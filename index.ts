@@ -19,8 +19,8 @@ import qrcodeTerminal from 'qrcode-terminal'
 import rp from 'request-promise'
 
 // const rp = require('request-promise')
-
-let TOKEN = '替换为微信开放平台TOKEN' || process.env['WX_TOKEN']
+const WX_TOKEN = '' // 替换为微信开放平台TOKEN或者使用环境变量，推荐使用环境变量
+let TOKEN = WX_TOKEN || process.env['WX_TOKEN']
 
 function onScan(qrcode: string, status: ScanStatus) {
     if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {

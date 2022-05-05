@@ -1,0 +1,10 @@
+﻿分类(必填),问题(必填),问题阈值(选填-默认0.9),相似问题(多个用##分隔),机器人回答(多个用##分隔),是否停用(选填-默认FALSE)
+基础问答,What is Wechaty,0.7,what'swechaty,Wechaty is an Open Source software application for building chatbots.LINE_BREAKGo to the https://wechaty.js.org/docs/wechaty for more information.,false
+基础问答,帮助,0.7,,"{""multimsg"":[""帮助中心建设中，稍后上线~""]}",false
+基础问答,你是谁？,0.7,你是谁了？##你是啥人？,"{""multimsg"":[""我是你的个人小助理瓦力，联系超哥可以添加 瓦力 为好友，也欢迎关注超哥的公众号 彪悍的超哥""]}",false
+基础问答,你有什么功能,0.7,,"{""multimsg"":[""我可以闲聊、百科问答等，我还在学习中""]}",false
+基础问答,上海疫情动态,0.7,上海疫情有什么动态##上海疫情现象有哪些##上海疫情##上海疫情新闻##上海疫情预防##上海疫情事件##上海疫情第一季##上海疫情现状##上海疫情不全##上海疫情审查##上海疫情响应是什么,"{""multimsg"":[""上海现存确诊疫情地图LINE_BREAKhttps://news.sina.cn/project/fy2020/yq_province.shtml?province=shanghai""]}",false
+拼团25187527247,25187527247@chatroom春笋什么时候发货？,0.7,春笋什么时候发货##春笋什么时候发货？##春笋什么时候开始发货##求问春笋什么时候发货,"{""multimsg"":[""QA25187527247@chatroom亲，请不要着急，三天之内发货"",""QA20641535286@chatroom亲，请不要着急，三天之内发货""]}",false
+拼团25187527247,25187527247@chatroom红薯干大概几天到,0.7,,"{""multimsg"":[""QA25187527247@chatroom红薯5月4日到货""]}",false
+拼团25187527247,25187527247@chatroom今天春笋能到吗？,0.7,,"{""multimsg"":[""QA25187527247@chatroom亲，可以到""]}",false
+拼团20641535286,有几种颜色？,0.9,,"{""multimsg"":[""QA20641535286@chatroom有白色、黑色、蓝色三种颜色"",""QA20641535286@chatroom有定制颜色"",""QA25187527247@chatroom有白色、黑色、蓝色三种颜色""]}",false
