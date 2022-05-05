@@ -59,36 +59,47 @@ npm install
 > 示例问答中的 xxx@chatroom 为你需要引入QA的群，此处特别注意，必须在回答中以 **QA+xxx@chatroom+回答内容** 才能达到在不同的群内有不同回答的效果
 
 扫码登陆
+
 <img src="./docs/image/1-1.png" width="60%">
 
 填写机器人信息
+
 <img src="./docs/image/1-2.png" width="60%">
 
 批量导入问答
+
 <img src="./docs/image/1-3.png" width="60%">
 
 选择项目中tools目录下的示例问答
+
 <img src="./docs/image/1-4.png" width="60%">
 
 上传问答
+
 <img src="./docs/image/1-5.png" width="60%">
 
 导入成功后问答列表
+
 <img src="./docs/image/1-6.png" width="60%">
 
 上线发布
+
 <img src="./docs/image/1-10.png" width="60%">
 
 发布成功
+
 <img src="./docs/image/1-11.png" width="60%">
 
 应用绑定，获取token
+
 <img src="./docs/image/1-7.png" width="60%">
 
 填写申请信息，提交后马上就会审核通过
+
 <img src="./docs/image/1-8.png" width="60%">
 
 开通成功，复制token备用
+
 <img src="./docs/image/1-9.png" width="60%">
 
 4. 启动系统，在获取token之后，准备启动系统
@@ -107,9 +118,11 @@ npm run start
 ## 效果
 
 - 程序运行成功
+
 <img src="./docs/image/0-6.png" width="60%">
 
 - 问答
+
 <img src="./docs/image/0-7.png" width="60%">
 
 ## 最佳实践
