@@ -1,4 +1,4 @@
-# wechaty-wx-openai-link
+# wechat-openai-qa-bot
 
 ## 简介
 
