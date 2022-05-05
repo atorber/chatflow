@@ -25,7 +25,7 @@ git clone https://github.com/atorber/wechaty-wx-openai-link.git
 
 考虑对git不熟悉的用户，可以在页面直接下载项目.zip到电脑上,下载后解压缩即可
 
-![0-1](./docs/image/0-1.png =300)
+<img src="./docs/image/0-1.png" width="50%">
 
 clone或下载解压缩之后的目录是这样
 
