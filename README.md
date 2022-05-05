@@ -25,11 +25,11 @@ git clone https://github.com/atorber/wechaty-wx-openai-link.git
 
 考虑对git不熟悉的用户，可以在页面直接下载项目.zip到电脑上,下载后解压缩即可
 
-<img src="./docs/image/0-1.png" width="50%">
+<img src="./docs/image/0-1.png" width="60%">
 
 clone或下载解压缩之后的目录是这样
 
-![0-2](./docs/image/0-2.png)
+<img src="./docs/image/0-2.png" width="60%">
 
 2. 安装nodejs，项目的tools目录下有相应的安装包node-v16.15.0-x64.zip，解压缩并安装；下载WeChatSetup-v3.3.0.115并安装（点击下载[WeChatSetup-v3.3.0.115.exe](https://github.com/wechaty/wechaty-puppet-xp/releases/download/v0.5/WeChatSetup-v3.3.0.115.exe)）
 
@@ -37,15 +37,15 @@ clone或下载解压缩之后的目录是这样
 
 3. 安装依赖，假设当前系统为win10，在系统搜索栏中输入 powershell ，选择第一个结果
 
-![0-4](./docs/image/0-4.png)
+<img src="./docs/image/0-4.png" width="60%">
 
 打开Windows PoweShell
 
-![0-5](./docs/image/0-5.png)
+<img src="./docs/image/0-5.png" width="60%">
 
 到项目目录下用鼠标点击地址栏复制文件路径，例如我当前的路径为 C:\Users\wechaty\Documents\GitHub\wechaty-wx-openai-link
 
-![0-3](./docs/image/0-3.png)
+<img src="./docs/image/0-3.png" width="60%">
 
 在复制如下命令在Windows PoweShell中执行
 
@@ -59,37 +59,37 @@ npm install
 > 示例问答中的 xxx@chatroom 为你需要引入QA的群，此处特别注意，必须在回答中以 **QA+xxx@chatroom+回答内容** 才能达到在不同的群内有不同回答的效果
 
 扫码登陆
-![1-1](./docs/image/1-1.png)
+<img src="./docs/image/1-1.png" width="60%">
 
 填写机器人信息
-![1-2](./docs/image/1-2.jpg)
+<img src="./docs/image/1-2.png" width="60%">
 
 批量导入问答
-![1-3](./docs/image/1-3.png)
+<img src="./docs/image/1-3.png" width="60%">
 
 选择项目中tools目录下的示例问答
-![1-4](./docs/image/1-4.png)
+<img src="./docs/image/1-4.png" width="60%">
 
 上传问答
-![1-5](./docs/image/1-5.png)
+<img src="./docs/image/1-5.png" width="60%">
 
 导入成功后问答列表
-![1-6](./docs/image/1-6.png)
+<img src="./docs/image/1-6.png" width="60%">
 
 上线发布
-![1-10](./docs/image/1-10.png)
+<img src="./docs/image/1-10.png" width="60%">
 
 发布成功
-![1-11](./docs/image/1-11.png)
+<img src="./docs/image/1-11.png" width="60%">
 
 应用绑定，获取token
-![1-7](./docs/image/1-7.png)
+<img src="./docs/image/1-7.png" width="60%">
 
 填写申请信息，提交后马上就会审核通过
-![1-8](./docs/image/1-8.png)
+<img src="./docs/image/1-8.png" width="60%">
 
 开通成功，复制token备用
-![1-9](./docs/image/1-9.png)
+<img src="./docs/image/1-9.png" width="60%">
 
 4. 启动系统，在获取token之后，准备启动系统
 
@@ -107,12 +107,10 @@ npm run start
 ## 效果
 
 - 程序运行成功
-
-![0-6](./docs/image/0-6.png)
+<img src="./docs/image/0-6.png" width="60%">
 
 - 问答
-
-![0-7](./docs/image/0-7.png)
+<img src="./docs/image/0-7.png" width="60%">
 
 ## 最佳实践
 
