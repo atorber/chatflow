@@ -123,7 +123,7 @@ npm run start
 
 - 问答
 
-<img width="647" alt="image" src="https://user-images.githubusercontent.com/104893934/167064369-97647ef1-1e74-4880-b2a3-541d5bdac68a.png">
+![image](https://user-images.githubusercontent.com/104893934/167064460-5e88dcaf-32c8-464f-9fe1-1b9efb272cd7.png)
 
 <img src="./docs/image/0-7.png" width="60%">
 
