@@ -125,9 +125,11 @@ npm run start
 
 <img src="./docs/image/0-7.png" width="60%">
 
-## 最佳实践
+## 快速体验
 
-TBD
+如果你对以上操作感觉困难而不能使用，添加ledongmao微信，提供你需要的问答清单，我们可以提供一个免费的机器人供体验
+
+当然，最好的反馈方式是在这里 https://github.com/choogoo/wechat-openai-qa-bot/issues 提交一个issues
 
 ## 二次开发
 
