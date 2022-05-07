@@ -1,6 +1,6 @@
 # wechat-openai-qa-bot
 
-[B站快速入门视频](https://www.bilibili.com/video/BV1hS4y1A7hL?share_source=copy_web)
+[B站快速入门视频](https://www.bilibili.com/video/BV1Y54y1f7v1?share_source=copy_web)
 
 ## 简介
 
