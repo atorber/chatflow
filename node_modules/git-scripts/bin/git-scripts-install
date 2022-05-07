@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+
+var program = require('commander')
+  , scripts = require('../');
+
+
+program
+  .usage('[path]')
+  .parse(process.argv);
+
+var path = program.args.shift()
+  , project = scripts(path);
+
+project.isGitRepo(function(result) {
+  if (!result) {
+    console.warn('Not a git repository.');
+    return;
+  }
+
+  project.installed(function(result) {
+    if (result) {
+      // git-scripts hooks are already installed.
+      return;
+    }
+
+    project.install(function(err) {
+      if (err) throw err;
+    });
+  });
+});
+
+

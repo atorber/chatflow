@@ -1,0 +1,5 @@
+{
+  "types": "../../dist/esm/batteries/url.d.ts",
+  "main": "../../dist/cjs/batteries/url.js",
+  "module": "../../dist/esm/batteries/url.js"
+}

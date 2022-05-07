@@ -1,0 +1,27 @@
+{
+    "name": "@types/tap",
+    "version": "15.0.7",
+    "description": "TypeScript definitions for tap",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/tap",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "zkldi",
+            "url": "https://github.com/zkldi",
+            "githubUsername": "zkldi"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/tap"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/node": "*"
+    },
+    "typesPublisherContentHash": "81a4e297cf62b0f02ec837f46588c1d7806d7afb2d91feb6d1fe6e46e523881f",
+    "typeScriptVersion": "3.9"
+}

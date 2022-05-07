@@ -1,0 +1,1 @@
+{"version":3,"sources":["subscription.ts"],"names":[],"mappings":"","file":"subscription.js","sourcesContent":["export interface Subscription {\n  unsubscribe: () => void;\n}\n"]}

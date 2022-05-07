@@ -1,0 +1,66 @@
+{
+  "name": "cuid",
+  "description": "Collision-resistant ids optimized for horizontal scaling and performance. For node and browsers.",
+  "version": "2.1.8",
+  "author": {
+    "name": "Eric Elliott",
+    "url": "https://ericelliottjs.com"
+  },
+  "browser": {
+    "./lib/fingerprint.js": "./lib/fingerprint.browser.js",
+    "./lib/getRandomValue.js": "./lib/getRandomValue.browser.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-polyfill": "6.26.0",
+    "babel-preset-env": "1.7.0",
+    "babel-register": "6.26.0",
+    "browserify": "16.5.0",
+    "eslint": "5.16.0",
+    "eslint-plugin-testcafe": "0.2.1",
+    "http-server": "^0.12.0",
+    "mkdirp": "0.5.1",
+    "riteway": "6.1.1",
+    "tape": "4.11.0",
+    "testcafe": "1.1.4",
+    "uglify-js": "3.7.2",
+    "updtr": "3.1.0",
+    "watchify": "3.11.1"
+  },
+  "files": [
+    "lib",
+    "dist",
+    "index.js",
+    "index.d.ts"
+  ],
+  "jsdelivr": "dist/cuid.min.js",
+  "keywords": [
+    "guid",
+    "id",
+    "uid",
+    "unique id",
+    "uuid"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "react-native": {
+    "./lib/fingerprint.js": "./lib/fingerprint.react-native.js",
+    "./lib/getRandomValue.js": "./lib/getRandomValue.react-native.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ericelliott/cuid.git"
+  },
+  "scripts": {
+    "build": "mkdirp dist && browserify index.js -s cuid -o dist/cuid.js && uglifyjs dist/cuid.js -c -m -o dist/cuid.min.js",
+    "lint": "eslint index.js lib test",
+    "prepare": "npm run build",
+    "test": "npm run -s lint && npm run -s test:server && npm run -s test:random && npm run -s test:browser && npm run -s test:worker",
+    "test:browser": "testcafe chrome ./test/browser.js",
+    "test:worker": "browserify ./test/worker/worker.js -s cuid -o ./test/worker/worker.bundled.js && testcafe chrome ./test/worker.js --app \"http-server ./test/worker -s\"",
+    "test:server": "tape -r babel-register -r babel-polyfill test/server.js",
+    "test:random": "node -r babel-register -r babel-polyfill test/getRandomValue.test.js",
+    "update": "updtr"
+  },
+  "unpkg": "dist/cuid.min.js"
+}

@@ -1,0 +1,50 @@
+{
+	"name": "get-port",
+	"version": "6.1.2",
+	"description": "Get an available port",
+	"license": "MIT",
+	"repository": "sindresorhus/get-port",
+	"funding": "https://github.com/sponsors/sindresorhus",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "https://sindresorhus.com"
+	},
+	"type": "module",
+	"exports": "./index.js",
+	"engines": {
+		"node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+	},
+	"scripts": {
+		"test": "xo && ava && tsd"
+	},
+	"files": [
+		"index.js",
+		"index.d.ts"
+	],
+	"keywords": [
+		"port",
+		"find",
+		"finder",
+		"portfinder",
+		"free",
+		"available",
+		"connection",
+		"connect",
+		"open",
+		"net",
+		"tcp",
+		"scan",
+		"random",
+		"preferred",
+		"chosen"
+	],
+	"devDependencies": {
+		"@types/node": "^16.10.2",
+		"ava": "^3.15.0",
+		"tsd": "^0.17.0",
+		"typescript": "^4.4.3",
+		"xo": "^0.45.0"
+	},
+	"sideEffects": false
+}

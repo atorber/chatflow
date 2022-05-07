@@ -1,0 +1,48 @@
+{
+  "name": "level-codec",
+  "version": "10.0.0",
+  "description": "Encode keys, values and range options, with built-in or custom encodings",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard && hallmark && nyc tape test/*.js",
+    "test-browsers-local": "airtap --coverage --verbose test/*.js",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "hallmark": "hallmark --fix",
+    "dependency-check": "dependency-check . test/*.js",
+    "prepublishOnly": "npm run dependency-check"
+  },
+  "files": [
+    "lib",
+    "index.js",
+    "CHANGELOG.md",
+    "CONTRIBUTORS.md",
+    "LICENSE.md",
+    "UPGRADING.md"
+  ],
+  "dependencies": {
+    "buffer": "^6.0.3"
+  },
+  "devDependencies": {
+    "airtap": "^4.0.3",
+    "airtap-playwright": "^1.0.1",
+    "coveralls": "^3.0.2",
+    "dependency-check": "^3.3.0",
+    "hallmark": "^3.1.0",
+    "level-community": "^3.0.0",
+    "nyc": "^15.1.0",
+    "standard": "^16.0.3",
+    "tape": "^5.0.1"
+  },
+  "hallmark": {
+    "community": "level-community"
+  },
+  "repository": "Level/codec",
+  "homepage": "https://github.com/Level/codec",
+  "keywords": [
+    "level"
+  ],
+  "engines": {
+    "node": ">=10"
+  }
+}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["asynciterable/extremaoptions.ts"],"names":[],"mappings":"","file":"extremaoptions.js","sourcesContent":["export interface ExtremaOptions<TSource, TKey> {\n  selector?: (item: TSource, signal?: AbortSignal) => TKey | Promise<TKey>;\n  comparer?: (left: TKey, right: TKey) => number | Promise<number>;\n  signal?: AbortSignal;\n}\n"]}

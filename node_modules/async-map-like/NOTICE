@@ -1,0 +1,8 @@
+AsyncMapLike is a TypeScript definition for ES6 Map & Async interfaces.
+Copyright 2020 Huan (李卓桓) <zixia@zixia.net>
+
+This product includes software developed at
+The Wechaty Organization (https://github.com/wechaty).
+
+This software contains code derived from the Stackoverflow,
+including various modifications by GitHub.

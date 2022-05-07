@@ -1,0 +1,30 @@
+{
+  "name": "nop",
+  "version": "1.0.0",
+  "description": "library for providing a function that does nothing; it's like super useful",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/supershabam/nop"
+  },
+  "keywords": [
+    "nop",
+    "noop",
+    "no-op",
+    "useless",
+    "wtf"
+  ],
+  "author": "Ian Hansen",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "~1.4.2",
+    "should": "~1.1.0"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "open-graph",
+  "version": "0.2.6",
+  "description": "An Open Graph implementation for Node.js.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "open graph",
+    "open",
+    "graph",
+    "opengraph",
+    "og"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/samholmes/node-open-graph.git",
+    "web": "http://github.com/samholmes/node-open-graph"
+  },
+  "author": "Sam Holmes",
+  "license": "BSD",
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "request": "^2.73.0"
+  }
+}

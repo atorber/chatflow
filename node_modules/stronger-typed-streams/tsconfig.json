@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "preserveConstEnums": true,
+        "strictNullChecks": true,
+        "noImplicitThis": true,
+        "lib": ["es2015"],
+        "removeComments": false,
+        "inlineSourceMap": true,
+        "declaration": true,
+        "target": "es5",
+        "outDir": "dist",
+        "alwaysStrict": true,
+        "strictNullChecks": true
+    },
+    "include": [
+        "src/**/*.ts",
+        "test/**/*.ts"
+    ]
+}

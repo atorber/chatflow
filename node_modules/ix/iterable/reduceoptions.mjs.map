@@ -1,0 +1,1 @@
+{"version":3,"sources":["iterable/reduceoptions.ts"],"names":[],"mappings":"","file":"reduceoptions.js","sourcesContent":["import { ScanOptions } from './operators/scanoptions';\n\nexport type ReduceOptions<T, R> = ScanOptions<T, R>;\n"]}

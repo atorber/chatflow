@@ -1,0 +1,12 @@
+import { OperatorAsyncFunction } from '../interfaces';
+import { AsyncIterableX } from './asynciterablex';
+export declare function pipe<T>(source: AsyncIterable<T>): AsyncIterableX<T>;
+export declare function pipe<T, A>(source: AsyncIterable<T>, op1: OperatorAsyncFunction<T, A>): AsyncIterableX<A>;
+export declare function pipe<T, A, B>(source: AsyncIterable<T>, op1: OperatorAsyncFunction<T, A>, op2: OperatorAsyncFunction<A, B>): AsyncIterableX<B>;
+export declare function pipe<T, A, B, C>(source: AsyncIterable<T>, op1: OperatorAsyncFunction<T, A>, op2: OperatorAsyncFunction<A, B>, op3: OperatorAsyncFunction<B, C>): AsyncIterableX<C>;
+export declare function pipe<T, A, B, C, D>(source: AsyncIterable<T>, op1: OperatorAsyncFunction<T, A>, op2: OperatorAsyncFunction<A, B>, op3: OperatorAsyncFunction<B, C>, op4: OperatorAsyncFunction<C, D>): AsyncIterableX<D>;
+export declare function pipe<T, A, B, C, D, E>(source: AsyncIterable<T>, op1: OperatorAsyncFunction<T, A>, op2: OperatorAsyncFunction<A, B>, op3: OperatorAsyncFunction<B, C>, op4: OperatorAsyncFunction<C, D>, op5: OperatorAsyncFunction<D, E>): AsyncIterableX<E>;
+export declare function pipe<T, A, B, C, D, E, F>(source: AsyncIterable<T>, op1: OperatorAsyncFunction<T, A>, op2: OperatorAsyncFunction<A, B>, op3: OperatorAsyncFunction<B, C>, op4: OperatorAsyncFunction<C, D>, op5: OperatorAsyncFunction<D, E>, op6: OperatorAsyncFunction<E, F>): AsyncIterableX<F>;
+export declare function pipe<T, A, B, C, D, E, F, G>(source: AsyncIterable<T>, op1: OperatorAsyncFunction<T, A>, op2: OperatorAsyncFunction<A, B>, op3: OperatorAsyncFunction<B, C>, op4: OperatorAsyncFunction<C, D>, op5: OperatorAsyncFunction<D, E>, op6: OperatorAsyncFunction<E, F>, op7: OperatorAsyncFunction<F, G>): AsyncIterableX<G>;
+export declare function pipe<T, A, B, C, D, E, F, G, H>(source: AsyncIterable<T>, op1: OperatorAsyncFunction<T, A>, op2: OperatorAsyncFunction<A, B>, op3: OperatorAsyncFunction<B, C>, op4: OperatorAsyncFunction<C, D>, op5: OperatorAsyncFunction<D, E>, op6: OperatorAsyncFunction<E, F>, op7: OperatorAsyncFunction<F, G>, op8: OperatorAsyncFunction<G, H>): AsyncIterableX<H>;
+export declare function pipe<T, A, B, C, D, E, F, G, H, I>(source: AsyncIterable<T>, op1: OperatorAsyncFunction<T, A>, op2: OperatorAsyncFunction<A, B>, op3: OperatorAsyncFunction<B, C>, op4: OperatorAsyncFunction<C, D>, op5: OperatorAsyncFunction<D, E>, op6: OperatorAsyncFunction<E, F>, op7: OperatorAsyncFunction<F, G>, op8: OperatorAsyncFunction<G, H>, op9: OperatorAsyncFunction<H, I>): AsyncIterableX<I>;

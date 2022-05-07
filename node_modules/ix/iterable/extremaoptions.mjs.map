@@ -1,0 +1,1 @@
+{"version":3,"sources":["iterable/extremaoptions.ts"],"names":[],"mappings":"","file":"extremaoptions.js","sourcesContent":["export interface ExtremaOptions<TSource, TKey = TSource> {\n  comparer?: (left: TKey, right: TKey) => number;\n  selector: (item: TSource) => TKey;\n  signal?: AbortSignal;\n}\n"]}

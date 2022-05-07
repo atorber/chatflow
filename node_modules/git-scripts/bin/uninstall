@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+
+var path = require('path')
+  , spawn = require('child_process').spawn;
+
+
+// check if git-scripts is in the `node_modules` directory.
+
+if (path.basename(path.normalize(__dirname + '/../..')) != 'node_modules') {
+  process.exit();
+}
+
+// execute uninstall on the project root.
+
+var bin = __dirname + '/git-scripts'
+  , args = ['uninstall']
+  , root = __dirname + '/../../..'
+  , proc = spawn(bin, args, {cwd: root, stdio: 'inherit', customFds: [0, 1, 2]});
+
+proc.on('close', function(code) {
+  process.exit(code);
+});
+

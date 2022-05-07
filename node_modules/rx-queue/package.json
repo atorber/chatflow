@@ -1,0 +1,76 @@
+{
+  "name": "rx-queue",
+  "version": "1.0.5",
+  "description": "Easy to Use ReactiveX Queue that Supports Delay/DelayExecutor/Throttle/Debounce/Concurrency Features Powered by RxJS/IxJS",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/src/mod.js",
+      "require": "./dist/cjs/src/mod.js"
+    }
+  },
+  "typings": "./dist/esm/src/mod.d.ts",
+  "engines": {
+    "node": ">=16",
+    "npm": ">=7"
+  },
+  "scripts": {
+    "clean": "shx rm -fr dist/*",
+    "dist": "npm-run-all clean build dist:commonjs",
+    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "dist:commonjs": "jq -n \"{ type: \\\"commonjs\\\" }\" > dist/cjs/package.json",
+    "lint": "npm-run-all lint:es lint:ts",
+    "lint:ts": "tsc --isolatedModules --noEmit",
+    "test": "npm-run-all lint test:unit",
+    "test:unit": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" tap \"src/**/*.spec.ts\" \"tests/*.spec.ts\"",
+    "test:pack": "bash -x scripts/npm-pack-testing.sh",
+    "lint:es": "eslint --ignore-pattern fixtures/ \"src/**/*.ts\" \"tests/**/*.ts\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/huan/rx-queue.git"
+  },
+  "keywords": [
+    "queue",
+    "delay",
+    "executor",
+    "throttle",
+    "debounce",
+    "rxjs",
+    "rx",
+    "fifo"
+  ],
+  "author": "Huan LI <zixia@zixia.net>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/huan/rx-queue/issues"
+  },
+  "homepage": "https://github.com/huan/rx-queue#readme",
+  "devDependencies": {
+    "@chatie/eslint-config": "^1.0.4",
+    "@chatie/git-scripts": "^0.6.2",
+    "@chatie/semver": "^0.4.7",
+    "@chatie/tsconfig": "^4.5.3",
+    "@types/sinon": "^10.0.6",
+    "source-map-support": "^0.5.21",
+    "tstest": "^1.0.1",
+    "typescript": "^4.5.2"
+  },
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  },
+  "git": {
+    "scripts": {
+      "pre-push": "npx git-scripts-pre-push"
+    }
+  },
+  "dependencies": {
+    "ix": "^4.5.2",
+    "rxjs": "^7.5.5"
+  }
+}

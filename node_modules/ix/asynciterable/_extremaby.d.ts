@@ -1,0 +1,1 @@
+export declare function extremaBy<TSource, TKey>(source: AsyncIterable<TSource>, selector: (item: TSource, signal?: AbortSignal) => TKey | Promise<TKey>, comparer: (left: TKey, right: TKey, signal?: AbortSignal) => number | Promise<number>, signal?: AbortSignal): Promise<TSource[]>;

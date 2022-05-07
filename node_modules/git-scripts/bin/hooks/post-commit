@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+
+var path = require('path')
+  , scripts = require('../../')
+  , name = path.basename(__filename)
+  , project = scripts();
+
+
+project.run(name, process.argv.slice(2), function(err) {
+  if (err) {
+    console.error('Failed to exec ' + name + ' hook script')
+    process.exit(err.code);
+  }
+});
+
