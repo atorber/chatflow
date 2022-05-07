@@ -1,6 +1,6 @@
 # wechat-openai-qa-bot
 
-<iframe src="//player.bilibili.com/player.html?aid=853865811&bvid=BV1Y54y1f7v1&cid=714379422&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+[B站快速入门视频](https://www.bilibili.com/video/BV1hS4y1A7hL?share_source=copy_web)
 
 ## 简介
 
