@@ -33,7 +33,6 @@
   "devDependencies": {
     "typescript": "^4.4.4",
     "@chatie/eslint-config": "^1.0.4",
-    "@chatie/git-scripts": "^0.6.2",
     "@chatie/tsconfig": "^4.6.3",
     "check-node-version": "^4.2.1",
     "is-pr": "^2.0.0"
