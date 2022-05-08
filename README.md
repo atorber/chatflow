@@ -156,3 +156,8 @@ npm run start
 提前下载好[向日葵](https://sunlogin.oray.com/download)软件并注册号账号，登陆后发控制码
 
 <img src="https://user-images.githubusercontent.com/104893934/167300700-19c6283b-584c-48f4-bc10-7418cc7528f3.png" width="60%">
+
+3. 下载解压缩软件
+
+[2345好压](https://haozip.2345.cc/)
+
