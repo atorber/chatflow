@@ -18,7 +18,7 @@ import {
 import qrcodeTerminal from 'qrcode-terminal'
 import rp from 'request-promise'
 
- // 替换为微信开放平台TOKEN或者使用环境变量，推荐使用环境变量
+// 替换为微信开放平台TOKEN或者使用环境变量，推荐使用环境变量
 const WX_TOKEN = ''
 
 let TOKEN = WX_TOKEN || process.env['WX_TOKEN']
@@ -47,13 +47,13 @@ function onLogout(user: Contact) {
 }
 
 async function onMessage(message: Message) {
-    log.info('StarterBot', JSON.stringify(message))
+    log.info('onMessage:', bot.Message.Type[message.type()])
 
     if (message.text() === 'ding') {
         await message.say('dong')
     }
 
-    if (message.room() && message.room().id && message.type() === bot.Message.Type.Text) {
+    if (message.room() && message.room().id) {
         await wxai(message)
     }
 }
@@ -99,10 +99,27 @@ async function wxai(message) {
     const room = message.room()
     const talker = message.talker()
     const roomid = room.id
-    const text = message.text()
-    let answer = await aibot(talker, room, text)
+    let text = message.text()
+    let answer = ''
+    if (message.type() === bot.Message.Type.Text) {
+        answer = await aibot(talker, room, text)
+    }
+
+    if (message.type() === bot.Message.Type.MiniProgram) {
+        let MiniProgram = await message.toMiniProgram()
+        text = `${MiniProgram.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
+        answer = await aibot(talker, room, text)
+    }
+
+    // if (message.type() === bot.Message.Type.Url) {
+    //     let urllink = await message.toUrlLink()
+    //     text = JSON.stringify(urllink)
+    //     answer = await aibot(talker, room, text)
+    // }
+
     // console.debug('answer=====================', answer)
     if (answer) {
+        console.debug('start to say...')
         await room.say(answer, ...[talker,])
     }
 };
@@ -143,6 +160,7 @@ async function getSignature(room) {
 }
 
 async function aibot(talker, room, query) {
+    console.debug('start getSignature...')
     let signature = await getSignature(room)
     let method = 'POST'
     let uri = `https://openai.weixin.qq.com/openapi/aibot/${TOKEN}`
@@ -167,6 +185,7 @@ async function aibot(talker, room, query) {
     let answer = ''
     let log = {}
     try {
+        console.debug('start call aibot...')
         let resMsg = await rp(opt)
         // console.debug(JSON.stringify(resMsg))
         if (resMsg.answer_type == 'text') {
@@ -203,9 +222,8 @@ async function aibot(talker, room, query) {
             }
         }
         return answer
-    }
-    catch (err) {
-        console.error(err)
+    } catch (err) {
+        console.table(err)
         return answer
     }
 }
