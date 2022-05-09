@@ -18,8 +18,9 @@ import {
 import qrcodeTerminal from 'qrcode-terminal'
 import rp from 'request-promise'
 
-// const rp = require('request-promise')
-const WX_TOKEN = '' // 替换为微信开放平台TOKEN或者使用环境变量，推荐使用环境变量
+ // 替换为微信开放平台TOKEN或者使用环境变量，推荐使用环境变量
+const WX_TOKEN = ''
+
 let TOKEN = WX_TOKEN || process.env['WX_TOKEN']
 
 function onScan(qrcode: string, status: ScanStatus) {
@@ -100,7 +101,7 @@ async function wxai(message) {
     const roomid = room.id
     const text = message.text()
     let answer = await aibot(talker, room, text)
-    console.debug('answer=====================', answer)
+    // console.debug('answer=====================', answer)
     if (answer) {
         await room.say(answer, ...[talker,])
     }
