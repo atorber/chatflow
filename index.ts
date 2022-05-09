@@ -99,7 +99,7 @@ async function wxai(message) {
     const talker = message.talker()
     const roomid = room.id
     const text = message.text()
-    let answer = await aibot(room, text)
+    let answer = await aibot(talker, room, text)
     console.debug('answer=====================', answer)
     if (answer) {
         await room.say(answer, ...[talker,])
@@ -141,7 +141,7 @@ async function getSignature(room) {
     }
 }
 
-async function aibot(room, query) {
+async function aibot(talker, room, query) {
     let signature = await getSignature(room)
     let method = 'POST'
     let uri = `https://openai.weixin.qq.com/openapi/aibot/${TOKEN}`
@@ -161,30 +161,34 @@ async function aibot(room, query) {
     }
     // console.debug(opt)
     const roomid = room.id
+    let nickName = talker.name()
+    let topic = await room.topic()
     let answer = ''
+    let log = {}
     try {
         let resMsg = await rp(opt)
         // console.debug(JSON.stringify(resMsg))
         if (resMsg.answer_type == 'text') {
             let msgText = resMsg.answer
-            console.debug('msgText==========', msgText)
+            // console.debug('msgText==========', msgText)
             try {
                 msgText = JSON.parse(msgText)
-                console.debug('msgText JSON==========', msgText)
+                // console.table(msgText)
 
                 if (msgText.multimsg && msgText.multimsg.length) {
                     let answers = msgText.multimsg
-                    console.debug('answers============', answers)
+                    console.table(answers)
                     for (let i in answers) {
                         let textArr = answers[i].split(roomid)
-                        console.debug('textArr===========', textArr)
+                        // console.debug('textArr===========', textArr)
                         if (textArr.length == 2) {
                             answer = textArr[1]
                         }
                     }
+                    console.table({ answer, nickName, topic, roomid, query })
                     return answer
                 }
-                console.debug('msgText.multimsg不存在或数量小于1')
+                console.table({ msg: '没有命中关键字', nickName, topic, roomid, query })
                 return answer
             } catch (err) {
                 // console.error(err)
@@ -193,7 +197,7 @@ async function aibot(room, query) {
                     answer = textArr[1]
                     return answer
                 }
-                console.debug('当前群QA不存在:', roomid, query)
+                console.table({ msg: '没有命中关键字', nickName, topic, roomid, query })
                 return answer
             }
         }
