@@ -9,7 +9,9 @@
   },
   "scripts": {
     "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node index.ts",
-    "dev": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node index.ts"
+    "dev": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node dev.ts",
+    "rm-temp":"rm -r temp; mkdir temp",
+    "rm-cache":"rm -r cache; mkdir cache"
   },
   "repository": {
     "type": "git",
@@ -24,16 +26,18 @@
   "homepage": "https://github.com/atorber/wechaty-wx-openai-link#readme",
   "dependencies": {
     "dotenv": "^16.0.0",
+    "exceljs": "^4.3.0",
+    "node-xlsx": "^0.21.0",
     "qrcode-terminal": "^0.12.0",
     "request-promise": "^4.2.6",
     "wechaty": "^1.18.1",
-    "wechaty-puppet-xp": "^1.11.1"
+    "wechaty-puppet-xp": "^1.11.6"
   },
   "devDependencies": {
-    "typescript": "^4.4.4",
     "@chatie/eslint-config": "^1.0.4",
     "@chatie/tsconfig": "^4.6.3",
     "check-node-version": "^4.2.1",
-    "is-pr": "^2.0.0"
+    "is-pr": "^2.0.0",
+    "typescript": "^4.4.4"
   }
 }

@@ -18,6 +18,9 @@ import {
 import qrcodeTerminal from 'qrcode-terminal'
 import rp from 'request-promise'
 
+import excel2order from './excel.js'
+import { FileBox } from 'file-box'
+
 //定义一个延时方法
 let wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -55,7 +58,6 @@ async function onMessage(message: Message) {
     if (message.text() === 'ding') {
         await message.say('dong')
     }
-
     if (message.room() && message.room().id) {
         await wxai(message)
     }
@@ -127,6 +129,8 @@ async function wxai(message) {
             // text = `${urllink.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
             // answer = await aibot(talker, room, text)
             console.debug(file)
+            let filePath = `C:\\Users\\wechaty\\Documents\\WeChat Files\\wxid_0o1t51l3f57221\\FileStorage\\File\\2022-05\\${file.name}`
+            await excel2order(filePath, message)
         } catch (err) {
             console.error(err)
         }
