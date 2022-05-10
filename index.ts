@@ -18,6 +18,9 @@ import {
 import qrcodeTerminal from 'qrcode-terminal'
 import rp from 'request-promise'
 
+//定义一个延时方法
+let wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 // 替换为微信开放平台TOKEN或者使用环境变量，推荐使用环境变量
 const WX_TOKEN = ''
 
@@ -111,11 +114,24 @@ async function wxai(message) {
         answer = await aibot(talker, room, text)
     }
 
-    // if (message.type() === bot.Message.Type.Url) {
-    //     let urllink = await message.toUrlLink()
-    //     text = JSON.stringify(urllink)
-    //     answer = await aibot(talker, room, text)
-    // }
+    if (message.type() === bot.Message.Type.Url) {
+        let urllink = await message.toUrlLink()
+        text = `${urllink.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
+        answer = await aibot(talker, room, text)
+    }
+
+    if (message.type() === bot.Message.Type.Attachment) {
+        await wait(1000)
+        try {
+            let file = await message.toFileBox()
+            // text = `${urllink.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
+            // answer = await aibot(talker, room, text)
+            console.debug(file)
+        } catch (err) {
+            console.error(err)
+        }
+
+    }
 
     // console.debug('answer=====================', answer)
     if (answer) {
