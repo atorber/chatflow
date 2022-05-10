@@ -89,11 +89,11 @@ clone或下载解压缩之后的目录是这样
 
 打开Windows PoweShell
 
-<img src="./docs/image/0-5.png" width="60%">
+<img src="./docs/image/0-5.png" width="30%">
 
 到项目目录下用鼠标点击地址栏复制文件路径，例如我当前的路径为 C:\Users\wechaty\Documents\GitHub\wechaty-wx-openai-link
 
-<img src="./docs/image/0-3.png" width="60%">
+<img src="./docs/image/0-3.png" width="30%">
 
 在复制如下命令在Windows PoweShell中执行
 
