@@ -57,11 +57,11 @@ Chatbot  !  !  !
 
 原始表
 
-<img src="https://user-images.githubusercontent.com/19552906/167664376-2ea0f286-2995-4d01-8915-48ffc8271de2.png" width="60%">
+<img src="https://user-images.githubusercontent.com/19552906/167664376-2ea0f286-2995-4d01-8915-48ffc8271de2.png" width="20%">
 
 汇总表
 
-<img src="https://user-images.githubusercontent.com/19552906/167664430-17dc51f4-57f8-46b0-bd01-a4b2316ca36d.png" width="60%">
+<img src="https://user-images.githubusercontent.com/19552906/167664430-17dc51f4-57f8-46b0-bd01-a4b2316ca36d.png" width="20%">
 
 ## 快速入门
 
@@ -89,11 +89,11 @@ clone或下载解压缩之后的目录是这样
 
 打开Windows PoweShell
 
-<img src="./docs/image/0-5.png" width="30%">
+<img src="./docs/image/0-5.png" width="60%">
 
 到项目目录下用鼠标点击地址栏复制文件路径，例如我当前的路径为 C:\Users\wechaty\Documents\GitHub\wechaty-wx-openai-link
 
-<img src="./docs/image/0-3.png" width="30%">
+<img src="./docs/image/0-3.png" width="60%">
 
 在复制如下命令在Windows PoweShell中执行
 
