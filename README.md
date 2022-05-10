@@ -51,7 +51,17 @@ Chatbot  !  !  !
 
 ### 快团团订单自动汇总
 
+发送原始订单表到群内自动生成按楼栋汇总好的表格
+
 <img src="https://user-images.githubusercontent.com/104893934/167663152-94127586-5429-4689-bba8-379127606a56.png" width="60%">
+
+原始表
+
+<img src="https://user-images.githubusercontent.com/19552906/167664376-2ea0f286-2995-4d01-8915-48ffc8271de2.png" width="60%">
+
+汇总表
+
+<img src="https://user-images.githubusercontent.com/19552906/167664430-17dc51f4-57f8-46b0-bd01-a4b2316ca36d.png" width="60%">
 
 ## 快速入门
 
