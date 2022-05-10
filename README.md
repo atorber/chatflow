@@ -35,15 +35,19 @@ Chatbot  !  !  !
 
 ### 常见问题问答自动回复
 
-![image](https://user-images.githubusercontent.com/104893934/167547910-4550f388-ee15-478c-8345-560b98367d88.png)
+<img src="https://user-images.githubusercontent.com/104893934/167547910-4550f388-ee15-478c-8345-560b98367d88.png" width="60%">
 
-### 后台添加问题
+### 问答列表
 
+<img src="https://user-images.githubusercontent.com/104893934/167548122-e97bd126-4df9-410c-b87c-876df3f7aacf.png" width="60%">
 
+### 编辑问题
+
+<img src="https://user-images.githubusercontent.com/104893934/167548070-31c847ae-b876-4051-bccf-ed81baad56b9.png" width="60%">
 
 ### 非本群链接检测
 
-![image](https://user-images.githubusercontent.com/104893934/167547463-0b943e27-4667-4266-bed4-1fd020637902.png)
+<img src="https://user-images.githubusercontent.com/104893934/167547463-0b943e27-4667-4266-bed4-1fd020637902.png" width="60%">
 
 ## 快速入门
 
@@ -145,17 +149,9 @@ npm run start
 
 不顺利的话...请截图留言...
 
-## 效果
-
 - 程序运行成功
 
 <img src="./docs/image/0-6.png" width="60%">
-
-- 问答
-
-<img src="https://user-images.githubusercontent.com/104893934/167064460-5e88dcaf-32c8-464f-9fe1-1b9efb272cd7.png" width="60%">
-
-<img src="./docs/image/0-7.png" width="60%">
 
 ## 快速体验
 
@@ -173,6 +169,8 @@ npm run start
 
 **遇到任何报错，一定记得第一时间查看报错信息，即使看不懂，起码复制或截图，否则没有人能仅凭几句语焉不详帮你解决问题**
 
+### 安装和运行
+
 1. 安装依赖时提示需要Visual Studio 2017+
 
 去微软官网下载[Visual Studio 2022](https://visualstudio.microsoft.com/zh-hans/thank-you-downloading-visual-studio/?sku=Community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030&passive=false)并安装
@@ -189,3 +187,12 @@ npm run start
 
 [2345好压](https://haozip.2345.cc/)
 
+### 功能使用
+
+1. 添加问答
+
+TBD
+
+2. 非群主链接检测配置
+
+TBD
