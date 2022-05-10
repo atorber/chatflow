@@ -33,7 +33,17 @@ Chatbot  !  !  !
 
 ## 效果展示
 
+### 常见问题问答自动回复
 
+![image](https://user-images.githubusercontent.com/104893934/167547910-4550f388-ee15-478c-8345-560b98367d88.png)
+
+### 后台添加问题
+
+
+
+### 非本群链接检测
+
+![image](https://user-images.githubusercontent.com/104893934/167547463-0b943e27-4667-4266-bed4-1fd020637902.png)
 
 ## 快速入门
 
