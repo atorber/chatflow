@@ -24,11 +24,12 @@ async function excel2order(filepath, message) {
         if (name == '顾客购买表(商品列排)') {
             console.log(rows.length);
             let keys = rows[0]
+            let keysLength = keys.length
             let orders = {}
             rows.shift()
             rows.pop()
             rows.sort(function (a, b) {
-                return a[9] - b[9];
+                return a[keysLength - 1] - b[keysLength - 1];
             })
             for (var i = 0; i < rows.length; i++) {
                 console.log(`第${i + 1}行数据：${rows[i]}`)
@@ -36,7 +37,7 @@ async function excel2order(filepath, message) {
                     let row = rows[i]
                     let order = {}
                     for (let i in row) {
-                        if (!['团员备注', '详细地址', '下单人', '收货人'].includes(keys[i])) {
+                        if (!['团员备注', '详细地址', '下单人'].includes(keys[i])) {
                             order[keys[i]] = row[i]
                         }
                     }
@@ -83,21 +84,28 @@ async function excel2order(filepath, message) {
                 addInfo.name = i + '期';
                 //数据数组
                 addInfo.data = [
-                    [keys[9], keys[8]],
+                    [keys[keysLength - 2], keys[keysLength - 3], keys[keysLength - 5]],
                 ];
+
+                let qicount = {
+
+                }
 
                 for (let g = 3; g < keys.length - 5; g++) {
                     addInfo.data[0].push(keys[g])
+                    qicount[keys[g]] = 0
                 }
 
                 let qi = orders[i]
                 for (let j in qi) {
                     // newList.push(j + '号楼')
                     let loucount = {
-                        [keys[3]]: 0,
-                        [keys[4]]: 0,
-                        [keys[5]]: 0,
+
                     }
+                    for (let g = 3; g < keys.length - 5; g++) {
+                        loucount[keys[g]] = 0
+                    }
+
                     for (let g = 3; g < keys.length - 5; g++) {
                         loucount[keys[g]] = 0
                     }
@@ -108,19 +116,27 @@ async function excel2order(filepath, message) {
                             loucount[keys[g]] = loucount[keys[g]] + shi[keys[g]]
                         }
                         newList.push(shi)
-                        let shiorder = [shi[keys[9]] + '号楼', shi[keys[8]],]
+                        let shiorder = [shi[keys[keysLength - 2]] + '号楼', shi[keys[keysLength - 3]], shi[keys[keysLength - 5]]]
 
                         for (let g = 3; g < keys.length - 5; g++) {
-                            shiorder.push(shi[keys[g]] || '0')
+                            shiorder.push(shi[keys[g]] || 0)
                         }
                         addInfo.data.push(shiorder);
                     }
-                    let count = [{ v: '小计', s }, { v: '', s },]
+
+                    let count = ['小计', '', '']
                     for (let g = 3; g < keys.length - 5; g++) {
-                        count.push({ v: loucount[keys[g]] || '0', s })
+                        count.push(loucount[keys[g]] || 0)
+                        qicount[keys[g]] = qicount[keys[g]] + loucount[keys[g]]
                     }
                     addInfo.data.push(count);
                 }
+
+                let count = ['合计', '', '']
+                for (let g = 3; g < keys.length - 5; g++) {
+                    count.push(qicount[keys[g]] || 0)
+                }
+                addInfo.data.push(count);
                 excelData.push(JSON.parse(JSON.stringify(addInfo)));
             }
             // console.debug(excelData)
@@ -146,6 +162,7 @@ async function excel2order(filepath, message) {
                     if (message) {
                         await message.say(fileBox)
                         newpath = ''
+                        message = ''
                     }
                 });
 
@@ -171,7 +188,7 @@ async function xlsxrw(filename) {
         // 遍历工作表中的所有行（包括空行）
         worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
             console.log('Row ' + rowNumber + ' = ' + JSON.stringify(row.values));
-            row.height = 20;
+            row.height = 30;
             if (rowNumber === 1) {
                 row.height = 20;
                 row.eachCell(function (cell, colNumber) {
@@ -202,8 +219,17 @@ async function xlsxrw(filename) {
                             fgColor: { argb: 'FFFFFF00' },
                             bgColor: { argb: 'FF0000FF' }
                         };
+                    } else {
+                        cell.font = {
+                            bold: true
+                        };
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'darkTrellis',
+                            fgColor: { argb: 'FFFFFF00' },
+                            bgColor: { argb: 'FF0000FF' }
+                        };
                     }
-
                 });
             }
         });

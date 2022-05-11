@@ -9,9 +9,10 @@
   },
   "scripts": {
     "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node index.ts",
+    "dev-ts": "ts-node-esm dev.ts",
     "dev": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node dev.ts",
-    "rm-temp":"rm -r temp; mkdir temp",
-    "rm-cache":"rm -r cache; mkdir cache"
+    "rm-temp": "rm -r temp; mkdir temp",
+    "rm-cache": "rm -r cache; mkdir cache"
   },
   "repository": {
     "type": "git",
@@ -25,13 +26,22 @@
   },
   "homepage": "https://github.com/atorber/wechaty-wx-openai-link#readme",
   "dependencies": {
+    "@vikadata/vika": "^1.0.5",
     "dotenv": "^16.0.0",
     "exceljs": "^4.3.0",
+    "file-box": "^1.4.12",
+    "forever": "^4.0.3",
+    "fs": "^0.0.1-security",
+    "moment": "^2.29.1",
     "node-xlsx": "^0.21.0",
+    "pm2": "^5.2.0",
     "qrcode-terminal": "^0.12.0",
     "request-promise": "^4.2.6",
+    "uuid": "^8.3.2",
     "wechaty": "^1.18.1",
-    "wechaty-puppet-xp": "^1.11.6"
+    "wechaty-puppet": "^1.18.3",
+    "wechaty-puppet-xp": "^1.11.6",
+    "wechaty-vika-link": "^0.17.0"
   },
   "devDependencies": {
     "@chatie/eslint-config": "^1.0.4",

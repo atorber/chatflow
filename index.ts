@@ -12,11 +12,14 @@ import {
     Message,
     ScanStatus,
     WechatyBuilder,
-    log,
+    log
 } from 'wechaty'
 
 import qrcodeTerminal from 'qrcode-terminal'
 import rp from 'request-promise'
+
+// import WechatyVikaPlugin from 'wechaty-vika-link'
+import WechatyVikaPlugin from './src/index.js'
 
 import excel2order from './excel.js'
 import { FileBox } from 'file-box'
@@ -54,7 +57,6 @@ function onLogout(user: Contact) {
 
 async function onMessage(message: Message) {
     log.info('onMessage:', bot.Message.Type[message.type()])
-
     if (message.text() === 'ding') {
         await message.say('dong')
     }
@@ -91,6 +93,9 @@ const bot = WechatyBuilder.build({
     // }
 })
 
+bot.use(
+    WechatyVikaPlugin()
+)
 bot.on('scan', onScan)
 bot.on('login', onLogin)
 bot.on('logout', onLogout)
@@ -128,9 +133,25 @@ async function wxai(message) {
             let file = await message.toFileBox()
             // text = `${urllink.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
             // answer = await aibot(talker, room, text)
-            console.debug(file)
-            let filePath = `C:\\Users\\wechaty\\Documents\\WeChat Files\\wxid_0o1t51l3f57221\\FileStorage\\File\\2022-05\\${file.name}`
-            await excel2order(filePath, message)
+            if (file.name.split('.')[1] === 'xlsx') {
+                console.debug(file)
+                let filePath = `C:\\Users\\wechaty\\Documents\\WeChat Files\\wxid_0o1t51l3f57221\\FileStorage\\File\\2022-05\\${file.name}`
+                await excel2order(filePath, message)
+            }
+        } catch (err) {
+            console.error(err)
+        }
+
+    }
+
+    if (message.type() === bot.Message.Type.Image&&false) {
+        await wait(1000)
+        try {
+            let file = await message.toFileBox()
+            if (file.name.split('.')[1] === 'xlsx') {
+                console.debug(file)
+                let filePath = `C:\\Users\\wechaty\\Documents\\WeChat Files\\wxid_0o1t51l3f57221\\FileStorage\\File\\2022-05\\${file.name}`
+            }
         } catch (err) {
             console.error(err)
         }

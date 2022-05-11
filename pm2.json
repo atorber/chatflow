@@ -1,0 +1,11 @@
+{
+    "apps": [
+        {
+            "name": "dev",
+            "script": "./dev.ts",
+            "env": {
+                "NODE_OPTIONS": "--no-warnings --loader=ts-node/esm"
+            }
+        }
+    ]
+}
