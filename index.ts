@@ -23,14 +23,19 @@ import WechatyVikaPlugin from './src/index.js'
 
 import excel2order from './excel.js'
 import { FileBox } from 'file-box'
+import path from 'path'
+const __dirname = path.resolve();
+
+import os from 'os'
+const userInfo = os.userInfo()
+const rootPath = `${userInfo.homedir}\\Documents\\WeChat Files\\`
 
 //定义一个延时方法
 let wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-// 替换为微信开放平台TOKEN或者使用环境变量，推荐使用环境变量
-const WX_TOKEN = ''
+import configs from './config.js'
 
-let TOKEN = WX_TOKEN || process.env['WX_TOKEN']
+const TOKEN = configs.WX_TOKEN
 
 function onScan(qrcode: string, status: ScanStatus) {
     if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
@@ -56,12 +61,14 @@ function onLogout(user: Contact) {
 }
 
 async function onMessage(message: Message) {
-    log.info('onMessage:', bot.Message.Type[message.type()])
-    if (message.text() === 'ding') {
-        await message.say('dong')
-    }
-    if (message.room() && message.room().id) {
-        await wxai(message)
+    try {
+        log.info('message id=============:', message.id)
+        log.info('message type===========:', bot.Message.Type[message.type()])
+        if (message.room() && message.room().id) {
+            await wxai(message)
+        }
+    } catch (e) {
+        console.error(e)
     }
 }
 
@@ -93,8 +100,9 @@ const bot = WechatyBuilder.build({
     // }
 })
 
+const vika_config = { token: configs.VIKA_TOKEN, sheetName: configs.VIKA_DATASHEETNAME || '' }
 bot.use(
-    WechatyVikaPlugin()
+    WechatyVikaPlugin(vika_config)
 )
 bot.on('scan', onScan)
 bot.on('login', onLogin)
@@ -128,14 +136,19 @@ async function wxai(message) {
     }
 
     if (message.type() === bot.Message.Type.Attachment) {
-        await wait(1000)
         try {
             let file = await message.toFileBox()
+            let fileName = file.name
             // text = `${urllink.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
             // answer = await aibot(talker, room, text)
-            if (file.name.split('.')[1] === 'xlsx') {
-                console.debug(file)
-                let filePath = `C:\\Users\\wechaty\\Documents\\WeChat Files\\wxid_0o1t51l3f57221\\FileStorage\\File\\2022-05\\${file.name}`
+            if (fileName.split('.')[1] === 'xlsx') {
+                // console.debug('file=============', file)
+                let filePath = __dirname + `\\cache\\${new Date().getTime() + fileName}`
+                // let filePath = `C:\\Users\\wechaty\\Documents\\WeChat Files\\wxid_0o1t51l3f57221\\FileStorage\\File\\2022-05\\${file.name}`
+                await file.toFile(filePath)
+                await wait(1000)
+                console.debug('fileName=====', filePath)
+
                 await excel2order(filePath, message)
             }
         } catch (err) {
@@ -144,14 +157,11 @@ async function wxai(message) {
 
     }
 
-    if (message.type() === bot.Message.Type.Image&&false) {
+    if (message.type() === bot.Message.Type.Image) {
         await wait(1000)
         try {
             let file = await message.toFileBox()
-            if (file.name.split('.')[1] === 'xlsx') {
-                console.debug(file)
-                let filePath = `C:\\Users\\wechaty\\Documents\\WeChat Files\\wxid_0o1t51l3f57221\\FileStorage\\File\\2022-05\\${file.name}`
-            }
+            console.debug('image=====', file)
         } catch (err) {
             console.error(err)
         }
@@ -268,3 +278,7 @@ async function aibot(talker, room, query) {
         return answer
     }
 }
+function token(token: any, VIKA_TOKEN: string): import("wechaty").WechatyPlugin | import("wechaty").WechatyPlugin[] {
+    throw new Error('Function not implemented.')
+}
+

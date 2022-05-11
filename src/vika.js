@@ -3,18 +3,17 @@ import moment from 'moment'
 import { v4 } from 'uuid'
 import rp from 'request-promise'
 
-const VIKA_TOKEN = "" //替换维格表token
-const VIKA_DATASHEETNAME = "qa-bot"
 //定义一个延时方法
 let wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 class VikaBot {
-  constructor() {
-    this.token = process.env['VIKA_TOKEN'] || VIKA_TOKEN
+  constructor(config) {
+    console.debug('vika init=====',config)
+    this.token = config.token
     this.vika = new Vika({ token: this.token })
     this.spaceId = ''
     this.datasheetId = ''
-    this.datasheetName = VIKA_DATASHEETNAME || process.env['VIKA_DATASHEETNAME'] || 'ChatRecord'
+    this.datasheetName = config.sheetName || 'ChatRecord'
     this.checkInit()
   }
 
@@ -103,8 +102,8 @@ class VikaBot {
   }
 
   async addChatRecord(msg, uploaded_attachments, msg_type, text) {
-    console.debug(msg)
-    console.debug(JSON.stringify(msg))
+    // console.debug(msg)
+    // console.debug(JSON.stringify(msg))
     const talker = msg.talker()
     // console.debug(talker)
     const to = msg.to()

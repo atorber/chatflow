@@ -1,4 +1,3 @@
-import { VikaBot } from '../vika.js'
 import fs from 'fs'
 import console from 'console'
 
@@ -8,9 +7,8 @@ import { log } from 'wechaty-puppet'
 let msgList = []
 
 let wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-let vika = new VikaBot()
 
-async function onMessage(message) {
+async function onMessage(message, vika) {
   // console.debug(message)
   try {
 
