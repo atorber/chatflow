@@ -113,10 +113,13 @@ async function onMessage(message, vika) {
         let readerStream = fs.createReadStream(filePath);
         uploaded_attachments = await vika.upload(readerStream)
         fs.unlink(filePath, (err) => {
-          console.debug(filePath, '已删除')
+          console.debug(filePath, err)
         })
       } catch {
         console.debug('上传失败：', filePath)
+        fs.unlink(filePath, (err) => {
+          console.debug(filePath, err)
+        })
       }
 
     }

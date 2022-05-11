@@ -1,6 +1,6 @@
 {
   "name": "wechaty-wx-openai-link",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "wechaty-wx-openai-link",
   "type": "module",
   "engines": {
