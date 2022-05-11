@@ -18,7 +18,7 @@
 
 - 支持非群主小程序卡片、网页链接分享检测，自动提醒、警告发送者撤回
 
-- 支持快团团订货单转换，原始表发送到群即可自动转换为按楼栋统计表（即将上线）
+- 支持快团团订货单转换，原始表发送到群即可自动转换为按楼栋统计表（已上线）
 
 ### 项目用到了一些工具和免费的轮子：
 
@@ -48,6 +48,20 @@ Chatbot  !  !  !
 ### 非本群链接检测
 
 <img src="https://user-images.githubusercontent.com/104893934/167547463-0b943e27-4667-4266-bed4-1fd020637902.png" width="60%">
+
+### 快团团订单自动汇总
+
+发送原始订单表到群内自动生成按楼栋汇总好的表格
+
+<img src="https://user-images.githubusercontent.com/104893934/167663152-94127586-5429-4689-bba8-379127606a56.png" width="60%">
+
+原始表
+
+<img src="https://user-images.githubusercontent.com/19552906/167664376-2ea0f286-2995-4d01-8915-48ffc8271de2.png" width="20%">
+
+汇总表
+
+<img src="https://user-images.githubusercontent.com/19552906/167664430-17dc51f4-57f8-46b0-bd01-a4b2316ca36d.png" width="20%">
 
 ## 快速入门
 
