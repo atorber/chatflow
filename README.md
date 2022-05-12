@@ -69,17 +69,19 @@ Chatbot  !  !  !
 
 原始表
 
-<img src="https://user-images.githubusercontent.com/19552906/167664376-2ea0f286-2995-4d01-8915-48ffc8271de2.png" width="20%">
+<img src="https://user-images.githubusercontent.com/104893934/168030413-f13c2107-d54f-4921-b361-948ac28a0841.png" width="60%">
 
 汇总表
 
-<img src="https://user-images.githubusercontent.com/19552906/167664430-17dc51f4-57f8-46b0-bd01-a4b2316ca36d.png" width="20%">
+<img src="https://user-images.githubusercontent.com/104893934/168030570-b88991f4-be4b-4479-94e7-0041d0508fc1.png" width="60%">
 
 ### 群消息汇集
 
 <img src="https://user-images.githubusercontent.com/19552906/167827644-a4cad573-b26f-4701-a27f-1ada1d2ffb47.png" width="60%">
 
 ## 快速入门
+
+> 提示：最新版本里需要在config.js文件中修改自己的微信对话开放平台、VIKA维格表的token，维格表token的获取方式请自行浏览官方网站
 
 1. clone （下载）项目代码,运行以下命令：
 
