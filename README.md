@@ -6,7 +6,9 @@
 
 本项目使用wechat机器人快速实现一个免费的QA问答系统，如果你是一个社群工作者、拼团团长、业务群运营经理，使用这个项目可以帮助你解决一些重复性问答。
 
-**前提是你有一台Windows电脑可以运行本项目。**
+前提是你有一台Windows电脑可以运行本项目，仅支持Windows环境下运行。
+
+项目是在上海因疫情在社区团购物资以及社区管理等群组活动各方工作繁杂的背景下产生希望能帮助大家解决一些实际的问题，请务必善用。
 
 ### 已经支持的功能：
 
@@ -34,14 +36,13 @@
 
 > 如果你是团长可忽略此段内容，开发者可进一步了解
 
-- [Wechaty](https://wechaty.js.org/) —— In just a few lines of code, you can have a fully featured
-Chatbot  !  !  !
+- [Wechaty](https://wechaty.js.org/) —— 只需几行代码，您就可以拥有一个功能齐全的聊天机器人
 
 - [wechaty-puppet-xp](https://github.com/atorber/puppet-xp) —— 可能是目前最好用的免费wechat机器人
 
 - [微信对话开放平台](https://openai.weixin.qq.com/) —— 5分钟零基础免费一键搭建智能对话机器人，并应用于微信公众号、小程序、企业网站、APP等
 
-- [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?home=1)将过去复杂的IT数据库技术，做得像表格一样简单
+- [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?home=1) —— 将过去复杂的IT数据库技术，做得像表格一样简单
 
 ## 效果展示
 
@@ -81,7 +82,21 @@ Chatbot  !  !  !
 
 ## 快速入门
 
-> 提示：最新版本里需要在config.js文件中修改自己的微信对话开放平台、VIKA维格表的token，维格表token的获取方式请自行浏览官方网站
+> 提示：2022-5-13最新版本里需要在config.js文件中修改自己的微信对话开放平台、VIKA维格表的token，维格表token的获取方式请自行浏览官方网站,同时需要在维格表中创建一个名为 mp-chatbot 的空间，关于维格表的操作可以参考[wechaty-vika-link](https://github.com/atorber/wechaty-vika-link/tree/anti-epidemic)
+
+```
+const WX_TOKEN = "" // 微信对话平台token
+const VIKA_TOKEN = "" // 维格表token
+const VIKA_DATASHEETNAME = "qa-bot" // 维格表名
+
+const configs = {
+    WX_TOKEN,
+    VIKA_TOKEN,
+    VIKA_DATASHEETNAME
+}
+
+export default configs
+```
 
 1. clone （下载）项目代码,运行以下命令：
 
