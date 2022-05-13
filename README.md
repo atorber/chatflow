@@ -43,6 +43,13 @@ Chatbot  !  !  !
 
 - [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?home=1)将过去复杂的IT数据库技术，做得像表格一样简单
 
+## 快速开始
+
+```
+npm install
+npm start
+```
+
 ## 效果展示
 
 ### 常见问题问答自动回复
@@ -79,7 +86,7 @@ Chatbot  !  !  !
 
 <img src="https://user-images.githubusercontent.com/19552906/167827644-a4cad573-b26f-4701-a27f-1ada1d2ffb47.png" width="60%">
 
-## 快速入门
+## 使用教程
 
 1. clone （下载）项目代码,运行以下命令：
 

@@ -1,7 +1,7 @@
 {
-  "name": "wechaty-wx-openai-link",
-  "version": "0.3.1",
-  "description": "wechaty-wx-openai-link",
+  "name": "openai-qa-bot",
+  "version": "0.3.2",
+  "description": "openai-qa-bot",
   "type": "module",
   "engines": {
     "node": ">=16",
@@ -39,6 +39,7 @@
     "request-promise": "^4.2.6",
     "uuid": "^8.3.2",
     "wechaty": "^1.18.1",
+    "wechaty-plugin-contrib": "^1.0.18",
     "wechaty-puppet": "^1.18.3",
     "wechaty-puppet-xp": "^1.11.6",
     "wechaty-vika-link": "^0.17.0"

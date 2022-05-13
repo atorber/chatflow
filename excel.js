@@ -23,7 +23,7 @@ async function excel2order(filepath, message) {
             let name = sheet.name
             console.debug(name)
             if (name == '顾客购买表(商品列排)') {
-                // console.log(rows.length);
+                console.log(rows.length);
                 let keys = rows[0]
                 let keysLength = keys.length
                 let orders = {}
@@ -33,17 +33,17 @@ async function excel2order(filepath, message) {
                     return a[keysLength - 1] - b[keysLength - 1];
                 })
                 for (var i = 0; i < rows.length; i++) {
-                    // console.log(`第${i + 1}行数据：${rows[i]}`)
+                    console.log(`第${i + 1}行数据：${rows[i]}`)
                     if (i > 0 && i < rows.length - 1) {
                         let row = rows[i]
                         let order = {}
                         for (let i in row) {
-                            if (!['团员备注', '详细地址', '下单人'].includes(keys[i])) {
+                            if (!['团员备注', '详细地址', '下单人', '跟团号'].includes(keys[i])) {
                                 order[keys[i]] = row[i]
                             }
                         }
                         // order.index = i
-                        // console.debug(order)
+                        console.debug(order)
                         if (Object.keys(orders).includes(order['几期'])) {
                             if (orders[order['几期']][order['几号楼']]) {
                                 orders[order['几期']][order['几号楼']].push(order)
@@ -85,14 +85,14 @@ async function excel2order(filepath, message) {
                     addInfo.name = i + '期';
                     //数据数组
                     addInfo.data = [
-                        [keys[keysLength - 2], keys[keysLength - 3], keys[keysLength - 5]],
+                        [keys[keysLength - 2], keys[keysLength - 3], keys[keysLength - 10]],
                     ];
 
                     let qicount = {
 
                     }
 
-                    for (let g = 3; g < keys.length - 5; g++) {
+                    for (let g = 4; g < keys.length - 19; g++) {
                         addInfo.data[0].push(keys[g])
                         qicount[keys[g]] = 0
                     }
@@ -103,30 +103,27 @@ async function excel2order(filepath, message) {
                         let loucount = {
 
                         }
-                        for (let g = 3; g < keys.length - 5; g++) {
-                            loucount[keys[g]] = 0
-                        }
 
-                        for (let g = 3; g < keys.length - 5; g++) {
+                        for (let g = 4; g < keys.length - 19; g++) {
                             loucount[keys[g]] = 0
                         }
                         let lou = qi[j]
                         for (let x in lou) {
                             let shi = lou[x]
-                            for (let g = 3; g < keys.length - 5; g++) {
+                            for (let g = 4; g < keys.length - 19; g++) {
                                 loucount[keys[g]] = loucount[keys[g]] + shi[keys[g]]
                             }
                             newList.push(shi)
-                            let shiorder = [shi[keys[keysLength - 2]] + '号楼', shi[keys[keysLength - 3]], shi[keys[keysLength - 5]]]
+                            let shiorder = [shi[keys[keysLength - 2]] + '号楼', shi[keys[keysLength - 3]], shi[keys[keysLength - 10]]]
 
-                            for (let g = 3; g < keys.length - 5; g++) {
+                            for (let g = 4; g < keys.length - 19; g++) {
                                 shiorder.push(shi[keys[g]] || 0)
                             }
                             addInfo.data.push(shiorder);
                         }
 
                         let count = ['小计', '', '']
-                        for (let g = 3; g < keys.length - 5; g++) {
+                        for (let g = 4; g < keys.length - 19; g++) {
                             count.push(loucount[keys[g]] || 0)
                             qicount[keys[g]] = qicount[keys[g]] + loucount[keys[g]]
                         }
@@ -134,7 +131,7 @@ async function excel2order(filepath, message) {
                     }
 
                     let count = ['合计', '', '']
-                    for (let g = 3; g < keys.length - 5; g++) {
+                    for (let g = 4; g < keys.length - 19; g++) {
                         count.push(qicount[keys[g]] || 0)
                     }
                     addInfo.data.push(count);

@@ -12,44 +12,42 @@ async function onMessage(message, vika) {
   // console.debug(message)
   try {
 
-    let file_payload = {}
     let uploaded_attachments = ''
-    let msg_type = 'Unknown'
-    let msgId = message.id
+    let msg_type = PUPPET.types.Message[message.type()]
     let file = ''
-    let fileDate = ''
     let filePath = ''
     let text = ''
+
     switch (message.type()) {
       // 文本消息
       case PUPPET.types.Message.Text:
-        msg_type = 'Text'
         text = message.text();
         break;
 
       // 图片消息
 
       case PUPPET.types.Message.Image:
-        msg_type = 'Image'
-        file = await message.toImage().artwork()
-        await wait(1000)
-        // console.debug('file=======================',file)
+
+        try {
+          file = await message.toImage().artwork()
+          await wait(1000)
+          // console.debug('file=======================',file)
+        } catch (e) {
+          console.error('Image解析失败：', e)
+        }
+
         break;
 
       // 链接卡片消息
       case PUPPET.types.Message.Url:
-        msg_type = 'Url'
+
         const urlLink = await message.toUrlLink();
         text = JSON.stringify(JSON.parse(JSON.stringify(urlLink)).payload)
-
-        // urlLink: 链接主要数据：包括 title，URL，description
-
-        file = await message.toFileBox();
+        // file = await message.toFileBox();
         break;
 
       // 小程序卡片消息
       case PUPPET.types.Message.MiniProgram:
-        msg_type = 'MiniProgram'
 
         const miniProgram = await message.toMiniProgram();
         text = JSON.stringify(JSON.parse(JSON.stringify(miniProgram)).payload)
@@ -73,32 +71,56 @@ async function onMessage(message, vika) {
 
       // 语音消息
       case PUPPET.types.Message.Audio:
-        msg_type = 'Audio'
-        file = await message.toFileBox();
+
+        try {
+          file = await message.toFileBox();
+
+        } catch (e) {
+          console.error('Audio解析失败：', e)
+        }
 
         break;
 
       // 视频消息
       case PUPPET.types.Message.Video:
-        msg_type = 'Video'
 
-        file = await message.toFileBox();
+        try {
+          file = await message.toFileBox();
+
+        } catch (e) {
+          console.error('Video解析失败：', e)
+        }
         break;
 
       // 动图表情消息
       case PUPPET.types.Message.Emoticon:
-        msg_type = 'Emoticon'
-        file = await message.toFileBox();
+
+        try {
+          file = await message.toFileBox();
+
+        } catch (e) {
+          console.error('Emoticon解析失败：', e)
+        }
 
         break;
 
       // 文件消息
       case PUPPET.types.Message.Attachment:
-        msg_type = 'Attachment'
-        file = await message.toFileBox();
+
+        try {
+          file = await message.toFileBox();
+
+        } catch (e) {
+          console.error('Attachment解析失败：', e)
+        }
 
         break;
+      // 文件消息
+      case PUPPET.types.Message.Location:
 
+        const location = await message.toLocation();
+        text = JSON.stringify(JSON.parse(JSON.stringify(location)).payload)
+        break;
       // 其他消息
       default:
         break;
@@ -113,12 +135,12 @@ async function onMessage(message, vika) {
         let readerStream = fs.createReadStream(filePath);
         uploaded_attachments = await vika.upload(readerStream)
         fs.unlink(filePath, (err) => {
-          console.debug(filePath, err)
+          console.debug('上传vika完成删除文件：', filePath, err)
         })
       } catch {
         console.debug('上传失败：', filePath)
         fs.unlink(filePath, (err) => {
-          console.debug(filePath, err)
+          console.debug('上传vika失败删除文件', filePath, err)
         })
       }
 
@@ -128,7 +150,7 @@ async function onMessage(message, vika) {
     vika.addChatRecord(message, uploaded_attachments, msg_type, text)
 
   } catch (e) {
-    console.log('监听消息失败', e)
+    console.log('vika 写入失败：', e)
   }
 }
 

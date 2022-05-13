@@ -8,20 +8,28 @@ let wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 class VikaBot {
   constructor(config) {
-    console.debug('vika init=====',config)
-    this.token = config.token
-    this.vika = new Vika({ token: this.token })
-    this.spaceId = ''
-    this.datasheetId = ''
-    this.datasheetName = config.sheetName || 'ChatRecord'
-    this.checkInit()
+    if (!config.token) {
+      console.error('未配置token，请在config.ts中配置')
+    } else if (!config.spaceName) {
+      console.error('未配置空间名称，请在config.ts中配置')
+    } else if (!config.sheetName) {
+      console.error('未配置表名称，请在config.ts中配置')
+    } else {
+      this.token = config.token
+      this.spaceName = config.spaceName
+      this.datasheetName = config.sheetName
+      this.vika = new Vika({ token: this.token })
+      this.spaceId = ''
+      this.datasheetId = ''
+      this.checkInit()
+    }
   }
 
   async getAllSpaces() {
     // 获取当前用户的空间站列表
     const spaceListResp = await this.vika.spaces.list()
     if (spaceListResp.success) {
-      console.log(spaceListResp.data.spaces)
+      console.table(spaceListResp.data.spaces)
       return spaceListResp.data.spaces
     } else {
       console.error(spaceListResp)
@@ -32,11 +40,16 @@ class VikaBot {
   async getSpaceId() {
     let spaceList = await this.getAllSpaces()
     for (let i in spaceList) {
-      if (spaceList[i].name === 'mp-chatbot') {
+      if (spaceList[i].name === this.spaceName) {
         this.spaceId = spaceList[i].id
+        break
       }
     }
-    return this.spaceId
+    if (this.spaceId) {
+      return this.spaceId
+    } else {
+      return null
+    }
   }
 
   async getNodesList() {
@@ -157,15 +170,15 @@ class VikaBot {
     //   },
     // ]
 
-    console.table(records[0].fields)
+    // console.table(records[0].fields)
     const datasheet = this.vika.datasheet(this.datasheetId)
     datasheet.records.create(records).then((response) => {
       if (response.success) {
-        console.log(response.code)
+        console.log('写入vika成功：', response.code)
       } else {
-        console.error(response)
+        console.error('调用vika写入接口成功，写入vika失败：', response)
       }
-    }).catch(err => { console.error(err) })
+    }).catch(err => { console.error('调用vika写入接口失败：', err) })
   }
 
   async upload(file) {
@@ -192,13 +205,13 @@ class VikaBot {
 
     if (this.spaceId) {
       let tables = await this.getNodesList()
-      console.debug('空间内所有表:', tables)
+      console.table(tables)
 
       if (tables[this.datasheetName]) {
         this.datasheetId = tables[this.datasheetName]
         console.debug(this.datasheetName + '表存在:', this.datasheetId, '初始化完成')
       } else {
-        console.debug(this.datasheetName + '表不存在:自动创建')
+        console.debug(this.datasheetName + '表不存在:自动创建...')
         let name = this.datasheetName
 
         let fields = [
@@ -327,7 +340,7 @@ class VikaBot {
       }
 
     } else {
-      console.debug('mp-chatbot空间不存在')
+      console.error('指定空间不存在，请先创建空间，并在config.ts中配置VIKA_SPACENAME')
     }
 
     return {
