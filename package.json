@@ -12,7 +12,12 @@
     "dev-ts": "ts-node-esm dev.ts",
     "dev": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node dev.ts",
     "rm-temp": "rm -r temp; mkdir temp",
-    "rm-cache": "rm -r cache; mkdir cache"
+    "rm-cache": "rm -r cache; mkdir cache",
+    "lint": "npm run lint:es && npm run lint:ts && npm run lint:md",
+    "lint:md": "markdownlint README.md",
+    "lint:ts": "tsc --isolatedModules --noEmit",
+    "lint:es": "eslint \"src/**/*.ts\" \"tests/**/*.spec.ts\" --ignore-pattern tests/fixtures/",
+    "lint-fix": "eslint --fix \"src/**/*.ts\" \"tests/**/*.spec.ts\""
   },
   "repository": {
     "type": "git",

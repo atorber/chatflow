@@ -9,6 +9,7 @@
     "tests/fixtures/",
   ],
   "include": [
+    "./*.ts",
     "app/**/*.ts",
     "bin/*.ts",
     "bot/**/*.ts",
