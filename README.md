@@ -75,7 +75,7 @@ npm start
 
 <img src="https://user-images.githubusercontent.com/104893934/167663152-94127586-5429-4689-bba8-379127606a56.png" width="60%">
 
-原始表
+快团团后台导出的全部字段原始表
 
 <img src="https://user-images.githubusercontent.com/104893934/168030413-f13c2107-d54f-4921-b361-948ac28a0841.png" width="60%">
 
