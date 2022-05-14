@@ -46,7 +46,7 @@
     "wechaty": "^1.18.1",
     "wechaty-plugin-contrib": "^1.0.18",
     "wechaty-puppet": "^1.18.3",
-    "wechaty-puppet-xp": "^1.11.6",
+    "wechaty-puppet-xp": "^1.11.8",
     "wechaty-vika-link": "^0.17.0"
   },
   "devDependencies": {

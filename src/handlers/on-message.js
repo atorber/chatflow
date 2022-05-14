@@ -119,8 +119,8 @@ async function onMessage (message, vika) {
       // 文件消息
       case PUPPET.types.Message.Location:
 
-        const location = await message.toLocation()
-        text = JSON.stringify(JSON.parse(JSON.stringify(location)).payload)
+        // const location = await message.toLocation()
+        // text = JSON.stringify(JSON.parse(JSON.stringify(location)).payload)
         break
       // 其他消息
       default:
