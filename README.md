@@ -24,6 +24,10 @@
 
 - 群聊天消息存档到表格（基于vika维格表，免费）
 
+### 体验群
+
+<img src="https://user-images.githubusercontent.com/104893934/168411822-1f7a96c5-f7a2-4cf6-af4a-78641c366eb5.png" width="30%">
+
 ### TODO LIST
 
 - 消息群发，通知消息同时发布到多个群
