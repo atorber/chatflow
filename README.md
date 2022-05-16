@@ -1,7 +1,5 @@
 # wechat-openai-qa-bot
 
-[B站快速入门视频](https://www.bilibili.com/video/BV1Y54y1f7v1?share_source=copy_web)
-
 ## 简介
 
 本项目使用wechat机器人快速实现一个免费的QA问答系统，如果你是一个社群工作者、拼团团长、业务群运营经理，使用这个项目可以帮助你解决一些重复性问答。
@@ -9,6 +7,10 @@
 前提是你有一台Windows电脑可以运行本项目，仅支持Windows环境下运行。
 
 项目是在上海因疫情在社区团购物资以及社区管理等群组活动各方工作繁杂的背景下产生希望能帮助大家解决一些实际的问题，请务必善用。
+
+[[字幕]微信智能问答机器人系统（一）](https://www.bilibili.com/video/BV1Y54y1f7v1?share_source=copy_web)
+
+[[字幕]微信智能问答机器人系统（二）](https://www.bilibili.com/video/BV1Ju41167Qo?share_source=copy_web)
 
 ### 已经支持的功能：
 
