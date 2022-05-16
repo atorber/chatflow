@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable sort-keys */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable eqeqeq */
@@ -37,37 +38,25 @@ async function excel2order (filepath, message) {
           return a[keysLength - 1] - b[keysLength - 1]
         })
         for (let i = 0; i < rows.length; i++) {
-          console.log(`第${i + 1}行数据：${rows[i]}`)
-          if (i > 0 && i < rows.length - 1) {
-            const row = rows[i]
-            const order = {}
-            for (const i in row) {
-              if (!['团员备注', '详细地址', '下单人', '跟团号'].includes(keys[i])) {
-                order[keys[i]] = row[i]
-              }
+        //   console.log(`第${i + 1}行数据：${rows[i]}`)
+          const row = rows[i]
+          const order = {}
+          for (const y in row) {
+            if (!['团员备注', '详细地址', '下单人', '跟团号'].includes(keys[y])) {
+              order[keys[y]] = row[y]
             }
-            // order.index = i
-            console.debug(order)
-            if (Object.keys(orders).includes(order['几期'])) {
-              if (orders[order['几期']][order['几号楼']]) {
-                orders[order['几期']][order['几号楼']].push(order)
-                const items = orders[order['几期']][order['几号楼']]
-                items.sort(function (a, b) {
-                  return a['几室'] - b['几室']
-                })
-                orders[order['几期']][order['几号楼']] = items
-              } else {
-                orders[order['几期']][order['几号楼']] = []
-                orders[order['几期']][order['几号楼']].push(order)
-                const items = orders[order['几期']][order['几号楼']]
-                items.sort(function (a, b) {
-                  return a['几室'] - b['几室']
-                })
-                orders[order['几期']][order['几号楼']] = items
-              }
-
+          }
+          // order.index = i
+          // console.debug(order)
+          if (Object.keys(orders).includes(order['几期'])) {
+            if (orders[order['几期']][order['几号楼']]) {
+              orders[order['几期']][order['几号楼']].push(order)
+              const items = orders[order['几期']][order['几号楼']]
+              items.sort(function (a, b) {
+                return a['几室'] - b['几室']
+              })
+              orders[order['几期']][order['几号楼']] = items
             } else {
-              orders[order['几期']] = {}
               orders[order['几期']][order['几号楼']] = []
               orders[order['几期']][order['几号楼']].push(order)
               const items = orders[order['几期']][order['几号楼']]
@@ -76,7 +65,18 @@ async function excel2order (filepath, message) {
               })
               orders[order['几期']][order['几号楼']] = items
             }
+
+          } else {
+            orders[order['几期']] = {}
+            orders[order['几期']][order['几号楼']] = []
+            orders[order['几期']][order['几号楼']].push(order)
+            const items = orders[order['几期']][order['几号楼']]
+            items.sort(function (a, b) {
+              return a['几室'] - b['几室']
+            })
+            orders[order['几期']][order['几号楼']] = items
           }
+
         }
         // console.debug(JSON.stringify(orders))
         const newList = []
@@ -137,6 +137,8 @@ async function excel2order (filepath, message) {
               titleRow.push(keys[g])
               qicount[keys[g]] = qicount[keys[g]] + loucount[keys[g]]
             }
+            console.debug(JSON.stringify(count))
+            console.debug(JSON.stringify(qicount))
             addInfo.data.push(count)
             addInfo.data.push(blankRow)
             addInfo.data.push(titleRow)
@@ -198,12 +200,12 @@ async function xlsxrw (filename) {
 
     // 遍历工作表中的所有行（包括空行）
     worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
-      console.log('Row ' + rowNumber + ' = ' + JSON.stringify(row.values))
+    //   console.log('Row ' + rowNumber + ' = ' + JSON.stringify(row.values))
       row.height = 30
       if (rowNumber === 1) {
         row.height = 20
         row.eachCell(function (cell, colNumber) {
-          console.log('Cell ' + colNumber + ' = ' + cell.value)
+        //   console.log('Cell ' + colNumber + ' = ' + cell.value)
           if (colNumber < 3) {
             worksheet.getColumn(colNumber).width = 10
           } else {
@@ -218,8 +220,9 @@ async function xlsxrw (filename) {
       }
       if (row.getCell(1).value && row.getCell(1).value.includes('小计')) {
         // 遍历一行中的所有单元格（包括空单元格）
+        console.log('row ', JSON.stringify(row.values))
         row.eachCell({ includeEmpty: true }, function (cell, colNumber) {
-          console.log('Cell ' + colNumber + ' = ' + cell.value)
+        //   console.log('Cell ' + colNumber + ' = ' + cell.value)
           if (colNumber < 3) {
             cell.font = {
               bold: true,
