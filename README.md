@@ -46,7 +46,7 @@
 
 - [微信对话开放平台](https://openai.weixin.qq.com/) —— 5分钟零基础免费一键搭建智能对话机器人，并应用于微信公众号、小程序、企业网站、APP等
 
-- [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?home=1) —— 将过去复杂的IT数据库技术，做得像表格一样简单
+- [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973) —— 将过去复杂的IT数据库技术，做得像表格一样简单(如果要注册，通过这个链接)
 
 ## 快速开始
 
