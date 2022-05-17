@@ -146,13 +146,13 @@ async function wxai (message: Message) {
     answer = await aibot(talker, room, text)
   }
 
-  if (message.type() === bot.Message.Type.MiniProgram && configs.linkWhiteList.includes(talker.id)) {
+  if (message.type() === bot.Message.Type.MiniProgram && !configs.linkWhiteList.includes(talker.id)) {
     const MiniProgram = await message.toMiniProgram()
     text = `${MiniProgram.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
     answer = await aibot(talker, room, text)
   }
 
-  if (message.type() === bot.Message.Type.Url && configs.linkWhiteList.includes(talker.id)) {
+  if (message.type() === bot.Message.Type.Url && !configs.linkWhiteList.includes(talker.id)) {
     const urllink = await message.toUrlLink()
     text = `${urllink.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
     answer = await aibot(talker, room, text)
