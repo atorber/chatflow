@@ -1,0 +1,574 @@
+[
+    {
+        "id": "dcb6b2cc74a2666a",
+        "type": "tab",
+        "label": "智能对话QA系统",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "449592905fec06a5",
+        "type": "tab",
+        "label": "实时日志",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "96b70ccab4c1b942",
+        "type": "tab",
+        "label": "UI",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f47d5d1e864efa46",
+        "type": "ui_tab",
+        "name": "Home",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "694c801ce7e9df20",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-light",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#0094CE",
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#fafafa",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#1bbfff",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#0094ce",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "5cd49891dcf2ec59",
+        "type": "ui_group",
+        "name": "Default",
+        "tab": "f47d5d1e864efa46",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "51751be1a2b4f446",
+        "type": "inject",
+        "z": "dcb6b2cc74a2666a",
+        "name": "启动QA系统",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "2c4ff291c950275c"
+            ]
+        ]
+    },
+    {
+        "id": "2c4ff291c950275c",
+        "type": "exec",
+        "z": "dcb6b2cc74a2666a",
+        "command": "cd C:\\Users\\wechaty\\Documents\\GitHub\\wechat-openai-qa-bot",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "cd到代码目录",
+        "x": 380,
+        "y": 100,
+        "wires": [
+            [],
+            [],
+            [
+                "ddb3bf4675a8ba5d",
+                "d9dc44182c4963bf"
+            ]
+        ]
+    },
+    {
+        "id": "b8cdf17374102b0b",
+        "type": "debug",
+        "z": "dcb6b2cc74a2666a",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "$string(msg)",
+        "targetType": "jsonata",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 630,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "04ec3a70f40d1888",
+        "type": "exec",
+        "z": "dcb6b2cc74a2666a",
+        "command": "npm run dev",
+        "addpay": "payload",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "启动程序",
+        "x": 360,
+        "y": 260,
+        "wires": [
+            [
+                "d9dc44182c4963bf"
+            ],
+            [
+                "d9dc44182c4963bf"
+            ],
+            [
+                "d9dc44182c4963bf"
+            ]
+        ]
+    },
+    {
+        "id": "ddb3bf4675a8ba5d",
+        "type": "switch",
+        "z": "dcb6b2cc74a2666a",
+        "name": "判断cd是否执行成功",
+        "property": "payload.code",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "neq",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 400,
+        "y": 180,
+        "wires": [
+            [
+                "04ec3a70f40d1888",
+                "d9dc44182c4963bf"
+            ],
+            [
+                "d9dc44182c4963bf"
+            ]
+        ]
+    },
+    {
+        "id": "bf7fe7333a771c5f",
+        "type": "inject",
+        "z": "dcb6b2cc74a2666a",
+        "name": "停止QA系统",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 560,
+        "wires": [
+            [
+                "2aa5760853fc8a10"
+            ]
+        ]
+    },
+    {
+        "id": "59b25313c0717113",
+        "type": "exec",
+        "z": "dcb6b2cc74a2666a",
+        "command": "taskkill /f /t /im cmd.exe",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "结束机器人进程",
+        "x": 380,
+        "y": 640,
+        "wires": [
+            [
+                "0e482f3ac95afbd4"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "af37401a57e2119f",
+        "type": "change",
+        "z": "dcb6b2cc74a2666a",
+        "name": "记录进程ID",
+        "rules": [
+            {
+                "t": "set",
+                "p": "pid",
+                "pt": "flow",
+                "to": "pid",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 370,
+        "y": 440,
+        "wires": [
+            [
+                "b8cdf17374102b0b"
+            ]
+        ]
+    },
+    {
+        "id": "2aa5760853fc8a10",
+        "type": "change",
+        "z": "dcb6b2cc74a2666a",
+        "name": "获取PID",
+        "rules": [
+            {
+                "t": "set",
+                "p": "pid",
+                "pt": "msg",
+                "to": "pid",
+                "tot": "flow"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 360,
+        "y": 520,
+        "wires": [
+            [
+                "0e482f3ac95afbd4",
+                "c8e415e2f1a73ebb"
+            ]
+        ]
+    },
+    {
+        "id": "d9dc44182c4963bf",
+        "type": "debug",
+        "z": "dcb6b2cc74a2666a",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 670,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "0e482f3ac95afbd4",
+        "type": "debug",
+        "z": "dcb6b2cc74a2666a",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 610,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "e812b83d0fde183f",
+        "type": "status",
+        "z": "dcb6b2cc74a2666a",
+        "name": "",
+        "scope": [
+            "04ec3a70f40d1888"
+        ],
+        "x": 650,
+        "y": 260,
+        "wires": [
+            [
+                "b8cdf17374102b0b",
+                "a1c565bc86caff69"
+            ]
+        ]
+    },
+    {
+        "id": "a1c565bc86caff69",
+        "type": "function",
+        "z": "dcb6b2cc74a2666a",
+        "name": "PID格式化",
+        "func": "if(msg.status&&msg.status.text&&msg.status.text.indexOf('pid')!==-1){\n    msg.pid = msg.status.text.split(':')[1]\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 320,
+        "wires": [
+            [
+                "1e6f6c7f4510807e"
+            ]
+        ]
+    },
+    {
+        "id": "1e6f6c7f4510807e",
+        "type": "switch",
+        "z": "dcb6b2cc74a2666a",
+        "name": "判断是否包含PID",
+        "property": "pid",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 390,
+        "y": 380,
+        "wires": [
+            [
+                "af37401a57e2119f"
+            ]
+        ]
+    },
+    {
+        "id": "c8e415e2f1a73ebb",
+        "type": "function",
+        "z": "dcb6b2cc74a2666a",
+        "name": "",
+        "func": "msg.payload = `taskkill /pid ${msg.pid} /F`\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 580,
+        "wires": [
+            [
+                "59b25313c0717113"
+            ]
+        ]
+    },
+    {
+        "id": "135e5bf3f77e94fe",
+        "type": "debug",
+        "z": "449592905fec06a5",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "$string(msg.payload)",
+        "targetType": "jsonata",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 420,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "5113791f2133429e",
+        "type": "http response",
+        "z": "449592905fec06a5",
+        "name": "",
+        "statusCode": "200",
+        "headers": {},
+        "x": 600,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "0a1fb57d875c3676",
+        "type": "function",
+        "z": "449592905fec06a5",
+        "name": "",
+        "func": "msg.payload = {\n    code:0,\n    msg:'请求成功',\n    data:null\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 320,
+        "wires": [
+            [
+                "5113791f2133429e"
+            ]
+        ]
+    },
+    {
+        "id": "2d35ef4f036b55e4",
+        "type": "http in",
+        "z": "449592905fec06a5",
+        "name": "日志接收器",
+        "url": "/log",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 200,
+        "y": 240,
+        "wires": [
+            [
+                "0a1fb57d875c3676",
+                "135e5bf3f77e94fe"
+            ]
+        ]
+    },
+    {
+        "id": "2042ef0ee7920bd1",
+        "type": "ui_template",
+        "z": "96b70ccab4c1b942",
+        "group": "5cd49891dcf2ec59",
+        "name": "",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "format": "<div ng-bind-html=\"msg.payload\"></div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 300,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    }
+]
