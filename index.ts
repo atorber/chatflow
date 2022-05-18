@@ -194,6 +194,10 @@ async function wxai (message: Message) {
   // log.info('answer=====================', answer)
   if (answer) {
     log.info(`向 ${talker.name()} 发送消息...`)
+    if (message.type() === bot.Message.Type.Text) {
+      answer = text.length > 10 ? (answer + '\n------------------------------\n' + talker.name() + ':' + text.slice(0, 10) + '...') : (answer + '\n------------------------------\n' + talker.name() + ':' + text)
+
+    }
     await room.say(answer, ...[talker])
   }
 };
