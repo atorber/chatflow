@@ -32,62 +32,68 @@ async function excel2order (filepath, message) {
         const keys = rows[0]
         const keysLength = keys.length
         const orders = {}
+        const rowLength = keys.length
         rows.shift()
         rows.pop()
         rows.sort(function (a, b) {
-          return a[keysLength - 1] - b[keysLength - 1]
+          return String(a[keysLength - 1]) - String(b[keysLength - 1])
         })
+        const num = {
+
+        }
         for (let i = 0; i < rows.length; i++) {
-        //   console.log(`第${i + 1}行数据：${rows[i]}`)
+
+          //   console.log(`第${i + 1}行数据：${rows[i]}`)
           const row = rows[i]
+          row[rowLength - 1] = String(row[rowLength - 1])
           const order = {}
           for (const y in row) {
-            if (!['团员备注', '详细地址', '下单人', '跟团号'].includes(keys[y])) {
-              order[keys[y]] = row[y]
-            }
+            order[y] = row[y]
           }
           // order.index = i
-          // console.debug(order)
-          if (Object.keys(orders).includes(order['几期'])) {
-            if (orders[order['几期']][order['几号楼']]) {
-              orders[order['几期']][order['几号楼']].push(order)
-              const items = orders[order['几期']][order['几号楼']]
-              items.sort(function (a, b) {
-                return a['几室'] - b['几室']
+          //   console.debug(order)louOrders
+          //   console.debug(order[0])
+
+          if (Object.keys(orders).includes(order[rowLength - 1])) {
+            const qiOrders = orders[order[rowLength - 1]]
+
+            if (Object.keys(qiOrders).includes(order[rowLength - 2])) {
+              const louOrders = qiOrders[order[rowLength - 2]]
+              louOrders.push(order)
+              louOrders.sort(function (a, b) {
+                return a[rowLength - 3] - b[rowLength - 3]
               })
-              orders[order['几期']][order['几号楼']] = items
+              qiOrders[order[rowLength - 2]] = louOrders
+              orders[order[rowLength - 1]] = qiOrders
+
             } else {
-              orders[order['几期']][order['几号楼']] = []
-              orders[order['几期']][order['几号楼']].push(order)
-              const items = orders[order['几期']][order['几号楼']]
-              items.sort(function (a, b) {
-                return a['几室'] - b['几室']
-              })
-              orders[order['几期']][order['几号楼']] = items
+              const louOrders = [order]
+              qiOrders[order[rowLength - 2]] = louOrders
+              orders[order[rowLength - 1]] = qiOrders
+
             }
 
           } else {
-            orders[order['几期']] = {}
-            orders[order['几期']][order['几号楼']] = []
-            orders[order['几期']][order['几号楼']].push(order)
-            const items = orders[order['几期']][order['几号楼']]
-            items.sort(function (a, b) {
-              return a['几室'] - b['几室']
-            })
-            orders[order['几期']][order['几号楼']] = items
+            const qiOrders = {}
+            qiOrders[order[rowLength - 2]] = [order]
+            orders[order[rowLength - 1]] = qiOrders
+            // console.debug(JSON.stringify(orders))
+
           }
 
         }
-        // console.debug(JSON.stringify(orders))
+        console.debug(JSON.stringify(orders))
         const newList = []
-        const addInfo = {}
         const excelData = []
+
         // 添加数据
         for (const i in orders) {
           // newList.push(i + '期')
+          const addInfo = {}
           // 名称
-          addInfo.name = i + '期'
-          // 数据数组
+          addInfo.name = i + '期(弄)'
+
+          // 固定表头
           addInfo.data = [
             [keys[keysLength - 2], keys[keysLength - 3], keys[keysLength - 10]],
           ]
@@ -96,9 +102,10 @@ async function excel2order (filepath, message) {
 
           }
 
+          //   表头及计数初始化
           for (let g = 4; g < keys.length - 19; g++) {
             addInfo.data[0].push(keys[g])
-            qicount[keys[g]] = 0
+            qicount[g] = 0
           }
 
           const qi = orders[i]
@@ -109,20 +116,21 @@ async function excel2order (filepath, message) {
             }
 
             for (let g = 4; g < keys.length - 19; g++) {
-              loucount[keys[g]] = 0
+              loucount[g] = 0
             }
 
             const lou = qi[j]
+
             for (const x in lou) {
               const shi = lou[x]
               for (let g = 4; g < keys.length - 19; g++) {
-                loucount[keys[g]] = loucount[keys[g]] + shi[keys[g]]
+                loucount[g] = loucount[g] + shi[g]
               }
               newList.push(shi)
-              const shiorder = [shi[keys[keysLength - 2]] + '号楼', shi[keys[keysLength - 3]], shi[keys[keysLength - 10]]]
+              const shiorder = [shi[rowLength - 2] + '号楼', shi[rowLength - 2], shi[rowLength - 10]]
 
               for (let g = 4; g < keys.length - 19; g++) {
-                shiorder.push(shi[keys[g]] || 0)
+                shiorder.push(shi[g] || 0)
               }
               addInfo.data.push(shiorder)
             }
@@ -132,28 +140,30 @@ async function excel2order (filepath, message) {
             const titleRow = [keys[keysLength - 2], keys[keysLength - 3], keys[keysLength - 10]]
 
             for (let g = 4; g < keys.length - 19; g++) {
-              count.push(loucount[keys[g]] || 0)
+              count.push(loucount[g] || 0)
               blankRow.push('')
               titleRow.push(keys[g])
-              qicount[keys[g]] = qicount[keys[g]] + loucount[keys[g]]
+              qicount[g] = qicount[g] + loucount[g]
             }
             console.debug(JSON.stringify(count))
-            console.debug(JSON.stringify(qicount))
             addInfo.data.push(count)
             addInfo.data.push(blankRow)
             addInfo.data.push(titleRow)
 
           }
+          //   console.debug(JSON.stringify(qicount))
 
           const count = ['合计', '', '']
           for (let g = 4; g < keys.length - 19; g++) {
-            count.push(qicount[keys[g]] || 0)
+            count.push(qicount[g] || 0)
           }
+          //   console.debug('合计-------------------', count)
+
           addInfo.data.push(count)
           excelData.push(JSON.parse(JSON.stringify(addInfo)))
         }
         // console.debug(excelData)
-        // console.debug(newList)
+        console.debug(newList.length)
         // 写入Excel数据
         try {
           // 写xlsx
