@@ -8,7 +8,12 @@ import ExcelJS from 'exceljs'
 import fs from 'fs'
 import { FileBox } from 'file-box'
 import path from 'path'
+import configs from './config.js'
+import { VikaBot } from './src/vika.js'
 const __dirname = path.resolve()
+
+const vikaConfig = { token: configs.VIKA_TOKEN, sheetName: configs.VIKA_DATASHEETNAME, spaceName: configs.VIKA_SPACENAME }
+const vika = new VikaBot(vikaConfig)
 
 async function excel2order (filepath, message) {
   // console.debug('文件路径：', filepath)
@@ -82,7 +87,7 @@ async function excel2order (filepath, message) {
           }
 
         }
-        console.debug(JSON.stringify(orders))
+        // console.debug(JSON.stringify(orders))
         const newList = []
         const excelData = []
 
@@ -183,6 +188,7 @@ async function excel2order (filepath, message) {
             const fileBox = FileBox.fromFile(newpath)
             console.log(fileBox)
             if (message) {
+              await message.say('转换成功，请下载查看~')
               await message.say(fileBox)
               newpath = ''
               message = ''
@@ -190,6 +196,7 @@ async function excel2order (filepath, message) {
           })
 
         } catch (e) {
+          await message.say('格式转换失败:\n1.请检查原始表格是否正确\n2.仅支持从快团团默认导出的全量字段表格\n3.表格中必须须包含 顾客购买表(商品列排) sheet\n4.文件名中不能包含括号等特殊字符，建议使用导出的原始文件名')
           // 输出日志
           console.log('excel写入异常,error=%s', e.stack)
           return e

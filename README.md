@@ -52,6 +52,8 @@
 
 - [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973) —— 将过去复杂的IT数据库技术，做得像表格一样简单(如果要注册，通过这个链接，或者使用邀请码 55152973 )
 
+- [vue-im](https://github.com/polk6/vue-im) —— 由@polk6开源的客服web项目
+
 ## 快速开始
 
 ```

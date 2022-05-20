@@ -1,0 +1,129 @@
+// 公共类
+#common-wrapper {
+    .hide {
+        display: none !important;
+    }
+    .show {
+        display: initial !important;
+    }
+    .float-left {
+        float: left;
+    }
+    .float-right {
+        float: right;
+    }
+    .text-right {
+        text-align: right;
+    }
+    .text-center {
+        text-align: center;
+    }
+    .text-left {
+        text-align: left;
+    }
+    .red {
+        color: red;
+    }
+    ::-webkit-scrollbar {
+        width: 10px;
+        background: transparent;
+    }
+    ::-webkit-scrollbar-track-piece {
+        background: none;
+    }
+    ::-webkit-scrollbar-thumb {
+        height: 50px;
+        border: 2px solid rgba(0, 0, 0, 0);
+        border-radius: 12px;
+        background-clip: padding-box;
+        background-color: #ccd4d4;
+        box-shadow: inset -1px -1px 0px #ccd4d4, inset 1px 1px 0px #ccd4d4;
+    }
+    .position-h-mid {
+        position: absolute;
+        left: 50%;
+        transform: translate(-50%, 0);
+    }
+    .position-v-mid {
+        position: absolute;
+        top: 50%;
+        transform: translate(0, -50%);
+    }
+    .position-h-v-mid {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
+// elemUI相关
+#common-wrapper {
+    .el-button--text {
+        margin: 0px;
+        padding: 0px;
+        color: #00a8d7;
+    }
+    .el-button--primary {
+        background-color: #00a8d7;
+        border-color: #00a8d7;
+        &.is-disabled {
+            color: #ffffff;
+            cursor: not-allowed;
+            background-image: none;
+            background-color: #b8e9f8;
+            border-color: #b8e9f8;
+        }
+    }
+    .el-textarea__inner {
+        resize: none;
+    }
+    .el-select,
+    .el-slider__runway {
+        z-index: 0;
+    }
+    .el-input__inner {
+        &:hover {
+            border-color: #00a8d7;
+        }
+    }
+    .el-select {
+        .el-tag--primary {
+            background-color: #f4f4f4;
+            border-color: #dfe4e6;
+            color: #6e6e6e;
+        }
+        &:hover {
+            .el-input__inner {
+                border-color: #00a8d7;
+            }
+        }
+    }
+    .el-dropdown {
+        .el-icon-caret-bottom {
+            font-size: 12px;
+            margin-left: 16px;
+        }
+    }
+    .el-tag {
+        background-color: #f4f4f4;
+        color: #454545;
+        border-color: #e6e6e6;
+        padding: 0px 10px;
+    }
+    .el-pager {
+        li.active {
+            border-color: #00a8d7;
+            background-color: #00a8d7;
+        }
+    }
+    .el-dialog__wrapper {
+        .el-dialog__body {
+            padding: 0px;
+        }
+    }
+}
+
+body {
+    font-family: 'Microsoft YaHei', 'CaviarDreams Bold', Helvetica, Arial, sans-serif, 'STHeiti';
+}
