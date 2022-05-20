@@ -1,5 +1,7 @@
 # wechat-openai-qa-bot
 
+> 忽略代码质量,It's ugly, but a little useful,欢迎提交优化PR.
+
 ## 简介
 
 本项目使用wechat机器人快速实现一个免费的QA问答系统，如果你是一个社群工作者、拼团团长、业务群运营经理，使用这个项目可以帮助你解决一些重复性问答。
