@@ -82,7 +82,7 @@ npm run dev
 
 ### 简单客服后台系统
 
-
+<img src="https://user-images.githubusercontent.com/104893934/169646853-b635e1ad-92fd-4fd4-b62a-c165e5ba4796.png" width="60%">
 
 ### 常见问题问答自动回复
 
