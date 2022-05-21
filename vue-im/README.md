@@ -1,32 +1,25 @@
-# vue-im
-一个基于Vue2.0的在线客服系统。包括服务端和客户端。
+# wechat客服系统
+
+基于另一个开源项目[vue-im](https://github.com/polk6/vue-im)二次开发的客服系统，对接微信chatbot实现群消息转换为单聊模式，并支持快捷答复。
+
+感谢作者[@fang mu](https://github.com/polk6)
 
 # Features
 * 支持1客服对多用户
-* 支持客户选择客服
-* 输入框支持文本、图片、表情、文件传输
-* 输入框支持粘贴图片、文本表情混合
+* 当前仅支持文本消息
 
 ## im-server im服务端
-![image](https://user-images.githubusercontent.com/3334204/54471439-e1a7b400-47f3-11e9-8a97-819ef99a0fb5.png)
 
-## im-client im客户端
-![image](https://user-images.githubusercontent.com/3334204/54471440-e704fe80-47f3-11e9-9454-96a2fb27b122.png)
+<img src="https://user-images.githubusercontent.com/104893934/169646853-b635e1ad-92fd-4fd4-b62a-c165e5ba4796.png" width="60%">
 
 ## Usage
 ```
-npm install .
-
+npm install
 npm run dev
 ```
+
+启动后使用谷歌浏览器访问http://localhost:8080/#/imServer
+
 ## Express-server
+
 ./build/webpack.dev.conf.js 内置了一个Express服务，后台接口都在此处
-
-## Blog
-[https://www.cnblogs.com/polk6/p/vue-im.html](https://www.cnblogs.com/polk6/p/vue-im.html)
-
-## Browser
-目前只适配了Chrome浏览器
-
-## LICENSE
-[MIT](https://zh.wikipedia.org/wiki/MIT%E8%A8%B1%E5%8F%AF%E8%AD%89)	

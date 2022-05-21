@@ -25,14 +25,14 @@ export const imServerStore = new Vuex.Store({
          * 触发当前选择的chat含有新的消息
          * @param {Object} payload 载荷对象
          */
-        triggerHaveNewMsgDelegate: function(state, payload) {
+        triggerHaveNewMsgDelegate: function (state, payload) {
             state.haveNewMsgDelegate = Date.now();
         },
 
         /**
          * 排序当前会话列表
          */
-        sortCurrentChatEnlist: function(state, payload) {
+        sortCurrentChatEnlist: function (state, payload) {
             var enlist = state.currentChatEnlist.concat();
 
             // 排序规则：
@@ -71,7 +71,7 @@ export const imServerStore = new Vuex.Store({
         /**
          * 清除通知chat
          */
-        clearNotificationChat: function(state) {
+        clearNotificationChat: function (state) {
             state.notificationChatEnlist = [];
         }
     },
@@ -81,7 +81,7 @@ export const imServerStore = new Vuex.Store({
          * @param {Object} payload 载荷对象
          * @param {String} payload.newChatEn 新的chat对象
          */
-        addClientChat: function(context, { newChatEn }) {
+        addClientChat: function (context, { newChatEn }) {
             context.dispatch('getChatEnByChatId', { clientChatId: newChatEn.clientChatId }).then((chatEn) => {
                 if (chatEn == null) {
                     // 1)公共属性
@@ -112,7 +112,7 @@ export const imServerStore = new Vuex.Store({
          * @param {String} clientChatId 需要修改的chatEn的id，根据此id匹配当前集合或历史集合
          * @param {String} listName 指定的集合名称；e.g. currentChatEnlist、historyChatEnlist、allHistoryChatEnlist
          */
-        getChatEnByChatId: function(context, { clientChatId, listName }) {
+        getChatEnByChatId: function (context, { clientChatId, listName }) {
             var chatEn = null;
 
             if (listName) {
@@ -146,7 +146,7 @@ export const imServerStore = new Vuex.Store({
          * @param {Object} payload.clientChatId 需要修改的chatEn的id，根据此id匹配当前集合或历史集合
          * @param {Array} payload.extends Chat需要变更的属性对象数组
          */
-        extendChatEn: function(context, payload) {
+        extendChatEn: function (context, payload) {
             return context.dispatch('getChatEnByChatId', { clientChatId: payload.clientChatId }).then((chatEn) => {
                 // 1.若没有，就附加到当前会话列表里
                 if (chatEn == null) {
@@ -161,7 +161,7 @@ export const imServerStore = new Vuex.Store({
                 // 3.若选中的当前chatEn 与 传入的一直，更新选中额chatEn
                 if (context.state.selectedChatEn && context.state.selectedChatEn.clientChatId == chatEn.clientChatId) {
                     context.state.selectedChatEn = Object.assign({}, chatEn);
-                    Vue.nextTick(function() {});
+                    Vue.nextTick(function () { });
                 }
                 return chatEn;
             });
@@ -176,7 +176,7 @@ export const imServerStore = new Vuex.Store({
          * @param {String} msg.content 消息内容
          * @param {Function} successCallback 添加消息后的回调
          */
-        addChatMsg: function(context, { clientChatId, msg, successCallback }) {
+        addChatMsg: function (context, { clientChatId, msg, successCallback }) {
             context.dispatch('getChatEnByChatId', { clientChatId: clientChatId }).then((chatEn) => {
                 if (chatEn == null) {
                     return;
@@ -250,7 +250,7 @@ export const imServerStore = new Vuex.Store({
          * 选中会话
          * @param {String} clientChatId 选中会话Id
          */
-        selectChat: function(context, { clientChatId }) {
+        selectChat: function (context, { clientChatId }) {
             context.dispatch('getChatEnByChatId', { clientChatId: clientChatId }).then((chatEn) => {
                 var state = context.state;
                 chatEn.newMsgCount = 0; // 设置新消息为0
@@ -273,7 +273,7 @@ export const imServerStore = new Vuex.Store({
          * @param {Object} chatEn 会话对象
          * @param {String} oprType 操作类型；eg：chat(添加会话)、msg(添加消息)
          */
-        addNotificationChat: function(context, { chatEn, oprType }) {
+        addNotificationChat: function (context, { chatEn, oprType }) {
             var state = context.state;
             // 当前的路由是否在im模块里，若不在im模块里，才显示通知
             if (window.polkVue.$route.name == 'im') {
@@ -342,7 +342,7 @@ export const imServerStore = new Vuex.Store({
                     tag: Date.now(),
                     icon: ak.BLL.getPngFromWay(item.sourceInfo_way)
                 });
-                notification.onclick = function(e) {
+                notification.onclick = function (e) {
                     window.focus();
                     window.polkVue.$router.push('im');
                     context.commit('clearNotificationChat');
@@ -351,7 +351,7 @@ export const imServerStore = new Vuex.Store({
                     imServerStore_notificationList = [];
                 };
 
-                notification.onclose = function(e) {
+                notification.onclose = function (e) {
                     // remove en
                     for (var i = 0; i < state.notificationChatEnlist.length; i++) {
                         if (state.notificationChatEnlist[i].clientChatId == item.clientChatId) {
@@ -368,7 +368,7 @@ export const imServerStore = new Vuex.Store({
                     }
                 };
 
-                setTimeout(function() {
+                setTimeout(function () {
                     notification && notification.close();
                 }, 1000 * 10);
 
@@ -379,20 +379,20 @@ export const imServerStore = new Vuex.Store({
         /**
          * 服务端上线
          */
-        SERVER_ON: function(context, payload) {
+        SERVER_ON: function (context, payload) {
             context.state.socket = require('socket.io-client')('http://localhost:3001');
-            context.state.socket.on('connect', function() {
+            context.state.socket.on('connect', function () {
                 // 服务端上线
                 context.state.socket.emit('SERVER_ON', {
                     serverChatEn: {
                         serverChatId: context.state.serverChatEn.serverChatId,
                         serverChatName: context.state.serverChatEn.serverChatName,
-                        avatarUrl:context.state.serverChatEn.avatarUrl
+                        avatarUrl: context.state.serverChatEn.avatarUrl
                     }
                 });
 
                 // 访客端上线
-                context.state.socket.on('CLIENT_ON', function(data) {
+                context.state.socket.on('CLIENT_ON', function (data) {
                     // 1)增加客户列表
                     context.dispatch('addClientChat', {
                         newChatEn: {
@@ -403,7 +403,7 @@ export const imServerStore = new Vuex.Store({
                 });
 
                 // 访客端离线
-                context.state.socket.on('CLIENT_OFF', function(data) {
+                context.state.socket.on('CLIENT_OFF', function (data) {
                     // 1)修改客户状态为离线
                     context.dispatch('extendChatEn', {
                         clientChatId: data.clientChatEn.clientChatId,
@@ -424,7 +424,7 @@ export const imServerStore = new Vuex.Store({
                 });
 
                 // 访客端发送了信息
-                context.state.socket.on('CLIENT_SEND_MSG', function(data) {
+                context.state.socket.on('CLIENT_SEND_MSG', function (data) {
                     context.dispatch('addChatMsg', {
                         clientChatId: data.clientChatEn.clientChatId,
                         msg: data.msg
@@ -441,7 +441,7 @@ export const imServerStore = new Vuex.Store({
         /**
          * 服务端离线
          */
-        SERVER_OFF: function(context, payload) {
+        SERVER_OFF: function (context, payload) {
             context.state.socket.emit('SERVER_OFF', {
                 serverChatEn: {
                     serverChatId: context.state.serverChatEn.serverChatId,
@@ -455,7 +455,7 @@ export const imServerStore = new Vuex.Store({
         /**
          * 发送消息
          */
-        sendMsg: function(context, { clientChatId, msg }) {
+        sendMsg: function (context, { clientChatId, msg }) {
             console.log(clientChatId);
             context.state.socket.emit('SERVER_SEND_MSG', {
                 clientChatId: clientChatId,
@@ -467,28 +467,28 @@ export const imServerStore = new Vuex.Store({
         /**
          * 获取选中的会话对象
          */
-        selectedChatEn: function(state) {
+        selectedChatEn: function (state) {
             return state.selectedChatEn;
         },
 
         /**
          * 当前会话集合
          */
-        currentChatEnlist: function(state) {
+        currentChatEnlist: function (state) {
             return state.currentChatEnlist;
         },
 
         /**
          * 选中的chat含有新消息
          */
-        haveNewMsgDelegate: function(state) {
+        haveNewMsgDelegate: function (state) {
             return state.haveNewMsgDelegate;
         },
 
         /**
          * 客服chat信息
          */
-        serverChatEn: function(state) {
+        serverChatEn: function (state) {
             return state.serverChatEn;
         }
     }
