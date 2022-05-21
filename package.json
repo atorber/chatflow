@@ -55,6 +55,7 @@
   "devDependencies": {
     "@chatie/eslint-config": "^1.0.4",
     "@chatie/tsconfig": "^4.6.3",
+    "@types/request-promise": "^4.1.48",
     "check-node-version": "^4.2.1",
     "is-pr": "^2.0.0",
     "typescript": "^4.4.4"
