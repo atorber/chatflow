@@ -1,6 +1,6 @@
 # wechat-openai-qa-bot
 
-> 忽略代码质量,It's ugly, but a little useful,欢迎提交优化PR.
+> 忽略代码质量,专业PM，业余coder，It's ugly, but a little useful,欢迎提交优化PR.
 
 ## 简介
 
@@ -28,6 +28,8 @@
 
 - 群聊天消息存档到表格（基于vika维格表，免费）
 
+- 简单客服后台，可以把群内消息按发言人列表区分
+
 ### 体验群
 
 <img src="https://user-images.githubusercontent.com/104893934/168411822-1f7a96c5-f7a2-4cf6-af4a-78641c366eb5.png" width="30%">
@@ -52,16 +54,35 @@
 
 - [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973) —— 将过去复杂的IT数据库技术，做得像表格一样简单(如果要注册，通过这个链接，或者使用邀请码 55152973 )
 
-- [vue-im](https://github.com/polk6/vue-im) —— 由@polk6开源的客服web项目
+- [vue-im](https://github.com/polk6/vue-im) —— 由@polk6开源的客服web项目，实现客服后台回复咨询消息
 
 ## 快速开始
 
+### 基本功能运行
+
 ```
+git clone https://github.com/choogoo/wechat-openai-qa-bot.git
 npm install
 npm start
 ```
 
+### 简单客服后台
+
+> 使用简单后台时，必须先启动vue-im再启动主程序
+
+```
+cd ./vue-im
+npm install
+npm run dev
+```
+
+启动后浏览器中访问http://localhost:8080/#/imServer即可打开客服管理后台
+
 ## 效果展示
+
+### 简单客服后台系统
+
+
 
 ### 常见问题问答自动回复
 
