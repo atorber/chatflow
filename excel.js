@@ -132,7 +132,7 @@ async function excel2order (filepath, message) {
                 loucount[g] = loucount[g] + shi[g]
               }
               newList.push(shi)
-              const shiorder = [shi[rowLength - 2] + '号楼', shi[rowLength - 2], shi[rowLength - 10]]
+              const shiorder = [shi[rowLength - 2] + '号楼', shi[rowLength - 3], shi[rowLength - 10]]
 
               for (let g = 4; g < keys.length - 19; g++) {
                 shiorder.push(shi[g] || 0)
