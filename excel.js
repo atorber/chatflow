@@ -12,8 +12,8 @@ import configs from './config.js'
 import { VikaBot } from './src/vika.js'
 const __dirname = path.resolve()
 
-const vikaConfig = { token: configs.VIKA_TOKEN, sheetName: configs.VIKA_DATASHEETNAME, spaceName: configs.VIKA_SPACENAME }
-const vika = new VikaBot(vikaConfig)
+// const vikaConfig = { token: configs.VIKA_TOKEN, sheetName: configs.VIKA_DATASHEETNAME, spaceName: configs.VIKA_SPACENAME }
+// const vika = new VikaBot(vikaConfig)
 
 async function excel2order (filepath, message) {
   // console.debug('文件路径：', filepath)
@@ -219,10 +219,23 @@ async function xlsxrw (filename) {
     worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
     //   console.log('Row ' + rowNumber + ' = ' + JSON.stringify(row.values))
       row.height = 30
-      if (rowNumber === 1) {
-        row.height = 20
-        row.eachCell(function (cell, colNumber) {
+
+      row.eachCell({ includeEmpty: true }, function (cell, colNumber) {
         //   console.log('Cell ' + colNumber + ' = ' + cell.value)
+        if (row.getCell(1).value) {
+          // 在A1周围设置单个细边框
+          cell.border = {
+            top: { style:'thin' },
+            left: { style:'thin' },
+            bottom: { style:'thin' },
+            right: { style:'thin' },
+          }
+          cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+        }
+
+        if (rowNumber === 1) {
+          row.height = 20
+          //   console.log('Cell ' + colNumber + ' = ' + cell.value)
           if (colNumber < 3) {
             worksheet.getColumn(colNumber).width = 10
           } else {
@@ -230,16 +243,15 @@ async function xlsxrw (filename) {
           }
 
           cell.alignment = { wrapText: true }
-          cell.font = {
-            bold: true,
-          }
-        })
-      }
-      if (row.getCell(1).value && row.getCell(1).value.includes('小计')) {
-        // 遍历一行中的所有单元格（包括空单元格）
-        console.log('row ', JSON.stringify(row.values))
-        row.eachCell({ includeEmpty: true }, function (cell, colNumber) {
-        //   console.log('Cell ' + colNumber + ' = ' + cell.value)
+          // cell.font = {
+          //   bold: true,
+          // }
+
+        }
+        if (row.getCell(1).value && row.getCell(1).value.includes('小计')) {
+          // 遍历一行中的所有单元格（包括空单元格）
+          console.log('row ', JSON.stringify(row.values))
+          //   console.log('Cell ' + colNumber + ' = ' + cell.value)
           if (colNumber < 3) {
             cell.font = {
               bold: true,
@@ -261,8 +273,10 @@ async function xlsxrw (filename) {
               bgColor: { argb: 'FF0000FF' },
             }
           }
-        })
-      }
+
+        }
+
+      })
     })
 
   })
