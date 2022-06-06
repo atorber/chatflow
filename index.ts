@@ -14,19 +14,20 @@ import 'dotenv/config.js'
 
 import {
   Contact,
-  Message,
   Room,
+  Message,
   ScanStatus,
   WechatyBuilder,
   log,
+  types,
 } from 'wechaty'
-
-import {
-  OneToManyRoomConnector,
-  OneToManyRoomConnectorConfig,
-  ManyToOneRoomConnector,
-  ManyToOneRoomConnectorConfig,
-} from 'wechaty-plugin-contrib'
+import * as PUPPET from 'wechaty-puppet'
+// import {
+//   OneToManyRoomConnector,
+//   OneToManyRoomConnectorConfig,
+//   ManyToOneRoomConnector,
+//   ManyToOneRoomConnectorConfig,
+// } from 'wechaty-plugin-contrib'
 
 import qrcodeTerminal from 'qrcode-terminal'
 import rp from 'request-promise'
@@ -44,6 +45,7 @@ import configs from './config.js'
 import type { Puppet } from 'wechaty-puppet'
 
 import * as io from 'socket.io-client'
+
 const configData = {
   socket: '',
   chatInfoEn: {
@@ -55,11 +57,11 @@ const configData = {
   }, // 会话信息，包括聊天记录、状态
   clientChatEn: {
     clientChatId: 'ledongmao',
-    clientChatName: '超哥',
+    clientChatName: '客服机器人',
     avatarUrl: 'static/image/im_client_avatar.png',
   }, // 当前账号的信息
   serverChatEn: {
-    serverChatId:'xiaop',
+    serverChatId: 'xiaop',
     serverChatName: '小P',
     avatarUrl: 'static/image/im_robot_avatar.png',
   }, // 服务端chat信息
@@ -83,7 +85,7 @@ const configData = {
   rateDialogVisible: false, // 评价dialog
   leaveDialogVisible: false, // 留言dialog
 }
-let socket:io
+let socket: io
 if (configs.imOpen) {
   socket = io.connect('http://localhost:3001')
   configData.socket = socket
@@ -104,11 +106,11 @@ if (configs.imOpen) {
         role: 'sys',
         contentType: 'text',
         content: '客服 ' + configData.serverChatEn.serverChatName + ' 为你服务',
-      }, () => {})
+      }, () => { })
     })
 
     // 接受服务端信息
-    socket.on('SERVER_SEND_MSG', async (data:any) => {
+    socket.on('SERVER_SEND_MSG', async (data: any) => {
       console.debug(data)
       // if (data.msg && data.msg.role == 'server') {
       //   data.msg.role = 'client'
@@ -117,8 +119,8 @@ if (configs.imOpen) {
       try {
         const roomId = data.msg.clientChatId.split(' ')[1]
         const contactId = data.msg.clientChatId.split(' ')[0]
-        const room = await bot.Room.find({ id:roomId })
-        const contact = await bot.Contact.find({ id:contactId })
+        const room = await bot.Room.find({ id: roomId })
+        const contact = await bot.Contact.find({ id: contactId })
         if (room) {
           await room.say(data.msg.content, ...[contact])
         }
@@ -202,7 +204,7 @@ function sendMsg (rs: any) {
     // console.debug(configData.serverChatEn.serverChatId)
   }
   // 2.添加到消息集合李
-//   addChatMsg(msg)
+  //   addChatMsg(msg)
 }
 
 // 定义一个延时方法
@@ -226,6 +228,7 @@ function onScan (qrcode: string, status: ScanStatus) {
 
 function onLogin (user: Contact) {
   log.info('StarterBot', '%s login', user)
+  console.table(user)
 }
 
 function onLogout (user: Contact) {
@@ -312,6 +315,16 @@ if (missingConfiguration.length === 0) {
   bot.on('login', onLogin)
   bot.on('logout', onLogout)
   bot.on('message', onMessage)
+  bot.on('room-join', async (room, inviteeList, inviter) => {
+    const nameList = inviteeList.map(c => c.name()).join(',')
+    console.log(`Room ${await room.topic()} got new member ${nameList}, invited by ${inviter}`)
+    if (['25108313781@chatroom', '25187527247@chatroom', '20641535286@chatroom'].includes(room.id)) {
+      const newer = inviteeList[0]
+      if (newer) {
+        await room.say(`欢迎加入${await room.topic()},请阅读群公告~`, ...[newer])
+      }
+    }
+  })
   bot.start()
     .then(() => log.info('StarterBot', 'Starter Bot Started.'))
     .catch(e => log.error('StarterBot', e))
@@ -329,7 +342,7 @@ async function wxai (room: Room, message: Message) {
   const talker = message.talker()
   //   const roomid = room ? room.id : ''
   let text = message.text()
-  let answer = ''
+  let answer: any = {}
   if (message.type() === bot.Message.Type.Text) {
     answer = await aibot(talker, room, text)
   }
@@ -338,13 +351,46 @@ async function wxai (room: Room, message: Message) {
     const miniProgram = await message.toMiniProgram()
     text = `${miniProgram.title()?.slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
     answer = await aibot(talker, room, text)
-
   }
 
   if (message.type() === bot.Message.Type.Url && !configs.linkWhiteList.includes(talker.id)) {
     const urllink = await message.toUrlLink()
     text = `${urllink.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
     answer = await aibot(talker, room, text)
+  }
+
+  log.info('answer=====================', JSON.stringify(answer))
+  if (answer.messageType) {
+    switch (answer.messageType) {
+      case types.Message.Text: {
+        log.info(`向 ${talker.name()} 发送消息...`)
+        answer = text.length > 20 ? (answer.text + '\n------------------------------\n' + talker.name() + ':' + text.slice(0, 10) + '...') : (answer.text + '\n------------------------------\n' + talker.name() + ':' + text)
+        await room.say(answer, ...[talker])
+        break
+      }
+      case types.Message.Image: {
+        const fileBox = FileBox.fromUrl(answer.text)
+        await room.say(fileBox)
+        break
+      }
+      case types.Message.MiniProgram: {
+        const miniProgram = new bot.MiniProgram({
+          appid: answer.text.appid,
+          title: answer.text.title,
+          pagePath: answer.text.pagepath,
+          thumbUrl: answer.text.thumb_url,
+          thumbKey: '42f8609e62817ae45cf7d8fefb532e83',
+        })
+
+        await room.say(miniProgram)
+        break
+      }
+      default: {
+        break
+      }
+
+    }
+
   }
 
   if (message.type() === bot.Message.Type.Attachment) {
@@ -380,18 +426,9 @@ async function wxai (room: Room, message: Message) {
 
   }
 
-  // log.info('answer=====================', answer)
-  if (answer) {
-    log.info(`向 ${talker.name()} 发送消息...`)
-    if (message.type() === bot.Message.Type.Text) {
-      answer = text.length > 10 ? (answer + '\n------------------------------\n' + talker.name() + ':' + text.slice(0, 10) + '...') : (answer + '\n------------------------------\n' + talker.name() + ':' + text)
-
-    }
-    await room.say(answer, ...[talker])
-  }
 };
 
-async function aibot (talker: { name: () => any }, room: { id: any; topic: () => any }, query: any) {
+async function aibot (talker:Contact, room:Room, query: string) {
   // console.info('开始请求微信对话平台...')
   const signature = await getSignature(room)
   const method = 'POST'
@@ -414,12 +451,11 @@ async function aibot (talker: { name: () => any }, room: { id: any; topic: () =>
   const roomid = room.id
   const nickName = talker.name()
   const topic = await room.topic()
-  let answer = ''
-  const log = {}
+  let answer: any = {}
   try {
     // console.info('请求问答...')
     const resMsg = await rp(opt)
-    // log.info(JSON.stringify(resMsg))
+    log.info(JSON.stringify(resMsg))
     if (resMsg.answer_type == 'text') {
       let msgText = resMsg.answer
       // log.info('msgText==========', msgText)
@@ -434,19 +470,47 @@ async function aibot (talker: { name: () => any }, room: { id: any; topic: () =>
             const textArr = answers[i].split(roomid)
             // log.info('textArr===========', textArr)
             if (textArr.length == 2) {
-              answer = textArr[1]
+              answer = {
+                messageType: types.Message.Text,
+                text: textArr[1],
+              }
+              break
+            } else {
+              try {
+                answer = JSON.parse(answers[i])
+                if (answer.miniprogrampage) {
+                  answer = {
+                    messageType: types.Message.MiniProgram,
+                    text: answer.miniprogrampage,
+                  }
+                  // break
+                }
+                if (answer.image) {
+                  answer = {
+                    messageType: types.Message.Image,
+                    text: answer.image.url,
+                  }
+                  break
+                }
+              } catch (e) {
+                console.error(e)
+              }
             }
+
           }
           console.table({ answer, nickName, topic, roomid, query })
           return answer
         }
         console.table({ msg: '没有命中关键字', nickName, topic, roomid, query })
         return answer
-      } catch (err) {
-        // log.error(err)
+      } catch (err: any) {
+        log.error(err)
         const textArr = msgText.split(roomid)
         if (textArr.length == 2) {
-          answer = textArr[1]
+          answer = {
+            messageType: types.Message.Text,
+            text: textArr[1],
+          }
           return answer
         }
         console.table({ msg: '没有命中关键字', nickName, topic, roomid, query })

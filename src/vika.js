@@ -3,11 +3,12 @@ import moment from 'moment'
 import { v4 } from 'uuid'
 import rp from 'request-promise'
 
-//定义一个延时方法
-let wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+// 定义一个延时方法
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 class VikaBot {
-  constructor(config) {
+
+  constructor (config) {
     if (!config.token) {
       console.error('未配置token，请在config.ts中配置')
     } else if (!config.spaceName) {
@@ -25,7 +26,7 @@ class VikaBot {
     }
   }
 
-  async getAllSpaces() {
+  async getAllSpaces () {
     // 获取当前用户的空间站列表
     const spaceListResp = await this.vika.spaces.list()
     if (spaceListResp.success) {
@@ -37,9 +38,9 @@ class VikaBot {
     }
   }
 
-  async getSpaceId() {
-    let spaceList = await this.getAllSpaces()
-    for (let i in spaceList) {
+  async getSpaceId () {
+    const spaceList = await this.getAllSpaces()
+    for (const i in spaceList) {
       if (spaceList[i].name === this.spaceName) {
         this.spaceId = spaceList[i].id
         break
@@ -52,10 +53,10 @@ class VikaBot {
     }
   }
 
-  async getNodesList() {
+  async getNodesList () {
     // 获取指定空间站的一级文件目录
     const nodeListResp = await this.vika.nodes.list({ spaceId: this.spaceId })
-    let tables = {}
+    const tables = {}
     if (nodeListResp.success) {
       // console.log(nodeListResp.data.nodes);
       const nodes = nodeListResp.data.nodes
@@ -71,7 +72,7 @@ class VikaBot {
     return tables
   }
 
-  async addDataSheet(name, fields) {
+  async addDataSheet (name, fields) {
     /*
     {
           "name": "我的表格",
@@ -86,26 +87,26 @@ class VikaBot {
           ]
         }
     */
-    var body = {
-      "name": name,
-      "description": "创建自wechaty-vika-link",
-      "folderId": "",
-      "preNodeId": "",
-      "fields": fields
+    const body = {
+      name: name,
+      description: '创建自wechaty-vika-link',
+      folderId: '',
+      preNodeId: '',
+      fields: fields,
     }
-    var headers = {
+    const headers = {
       Authorization: `Bearer ${this.token}`,
-      "Content-Type": "application/json"
+      'Content-Type': 'application/json',
     }
-    var options = {
+    const options = {
       method: 'POST',
       uri: `https://api.vika.cn/fusion/v1/spaces/${this.spaceId}/datasheets`,
       body,
       headers,
-      json: true // Automatically stringifies the body to JSON
-    };
+      json: true, // Automatically stringifies the body to JSON
+    }
 
-    var parsedBody = await rp(options)
+    const parsedBody = await rp(options)
     // console.debug(parsedBody)
     if (parsedBody.success) {
       this.datasheetId = parsedBody.data.id
@@ -114,7 +115,7 @@ class VikaBot {
     }
   }
 
-  async addChatRecord(msg, uploaded_attachments, msg_type, text) {
+  async addChatRecord (msg, uploaded_attachments, msg_type, text) {
     // console.debug(msg)
     // console.debug(JSON.stringify(msg))
     const talker = msg.talker()
@@ -122,23 +123,23 @@ class VikaBot {
     const to = msg.to()
     const type = msg.type()
     text = text || msg.text()
-    let room = msg.room()
+    const room = msg.room()
     let topic = ''
     if (room) {
       topic = await room.topic()
     }
-    let curTime = this.getCurTime()
-    let reqId = v4()
-    let ID = msg.id
+    const curTime = this.getCurTime()
+    const reqId = v4()
+    const ID = msg.id
     // let msg_type = msg.type()
-    let timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
-    let files = []
+    const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
+    const files = []
     if (uploaded_attachments) {
       files.push(uploaded_attachments)
       text = JSON.stringify(uploaded_attachments)
     }
 
-    let records = [
+    const records = [
       {
         fields: {
           _id: ID,
@@ -149,7 +150,7 @@ class VikaBot {
           wxid: talker.id != 'null' ? talker.id : '--',
           roomid: room && room.id ? room.id : '--',
           messageType: msg_type,
-          file: files
+          file: files,
         },
       },
     ]
@@ -181,8 +182,8 @@ class VikaBot {
     }).catch(err => { console.error('调用vika写入接口失败：', err) })
   }
 
-  async upload(file) {
-    const datasheet = this.vika.datasheet(this.datasheetId);
+  async upload (file) {
+    const datasheet = this.vika.datasheet(this.datasheetId)
     try {
       const resp = await datasheet.upload(file)
       if (resp.success) {
@@ -199,12 +200,12 @@ class VikaBot {
     }
   }
 
-  async checkInit() {
+  async checkInit () {
     this.spaceId = await this.getSpaceId()
     console.debug('mp-chatbot空间ID:', this.spaceId)
 
     if (this.spaceId) {
-      let tables = await this.getNodesList()
+      const tables = await this.getNodesList()
       console.table(tables)
 
       if (tables[this.datasheetName]) {
@@ -212,66 +213,66 @@ class VikaBot {
         console.debug(this.datasheetName + '表存在:', this.datasheetId, '初始化完成')
       } else {
         console.debug(this.datasheetName + '表不存在:自动创建...')
-        let name = this.datasheetName
+        const name = this.datasheetName
 
-        let fields = [
+        const fields = [
           {
-            "type": "SingleText",
-            "name": "_id",
-            "property": {
-              "defaultValue": ''
-            }
+            type: 'SingleText',
+            name: '_id',
+            property: {
+              defaultValue: '',
+            },
           },
           {
-            "type": "SingleText",
-            "name": "timeHms",
-            "property": {
-              "defaultValue": ''
-            }
+            type: 'SingleText',
+            name: 'timeHms',
+            property: {
+              defaultValue: '',
+            },
           },
           {
-            "type": "SingleText",
-            "name": "name",
-            "property": {
-              "defaultValue": ''
-            }
+            type: 'SingleText',
+            name: 'name',
+            property: {
+              defaultValue: '',
+            },
           },
           {
-            "type": "SingleText",
-            "name": "topic",
-            "property": {
-              "defaultValue": ''
-            }
+            type: 'SingleText',
+            name: 'topic',
+            property: {
+              defaultValue: '',
+            },
           },
           {
-            "type": "Text",
-            "name": "messagePayload"
+            type: 'Text',
+            name: 'messagePayload',
           },
           {
-            "type": "SingleText",
-            "name": "wxid",
-            "property": {
-              "defaultValue": ''
-            }
+            type: 'SingleText',
+            name: 'wxid',
+            property: {
+              defaultValue: '',
+            },
           },
           {
-            "type": "SingleText",
-            "name": "roomid",
-            "property": {
-              "defaultValue": ''
-            }
+            type: 'SingleText',
+            name: 'roomid',
+            property: {
+              defaultValue: '',
+            },
           },
           {
-            "type": "SingleText",
-            "name": "messageType",
-            "property": {
-              "defaultValue": ''
-            }
+            type: 'SingleText',
+            name: 'messageType',
+            property: {
+              defaultValue: '',
+            },
           },
           {
-            "type": "Attachment",
-            "name": "file"
-          }
+            type: 'Attachment',
+            name: 'file',
+          },
         ]
 
         // let fields = [
@@ -345,18 +346,19 @@ class VikaBot {
 
     return {
       spaceId: this.spaceId,
-      datasheetId: this.datasheetId
+      datasheetId: this.datasheetId,
     }
   }
 
-  getCurTime() {
-    //timestamp是整数，否则要parseInt转换
-    let timestamp = new Date().getTime()
-    var timezone = 8 //目标时区时间，东八区
-    var offset_GMT = new Date().getTimezoneOffset() // 本地时间和格林威治的时间差，单位为分钟
-    var time = timestamp + offset_GMT * 60 * 1000 + timezone * 60 * 60 * 1000
+  getCurTime () {
+    // timestamp是整数，否则要parseInt转换
+    const timestamp = new Date().getTime()
+    const timezone = 0 // 目标时区时间，东八区
+    const offset_GMT = new Date().getTimezoneOffset() // 本地时间和格林威治的时间差，单位为分钟
+    const time = timestamp + offset_GMT * 60 * 1000 + timezone * 60 * 60 * 1000
     return time
   }
+
 }
 
 export { VikaBot }
