@@ -240,7 +240,7 @@ npm run start
 
 ## 快速体验
 
-如果你对以上操作感觉困难而不能使用，添加ledongmao微信，提供你需要的问答清单，我们可以提供一个免费的机器人供体验
+如果你对以上操作感觉困难而不能使用，添加微信 `ledongmao` ，提供你需要的问答清单，我们可以提供一个免费的机器人供体验
 
 当然，最好的反馈方式是在这里 https://github.com/choogoo/wechat-openai-qa-bot/issues 提交一个issues
 
