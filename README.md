@@ -32,7 +32,7 @@
 
 ### 体验群
 
-<img src="https://user-images.githubusercontent.com/104893934/175979813-692876c1-7402-4db4-a06f-683ecca9225c.jpg" width="30%">
+<img src="https://user-images.githubusercontent.com/104893934/177258269-937b812b-1d0f-4387-aa62-1c992e0ddfa2.jpg" width="30%">
 
 ### TODO LIST
 
