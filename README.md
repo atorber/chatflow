@@ -32,7 +32,8 @@
 
 ### 体验群
 
-<img src="https://user-images.githubusercontent.com/104893934/177258269-937b812b-1d0f-4387-aa62-1c992e0ddfa2.jpg" width="30%">
+<img src="https://user-images.githubusercontent.com/104893934/178441718-629e3198-9dda-41a8-ae48-bca0ccf95bc2.jpg" width="30%">
+
 
 ### TODO LIST
 
