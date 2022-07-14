@@ -273,7 +273,7 @@ npm run start
 
 - 扫码加入体验群
 
-<img src="https://user-images.githubusercontent.com/104893934/178958587-69ce810b-1c2d-4ce7-a07f-6d7c71be810e.jpg" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178958587-69ce810b-1c2d-4ce7-a07f-6d7c71be810e.jpg" width="30%">
 
 ## 二次开发
 
