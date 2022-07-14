@@ -1,4 +1,4 @@
-# wechat-openai-qa-bot
+Wechat-Openai-QA-Bot
 
 > 忽略代码质量,专业PM，业余coder，It's ugly, but a little useful,欢迎提交优化PR.
 
@@ -14,7 +14,7 @@
 
 [[字幕]微信智能问答机器人系统（二）](https://www.bilibili.com/video/BV1Ju41167Qo?share_source=copy_web)
 
-### 已经支持的功能：
+### 已经支持的功能
 
 - 群内智能问答，可以自定义问答内容，智能匹配答案，支持相似问题匹配，例如“什么时候到货？”“亲，几时到货”“亲，什么时候到货”均能匹配（基于微信对话开放平台，免费）
 
