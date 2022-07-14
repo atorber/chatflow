@@ -195,7 +195,7 @@ npm install
 
 扫码登陆
 
-<img src="https://user-images.githubusercontent.com/104893934/178886931-19fb0d67-3682-4dea-8978-dc53acb59bcd.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178958587-69ce810b-1c2d-4ce7-a07f-6d7c71be810e.jpg" width="60%">
 
 
 填写机器人信息
