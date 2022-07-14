@@ -14,7 +14,9 @@ Wechat-Openai-QA-Bot
 
 [[字幕]微信智能问答机器人系统（二）](https://www.bilibili.com/video/BV1Ju41167Qo?share_source=copy_web)
 
-### 已经支持的功能
+<iframe src="//player.bilibili.com/player.html?aid=853865811&bvid=BV1Y54y1f7v1&cid=714379422&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+### 功能列表
 
 - 群内智能问答，可以自定义问答内容，智能匹配答案，支持相似问题匹配，例如“什么时候到货？”“亲，几时到货”“亲，什么时候到货”均能匹配（基于微信对话开放平台，免费）
 
@@ -30,10 +32,6 @@ Wechat-Openai-QA-Bot
 
 - 简单客服后台，可以把群内消息按发言人列表区分
 
-### 体验群
-
-<img src="https://user-images.githubusercontent.com/104893934/168411822-1f7a96c5-f7a2-4cf6-af4a-78641c366eb5.png" width="30%">
-
 ### TODO LIST
 
 - 消息群发，通知消息同时发布到多个群
@@ -42,7 +40,9 @@ Wechat-Openai-QA-Bot
 
 - 使用VIKA托管配置文件
 
-### 项目用到了一些免费且好用的开源项目和平台：
+### 相关依赖
+
+项目用到了一些免费且好用的开源项目和平台
 
 > 如果你是团长可忽略此段内容，开发者可进一步了解
 
@@ -243,6 +243,10 @@ npm run start
 如果你对以上操作感觉困难而不能使用，添加ledongmao微信，提供你需要的问答清单，我们可以提供一个免费的机器人供体验
 
 当然，最好的反馈方式是在这里 https://github.com/choogoo/wechat-openai-qa-bot/issues 提交一个issues
+
+- 扫码加入体验群
+
+<img src="https://user-images.githubusercontent.com/104893934/168411822-1f7a96c5-f7a2-4cf6-af4a-78641c366eb5.png" width="30%">
 
 ## 二次开发
 
