@@ -79,6 +79,8 @@ npm install
 
 4. 修改配置文件
 
+快速开始仅需要修改WX_TOKEN、VIKA_TOKEN、VIKA_SPACENAME、VIKA_DATASHEETNAME四个配置项
+
 ```
 const configs = {
   WX_TOKEN: '', // 微信对话平台token
@@ -86,19 +88,7 @@ const configs = {
   VIKA_SPACENAME:'',  // VIKA维格表空间名称，修改为自己的已存在的任意空间名称
   VIKA_DATASHEETNAME:'', // VIKA维格表名称,修改为自己的表名称，可填写任意名称，不需要在维格表中建表，程序会自动建表
   linkWhiteList: ['ledongmao',],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
-  roomWhiteList: [
-    {
-      name: 'xxxx',
-      id: '22064763@chatroom',
-    }, {
-      name: 'xxxx',
-      id: '22064763@chatroom',
-    }, {
-      name: 'xxxx',
-      id: '22064763@chatroom',
-    },
-  ],  // 群白名单，白名单里内群开启机器人，其他群不开启，暂未实现2022-5-21
-  imOpen: true,  // 是否开启uve-im客户端，设置为true时，需要先 cd ./vue-im 然后 npm install 启动服务 npm run dev
+  imOpen: false,  // 是否开启uve-im客户端，设置为true时，需要先 cd ./vue-im 然后 npm install 启动服务 npm run dev
   noderedOpen: false,  // 是否开启nodered，开启nodered后可以以可视化界面启动机器人，需要先导入 ./tools 目录下的 flows.json
 }
 ```
