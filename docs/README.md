@@ -158,11 +158,11 @@ git clone https://github.com/atorber/wechaty-wx-openai-link.git
 
 考虑对git不熟悉的用户，可以在页面直接下载项目.zip到电脑上,下载后解压缩即可
 
-<img src="./docs/image/0-1.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178886578-a32ac8fc-2efe-4280-be45-59fa918f24a4.png" width="60%">
 
 clone或下载解压缩之后的目录是这样
 
-<img src="./docs/image/0-2.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178886647-b1f6193a-58b1-4f35-a82c-0f1c3b6d90e7.png" width="60%">
 
 2. 安装nodejs，项目的tools目录下有相应的安装包node-v16.15.0-x64.zip，解压缩并安装；下载WeChatSetup-v3.3.0.115并安装（点击下载[WeChatSetup-v3.3.0.115.exe](https://github.com/wechaty/wechaty-puppet-xp/releases/download/v0.5/WeChatSetup-v3.3.0.115.exe)）
 
@@ -170,15 +170,17 @@ clone或下载解压缩之后的目录是这样
 
 3. 安装依赖，假设当前系统为win10，在系统搜索栏中输入 powershell ，选择第一个结果
 
-<img src="./docs/image/0-4.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178886715-8370286a-8bfe-49d4-b7aa-270b396c7d82.png" width="60%">
 
 打开Windows PoweShell
 
-<img src="./docs/image/0-5.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178886782-66c60bde-71a5-45a5-84be-aabb199104c4.png" width="60%">
+
 
 到项目目录下用鼠标点击地址栏复制文件路径，例如我当前的路径为 C:\Users\wechaty\Documents\GitHub\wechaty-wx-openai-link
 
-<img src="./docs/image/0-3.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178886794-8e3be7d6-a64b-4810-b1fd-acdc934f2807.png" width="60%">
+
 
 在复制如下命令在Windows PoweShell中执行
 
@@ -193,47 +195,57 @@ npm install
 
 扫码登陆
 
-<img src="./docs/image/1-1.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178886931-19fb0d67-3682-4dea-8978-dc53acb59bcd.png" width="60%">
+
 
 填写机器人信息
 
-<img src="./docs/image/1-2.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178886955-f2aed93a-0667-44ac-b657-a7dc6b901bc0.jpg" width="60%">
+
 
 批量导入问答
 
-<img src="./docs/image/1-3.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178886977-38854ae9-21d6-45f7-8963-09d0a827c13b.png" width="60%">
+
 
 选择项目中tools目录下的示例问答
 
-<img src="./docs/image/1-4.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178887001-53c16428-77da-4eba-8044-c9a9a2714174.png" width="60%">
+
 
 上传问答
 
-<img src="./docs/image/1-5.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178887023-7508dd4a-c7b1-4ac1-a848-05ec909125fd.png" width="60%">
+
 
 导入成功后问答列表
 
-<img src="./docs/image/1-6.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178887050-5a28fb3e-34c9-44fc-99b9-3413883ad995.png" width="60%">
+
 
 上线发布
 
-<img src="./docs/image/1-10.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178887066-d26a9c74-96c6-463a-8ac7-117b72e13dc4.png" width="60%">
 
 发布成功
 
-<img src="./docs/image/1-11.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178887079-5b17ab07-8e7f-4c8f-87bf-5ed7da546ad8.png" width="60%">
+
 
 应用绑定，获取token
 
-<img src="./docs/image/1-7.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178887115-6a2b14cb-6ccc-43c6-961d-d5c1bbcd58b6.png" width="60%">
+
 
 填写申请信息，提交后马上就会审核通过
 
-<img src="./docs/image/1-8.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178887131-db6248c0-302d-418f-bfa6-0ca5952d3f40.png" width="60%">
+
 
 开通成功，复制token备用
 
-<img src="./docs/image/1-9.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178887148-88e681c2-db4e-4051-a94f-215a1231eabb.png" width="60%">
+
 
 4. 启动系统，在获取token之后，准备启动系统
 
@@ -250,7 +262,8 @@ npm run start
 
 - 程序运行成功
 
-<img src="./docs/image/0-6.png" width="60%">
+<img src="https://user-images.githubusercontent.com/104893934/178887182-bb72a4f0-f2ff-4b52-b67e-d8832844c180.png" width="60%">
+
 
 ## 快速体验
 
