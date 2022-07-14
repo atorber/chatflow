@@ -10,12 +10,6 @@ Wechat-Openai-QA-Bot
 
 项目是在上海因疫情在社区团购物资以及社区管理等群组活动各方工作繁杂的背景下产生希望能帮助大家解决一些实际的问题，请务必善用。
 
-[[字幕]微信智能问答机器人系统（一）](https://www.bilibili.com/video/BV1Y54y1f7v1?share_source=copy_web)
-
-[[字幕]微信智能问答机器人系统（二）](https://www.bilibili.com/video/BV1Ju41167Qo?share_source=copy_web)
-
-<iframe src="//player.bilibili.com/player.html?aid=853865811&bvid=BV1Y54y1f7v1&cid=714379422&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
-
 ### 功能列表
 
 - 群内智能问答，可以自定义问答内容，智能匹配答案，支持相似问题匹配，例如“什么时候到货？”“亲，几时到货”“亲，什么时候到货”均能匹配（基于微信对话开放平台，免费）
@@ -55,6 +49,26 @@ Wechat-Openai-QA-Bot
 - [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973) —— 将过去复杂的IT数据库技术，做得像表格一样简单(如果要注册，通过这个链接，或者使用邀请码 55152973 )
 
 - [vue-im](https://github.com/polk6/vue-im) —— 由@polk6开源的客服web项目，实现客服后台回复咨询消息
+
+## 视频演示
+
+### 微信智能问答机器人系统（一）
+
+<div style="position:relative; padding-bottom:75%; width:100%; height:0">
+    <iframe src="//player.bilibili.com/player.html?aid=853865811&bvid=BV1Y54y1f7v1&cid=714379422&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute; height: 100%; width: 100%;"></iframe>
+</div>
+
+### 微信智能问答机器人系统（二）
+
+<div style="position:relative; padding-bottom:75%; width:100%; height:0">
+    <iframe src="//player.bilibili.com/player.html?aid=511574788&bvid=BV1Ju41167Qo&cid=721650219&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute; height: 100%; width: 100%;"></iframe>
+</div>
+
+### 微信智能问答机器人系统（三）
+
+<div style="position:relative; padding-bottom:75%; width:100%; height:0">
+    <iframe src="//player.bilibili.com/player.html?aid=639343626&bvid=BV1CY4y167YD&cid=726317086&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position:absolute; height: 100%; width: 100%;"></iframe>
+</div>
 
 ## 快速开始
 
