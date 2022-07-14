@@ -80,6 +80,19 @@ const configs = {
 ```
 npm start
 ```
+## 视频演示及使用教程
+
+[到项目官网查看视频教程](https://qabot.vlist.cc/)
+
+## 快速体验
+
+如果你对以上操作感觉困难而不能使用，添加 ledongmao 微信，提供你需要的问答清单，我们可以提供一个免费的机器人供体验
+
+当然，最好的反馈方式是在这里 https://github.com/choogoo/wechat-openai-qa-bot/issues 提交一个issues
+
+- 扫码加入体验群
+
+<img src="https://user-images.githubusercontent.com/104893934/168411822-1f7a96c5-f7a2-4cf6-af4a-78641c366eb5.png" width="30%">
 
 ## 效果展示
 
@@ -120,20 +133,6 @@ npm start
 - 生成汇总表
 
 <img src="https://user-images.githubusercontent.com/104893934/168030570-b88991f4-be4b-4479-94e7-0041d0508fc1.png" width="60%">
-
-## 视频演示及使用教程
-
-[到项目官网查看视频教程](https://qabot.vlist.cc/)
-
-## 快速体验
-
-如果你对以上操作感觉困难而不能使用，添加 ledongmao 微信，提供你需要的问答清单，我们可以提供一个免费的机器人供体验
-
-当然，最好的反馈方式是在这里 https://github.com/choogoo/wechat-openai-qa-bot/issues 提交一个issues
-
-- 扫码加入体验群
-
-<img src="https://user-images.githubusercontent.com/104893934/168411822-1f7a96c5-f7a2-4cf6-af4a-78641c366eb5.png" width="30%">
 
 ## 二次开发
 
