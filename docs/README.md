@@ -115,11 +115,13 @@ git clone https://github.com/atorber/wechaty-wx-openai-link.git
 
 <img src="https://user-images.githubusercontent.com/104893934/178886578-a32ac8fc-2efe-4280-be45-59fa918f24a4.png" width="60%">
 
-clone或下载解压缩之后的目录是这样
+下载解压缩之后的目录
 
 <img src="https://user-images.githubusercontent.com/104893934/178886647-b1f6193a-58b1-4f35-a82c-0f1c3b6d90e7.png" width="60%">
 
-2. 安装nodejs，项目的tools目录下有相应的安装包node-v16.15.0-x64.zip，解压缩并安装；下载WeChatSetup-v3.3.0.115并安装（点击下载[WeChatSetup-v3.3.0.115.exe](https://github.com/wechaty/wechaty-puppet-xp/releases/download/v0.5/WeChatSetup-v3.3.0.115.exe)）
+2. 安装nodejs，项目的tools目录下有相应的安装包node-v16.15.0-x64.zip，解压缩并安装；
+
+3. 下载WeChatSetup-v3.3.0.115并安装（点击下载[WeChatSetup-v3.3.0.115.exe](https://github.com/wechaty/wechaty-puppet-xp/releases/download/v0.5/WeChatSetup-v3.3.0.115.exe)）
 
 > 特别注意目前支持的微信客户端版本为 WeChatSetup-v3.3.0.115,如果电脑上已经安装了其他版本的微信，需要卸载之后安装项目中的版本
 
@@ -237,6 +239,13 @@ const configs = {
 }
 ```
 
+### 启动程序
+
+执行如下命令
+
+```
+npm run start
+```
 
 顺利的话，恭喜你已经拥有一个QA机器人，接下来你需要在简单问答中继续导入你需要的问答内容
 
@@ -260,7 +269,11 @@ npm run dev
 
 3. 启动后浏览器中访问 http://localhost:8080/#/imServer 即可打开客服管理后台
 
-4. 到根目录启动主程序
+4. 到根目录运行`npm run start`启动主程序
+
+### 添加问答
+
+修改./tools/export_skills_70785_1651747894.csv ,添加需要的问答和答案，重新覆盖导入
 
 ## 效果展示
 
@@ -347,13 +360,3 @@ npm run dev
 3. 下载解压缩软件
 
 [2345好压](https://haozip.2345.cc/)
-
-### 功能使用
-
-1. 添加问答
-
-修改./tools/export_skills_70785_1651747894.csv ,添加需要的问答和答案，重新覆盖导入
-
-2. 非群主链接检测配置
-
-TBD
