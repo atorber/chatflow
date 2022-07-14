@@ -32,7 +32,8 @@
 
 ### 体验群
 
-<img src="https://user-images.githubusercontent.com/104893934/168411822-1f7a96c5-f7a2-4cf6-af4a-78641c366eb5.png" width="30%">
+<img src="https://user-images.githubusercontent.com/104893934/178441718-629e3198-9dda-41a8-ae48-bca0ccf95bc2.jpg" width="30%">
+
 
 ### TODO LIST
 
@@ -240,7 +241,7 @@ npm run start
 
 ## 快速体验
 
-如果你对以上操作感觉困难而不能使用，添加ledongmao微信，提供你需要的问答清单，我们可以提供一个免费的机器人供体验
+如果你对以上操作感觉困难而不能使用，添加微信 `ledongmao` ，提供你需要的问答清单，我们可以提供一个免费的机器人供体验
 
 当然，最好的反馈方式是在这里 https://github.com/choogoo/wechat-openai-qa-bot/issues 提交一个issues
 
