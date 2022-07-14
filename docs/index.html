@@ -179,7 +179,7 @@
           function(hook, vm) {
             hook.beforeEach(function(html) {
               url =
-                  'https://github.com/choogoo/wechat-openai-qa-bot/tree/main/docs' +
+                  'https://github.com/choogoo/wechat-openai-qa-bot/tree/main/docs/' +
                   vm.route.file;
               // if (/githubusercontent\.com/.test(vm.route.file)) {
               //   url = vm.route.file
@@ -191,7 +191,7 @@
               //     .replace('@master', '/blob/master');
               // } else {
               //   url =
-              //     'https://github.com/choogoo/wechat-openai-qa-bot/tree/main/docs' +
+              //     'https://github.com/choogoo/wechat-openai-qa-bot/tree/main/docs/' +
               //     vm.route.file;
               // }
               var editHtml = '[:memo: Edit Document](' + url + ')\n';
