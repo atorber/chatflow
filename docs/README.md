@@ -281,11 +281,11 @@ npm run dev
 
 <img src="https://user-images.githubusercontent.com/19552906/167827644-a4cad573-b26f-4701-a27f-1ada1d2ffb47.png" width="60%">
 
-### 常见问题问答自动回复
+### 自动问答回复
 
 <img src="https://user-images.githubusercontent.com/104893934/167547910-4550f388-ee15-478c-8345-560b98367d88.png" width="60%">
 
-### 问答列表
+### 问题管理
 
 <img src="https://user-images.githubusercontent.com/104893934/167548122-e97bd126-4df9-410c-b87c-876df3f7aacf.png" width="60%">
 
