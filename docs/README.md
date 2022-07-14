@@ -285,6 +285,12 @@ npm run start
 
 **遇到任何报错，一定记得第一时间查看报错信息，即使看不懂，起码复制或截图，否则没有人能仅凭几句语焉不详帮你解决问题**
 
+### 环境依赖
+
+Windows > 10
+nodeJs > 16
+npm > 7
+
 ### 安装和运行
 
 1. 安装依赖时提示需要Visual Studio 2017+
@@ -293,7 +299,7 @@ npm run start
 
 <img src="https://user-images.githubusercontent.com/104893934/167300714-49a0dc40-8857-4e81-a780-80e63af74d97.png" width="60%">
 
-2. 关于远程协助，如果折腾半天也没有搞定，可以申请远程协助帮助安装
+2. 关于远程协助，如果折腾半天也没有搞定，可以联系申请远程协助指导安装
 
 提前下载好[向日葵](https://sunlogin.oray.com/download)软件并注册号账号，登陆后发控制码
 
@@ -307,7 +313,7 @@ npm run start
 
 1. 添加问答
 
-TBD
+修改./tools/export_skills_70785_1651747894.csv ,添加需要的问答和答案，重新覆盖导入
 
 2. 非群主链接检测配置
 
