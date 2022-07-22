@@ -1,11 +1,15 @@
 /* eslint-disable sort-keys */
 // 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
 const configs = {
-  WX_TOKEN: '', // 微信对话平台token
-  VIKA_TOKEN: '', // VIKA维格表token
-  VIKA_SPACENAME:'智慧社区管理平台',  // VIKA维格表空间名称，修改为自己的空间名称
-  VIKA_DATASHEETNAME:'qa-bot', // VIKA维格表名称,可以修改为自己的表名称
-  linkWhiteList: ['ledongmao', 'abcd'],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
+  WX_OPENAI_ONOFF:true, // 微信对话平台开启
+  WX_TOKEN: 'xxxxxxx', // 微信对话平台token
+  DIFF_REPLY_ONOFF:false,
+  VIKA_ONOFF:true, // 维格表开启
+  VIKA_TOKEN: 'xxxxxxx', // VIKA维格表token
+  VIKA_SPACENAME:'xxxxxxx',  // VIKA维格表空间名称，修改为自己的空间名称
+  VIKA_DATASHEETNAME:'xxxxxxx', // VIKA维格表名称,可以修改为自己的表名称
+  linkWhiteList: ['ledongmao', 'xxxxxxx'],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
+  welcomeList:['25108313781@chatroom', '25187527247@chatroom', '20641535286@chatroom'],
   roomWhiteList: [
     {
       name: 'xxxx',

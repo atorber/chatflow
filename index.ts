@@ -318,7 +318,7 @@ if (missingConfiguration.length === 0) {
   bot.on('room-join', async (room, inviteeList, inviter) => {
     const nameList = inviteeList.map(c => c.name()).join(',')
     console.log(`Room ${await room.topic()} got new member ${nameList}, invited by ${inviter}`)
-    if (['25108313781@chatroom', '25187527247@chatroom', '20641535286@chatroom'].includes(room.id)) {
+    if (configs.welcomeList.includes(room.id)) {
       const newer = inviteeList[0]
       if (newer) {
         await room.say(`欢迎加入${await room.topic()},请阅读群公告~`, ...[newer])
@@ -466,38 +466,48 @@ async function aibot (talker:Contact, room:Room, query: string) {
         if (msgText.multimsg && msgText.multimsg.length) {
           const answers = msgText.multimsg
           console.table(answers)
-          for (const i in answers) {
-            const textArr = answers[i].split(roomid)
-            // log.info('textArr===========', textArr)
-            if (textArr.length == 2) {
-              answer = {
-                messageType: types.Message.Text,
-                text: textArr[1],
-              }
-              break
-            } else {
-              try {
-                answer = JSON.parse(answers[i])
-                if (answer.miniprogrampage) {
-                  answer = {
-                    messageType: types.Message.MiniProgram,
-                    text: answer.miniprogrampage,
-                  }
-                  // break
-                }
-                if (answer.image) {
-                  answer = {
-                    messageType: types.Message.Image,
-                    text: answer.image.url,
-                  }
-                  break
-                }
-              } catch (e) {
-                console.error(e)
-              }
+
+          if(configs.DIFF_REPLY_ONOFF){
+            answer = {
+              messageType: types.Message.Text,
+              text: answers[0],
             }
 
+          }else{
+            for (const i in answers) {
+              const textArr = answers[i].split(roomid)
+              // log.info('textArr===========', textArr)
+              if (textArr.length == 2) {
+                answer = {
+                  messageType: types.Message.Text,
+                  text: textArr[1],
+                }
+                break
+              } else {
+                try {
+                  answer = JSON.parse(answers[i])
+                  if (answer.miniprogrampage) {
+                    answer = {
+                      messageType: types.Message.MiniProgram,
+                      text: answer.miniprogrampage,
+                    }
+                    // break
+                  }
+                  if (answer.image) {
+                    answer = {
+                      messageType: types.Message.Image,
+                      text: answer.image.url,
+                    }
+                    break
+                  }
+                } catch (e) {
+                  console.error(e)
+                }
+              }
+  
+            }
           }
+
           console.table({ answer, nickName, topic, roomid, query })
           return answer
         }
