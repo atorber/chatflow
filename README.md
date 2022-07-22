@@ -92,7 +92,8 @@ npm start
 
 - 扫码加入体验群
 
-<img src="https://user-images.githubusercontent.com/104893934/178958587-69ce810b-1c2d-4ce7-a07f-6d7c71be810e.jpg" width="60%">
+![7033bbce3c0c74c97cf8b4b815b4dd1](https://user-images.githubusercontent.com/104893934/180383667-0ec86fc8-4c42-41d9-97e7-cb0d848a6c60.jpg)
+
 
 ## 效果展示
 
