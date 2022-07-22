@@ -112,3 +112,7 @@ dist
 .tern-port
 
 package-lock.json
+dev-config.js
+dev-index.js
+WechatEveryDay.memory-card.json
+dev-index.ts
