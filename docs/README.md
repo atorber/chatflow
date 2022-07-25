@@ -2,9 +2,9 @@
 
 本项目使用wechat机器人快速实现一个免费的QA问答系统，如果你是一个社群工作者、拼团团长、业务群运营经理，使用这个项目可以帮助你解决一些重复性问答。
 
-前提是你有一台Windows电脑可以运行本项目，仅支持Windows环境下运行。
+~~前提是你有一台Windows电脑可以运行本项目，仅支持Windows环境下运行。~~ 
 
-项目是在上海因疫情在社区团购物资以及社区管理等群组活动各方工作繁杂的背景下产生希望能帮助大家解决一些实际的问题，请务必善用。
+乐大喜奔，已适配网页版微信，linux、mac、Windows均可运行。
 
 ### 功能列表
 
@@ -34,7 +34,9 @@
 
 - [Wechaty](https://wechaty.js.org/) —— 只需几行代码，您就可以拥有一个功能齐全的聊天机器人
 
-- [wechaty-puppet-xp](https://github.com/atorber/puppet-xp) —— 可能是目前最好用的免费wechat机器人
+- [wechaty-puppet-xp](https://github.com/wechaty/puppet-xp) —— 可能是目前最好用的免费wechat机器人
+
+- [wechaty-puppet-wechat](https://github.com/wechaty/puppet-wechat) —— 目前最简单的免费wechat机器人
 
 - [微信对话开放平台](https://openai.weixin.qq.com/) —— 5分钟零基础免费一键搭建智能对话机器人，并应用于微信公众号、小程序、企业网站、APP等
 
@@ -340,6 +342,27 @@ npm run dev
 - nodejs > 16
 
 - npm > 7
+
+### 切换网页版微信
+
+将【Windows桌面版微信】代码注释掉，【网页版微信】代码取消注释，重新运行程序即可
+
+```
+// Windows桌面版微信
+const bot = WechatyBuilder.build({
+  name: 'openai-qa-bot',
+  puppet: 'wechaty-puppet-xp',
+})
+
+// 网页版微信
+// const bot = WechatyBuilder.build({
+//   name: 'WechatEveryDay',
+//   puppet: 'wechaty-puppet-wechat', // 如果有token，记得更换对应的puppet
+//   puppetOptions: {
+//     uos: true
+//   }
+// })
+```
 
 ### 安装和运行
 
