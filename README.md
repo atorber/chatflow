@@ -8,7 +8,7 @@
 
 ~~前提是你有一台Windows电脑可以运行本项目，仅支持Windows环境下运行。~~ 
 
-乐大喜奔，已适配网页版微信，linux、mac、Windows均可运行。
+乐大喜奔，已适配网页版微信（基于wechaty-puppet-wechat，截止2022年7月25日网页版微信支持所有微信用户登陆），linux、mac、Windows均可运行。
 
 ### 功能列表
 
