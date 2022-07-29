@@ -41,7 +41,7 @@ import path from 'path'
 
 import os from 'os'
 
-import configs from './dev-config.js'
+import configs from './config.js'
 import type { Puppet } from 'wechaty-puppet'
 
 import * as io from 'socket.io-client'
