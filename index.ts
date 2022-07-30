@@ -46,7 +46,7 @@ import type { Puppet } from 'wechaty-puppet'
 
 import * as io from 'socket.io-client'
 
-const configData =configs.imConfigData
+const configData = configs.imConfigData
 let socket: io
 if (configs.imOpen) {
   socket = io.connect('http://localhost:3001')
@@ -111,7 +111,7 @@ const bot = WechatyBuilder.build({
 // 网页版微信
 // const bot = WechatyBuilder.build({
 //   name: 'openai-qa-bot',
-//   puppet: 'wechaty-puppet-wechat', 
+//   puppet: 'wechaty-puppet-wechat',
 //   puppetOptions: {
 //     uos: true
 //   }
@@ -200,7 +200,7 @@ function onScan (qrcode: string, status: ScanStatus) {
 
 function onLogin (user: Contact) {
   log.info('StarterBot', '%s login', user)
-  console.table(user)
+  console.info(user)
 }
 
 function onLogout (user: Contact) {
@@ -222,7 +222,7 @@ async function onMessage (message: Message) {
       id: message.id,
       type: bot.Message.Type[message.type()],
     }
-    console.table(msgInfo)
+    console.info(msgInfo)
     if (room && room.id) {
       await wxai(room, message)
       const topic = await room.topic()
@@ -271,7 +271,7 @@ async function onMessage (message: Message) {
 
 const missingConfiguration = []
 for (const key in configs) {
-  if (!configs[key] && !['imOpen', 'noderedOpen','DIFF_REPLY_ONOFF'].includes(key)) {
+  if (!configs[key] && !['imOpen', 'noderedOpen', 'DIFF_REPLY_ONOFF'].includes(key)) {
     missingConfiguration.push(key)
   }
 }
@@ -302,7 +302,7 @@ if (missingConfiguration.length === 0) {
     .catch(e => log.error('StarterBot', e))
 } else {
   log.error('\n======================================\n\n', `错误提示：\n缺少${missingConfiguration.join()}配置参数,请检查config.js文件\n\n======================================`)
-  console.table(configs)
+  console.info(configs)
 }
 
 function roomlinker (message: { text: () => any }) {
@@ -433,19 +433,19 @@ async function aibot (talker:Contact, room:Room, query: string) {
       // log.info('msgText==========', msgText)
       try {
         msgText = JSON.parse(msgText)
-        // console.table(msgText)
+        // console.info(msgText)
 
         if (msgText.multimsg && msgText.multimsg.length) {
           const answers = msgText.multimsg
-          console.table(answers)
+          console.info(answers)
 
-          if(!configs.DIFF_REPLY_ONOFF){
+          if (!configs.DIFF_REPLY_ONOFF) {
             answer = {
               messageType: types.Message.Text,
               text: answers[0],
             }
 
-          }else{
+          } else {
             for (const i in answers) {
               const textArr = answers[i].split(roomid)
               // log.info('textArr===========', textArr)
@@ -476,14 +476,14 @@ async function aibot (talker:Contact, room:Room, query: string) {
                   console.error(e)
                 }
               }
-  
+
             }
           }
 
-          console.table({ answer, nickName, topic, roomid, query })
+          console.info({ answer, nickName, topic, roomid, query })
           return answer
         }
-        console.table({ msg: '没有命中关键字', nickName, topic, roomid, query })
+        console.info({ msg: '没有命中关键字', nickName, topic, roomid, query })
         return answer
       } catch (err: any) {
         log.error(err)
@@ -495,13 +495,13 @@ async function aibot (talker:Contact, room:Room, query: string) {
           }
           return answer
         }
-        console.table({ msg: '没有命中关键字', nickName, topic, roomid, query })
+        console.info({ msg: '没有命中关键字', nickName, topic, roomid, query })
         return answer
       }
     }
     return answer
   } catch (err) {
-    console.table(err)
+    console.info(err)
     return answer
   }
 }
