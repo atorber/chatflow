@@ -102,20 +102,22 @@ const __dirname = path.resolve()
 const userInfo = os.userInfo()
 const rootPath = `${userInfo.homedir}\\Documents\\WeChat Files\\`
 
-// Windows桌面版微信
-const bot = WechatyBuilder.build({
-  name: 'openai-qa-bot',
-  puppet: 'wechaty-puppet-xp',
-})
+let userSelf:Contact
 
-// 网页版微信
+// Windows桌面版微信
 // const bot = WechatyBuilder.build({
 //   name: 'openai-qa-bot',
-//   puppet: 'wechaty-puppet-wechat', 
-//   puppetOptions: {
-//     uos: true
-//   }
+//   puppet: 'wechaty-puppet-xp',
 // })
+
+// 网页版微信
+const bot = WechatyBuilder.build({
+  name: 'openai-qa-bot',
+  puppet: 'wechaty-puppet-wechat', 
+  puppetOptions: {
+    uos: true
+  }
+})
 
 /**
  * 添加chat对象的msg
@@ -200,6 +202,7 @@ function onScan (qrcode: string, status: ScanStatus) {
 
 function onLogin (user: Contact) {
   log.info('StarterBot', '%s login', user)
+  userSelf = user
   console.info(user)
 }
 
@@ -223,10 +226,15 @@ async function onMessage (message: Message) {
       type: bot.Message.Type[message.type()],
     }
     console.info(msgInfo)
-    if (room && room.id) {
-      await wxai(room, message)
-      const topic = await room.topic()
 
+    if (room && room.id) {
+
+      // 请求问答
+      if((text.indexOf(`@${userSelf.name()}`)&&configs.AT_AHEAD)||!configs.AT_AHEAD){
+        await wxai(room, message)
+      }
+
+      const topic = await room.topic()
       // IM服务开启时执行
       if (configs.imOpen && bot.Message.Type.Text === message.type()) {
         configData.clientChatEn.clientChatId = talker.id + ' ' + room.id
@@ -332,6 +340,7 @@ async function wxai (room: Room, message: Message) {
   }
 
   log.info('answer=====================', JSON.stringify(answer))
+
   if (answer.messageType) {
     switch (answer.messageType) {
       case types.Message.Text: {

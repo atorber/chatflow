@@ -1,8 +1,9 @@
 /* eslint-disable sort-keys */
 // 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
 const configs = {
+  AT_AHEAD:true, // 只有机器人被@时回复
   WX_OPENAI_ONOFF:true, // 微信对话平台开启
-  DIFF_REPLY_ONOFF:false,
+  DIFF_REPLY_ONOFF:false, // 开启不同群个性化回复
   VIKA_ONOFF:true, // 维格表开启
   WX_TOKEN: 'xxxxxxx', // 微信对话平台token
   VIKA_TOKEN: 'xxxxxxx', // VIKA维格表token
