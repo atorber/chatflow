@@ -111,8 +111,9 @@ dist
 # TernJS port file
 .tern-port
 
-package-lock.json
 dev-config.js
 dev-index.js
 WechatEveryDay.memory-card.json
 dev-index.ts
+index-dev.ts
+config-dev.js
