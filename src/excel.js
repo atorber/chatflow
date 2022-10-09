@@ -8,12 +8,8 @@ import ExcelJS from 'exceljs'
 import fs from 'fs'
 import { FileBox } from 'file-box'
 import path from 'path'
-import configs from '../config.js'
 import { VikaBot } from './vika.js'
 const __dirname = path.resolve()
-
-// const vikaConfig = { token: configs.VIKA_TOKEN, sheetName: configs.VIKA_DATASHEETNAME, spaceName: configs.VIKA_SPACENAME }
-// const vika = new VikaBot(vikaConfig)
 
 async function excel2order (filepath, message) {
   // console.debug('文件路径：', filepath)
