@@ -92,10 +92,6 @@ npm start
 
 当然，最好的反馈方式是在这里 https://github.com/choogoo/wechat-openai-qa-bot/issues 提交一个issues
 
-- 扫码加入体验群
-
-![7033bbce3c0c74c97cf8b4b815b4dd1](https://user-images.githubusercontent.com/104893934/180383667-0ec86fc8-4c42-41d9-97e7-cb0d848a6c60.jpg)
-
 ## 在线交流
 
 QQ群 583830241
