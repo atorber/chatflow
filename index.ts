@@ -63,7 +63,6 @@ import * as io from 'socket.io-client'
 
 import { VikaBot } from './src/vika.js'
 
-import { WxOpenAi } from './src/wx-open-ai.js'
 import { JsonRpcError } from 'json-rpc-peer'
 
 const __dirname = path.resolve()
@@ -74,9 +73,11 @@ let bot: any
 let sysConfig: any
 
 const vikaConfig = {
-  spaceName: configs.VIKA_SPACENAME,
-  token: configs.VIKA_TOKEN,
+  spaceName: process.env['VIKA_SPACENAME'] || configs.VIKA_SPACENAME,
+  token: process.env['VIKA_TOKEN'] || configs.VIKA_TOKEN,
 }
+console.debug(vikaConfig)
+
 const vika = new VikaBot(vikaConfig)
 
 async function main () {
@@ -93,8 +94,6 @@ async function main () {
     TOKEN: sysConfig.WX_TOKEN,
     EncodingAESKey: sysConfig.EncodingAESKey,
   })
-
-  const wxaiClient = new WxOpenAi(bot, sysConfig)
 
   const wechatyConfig: any = {
     // 网页版微信
