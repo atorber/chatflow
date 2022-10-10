@@ -5,8 +5,8 @@ import { VikaBot } from './src/vika.js'
 import configs from './config.js'
 
 const vikaConfig = {
-  spaceName: configs.VIKA_SPACENAME,
-  token: configs.VIKA_TOKEN,
+  spaceName: process.env['VIKA_SPACENAME'] || configs.VIKA_SPACENAME,
+  token: process.env['VIKA_TOKEN'] || configs.VIKA_TOKEN,
 }
 const vika = new VikaBot(vikaConfig)
 

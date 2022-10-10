@@ -25,7 +25,7 @@ import {
   nlp,
   QueryData,
   genToken,
-} from './src/openai-sdk/dist/index.js'
+} from './src/openai/index.js'
 
 import {
   Contact,
@@ -63,7 +63,6 @@ import * as io from 'socket.io-client'
 
 import { VikaBot } from './src/vika.js'
 
-import { WxOpenAi } from './src/wx-open-ai.js'
 import { JsonRpcError } from 'json-rpc-peer'
 
 const __dirname = path.resolve()
@@ -73,10 +72,20 @@ const rootPath = `${userInfo.homedir}\\Documents\\WeChat Files\\`
 let bot: any
 let sysConfig: any
 
+if (process.env['VIKA_SPACENAME']) {
+  configs.VIKA_SPACENAME = process.env['VIKA_SPACENAME']
+}
+
+if (process.env['VIKA_TOKEN']) {
+  configs.VIKA_TOKEN = process.env['VIKA_TOKEN']
+}
+
 const vikaConfig = {
   spaceName: configs.VIKA_SPACENAME,
   token: configs.VIKA_TOKEN,
 }
+console.debug(vikaConfig)
+
 const vika = new VikaBot(vikaConfig)
 
 async function main () {
@@ -93,8 +102,6 @@ async function main () {
     TOKEN: sysConfig.WX_TOKEN,
     EncodingAESKey: sysConfig.EncodingAESKey,
   })
-
-  const wxaiClient = new WxOpenAi(bot, sysConfig)
 
   const wechatyConfig: any = {
     // 网页版微信
@@ -482,7 +489,7 @@ async function wxai (room: Room | undefined, message: Message) {
           title: answer.text.title,
           pagePath: answer.text.pagepath,
           // thumbUrl: answer.text.thumb_url,
-          thumbUrl:'https://openai-75050.gzc.vod.tencent-cloud.com/openaiassets_afffe2516dac42406e06eddc19303a8d.jpg',
+          thumbUrl: 'https://openai-75050.gzc.vod.tencent-cloud.com/openaiassets_afffe2516dac42406e06eddc19303a8d.jpg',
           thumbKey: '42f8609e62817ae45cf7d8fefb532e83',
         })
 
