@@ -117,3 +117,4 @@ WechatEveryDay.memory-card.json
 dev-index.ts
 index-dev.ts
 config-dev.js
+package-lock.json

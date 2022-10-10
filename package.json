@@ -1,6 +1,6 @@
 {
   "name": "openai-qa-bot",
-  "version": "0.4.0",
+  "version": "2.0",
   "description": "openai-qa-bot",
   "type": "module",
   "engines": {
@@ -9,6 +9,8 @@
   },
   "scripts": {
     "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node index.ts",
+    "start-dev": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node index-dev.ts",
+    "init": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node init.ts",
     "dev-xp": "ts-node-esm index-dev.ts",
     "dev-wechat": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" WECHATY_LOG=verbose WECHATY_PUPPET=wechaty-puppet-wechat node index-dev.ts",
     "rm-temp": "rm -r temp; mkdir temp",
@@ -31,14 +33,16 @@
   },
   "homepage": "https://github.com/atorber/wechaty-wx-openai-link#readme",
   "dependencies": {
-    "dotenv": "^16.0.0",
     "@vikadata/vika": "^1.0.5",
+    "dotenv": "^16.0.0",
     "exceljs": "^4.3.0",
     "file-box": "^1.4.12",
     "forever": "^4.0.3",
     "fs": "^0.0.1-security",
     "moment": "^2.29.1",
+    "njwt": "^1.2.0",
     "node-xlsx": "^0.21.0",
+    "openai-sdk": "^1.0.1",
     "pm2": "^5.2.0",
     "qrcode-terminal": "^0.12.0",
     "request-promise": "^4.2.6",
@@ -47,6 +51,7 @@
     "uuid": "^8.3.2",
     "wechaty": "^1.20.2",
     "wechaty-plugin-contrib": "^1.0.18",
+    "wechaty-puppet-padlocal": "^1.11.13",
     "wechaty-puppet-wechat": "^1.18.4",
     "wechaty-puppet-xp": "^1.11.14"
   },
@@ -54,6 +59,7 @@
     "@chatie/eslint-config": "^1.0.4",
     "@chatie/git-scripts": "^0.6.2",
     "@chatie/tsconfig": "^4.6.3",
+    "@types/qrcode-terminal": "^0.12.0",
     "@types/request-promise": "^4.1.48",
     "check-node-version": "^4.2.1",
     "is-pr": "^2.0.0",

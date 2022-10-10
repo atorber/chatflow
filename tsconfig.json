@@ -16,6 +16,6 @@
     "examples/**/*.ts",
     "scripts/**/*.ts",
     "src/**/*.ts",
-    "tests/**/*.spec.ts",
+    "tests/**/*.spec.ts", "src/wx-open-ai.js",
   ],
 }
