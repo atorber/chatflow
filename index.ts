@@ -25,7 +25,7 @@ import {
   nlp,
   QueryData,
   genToken,
-} from './src/openai-sdk/dist/index.js'
+} from './src/openai/index.js'
 
 import {
   Contact,
@@ -72,9 +72,17 @@ const rootPath = `${userInfo.homedir}\\Documents\\WeChat Files\\`
 let bot: any
 let sysConfig: any
 
+if (process.env['VIKA_SPACENAME']) {
+  configs.VIKA_SPACENAME = process.env['VIKA_SPACENAME']
+}
+
+if (process.env['VIKA_TOKEN']) {
+  configs.VIKA_TOKEN = process.env['VIKA_TOKEN']
+}
+
 const vikaConfig = {
-  spaceName: process.env['VIKA_SPACENAME'] || configs.VIKA_SPACENAME,
-  token: process.env['VIKA_TOKEN'] || configs.VIKA_TOKEN,
+  spaceName: configs.VIKA_SPACENAME,
+  token: configs.VIKA_TOKEN,
 }
 console.debug(vikaConfig)
 
@@ -481,7 +489,7 @@ async function wxai (room: Room | undefined, message: Message) {
           title: answer.text.title,
           pagePath: answer.text.pagepath,
           // thumbUrl: answer.text.thumb_url,
-          thumbUrl:'https://openai-75050.gzc.vod.tencent-cloud.com/openaiassets_afffe2516dac42406e06eddc19303a8d.jpg',
+          thumbUrl: 'https://openai-75050.gzc.vod.tencent-cloud.com/openaiassets_afffe2516dac42406e06eddc19303a8d.jpg',
           thumbKey: '42f8609e62817ae45cf7d8fefb532e83',
         })
 
