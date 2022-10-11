@@ -606,7 +606,7 @@ class VikaBot {
             群白名单: '关闭',
             消息上传到维格表: '开启',
             IM对话: '关闭',
-            puppet: 'wechaty-puppet-wechat',
+            puppet: 'wechaty-puppet-xp',
             'wechaty-token': '',
             可视化控制: '关闭',
           },
