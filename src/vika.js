@@ -176,7 +176,7 @@ class VikaBot {
     //   },
     // ]
 
-    // console.table(records[0].fields)
+    console.debug(records)
     const datasheet = this.vika.datasheet(this.messageSheet)
     datasheet.records.create(records).then((response) => {
       if (response.success) {
