@@ -182,3 +182,70 @@ QQ群 583830241
 - [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973) —— 将过去复杂的IT数据库技术，做得像表格一样简单(如果要注册，通过这个链接，或者使用邀请码 55152973 )
 
 - [vue-im](https://github.com/polk6/vue-im) —— 由@polk6开源的客服web项目，实现客服后台回复咨询消息
+
+## 常见问题
+
+**遇到任何报错，一定记得第一时间查看报错信息，即使看不懂，起码复制或截图，否则没有人能仅凭几句语焉不详帮你解决问题**
+
+### 环境依赖
+
+- Windows > 10
+
+- nodejs > 16
+
+- npm > 7
+
+### 切换网页版微信
+
+将【Windows桌面版微信】代码注释掉，【网页版微信】代码取消注释，重新运行程序即可
+
+```
+// Windows桌面版微信
+const bot = WechatyBuilder.build({
+  name: 'openai-qa-bot',
+  puppet: 'wechaty-puppet-xp',
+})
+
+// 网页版微信
+// const bot = WechatyBuilder.build({
+//   name: 'openai-qa-bot',
+//   puppet: 'wechaty-puppet-wechat', 
+//   puppetOptions: {
+//     uos: true
+//   }
+// })
+```
+
+### 安装和运行
+
+1. 安装依赖时提示需要Visual Studio 2017+
+
+去微软官网下载[Visual Studio 2022](https://visualstudio.microsoft.com/zh-hans/thank-you-downloading-visual-studio/?sku=Community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030&passive=false)并安装
+
+<img src="https://user-images.githubusercontent.com/104893934/167300714-49a0dc40-8857-4e81-a780-80e63af74d97.png" width="60%">
+
+2. 关于远程协助，如果折腾半天也没有搞定，可以联系申请远程协助指导安装
+
+提前下载好[向日葵](https://sunlogin.oray.com/download)软件并注册号账号，登陆后发控制码
+
+<img src="https://user-images.githubusercontent.com/104893934/167300700-19c6283b-584c-48f4-bc10-7418cc7528f3.png" width="60%">
+
+3. 下载解压缩软件
+
+[2345好压](https://haozip.2345.cc/)
+
+4. ubuntu系统下使用wechaty-puppet-wechat缺少依赖
+
+根据报错信息参考 https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md
+
+尝试运行如下命令
+
+```
+sudo apt install gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget libgbm1
+```
+
+安装单个依赖
+
+```
+sudo apt install libgbm1
+```
