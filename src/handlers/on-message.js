@@ -31,7 +31,7 @@ async function onMessage (message, vika) {
         try {
           const img = await message.toImage()
           file = await img.thumbnail()
-          await wait(1000)
+          // await wait(1000)
           // console.debug('file=======================',file)
         } catch (e) {
           console.error('Image解析失败：', e)
