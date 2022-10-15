@@ -249,3 +249,16 @@ sudo apt install gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 l
 ```
 sudo apt install libgbm1
 ```
+
+5. M1环境下报错
+
+报错信息
+
+```
+09:24:09 INFO Starter Bot Started. 
+09:24:26 ERR PuppetWeChatBridge start() exception: TimeoutError: Timed out after 30000 ms while trying to connect to the browser! Only Chrome at revision r982053 is guaranteed to work.
+09:24:26 ERR PuppetWeChat initBridge() exception: Timed out after 30000 ms while trying to connect to the browser! Only Chrome at revision r982053 is guaranteed to work.
+09:24:26 ERR PuppetWeChat initBridge() this.bridge.stop() rejection: Error: no page
+```
+
+解决方案,设置环境变量 `export PUPPETEER_EXPERIMENTAL_CHROMIUM_MAC_ARM=RAM` 
