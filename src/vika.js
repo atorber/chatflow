@@ -152,7 +152,7 @@ class VikaBot {
           name: talker ? talker.name() : '未知',
           topic: topic || '--',
           messagePayload: text,
-          wxid: talker.id != 'null' ? talker.id : '--',
+          wxid: talker.id !== 'null' ? talker.id : '--',
           roomid: room && room.id ? room.id : '--',
           messageType: msgType,
           file: files,
@@ -176,7 +176,44 @@ class VikaBot {
     //   },
     // ]
 
-    console.debug(records)
+    // console.debug(records)
+    const datasheet = this.vika.datasheet(this.messageSheet)
+    datasheet.records.create(records).then((response) => {
+      if (response.success) {
+        console.log('写入vika成功：', JSON.stringify(response.code))
+      } else {
+        console.error('调用vika写入接口成功，写入vika失败：', response)
+      }
+      return response
+    }).catch(err => { console.error('调用vika写入接口失败：', err) })
+  }
+
+  async addScanRecord (uploadedAttachments, text) {
+
+    const curTime = this.getCurTime()
+    const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
+    const files = []
+    if (uploadedAttachments) {
+      files.push(uploadedAttachments)
+    }
+
+    const records = [
+      {
+        fields: {
+          _id: timeHms,
+          timeHms: timeHms,
+          name: 'system',
+          topic: '--',
+          messagePayload: text,
+          wxid: 'system',
+          roomid: '--',
+          messageType: 'qrcode',
+          file: files,
+        },
+      },
+    ]
+
+    // console.debug(records)
     const datasheet = this.vika.datasheet(this.messageSheet)
     datasheet.records.create(records).then((response) => {
       if (response.success) {
@@ -184,6 +221,7 @@ class VikaBot {
       } else {
         console.error('调用vika写入接口成功，写入vika失败：', response)
       }
+      return response
     }).catch(err => { console.error('调用vika写入接口失败：', err) })
   }
 
@@ -963,8 +1001,8 @@ class VikaBot {
     // timestamp是整数，否则要parseInt转换
     const timestamp = new Date().getTime()
     const timezone = 8 // 目标时区时间，东八区
-    const offset_GMT = new Date().getTimezoneOffset() // 本地时间和格林威治的时间差，单位为分钟
-    const time = timestamp + offset_GMT * 60 * 1000 + timezone * 60 * 60 * 1000
+    const offsetGMT = new Date().getTimezoneOffset() // 本地时间和格林威治的时间差，单位为分钟
+    const time = timestamp + offsetGMT * 60 * 1000 + timezone * 60 * 60 * 1000
     return time
   }
 

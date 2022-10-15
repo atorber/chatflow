@@ -18,6 +18,9 @@ import 'dotenv/config.js'
 //   chat,
 //   nlp,
 // } = openai
+
+import fs from 'fs'
+
 import {
   init,
   chat,
@@ -282,15 +285,48 @@ async function main () {
     //   addChatMsg(msg)
   }
 
-  function onScan (qrcode: string, status: ScanStatus) {
+  async function onScan (qrcode: string, status: ScanStatus) {
+    console.debug(qrcode)
     if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
+      const qrcodeUrl = encodeURIComponent(qrcode)
+
       const qrcodeImageUrl = [
         'https://wechaty.js.org/qrcode/',
-        encodeURIComponent(qrcode),
+        qrcodeUrl,
       ].join('')
       log.info('StarterBot', 'onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
 
       qrcodeTerminal.generate(qrcode, { small: true })  // show qrcode on console
+
+      let uploadedAttachments = ''
+      let file:FileBox
+      let filePath = 'qrcode.png'
+      try {
+        file = FileBox.fromQRCode(qrcode)
+        if (file) {
+          filePath = './' + file.name
+          try {
+            const writeStream = fs.createWriteStream(filePath)
+            await file.pipe(writeStream)
+            await wait(200)
+            const readerStream = fs.createReadStream(filePath)
+            uploadedAttachments = await vika.upload(readerStream)
+            const text = qrcodeImageUrl
+            await vika.addScanRecord(uploadedAttachments, text)
+            fs.unlink(filePath, (err) => {
+              console.debug('上传vika完成删除文件：', filePath, err)
+            })
+          } catch {
+            console.debug('上传失败：', filePath)
+            fs.unlink(filePath, (err) => {
+              console.debug('上传vika失败删除文件', filePath, err)
+            })
+          }
+        }
+
+      } catch (e) {
+        console.log('vika 写入失败：', e)
+      }
 
     } else {
       log.info('StarterBot', 'onScan: %s(%s)', ScanStatus[status], status)
@@ -534,16 +570,16 @@ async function wxai (room: Room | undefined, message: Message) {
 
   }
 
-  if (message.type() === bot.Message.Type.Image) {
-    await wait(1000)
-    try {
-      const file = await message.toFileBox()
-      log.info('image=====', file)
-    } catch (err) {
-      log.error('image=====', err)
-    }
+  // if (message.type() === bot.Message.Type.Image) {
+  //   await wait(1000)
+  //   try {
+  //     const file = await message.toFileBox()
+  //     log.info('image=====', file)
+  //   } catch (err) {
+  //     log.error('image=====', err)
+  //   }
 
-  }
+  // }
 
 };
 

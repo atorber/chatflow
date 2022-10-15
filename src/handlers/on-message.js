@@ -34,8 +34,8 @@ async function onMessage (message, vika) {
         try {
           const img = await message.toImage()
           file = await img.thumbnail()
-          // await wait(1000)
-          // console.debug('file=======================',file)
+          await wait(500)
+          // console.debug('file=======================', file)
         } catch (e) {
           console.error('Image解析失败：', e)
         }
@@ -132,10 +132,11 @@ async function onMessage (message, vika) {
 
     if (file) {
       filePath = './' + file.name
+      // filePath = './2910842442594765389.jpg'
       try {
         const writeStream = fs.createWriteStream(filePath)
         await file.pipe(writeStream)
-        await wait(200)
+        await wait(500)
         const readerStream = fs.createReadStream(filePath)
         uploadedAttachments = await vika.upload(readerStream)
         vika.addChatRecord(message, uploadedAttachments, msgType, text)

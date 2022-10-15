@@ -262,3 +262,5 @@ sudo apt install libgbm1
 ```
 
 解决方案,设置环境变量 `export PUPPETEER_EXPERIMENTAL_CHROMIUM_MAC_ARM=RAM` 
+
+参考 https://www.npmjs.com/package/puppeteer?activeTab=readme
