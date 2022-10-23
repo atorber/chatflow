@@ -11,6 +11,7 @@ const configs = {
   roomWhiteList: [
     '25108313781@chatroom', // Easy Chatbot Show
     '5854608913@chatroom', // Moments
+    '5550027590@chatroom', // TESTONE
   ], // 群白名单，白名单里内群开启机器人，其他群不开启
   linkWhiteList: [
     'ledongmao',
