@@ -1,0 +1,16 @@
+import { ResponseCHAT } from './response'
+import {
+  transferNLP,
+  transferAIBOT,
+} from './util'
+import { QueryData } from './query'
+
+function chat (query: QueryData) {
+  return transferNLP('CHAT', query) as Promise<ResponseCHAT>
+}
+
+function chatAibot (query: QueryData) {
+  return transferAIBOT('AIBOT', query) as Promise<ResponseCHAT>
+}
+
+export { chat, chatAibot }

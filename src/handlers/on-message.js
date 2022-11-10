@@ -12,11 +12,14 @@ async function onMessage (message, vika) {
   // console.debug(message)
   try {
 
-    let uploaded_attachments = ''
-    const msg_type = PUPPET.types.Message[message.type()]
+    let uploadedAttachments = ''
+    const msgType = PUPPET.types.Message[message.type()]
     let file = ''
     let filePath = ''
     let text = ''
+
+    let urlLink
+    let miniProgram
 
     switch (message.type()) {
       // 文本消息
@@ -31,8 +34,8 @@ async function onMessage (message, vika) {
         try {
           const img = await message.toImage()
           file = await img.thumbnail()
-          await wait(1000)
-          // console.debug('file=======================',file)
+          await wait(500)
+          // console.debug('file=======================', file)
         } catch (e) {
           console.error('Image解析失败：', e)
         }
@@ -41,8 +44,7 @@ async function onMessage (message, vika) {
 
       // 链接卡片消息
       case PUPPET.types.Message.Url:
-
-        const urlLink = await message.toUrlLink()
+        urlLink = await message.toUrlLink()
         text = JSON.stringify(JSON.parse(JSON.stringify(urlLink)).payload)
         // file = await message.toFileBox();
         break
@@ -50,7 +52,8 @@ async function onMessage (message, vika) {
       // 小程序卡片消息
       case PUPPET.types.Message.MiniProgram:
 
-        const miniProgram = await message.toMiniProgram()
+        miniProgram = await message.toMiniProgram()
+
         text = JSON.stringify(JSON.parse(JSON.stringify(miniProgram)).payload)
 
         // console.debug(miniProgram)
@@ -129,12 +132,14 @@ async function onMessage (message, vika) {
 
     if (file) {
       filePath = './' + file.name
+      // filePath = './2910842442594765389.jpg'
       try {
         const writeStream = fs.createWriteStream(filePath)
         await file.pipe(writeStream)
-        await wait(200)
+        await wait(500)
         const readerStream = fs.createReadStream(filePath)
-        uploaded_attachments = await vika.upload(readerStream)
+        uploadedAttachments = await vika.upload(readerStream)
+        vika.addChatRecord(message, uploadedAttachments, msgType, text)
         fs.unlink(filePath, (err) => {
           console.debug('上传vika完成删除文件：', filePath, err)
         })
@@ -145,10 +150,10 @@ async function onMessage (message, vika) {
         })
       }
 
-    }
-
+    } else {
     // console.debug(message)
-    vika.addChatRecord(message, uploaded_attachments, msg_type, text)
+      vika.addChatRecord(message, uploadedAttachments, msgType, text)
+    }
 
   } catch (e) {
     console.log('vika 写入失败：', e)

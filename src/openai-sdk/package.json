@@ -1,0 +1,41 @@
+{
+  "name": "openai-sdk",
+  "version": "1.0.0",
+  "description": "http://openai.weixin.qq.com,AI,智能对话",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "start": "ts-node-dev --respawn --transpileOnly --prefer-ts example/index.ts",
+    "test": "ts-mocha --paths test/index.ts",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WeChatAI/openai-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WeChatAI/openai-sdk/issues"
+  },
+  "homepage": "https://github.com/WeChatAI/openai-sdk#readme",
+  "keywords": [
+    "http://openai.weixin.qq.com",
+    "AI",
+    "智能对话"
+  ],
+  "author": "lindanli, zhang-ning",
+  "license": "MIT",
+  "dependencies": {
+    "njwt": "^1.0.0",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.7",
+    "@types/mocha": "^5.2.7",
+    "@types/request": "^2.48.4",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2",
+    "ts-mocha": "^6.0.0",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "typescript": "^4.4.4"
+  }
+}
