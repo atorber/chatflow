@@ -10,7 +10,7 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 class VikaBot {
 
-  constructor (config) {
+  constructor(config) {
     if (!config.token) {
       console.error('未配置token，请在config.ts中配置')
     } else if (!config.spaceName) {
@@ -24,7 +24,7 @@ class VikaBot {
     }
   }
 
-  async getAllSpaces () {
+  async getAllSpaces() {
     // 获取当前用户的空间站列表
     const spaceListResp = await this.vika.spaces.list()
     if (spaceListResp.success) {
@@ -36,7 +36,7 @@ class VikaBot {
     }
   }
 
-  async getSpaceId () {
+  async getSpaceId() {
     const spaceList = await this.getAllSpaces()
     for (const i in spaceList) {
       if (spaceList[i].name === this.spaceName) {
@@ -51,7 +51,7 @@ class VikaBot {
     }
   }
 
-  async getNodesList () {
+  async getNodesList() {
     // 获取指定空间站的一级文件目录
     const nodeListResp = await this.vika.nodes.list({ spaceId: this.spaceId })
     const tables = {}
@@ -70,7 +70,7 @@ class VikaBot {
     return tables
   }
 
-  async getSheetFields (datasheetId) {
+  async getSheetFields(datasheetId) {
     const datasheet = await this.vika.datasheet(datasheetId)
     const fieldsResp = await datasheet.fields.list()
     let fields = []
@@ -83,7 +83,7 @@ class VikaBot {
     return fields
   }
 
-  async createDataSheet (key, name, fields) {
+  async createDataSheet(key, name, fields) {
 
     const datasheetRo = {
       fields,
@@ -107,7 +107,7 @@ class VikaBot {
     }
   }
 
-  async createRecord (datasheetId, records) {
+  async createRecord(datasheetId, records) {
     const datasheet = await this.vika.datasheet(datasheetId)
 
     const res = await datasheet.records.create(records)
@@ -120,7 +120,7 @@ class VikaBot {
 
   }
 
-  async addChatRecord (msg, uploadedAttachments, msgType, text) {
+  async addChatRecord(msg, uploadedAttachments, msgType, text) {
     // console.debug(msg)
     // console.debug(JSON.stringify(msg))
     const talker = msg.talker()
@@ -177,18 +177,26 @@ class VikaBot {
     // ]
 
     // console.debug(records)
-    const datasheet = this.vika.datasheet(this.messageSheet)
-    datasheet.records.create(records).then((response) => {
-      if (response.success) {
-        console.log('写入vika成功：', JSON.stringify(response.code))
-      } else {
-        console.error('调用vika写入接口成功，写入vika失败：', response)
-      }
-      return response
-    }).catch(err => { console.error('调用vika写入接口失败：', err) })
+    const messageSheet = this.messageSheet
+    const datasheet = this.vika.datasheet(messageSheet)
+    try {
+      datasheet.records.create(records).then((response) => {
+        if (response.success) {
+          console.log('写入vika成功：', JSON.stringify(response.code))
+        } else {
+          console.error('调用vika写入接口成功，写入vika失败：', response)
+        }
+        return response
+      }).catch(err => { console.error('调用vika写入接口失败：', err) })
+    } catch (err) {
+      console.error(err)
+    }
+
+
+
   }
 
-  async addScanRecord (uploadedAttachments, text) {
+  async addScanRecord(uploadedAttachments, text) {
 
     const curTime = this.getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
@@ -225,7 +233,7 @@ class VikaBot {
     }).catch(err => { console.error('调用vika写入接口失败：', err) })
   }
 
-  async upload (file) {
+  async upload(file) {
     const datasheet = this.vika.datasheet(this.messageSheet)
     try {
       const resp = await datasheet.upload(file)
@@ -243,7 +251,7 @@ class VikaBot {
     }
   }
 
-  async deleteRecords (datasheetId, recordsIds) {
+  async deleteRecords(datasheetId, recordsIds) {
     const datasheet = await this.vika.datasheet(datasheetId)
     const response = await datasheet.records.delete(recordsIds)
 
@@ -254,7 +262,7 @@ class VikaBot {
     }
   }
 
-  async getRecords (datasheetId, query = {}) {
+  async getRecords(datasheetId, query = {}) {
     let records = []
     const datasheet = await this.vika.datasheet(datasheetId)
     // 分页获取记录，默认返回第一页
@@ -269,7 +277,7 @@ class VikaBot {
     return records
   }
 
-  async clearBlankLines (datasheetId) {
+  async clearBlankLines(datasheetId) {
     const records = await this.getRecords(datasheetId, {})
     const recordsIds = []
     for (const i in records) {
@@ -279,7 +287,7 @@ class VikaBot {
 
   }
 
-  async getConfig () {
+  async getConfig() {
     const records = await this.getRecords(this.configSheet, {})
     const config = records[0].fields
     const sysConfig = {
@@ -287,9 +295,9 @@ class VikaBot {
       puppetName: config['puppet'],  // 支持wechaty-puppet-wechat、wechaty-puppet-xp、wechaty-puppet-padlocal
       puppetToken: config['wechaty-token'],
       WX_TOKEN: config['对话平台token'], // 微信对话平台token
-      EncodingAESKey:config['对话平台EncodingAESKey'], // 微信对话平台EncodingAESKey
+      EncodingAESKey: config['对话平台EncodingAESKey'], // 微信对话平台EncodingAESKey
       WX_OPENAI_ONOFF: config['智能问答'] === '开启', // 微信对话平台开启
-      roomWhiteListOpen:config['群白名单'] === '开启', // 群白名单功能
+      roomWhiteListOpen: config['群白名单'] === '开启', // 群白名单功能
       AT_AHEAD: config['AT回复'] === '开启', // 只有机器人被@时回复
       DIFF_REPLY_ONOFF: config['不同群个性回复'] === '开启', // 开启不同群个性化回复
       linkWhiteList: ['ledongmao', 'xxxxxxx'],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
@@ -300,7 +308,7 @@ class VikaBot {
 
   }
 
-  async checkInit () {
+  async checkInit() {
     this.spaceId = await this.getSpaceId()
     console.log('空间ID:', this.spaceId)
 
@@ -337,7 +345,7 @@ class VikaBot {
         this.roomWhiteListSheet = tables['群白名单']
         this.messageSheet = tables['消息记录']
 
-        console.log('系统表齐全，启动成功~')
+        console.log('系统表齐全，启动成功~', this)
       }
 
     } else {
@@ -345,7 +353,7 @@ class VikaBot {
     }
   }
 
-  async init () {
+  async init() {
 
     this.spaceId = await this.getSpaceId()
     console.log('空间ID:', this.spaceId)
@@ -997,7 +1005,7 @@ class VikaBot {
     }
   }
 
-  getCurTime () {
+  getCurTime() {
     // timestamp是整数，否则要parseInt转换
     const timestamp = new Date().getTime()
     const timezone = 8 // 目标时区时间，东八区

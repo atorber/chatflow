@@ -9,7 +9,7 @@ function WechatyVikaPlugin (config) {
     // bot.on('onScan', async (qrcode, status) => {
     //   await onScan(qrcode, status, vika)
     // })
-    bot.on('ready', async () => {
+    bot.on('login', async () => {
       await vika.checkInit()
     })
     bot.on('message', async (msg) => {
