@@ -92,7 +92,11 @@ npm start
 
 <img width="1310" alt="image" src="https://user-images.githubusercontent.com/104893934/203387234-7ceaee5c-650f-448d-a4f6-59a2153d5de7.png">
 
-8.2 修改配置文件,将群加入到问答白名单，修改roomWhiteList，加入需要开启的群ID（roomid），群ID在消息中查看
+8.2 修改配置文件,将群加入到问答白名单，修改roomWhiteList，加入需要开启的群ID（roomid），群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
+
+<img width="1378" alt="image" src="https://user-images.githubusercontent.com/104893934/203391583-a8c2d3ca-5604-4947-9371-f45b8261fc95.png">
+
+<img width="1139" alt="image" src="https://user-images.githubusercontent.com/104893934/203391251-db34aaa9-c2f1-42dc-8bf2-ed3a2cef707f.png">
 
 ```
 /* eslint-disable sort-keys */
@@ -116,6 +120,8 @@ export default configs
 8.3 在微信对话平台中录入问答内容，以群名称建立分类，问答时会优先匹配群名称对应的分类，匹配不到时匹配【通用问题】分类
 
 <img width="1423" alt="image" src="https://user-images.githubusercontent.com/104893934/203390223-9a0ac292-fde9-4114-85dc-9c70a97b917b.png">
+
+8.4 重启程序，在指定群测试问答
 
 ## 使用环境变量启动
 
@@ -231,54 +237,23 @@ QQ群 583830241
 
 **遇到任何报错，一定记得第一时间查看报错信息，即使看不懂，起码复制或截图，否则没有人能仅凭几句语焉不详帮你解决问题**
 
-### 环境依赖
+### 1. 环境依赖
 
-- Windows > 10
+- nodejs > 16 且 npm > 7
 
-- nodejs > 16
+使用wechaty-puppet-xp时需使用Windows > 10操作
 
-- npm > 7
+### 2. 切换网页版微信
 
-### 切换网页版微信
+在”系统配置“表中修改”puppet“并重启程序
 
-将【Windows桌面版微信】代码注释掉，【网页版微信】代码取消注释，重新运行程序即可
-
-```
-// Windows桌面版微信
-const bot = WechatyBuilder.build({
-  name: 'openai-qa-bot',
-  puppet: 'wechaty-puppet-xp',
-})
-
-// 网页版微信
-// const bot = WechatyBuilder.build({
-//   name: 'openai-qa-bot',
-//   puppet: 'wechaty-puppet-wechat', 
-//   puppetOptions: {
-//     uos: true
-//   }
-// })
-```
-
-### 安装和运行
-
-1. 安装依赖时提示需要Visual Studio 2017+
+### 3. 安装依赖时提示需要Visual Studio 2017+
 
 去微软官网下载[Visual Studio 2022](https://visualstudio.microsoft.com/zh-hans/thank-you-downloading-visual-studio/?sku=Community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030&passive=false)并安装
 
 <img src="https://user-images.githubusercontent.com/104893934/167300714-49a0dc40-8857-4e81-a780-80e63af74d97.png" width="60%">
 
-2. 关于远程协助，如果折腾半天也没有搞定，可以联系申请远程协助指导安装
-
-提前下载好[向日葵](https://sunlogin.oray.com/download)软件并注册号账号，登陆后发控制码
-
-<img src="https://user-images.githubusercontent.com/104893934/167300700-19c6283b-584c-48f4-bc10-7418cc7528f3.png" width="60%">
-
-3. 下载解压缩软件
-
-[2345好压](https://haozip.2345.cc/)
-
-4. ubuntu系统下使用wechaty-puppet-wechat缺少依赖
+### 4. ubuntu系统下使用wechaty-puppet-wechat缺少依赖解决方法
 
 根据报错信息参考 https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md
 
@@ -294,7 +269,7 @@ sudo apt install gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 l
 sudo apt install libgbm1
 ```
 
-5. M1环境下报错
+### 5. mac M1环境下运行报错
 
 报错信息
 
@@ -308,3 +283,9 @@ sudo apt install libgbm1
 解决方案,设置环境变量 `export PUPPETEER_EXPERIMENTAL_CHROMIUM_MAC_ARM=RAM` 
 
 参考 https://www.npmjs.com/package/puppeteer?activeTab=readme
+
+### 6. 如果折腾半天也没有搞定，可以联系远程协助指导安装
+
+提前下载好[向日葵](https://sunlogin.oray.com/download)软件并注册号账号，登陆后发控制码
+
+<img src="https://user-images.githubusercontent.com/104893934/167300700-19c6283b-584c-48f4-bc10-7418cc7528f3.png" width="60%">
