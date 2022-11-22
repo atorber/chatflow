@@ -344,8 +344,7 @@ class VikaBot {
         this.roomListSheet = tables['群列表']
         this.roomWhiteListSheet = tables['群白名单']
         this.messageSheet = tables['消息记录']
-
-        console.log('系统表齐全，启动成功~', this)
+        console.log('================================================\n\n系统表齐全，启动成功啦~\n\n================================================\n')
       }
 
     } else {
