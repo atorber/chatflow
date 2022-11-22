@@ -64,7 +64,19 @@ export default configs
 npm run init
 ```
 
-6. 查看维格表中系统表格是否已创建成功，之后运行
+<img width="817" alt="image" src="https://user-images.githubusercontent.com/104893934/203386340-f2c5cd44-1ecb-4b10-b248-cca84148c0f3.png">
+
+在维格表查看系统表是否创建成功
+
+<img width="1437" alt="image" src="https://user-images.githubusercontent.com/104893934/203386602-a243a23d-6864-4565-8742-c16d06f78ed2.png">
+
+6. 设置使用的puppet，程序默认使用wechaty-puppet-xp（仅Windows系统下可使用），mac、linux系统需切换到wechaty-puppet-xp或wechaty-puppet-padlocal
+
+> 快速启用可使用免费的wechaty-puppet-xp
+
+<img width="1384" alt="image" src="https://user-images.githubusercontent.com/104893934/203387787-46ec974c-3568-4fa6-a8c4-3e569f58aee1.png">
+
+7. 启动程序
 
 ```
 npm start
@@ -72,7 +84,40 @@ npm start
 
 看到如下界面，说明运行成功了
 
+<img width="786" alt="image" src="https://user-images.githubusercontent.com/104893934/203388629-c8081f57-dfd6-46c8-abb3-3a064e76bbc9.png">
 
+8.开启智能问答功能
+
+8.1 设置微信对话平台token，填写"系统配置表"中的 【对话平台token】、【对话平台EncodingAESKey】并开启智能问答
+
+<img width="1310" alt="image" src="https://user-images.githubusercontent.com/104893934/203387234-7ceaee5c-650f-448d-a4f6-59a2153d5de7.png">
+
+8.2 修改配置文件,将群加入到问答白名单，修改roomWhiteList，加入需要开启的群ID（roomid），群ID在消息中查看
+
+```
+/* eslint-disable sort-keys */
+// 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
+const configs = {
+  VIKA_TOKEN: '替换成自己的维格表token', 
+  VIKA_SPACENAME: '替换成你的维格表空间名称', //
+  welcomeList: [], 
+  roomWhiteList: [
+    '25108313781@chatroom', // Easy Chatbot Show
+    '5854608913@chatroom', // Moments
+  ], // 群白名单，白名单里内群开启机器人，其他群不开启
+  linkWhiteList: [
+    'xxxxxxx',
+  ], 
+}
+
+export default configs
+```
+
+8.3 在微信对话平台中录入问答内容，以群名称建立分类，问答时会优先匹配群名称对应的分类，匹配不到时匹配【通用问题】分类
+
+<img width="1423" alt="image" src="https://user-images.githubusercontent.com/104893934/203390223-9a0ac292-fde9-4114-85dc-9c70a97b917b.png">
+
+## 使用环境变量启动
 
 > 也可以不使用配置文件，通过配置环境变量启动
 
