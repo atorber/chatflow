@@ -6,9 +6,7 @@
 
 本项目使用wechat机器人快速实现一个免费的QA问答系统，如果你是一个社群工作者、拼团团长、业务群运营经理，使用这个项目可以帮助你解决一些重复性问答。
 
-~~前提是你有一台Windows电脑可以运行本项目，仅支持Windows环境下运行。~~ 
-
-乐大喜奔，已适配网页版微信（基于wechaty-puppet-wechat，截止2022年7月25日网页版微信支持所有微信用户登陆），linux、mac、Windows均可运行。
+乐大喜奔，已适配网页版微信，linux、mac、Windows均可运行。
 
 ### 功能列表
 
@@ -35,7 +33,7 @@ npm install
 
 3. 在电脑上登陆微信，微信版本必须为[WeChatSetup-v3.3.0.115.exe](https://github.com/wechaty/wechaty-puppet-xp/releases/download/v0.5/WeChatSetup-v3.3.0.115.exe)
 
-4. 修改config.js配置文件
+4. 修改./config.js配置文件
 
 快速开始仅需要修改VIKA_TOKEN、VIKA_SPACENAME配置项,其他配置项暂时无需修改
 
@@ -45,17 +43,12 @@ npm install
 const configs = {
   VIKA_TOKEN: '替换成自己的维格表token', // VIKA维格表token
   VIKA_SPACENAME: '替换成你的维格表空间名称', // VIKA维格表空间名称，修改为自己的空间名称
-  welcomeList: [
-    '25108313781@chatroom',
-    '25187527247@chatroom',
-    '20641535286@chatroom',
-  ], // 进群欢迎语白名单
+  welcomeList: [], // 进群欢迎语白名单
   roomWhiteList: [
     '25108313781@chatroom', // Easy Chatbot Show
     '5854608913@chatroom', // Moments
   ], // 群白名单，白名单里内群开启机器人，其他群不开启
   linkWhiteList: [
-    'ledongmao',
     'xxxxxxx',
   ], // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
 }
@@ -63,7 +56,9 @@ const configs = {
 export default configs
 ```
 
-5. 初始化系统表，运行
+> 只有加入到roomWhiteList里的群才会开启只能问答机器人
+
+5. 初始化系统表，先运行，系统会自动在维格表中创建好初始化表格
 
 ```
 npm run init
@@ -74,6 +69,10 @@ npm run init
 ```
 npm start
 ```
+
+看到如下界面，说明运行成功了
+
+
 
 > 也可以不使用配置文件，通过配置环境变量启动
 
