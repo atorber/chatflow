@@ -6,25 +6,17 @@
 /* eslint-disable sort-keys */
 import 'dotenv/config.js'
 import fs from 'fs'
-import {
-  init,
-  chat,
-  chatAibot,
-  nlp,
-  QueryData,
-  genToken,
-} from './src/openai/index.js'
 
 import {
   Contact,
-  Room,
+  // Room,
   Message,
   ScanStatus,
   WechatyBuilder,
   log,
-  types,
+  // types,
 } from 'wechaty'
-import * as PUPPET from 'wechaty-puppet'
+// import * as PUPPET from 'wechaty-puppet'
 // import {
 //   OneToManyRoomConnector,
 //   OneToManyRoomConnectorConfig,
@@ -33,14 +25,13 @@ import * as PUPPET from 'wechaty-puppet'
 // } from 'wechaty-plugin-contrib'
 
 import qrcodeTerminal from 'qrcode-terminal'
-import rp from 'request-promise'
 
 // import WechatyVikaPlugin from 'wechaty-vika-link'
 import WechatyVikaPlugin from './src/index.js'
 
 import { FileBox } from 'file-box'
 import configs from './config.js'
-import type { Puppet } from 'wechaty-puppet'
+// import type { Puppet } from 'wechaty-puppet'
 import * as io from 'socket.io-client'
 import { VikaBot } from './src/vika.js'
 import { configData } from './src/plugins/im.js'
@@ -72,24 +63,11 @@ async function main() {
   log.info(sysConfig)
 
   configs.roomWhiteList = configsRes[1]
-  configs.welcomeList = [
-    '25108313781@chatroom',
-    '25187527247@chatroom',
-    '20641535286@chatroom',
-  ] // 进群欢迎语白名单
-  configs.linkWhiteList = [
-    'ledongmao',
-    'xxxxxxx',
-  ] // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
+  configs.welcomeList = [] // 进群欢迎语白名单
 
   sysConfig = { ...configs, ...sysConfig }
   log.info(sysConfig)
   console.debug(sysConfig)
-
-  // init({
-  //   TOKEN: sysConfig.WX_TOKEN,
-  //   EncodingAESKey: sysConfig.EncodingAESKey,
-  // })
 
   const wechatyConfig: any = {
     // 网页版微信
@@ -117,7 +95,183 @@ async function main() {
 
   bot = WechatyBuilder.build(wechatyConfig[sysConfig.puppetName])
 
-  let socket: io
+  async function onScan(qrcode: string, status: ScanStatus) {
+    console.debug(qrcode)
+    if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
+      const qrcodeUrl = encodeURIComponent(qrcode)
+
+      const qrcodeImageUrl = [
+        'https://wechaty.js.org/qrcode/',
+        qrcodeUrl,
+      ].join('')
+      log.info('StarterBot', 'onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
+
+      qrcodeTerminal.generate(qrcode, { small: true })  // show qrcode on console
+
+      let uploadedAttachments = ''
+      let file: FileBox
+      let filePath = 'qrcode.png'
+      try {
+        file = FileBox.fromQRCode(qrcode)
+        if (file) {
+          filePath = './' + file.name
+          try {
+            const writeStream = fs.createWriteStream(filePath)
+            await file.pipe(writeStream)
+            await wait(200)
+            const readerStream = fs.createReadStream(filePath)
+            uploadedAttachments = await vika.upload(readerStream)
+            const text = qrcodeImageUrl
+            await vika.addScanRecord(uploadedAttachments, text)
+            fs.unlink(filePath, (err) => {
+              console.debug('上传vika完成删除文件：', filePath, err)
+            })
+          } catch {
+            console.debug('上传失败：', filePath)
+            fs.unlink(filePath, (err) => {
+              console.debug('上传vika失败删除文件', filePath, err)
+            })
+          }
+        }
+
+      } catch (e) {
+        console.log('vika 写入失败：', e)
+      }
+
+    } else {
+      log.info('StarterBot', 'onScan: %s(%s)', ScanStatus[status], status)
+    }
+  }
+
+  async function onLogin(user: Contact) {
+    log.info('StarterBot', '%s login', user.payload)
+    // log.info(JSON.stringify(user.payload))
+    const room = await bot.Room.findAll()
+    console.debug(room)
+    return room
+  }
+
+  function onLogout(user: Contact) {
+    log.info('StarterBot', '%s logout', user)
+  }
+
+  async function onMessage(message: Message) {
+
+    log.info('onMessage', JSON.stringify(message))
+
+    const talker = message.talker()
+    const text = message.text()
+    const room = message.room()
+    const roomId = room?.id
+    const topic = await room?.topic()
+
+    try {
+      const isSelfMsg = message.self()
+
+      if (room && roomId && !isSelfMsg) {
+
+        if (sysConfig.roomWhiteListOpen) {
+          const isInRoomWhiteList = sysConfig.roomWhiteList.includes(roomId)
+          if (isInRoomWhiteList) {
+            log.info('当前群在白名单内，请求问答...')
+            await wxai(sysConfig, bot,talker, room, message)
+          } else {
+            log.info('当前群不在白名单内，流程结束')
+          }
+        }
+
+        if (!sysConfig.roomWhiteListOpen) {
+          log.info('系统未开启白名单，请求问答...')
+          await wxai(sysConfig, bot,talker, room, message)
+        }
+
+        // IM服务开启时执行
+        if (sysConfig.imOpen && bot.Message.Type.Text === message.type()) {
+          configData.clientChatEn.clientChatId = talker.id + ' ' + room.id
+          configData.clientChatEn.clientChatName = talker.name() + '@' + topic
+          // log.debug(configData)
+          socket.emit('CLIENT_ON', {
+            clientChatEn: configData.clientChatEn,
+            serverChatId: configData.serverChatEn.serverChatId,
+          })
+          const data = {
+            msg: {
+              contentType: 'text',
+              content: text,
+              role: 'client',
+              avatarUrl: '/static/image/im_server_avatar.png',
+            },
+          }
+          log.info(JSON.stringify(data))
+          sendMsg(data)
+        }
+
+      }
+
+      if ((!room || !room.id) && !isSelfMsg) {
+        await wxai(sysConfig, bot,talker, undefined, message)
+      }
+
+    } catch (e) {
+      log.error('发起请求wxai失败', e)
+    }
+
+    // if (text == '我要转发') {
+    //   await message.say('接收密码')
+    // }
+
+    // if (text == '我要接收') {
+    //   await message.say('发送密码')
+    // }
+
+    // if (text == '发送密码to接收密码') {
+    //   await message.say('发送密码')
+    // }
+
+  }
+
+  async function roomJoin(room: { topic: () => any; id: any; say: (arg0: string, arg1: any) => any }, inviteeList: any[], inviter: any) {
+    const nameList = inviteeList.map(c => c.name()).join(',')
+    log.info(`Room ${await room.topic()} got new member ${nameList}, invited by ${inviter}`)
+    if (sysConfig.welcomeList.includes(room.id)) {
+      const newer = inviteeList[0]
+      if (newer) {
+        const newers: [Contact] = [newer]
+        await room.say(`欢迎加入${await room.topic()},请阅读群公告~`, ...newers)
+      }
+    }
+  }
+
+  const missingConfiguration = []
+
+  for (const key in configs) {
+    if (!configs[key] && !['imOpen', 'DIFF_REPLY_ONOFF'].includes(key)) {
+      missingConfiguration.push(key)
+    }
+  }
+
+  if (missingConfiguration.length === 0) {
+
+    const vikaConfig = { token: configs.VIKA_TOKEN, spaceName: configs.VIKA_SPACENAME }
+
+    bot.use(
+      WechatyVikaPlugin(vikaConfig),
+    )
+    bot.on('scan', onScan)
+    bot.on('login', onLogin)
+    bot.on('logout', onLogout)
+    bot.on('message', onMessage)
+    bot.on('room-join', roomJoin)
+    bot.start()
+      .then(() => log.info('Starter Bot Started.'))
+      .catch((e: any) => log.error(JSON.stringify(e)))
+      
+  } else {
+    log.error('\n======================================\n\n', `错误提示：\n缺少${missingConfiguration.join()}配置参数,请检查config.js文件\n\n======================================`)
+    log.info(configs)
+  }
+
+  let socket: any
   if (sysConfig.imOpen) {
     socket = io.connect('http://localhost:3001')
     configData.socket = socket
@@ -230,206 +384,6 @@ async function main() {
     //   addChatMsg(msg)
   }
 
-  async function onScan(qrcode: string, status: ScanStatus) {
-    console.debug(qrcode)
-    if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
-      const qrcodeUrl = encodeURIComponent(qrcode)
-
-      const qrcodeImageUrl = [
-        'https://wechaty.js.org/qrcode/',
-        qrcodeUrl,
-      ].join('')
-      log.info('StarterBot', 'onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
-
-      qrcodeTerminal.generate(qrcode, { small: true })  // show qrcode on console
-
-      let uploadedAttachments = ''
-      let file: FileBox
-      let filePath = 'qrcode.png'
-      try {
-        file = FileBox.fromQRCode(qrcode)
-        if (file) {
-          filePath = './' + file.name
-          try {
-            const writeStream = fs.createWriteStream(filePath)
-            await file.pipe(writeStream)
-            await wait(200)
-            const readerStream = fs.createReadStream(filePath)
-            uploadedAttachments = await vika.upload(readerStream)
-            const text = qrcodeImageUrl
-            await vika.addScanRecord(uploadedAttachments, text)
-            fs.unlink(filePath, (err) => {
-              console.debug('上传vika完成删除文件：', filePath, err)
-            })
-          } catch {
-            console.debug('上传失败：', filePath)
-            fs.unlink(filePath, (err) => {
-              console.debug('上传vika失败删除文件', filePath, err)
-            })
-          }
-        }
-
-      } catch (e) {
-        console.log('vika 写入失败：', e)
-      }
-
-    } else {
-      log.info('StarterBot', 'onScan: %s(%s)', ScanStatus[status], status)
-    }
-  }
-
-  async function onLogin(user: Contact) {
-    log.info('StarterBot', '%s login', user.payload)
-    // log.info(JSON.stringify(user.payload))
-    const room = await bot.Room.findAll()
-    console.debug(room)
-    return room
-  }
-
-  function onLogout(user: Contact) {
-    log.info('StarterBot', '%s logout', user)
-  }
-
-  async function onMessage(message: Message) {
-
-    log.info('onMessage', JSON.stringify(message))
-
-    // nodered启用时执行
-    if (sysConfig.noderedOpen) {
-      await doLog(message)
-    }
-
-    const talker = message.talker()
-    const text = message.text()
-    const room = message.room()
-    const roomId = room?.id
-    const topic = await room?.topic()
-
-    try {
-      const isSelfMsg = message.self()
-
-      if (room && roomId && !isSelfMsg) {
-
-        if (sysConfig.roomWhiteListOpen) {
-          const isInRoomWhiteList = sysConfig.roomWhiteList.includes(roomId)
-          if (isInRoomWhiteList) {
-            log.info('当前群在白名单内，请求问答...')
-            await wxai(sysConfig, bot,talker, room, message)
-          } else {
-            log.info('当前群不在白名单内，流程结束')
-          }
-        }
-
-        if (!sysConfig.roomWhiteListOpen) {
-          log.info('系统未开启白名单，请求问答...')
-          await wxai(sysConfig, bot,talker, room, message)
-        }
-
-        // IM服务开启时执行
-        if (sysConfig.imOpen && bot.Message.Type.Text === message.type()) {
-          configData.clientChatEn.clientChatId = talker.id + ' ' + room.id
-          configData.clientChatEn.clientChatName = talker.name() + '@' + topic
-          // log.debug(configData)
-          socket.emit('CLIENT_ON', {
-            clientChatEn: configData.clientChatEn,
-            serverChatId: configData.serverChatEn.serverChatId,
-          })
-          const data = {
-            msg: {
-              contentType: 'text',
-              content: text,
-              role: 'client',
-              avatarUrl: '/static/image/im_server_avatar.png',
-            },
-          }
-          log.info(JSON.stringify(data))
-          sendMsg(data)
-        }
-
-      }
-
-      if ((!room || !room.id) && !isSelfMsg) {
-        await wxai(sysConfig, bot,talker, undefined, message)
-      }
-
-    } catch (e) {
-      log.error('发起请求wxai失败', e)
-    }
-
-    // if (text == '我要转发') {
-    //   await message.say('接收密码')
-    // }
-
-    // if (text == '我要接收') {
-    //   await message.say('发送密码')
-    // }
-
-    // if (text == '发送密码to接收密码') {
-    //   await message.say('发送密码')
-    // }
-
-  }
-
-  const missingConfiguration = []
-  for (const key in configs) {
-    if (!configs[key] && !['imOpen', 'noderedOpen', 'DIFF_REPLY_ONOFF'].includes(key)) {
-      missingConfiguration.push(key)
-    }
-  }
-
-  if (missingConfiguration.length === 0) {
-
-    const vikaConfig = { token: configs.VIKA_TOKEN, spaceName: configs.VIKA_SPACENAME }
-
-    bot.use(
-      WechatyVikaPlugin(vikaConfig),
-    )
-    bot.on('scan', onScan)
-    bot.on('login', onLogin)
-    bot.on('logout', onLogout)
-    bot.on('message', onMessage)
-    bot.on('room-join', async (room: { topic: () => any; id: any; say: (arg0: string, arg1: any) => any }, inviteeList: any[], inviter: any) => {
-      const nameList = inviteeList.map(c => c.name()).join(',')
-      log.info(`Room ${await room.topic()} got new member ${nameList}, invited by ${inviter}`)
-      if (sysConfig.welcomeList.includes(room.id)) {
-        const newer = inviteeList[0]
-        if (newer) {
-          const newers: [Contact] = [newer]
-          await room.say(`欢迎加入${await room.topic()},请阅读群公告~`, ...newers)
-        }
-      }
-    })
-    bot.start()
-      .then(() => log.info('Starter Bot Started.'))
-      .catch((e: any) => log.error(JSON.stringify(e)))
-  } else {
-    log.error('\n======================================\n\n', `错误提示：\n缺少${missingConfiguration.join()}配置参数,请检查config.js文件\n\n======================================`)
-    log.info(configs)
-  }
-}
-
-function roomlinker(message: { text: () => any }) {
-  const text = message.text()
-  return ''
-}
-
-async function doLog(params: any) {
-  const uri = 'http://127.0.0.1:1880/log'
-  const method = 'POST'
-  const opt = {
-    method,
-    uri,
-    qs: {},
-    body: params,
-    headers: {},
-    json: true,
-  }
-  try {
-    const res = await rp(opt)
-    log.info('发送日志成功：', res)
-  } catch (err) {
-    log.error('发送日志失败：', err)
-  }
 }
 
 // 定义一个延时方法

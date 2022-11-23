@@ -1,21 +1,21 @@
 import {
     init,
-    chat,
+    // chat,
     chatAibot,
-    nlp,
-    QueryData,
+    // nlp,
+    // QueryData,
     genToken,
 } from '../openai/index.js'
 
 import { FileBox } from 'file-box'
-import excel2order from '../excel.js'
+// import excel2order from '../excel.js'
 
 import {
-    Contact,
-    Room,
-    Message,
-    ScanStatus,
-    WechatyBuilder,
+    // Contact,
+    // Room,
+    // Message,
+    // ScanStatus,
+    // WechatyBuilder,
     log,
     types,
   } from 'wechaty'
@@ -127,7 +127,7 @@ async function wxai(sysConfig:any,bot:any, talker:any, room:any, message:any) {
                 await wait(1000)
                 log.info('fileName=====', filePath)
 
-                await excel2order(filePath, message)
+                // await excel2order(filePath, message)
             }
         } catch (err) {
             log.error('转换失败', err)

@@ -18,4 +18,5 @@
     "src/**/*.ts",
     "tests/**/*.spec.ts", "src/wx-open-ai.js",
   ],
+  "esModuleInterop": true
 }

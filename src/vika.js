@@ -302,7 +302,6 @@ class VikaBot {
       DIFF_REPLY_ONOFF: config['不同群个性回复'] === '开启', // 开启不同群个性化回复
       linkWhiteList: ['ledongmao', 'xxxxxxx'],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
       imOpen: config['IM对话'] === '开启',  // 是否开启uve-im客户端，设置为true时，需要先 cd ./vue-im 然后 npm install 启动服务 npm run dev
-      noderedOpen: config['可视化控制'] === '开启',  // 是否开启nodered，开启nodered后可以以可视化界面启动机器人，需要先导入 ./tools 目录下的 flows.json
     }
     let roomWhiteList = []
     const roomWhiteListRecords = await this.getRecords(this.roomWhiteListSheet, {})
@@ -626,23 +625,6 @@ class VikaBot {
               },
               desc: 'puppet的token，仅当使用padlocal时需要填写',
             },
-            {
-              name: '可视化控制',
-              type: 'SingleSelect',
-              property: {
-                options: [
-                  {
-                    name: '开启',
-                    color: 'deepPurple_0',
-                  },
-                  {
-                    name: '关闭',
-                    color: 'indigo_0',
-                  },
-                ],
-              },
-              desc: '开启后可在node-red中可视化开启和关闭机器人',
-            },
           ],
           name: '系统配置',
         }
@@ -660,7 +642,6 @@ class VikaBot {
             IM对话: '关闭',
             puppet: 'wechaty-puppet-xp',
             'wechaty-token': '',
-            可视化控制: '关闭',
           },
         }]
         await this.createRecord(this.configSheet, recordsConfig)
