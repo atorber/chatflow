@@ -134,30 +134,17 @@ npm start
 
 <img width="1310" alt="image" src="https://user-images.githubusercontent.com/104893934/203387234-7ceaee5c-650f-448d-a4f6-59a2153d5de7.png">
 
-8.2 修改配置文件,将群加入到问答白名单，修改roomWhiteList，加入需要开启的群ID（roomid），群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
+8.2 设置群白名单,将群加入到问答白名单，在“群白名单”表中，加入需要开启的群ID（roomid），群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
+
+- 获取群ID
 
 <img width="1378" alt="image" src="https://user-images.githubusercontent.com/104893934/203391583-a8c2d3ca-5604-4947-9371-f45b8261fc95.png">
 
 <img width="1139" alt="image" src="https://user-images.githubusercontent.com/104893934/203391251-db34aaa9-c2f1-42dc-8bf2-ed3a2cef707f.png">
 
-```
-/* eslint-disable sort-keys */
-// 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
-const configs = {
-  VIKA_TOKEN: '替换成自己的维格表token', 
-  VIKA_SPACENAME: '替换成你的维格表空间名称', //
-  welcomeList: [], 
-  roomWhiteList: [
-    '25108313781@chatroom', // Easy Chatbot Show
-    '5854608913@chatroom', // Moments
-  ], // 群白名单，白名单里内群开启机器人，其他群不开启
-  linkWhiteList: [
-    'xxxxxxx',
-  ], 
-}
+- 添加白名单
 
-export default configs
-```
+![image](https://user-images.githubusercontent.com/104893934/203492852-95c083dd-6357-43ec-bba6-6170f1d47cd3.png)
 
 8.3 在微信对话平台中录入问答内容，以群名称建立分类，问答时会优先匹配群名称对应的分类，匹配不到时匹配【通用问题】分类
 
