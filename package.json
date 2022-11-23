@@ -45,6 +45,7 @@
     "openai-sdk": "^1.0.1",
     "pm2": "^5.2.0",
     "qrcode-terminal": "^0.12.0",
+    "request": "^2.88.0",
     "request-promise": "^4.2.6",
     "socket.io": "^2.1.0",
     "socket.io-client": "^2.4.0",
@@ -53,13 +54,13 @@
     "wechaty-plugin-contrib": "^1.0.18",
     "wechaty-puppet-padlocal": "^1.11.13",
     "wechaty-puppet-wechat": "^1.18.4",
-    "wechaty-puppet-xp": "^1.11.14",
-    "request": "^2.88.0"
+    "wechaty-puppet-xp": "^1.11.14"
   },
   "devDependencies": {
     "@chatie/eslint-config": "^1.0.4",
     "@chatie/git-scripts": "^0.6.2",
     "@chatie/tsconfig": "^4.6.3",
+    "@types/node": "^18.11.9",
     "@types/qrcode-terminal": "^0.12.0",
     "@types/request-promise": "^4.1.48",
     "check-node-version": "^4.2.1",
