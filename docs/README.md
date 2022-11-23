@@ -170,14 +170,14 @@ npm run start
 
 ## 使用教程
 
-> 提示：2022-5-13最新版本里需要在config.js文件中修改自己的微信对话开放平台、VIKA维格表的token，维格表token的获取方式请自行浏览官方网站,同时需要在维格表中创建一个名为 mp-chatbot 的空间，关于维格表的操作可以参考[wechaty-vika-link](https://github.com/atorber/wechaty-vika-link/tree/anti-epidemic)
+> 提示：2022-5-13最新版本里需要在config.js文件中修改自己的微信对话开放平台、VIKA维格表的token，维格表token的获取方式请自行浏览官方网站,同时需要在维格表中创建一个名为 mp-chatbot 的空间，关于维格表的操作可以参考[wechaty-vika-link](https://github.com/atorber/wechaty-vika-link)
 
 ### 环境准备
 
 1. clone （下载）项目代码,运行以下命令：
 
 ```
-git clone https://github.com/atorber/wechaty-wx-openai-link.git
+git clone https://github.com/atorber/wechat-openai-qa-bot.git
 ```
 
 考虑对git不熟悉的用户，可以在页面直接下载项目.zip到电脑上,下载后解压缩即可
@@ -213,7 +213,7 @@ git clone https://github.com/atorber/wechaty-wx-openai-link.git
 4. 在复制如下命令在Windows PoweShell中执行
 
 ```
-cd C:\Users\wechaty\Documents\GitHub\wechaty-wx-openai-link
+cd C:\Users\wechaty\Documents\GitHub\wechat-openai-qa-bot
 npm install
 ```
 
@@ -285,27 +285,13 @@ npm install
 在获取token之后，更新token到配置文件中，准备启动系统
 
 ```
+// 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
 const configs = {
-  WX_TOKEN: '', // 微信对话平台token
-  VIKA_TOKEN: '', // VIKA维格表token
-  VIKA_SPACENAME:'',  // VIKA维格表空间名称，修改为自己的已存在的任意空间名称
-  VIKA_DATASHEETNAME:'', // VIKA维格表名称,修改为自己的表名称，可填写任意名称，不需要在维格表中建表，程序会自动建表
-  linkWhiteList: ['ledongmao',],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
-  roomWhiteList: [
-    {
-      name: 'xxxx',
-      id: '22064763@chatroom',
-    }, {
-      name: 'xxxx',
-      id: '22064763@chatroom',
-    }, {
-      name: 'xxxx',
-      id: '22064763@chatroom',
-    },
-  ],  // 群白名单，白名单里内群开启机器人，其他群不开启，暂未实现2022-5-21
-  imOpen: true,  // 是否开启uve-im客户端，设置为true时，需要先 cd ./vue-im 然后 npm install 启动服务 npm run dev
-  noderedOpen: false,  // 是否开启nodered，开启nodered后可以以可视化界面启动机器人，需要先导入 ./tools 目录下的 flows.json
+  VIKA_TOKEN: '替换成自己的维格表token', // VIKA维格表token
+  VIKA_SPACENAME: '替换成你的维格表空间名称', // VIKA维格表空间名称，修改为自己的空间名称
 }
+
+export default configs
 ```
 
 ### 启动程序
@@ -326,7 +312,7 @@ npm run start
 
 ### 客服系统
 
-1. 修改配置文件中imOpen为`imOpen: true`
+1. 修改“系统配置”表中的为`IM对话`为开启
 
 2. 启动vue-im再启动主程序
 

@@ -120,3 +120,4 @@ config-dev.js
 package-lock.json
 .gitpod.yml
 openai-qa-bot.memory-card.json
+config.js
