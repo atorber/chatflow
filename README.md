@@ -26,6 +26,7 @@
 
 ```
 git clone https://github.com/choogoo/wechat-openai-qa-bot.git
+cd ./wechat-openai-qa-bot
 npm install
 ```
 
