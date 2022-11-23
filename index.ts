@@ -95,11 +95,27 @@ async function main () {
 
   void await vika.checkInit()
   // 获取系统配置信息
-  sysConfig = await vika.getConfig()
+  const configsRes = await vika.getConfig()
+  sysConfig = configsRes[0]
   log.info(sysConfig)
+
+  configs.roomWhiteList = configsRes[1]
+
+  configs.welcomeList = [
+    '25108313781@chatroom',
+    '25187527247@chatroom',
+    '20641535286@chatroom',
+  ] // 进群欢迎语白名单
+
+  configs.linkWhiteList = [
+    'ledongmao',
+    'xxxxxxx',
+  ] // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
 
   sysConfig = { ...configs, ...sysConfig }
   log.info(sysConfig)
+
+  console.debug(sysConfig)
 
   init({
     TOKEN: sysConfig.WX_TOKEN,

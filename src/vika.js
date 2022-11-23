@@ -304,7 +304,14 @@ class VikaBot {
       imOpen: config['IM对话'] === '开启',  // 是否开启uve-im客户端，设置为true时，需要先 cd ./vue-im 然后 npm install 启动服务 npm run dev
       noderedOpen: config['可视化控制'] === '开启',  // 是否开启nodered，开启nodered后可以以可视化界面启动机器人，需要先导入 ./tools 目录下的 flows.json
     }
-    return sysConfig
+    let roomWhiteList = []
+    const roomWhiteListRecords = await this.getRecords(this.roomWhiteListSheet, {})
+
+    for (let i = 0; i < roomWhiteListRecords.length; i++) {
+      roomWhiteList.push(roomWhiteListRecords[i].fields['群ID'])
+    }
+
+    return [sysConfig, roomWhiteList]
 
   }
 
