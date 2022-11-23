@@ -75,26 +75,118 @@ npm install
 
 3. 在电脑上登陆微信，微信版本必须为[WeChatSetup-v3.3.0.115.exe](https://github.com/wechaty/wechaty-puppet-xp/releases/download/v0.5/WeChatSetup-v3.3.0.115.exe)
 
-4. 修改配置文件
+4. 修改./config.js配置文件
 
-快速开始仅需要修改WX_TOKEN、VIKA_TOKEN、VIKA_SPACENAME、VIKA_DATASHEETNAME四个配置项
+快速开始仅需要修改VIKA_TOKEN、VIKA_SPACENAME配置项,其他配置项暂时无需修改
 
 ```
+/* eslint-disable sort-keys */
+// 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
 const configs = {
-  WX_TOKEN: '', // 微信对话平台token
-  VIKA_TOKEN: '', // VIKA维格表token
-  VIKA_SPACENAME:'',  // VIKA维格表空间名称，修改为自己的已存在的任意空间名称
-  VIKA_DATASHEETNAME:'', // VIKA维格表名称,修改为自己的表名称，可填写任意名称，不需要在维格表中建表，程序会自动建表
-  linkWhiteList: ['ledongmao',],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
-  imOpen: false,  // 是否开启uve-im客户端，设置为true时，需要先 cd ./vue-im 然后 npm install 启动服务 npm run dev
-  noderedOpen: false,  // 是否开启nodered，开启nodered后可以以可视化界面启动机器人，需要先导入 ./tools 目录下的 flows.json
+  VIKA_TOKEN: '替换成自己的维格表token', // VIKA维格表token
+  VIKA_SPACENAME: '替换成你的维格表空间名称', // VIKA维格表空间名称，修改为自己的空间名称
+  welcomeList: [], // 进群欢迎语白名单
+  roomWhiteList: [
+    '25108313781@chatroom', // Easy Chatbot Show
+    '5854608913@chatroom', // Moments
+  ], // 群白名单，白名单里内群开启机器人，其他群不开启
+  linkWhiteList: [
+    'xxxxxxx',
+  ], // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
 }
+
+export default configs
 ```
 
-5. 启动
+> 只有加入到roomWhiteList里的群才会开启只能问答机器人
+
+5. 初始化系统表，先运行，系统会自动在维格表中创建好初始化表格
+
+```
+npm run init
+```
+
+<img width="817" alt="image" src="https://user-images.githubusercontent.com/104893934/203386340-f2c5cd44-1ecb-4b10-b248-cca84148c0f3.png">
+
+在维格表查看系统表是否创建成功
+
+<img width="1437" alt="image" src="https://user-images.githubusercontent.com/104893934/203386602-a243a23d-6864-4565-8742-c16d06f78ed2.png">
+
+6. 设置使用的puppet，程序默认使用wechaty-puppet-xp（仅Windows系统下可使用），mac、linux系统需切换到wechaty-puppet-xp或wechaty-puppet-padlocal
+
+> 快速启用可使用免费的wechaty-puppet-xp
+
+<img width="1384" alt="image" src="https://user-images.githubusercontent.com/104893934/203387787-46ec974c-3568-4fa6-a8c4-3e569f58aee1.png">
+
+7. 启动程序
 
 ```
 npm start
+```
+
+看到如下界面，说明运行成功了
+
+<img width="786" alt="image" src="https://user-images.githubusercontent.com/104893934/203388629-c8081f57-dfd6-46c8-abb3-3a064e76bbc9.png">
+
+8.开启智能问答功能
+
+8.1 设置微信对话平台token，填写"系统配置表"中的 【对话平台token】、【对话平台EncodingAESKey】并开启智能问答
+
+<img width="1310" alt="image" src="https://user-images.githubusercontent.com/104893934/203387234-7ceaee5c-650f-448d-a4f6-59a2153d5de7.png">
+
+8.2 修改配置文件,将群加入到问答白名单，修改roomWhiteList，加入需要开启的群ID（roomid），群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
+
+<img width="1378" alt="image" src="https://user-images.githubusercontent.com/104893934/203391583-a8c2d3ca-5604-4947-9371-f45b8261fc95.png">
+
+<img width="1139" alt="image" src="https://user-images.githubusercontent.com/104893934/203391251-db34aaa9-c2f1-42dc-8bf2-ed3a2cef707f.png">
+
+```
+/* eslint-disable sort-keys */
+// 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
+const configs = {
+  VIKA_TOKEN: '替换成自己的维格表token', 
+  VIKA_SPACENAME: '替换成你的维格表空间名称', //
+  welcomeList: [], 
+  roomWhiteList: [
+    '25108313781@chatroom', // Easy Chatbot Show
+    '5854608913@chatroom', // Moments
+  ], // 群白名单，白名单里内群开启机器人，其他群不开启
+  linkWhiteList: [
+    'xxxxxxx',
+  ], 
+}
+
+export default configs
+```
+
+8.3 在微信对话平台中录入问答内容，以群名称建立分类，问答时会优先匹配群名称对应的分类，匹配不到时匹配【通用问题】分类
+
+<img width="1423" alt="image" src="https://user-images.githubusercontent.com/104893934/203390223-9a0ac292-fde9-4114-85dc-9c70a97b917b.png">
+
+8.4 重启程序，在指定群测试问答
+
+## 使用环境变量启动
+
+> 也可以不使用配置文件，通过配置环境变量启动
+
+Mac、Linux操作系统下运行(仅支持使用wechaty-puppet-wechat和wechaty-puppet-padlocal)
+
+```
+export VIKA_TOKEN="替换成自己的维格表token"
+export VIKA_SPACENAME="替换成你的维格表空间名称"
+npm run init
+npm start
+```
+
+Windows操作系统下运行(支持使用wechaty-puppet-xp、wechaty-puppet-wechat、wechaty-puppet-padlocal)
+
+推荐使用 wechaty-puppet-xp
+
+```
+set VIKA_TOKEN="替换成自己的维格表token"
+set VIKA_SPACENAME="替换成你的维格表空间名称"
+npm run init
+npm run start
 ```
 
 ## 使用教程
