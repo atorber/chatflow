@@ -277,6 +277,24 @@ class VikaBot {
     return records
   }
 
+  async getAllRecords(datasheetId) {
+    let records = []
+    const datasheet = await this.vika.datasheet(datasheetId)
+    const response = await datasheet.records.queryAll()
+    // console.debug('原始返回：',response)
+    if (response.next) {
+      for await (const eachPageRecords of response) {
+        // console.debug('eachPageRecords:',eachPageRecords.length)
+        records.push(...eachPageRecords)
+      }
+      // console.debug('records:',records.length)
+    } else {
+      console.error(response)
+      records = response
+    }
+    return records
+  }
+
   async clearBlankLines(datasheetId) {
     const records = await this.getRecords(datasheetId, {})
     const recordsIds = []

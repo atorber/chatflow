@@ -14,6 +14,7 @@ import {
   ScanStatus,
   WechatyBuilder,
   log,
+  Room,
   // types,
 } from 'wechaty'
 // import * as PUPPET from 'wechaty-puppet'
@@ -67,7 +68,7 @@ async function main() {
 
   sysConfig = { ...configs, ...sysConfig }
   log.info(sysConfig)
-  console.debug(sysConfig)
+  // console.debug(sysConfig)
 
   const wechatyConfig: any = {
     // 网页版微信
@@ -145,10 +146,13 @@ async function main() {
 
   async function onLogin(user: Contact) {
     log.info('StarterBot', '%s login', user.payload)
-    // log.info(JSON.stringify(user.payload))
-    const room = await bot.Room.findAll()
-    console.debug(room)
-    return room
+    log.info(JSON.stringify(user.payload))
+    const rooms = await bot.Room.findAll()
+    console.debug('当前最新微信群数量：',rooms.length)
+    updateRooms(rooms)
+    const contacts = await bot.Contact.findAll()
+    console.debug('当前微信最新联系人数量：',contacts.length)
+    updateContacts(contacts)
   }
 
   function onLogout(user: Contact) {
@@ -174,7 +178,7 @@ async function main() {
           const isInRoomWhiteList = sysConfig.roomWhiteList.includes(roomId)
           if (isInRoomWhiteList) {
             log.info('当前群在白名单内，请求问答...')
-            await wxai(sysConfig, bot,talker, room, message)
+            await wxai(sysConfig, bot, talker, room, message)
           } else {
             log.info('当前群不在白名单内，流程结束')
           }
@@ -182,7 +186,7 @@ async function main() {
 
         if (!sysConfig.roomWhiteListOpen) {
           log.info('系统未开启白名单，请求问答...')
-          await wxai(sysConfig, bot,talker, room, message)
+          await wxai(sysConfig, bot, talker, room, message)
         }
 
         // IM服务开启时执行
@@ -209,7 +213,7 @@ async function main() {
       }
 
       if ((!room || !room.id) && !isSelfMsg) {
-        await wxai(sysConfig, bot,talker, undefined, message)
+        await wxai(sysConfig, bot, talker, undefined, message)
       }
 
     } catch (e) {
@@ -242,6 +246,84 @@ async function main() {
     }
   }
 
+  async function updateContacts(contacts: Contact[]) {
+    const recordsAll: any = []
+    const recordExisting = await vika.getAllRecords(vika.contactSheet)
+    console.debug('云端好友数量：', recordExisting.length)
+    const wxids: string[] = []
+    if (recordExisting.length) {
+      recordExisting.forEach((record: {fields:any, id: any }) => {
+        wxids.push(record.fields.id)
+      });
+    }
+    for (let i = 0; i < contacts.length; i++) {
+      let item = contacts[i]
+      if (item && !wxids.includes(item.id)) {
+        const fields = {
+          "id": item.id,
+          "name": item.name(),
+          "alias": String(await item.alias() || ''),
+          "gender": String(item.gender() || ''),
+          "friend": item.friend(),
+          "type": String(item.type()),
+          "avatar": String(await item.avatar()),
+          "phone": String(await item.phone())
+        }
+        const record = {
+          fields
+        }
+        recordsAll.push(record)
+      }
+    }
+
+    for (let i = 0; i < recordsAll.length; i = i + 10) {
+      const records = recordsAll.slice(i, i + 10)
+      await vika.createRecord(vika.contactSheet, records)
+      console.debug('好友列表同步中...', i + 10)
+      void await wait(200)
+    }
+
+    console.debug('同步好友列表完成，更新好友数量：',recordsAll.length)
+
+  }
+
+  async function updateRooms(rooms: Room[]) {
+    const recordsAll: any = []
+    const recordExisting = await vika.getAllRecords(vika.roomListSheet)
+    console.debug('云端群数量：', recordExisting.length)
+    const wxids: string[] = []
+    if (recordExisting.length) {
+      recordExisting.forEach((record: {fields:any, id: any }) => {
+        wxids.push(record.fields.id)
+      });
+    }
+    for (let i = 0; i < rooms.length; i++) {
+      let item = rooms[i]
+      if (item && !wxids.includes(item.id)) {
+        const fields = {
+          "id": item.id,
+          "topic": await item.topic()||'',
+          "ownerId": String(item.owner() || ''),
+          "avatar": String(await item.avatar() || ''),
+        }
+        const record = {
+          fields
+        }
+        recordsAll.push(record)
+      }
+    }
+
+    for (let i = 0; i < recordsAll.length; i = i + 10) {
+      const records = recordsAll.slice(i, i + 10)
+      await vika.createRecord(vika.roomListSheet, records)
+      console.debug('群列表同步中...', i + 10)
+      void await wait(200)
+    }
+
+    console.debug('同步群列表完成，更新群数量：',recordsAll.length)
+
+  }
+
   const missingConfiguration = []
 
   for (const key in configs) {
@@ -262,10 +344,22 @@ async function main() {
     bot.on('logout', onLogout)
     bot.on('message', onMessage)
     bot.on('room-join', roomJoin)
+
     bot.start()
-      .then(() => log.info('Starter Bot Started.'))
-      .catch((e: any) => log.error(JSON.stringify(e)))
-      
+    .then(() => log.info('Starter Bot Started.'))
+    .catch((e: any) => log.error(JSON.stringify(e)))
+
+    // try {
+    //   bot.start()
+    //     .then(() => log.info('Starter Bot Started.'))
+    //     .catch((e: any) => log.error(JSON.stringify(e)))
+    // } catch (e) {
+    //   void await wait(1000)
+    //   bot.start()
+    //     .then(() => log.info('Starter Bot Started.'))
+    //     .catch((e: any) => log.error(JSON.stringify(e)))
+    // }
+
   } else {
     log.error('\n======================================\n\n', `错误提示：\n缺少${missingConfiguration.join()}配置参数,请检查config.js文件\n\n======================================`)
     log.info(configs)
