@@ -258,7 +258,7 @@ async function main() {
     }
     for (let i = 0; i < contacts.length; i++) {
       let item = contacts[i]
-      if (item && !wxids.includes(item.id)) {
+      if (item && item.friend() && !wxids.includes(item.id)) {
         const fields = {
           "id": item.id,
           "name": item.name(),

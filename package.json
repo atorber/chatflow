@@ -54,7 +54,7 @@
     "wechaty-plugin-contrib": "^1.0.18",
     "wechaty-puppet-padlocal": "^1.11.13",
     "wechaty-puppet-wechat": "^1.18.4",
-    "wechaty-puppet-xp": "^1.11.14"
+    "wechaty-puppet-xp": "^1.12.3"
   },
   "devDependencies": {
     "@chatie/eslint-config": "^1.0.4",

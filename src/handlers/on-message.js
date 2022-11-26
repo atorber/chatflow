@@ -32,12 +32,14 @@ async function onMessage (message, vika) {
       case PUPPET.types.Message.Image:
 
         try {
-          const img = await message.toImage()
-          file = await img.thumbnail()
-          await wait(500)
-          // console.debug('file=======================', file)
+          // await wait(2500)
+          // const img = await message.toImage()
+          // file = await img.thumbnail()
+          file = await message.toFileBox()
+
         } catch (e) {
           console.error('Image解析失败：', e)
+          file = ''
         }
 
         break
@@ -81,6 +83,7 @@ async function onMessage (message, vika) {
 
         } catch (e) {
           console.error('Audio解析失败：', e)
+          file = ''
         }
 
         break
@@ -93,6 +96,7 @@ async function onMessage (message, vika) {
 
         } catch (e) {
           console.error('Video解析失败：', e)
+          file = ''
         }
         break
 
@@ -104,6 +108,7 @@ async function onMessage (message, vika) {
 
         } catch (e) {
           console.error('Emoticon解析失败：', e)
+          file = ''
         }
 
         break
@@ -116,6 +121,7 @@ async function onMessage (message, vika) {
 
         } catch (e) {
           console.error('Attachment解析失败：', e)
+          file = ''
         }
 
         break
