@@ -14,9 +14,9 @@ async function init (): Promise<void> {
   await vika.init()
 }
 
-async function getFields (datasheetId: string): Promise<void> {
-  await vika.getSheetFields(datasheetId)
-}
+// async function getFields (datasheetId: string): Promise<void> {
+//   await vika.getSheetFields(datasheetId)
+// }
 
 // void getFields('dstKiDu2sEAXJGvsJR')
 

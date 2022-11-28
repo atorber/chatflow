@@ -1,6 +1,6 @@
-import { ResponseNER, ResponseSENTIMENT, ResponseSENSITIVE } from './response'
+import type { ResponseNER, ResponseSENTIMENT, ResponseSENSITIVE } from './response'
 import { transferNLP } from './util'
-import { QueryData } from './query'
+import type { QueryData } from './query'
 
 function tokenize (query: QueryData) {
   return transferNLP('TOKENIZE', query)

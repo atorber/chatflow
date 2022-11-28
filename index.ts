@@ -38,6 +38,8 @@ import { VikaBot } from './src/vika.js'
 import { configData } from './src/plugins/im.js'
 import { wxai } from './src/plugins/wxai.js'
 
+import schedule from 'node-schedule'
+
 let bot: any
 let sysConfig: any
 
@@ -148,11 +150,22 @@ async function main() {
     log.info('StarterBot', '%s login', user.payload)
     log.info(JSON.stringify(user.payload))
     const rooms = await bot.Room.findAll()
-    console.debug('当前最新微信群数量：',rooms.length)
+    console.debug('当前最新微信群数量：', rooms.length)
     updateRooms(rooms)
     const contacts = await bot.Contact.findAll()
-    console.debug('当前微信最新联系人数量：',contacts.length)
+    console.debug('当前微信最新联系人数量：', contacts.length)
     updateContacts(contacts)
+
+    // 心跳5min发一次
+    // const rule = new schedule.RecurrenceRule();
+    // rule.second = 300;
+    // const job = schedule.scheduleJob(rule, async function () {
+    //   const curDate = '现在时间：' + new Date()
+    //   console.log(curDate);
+    //   const contact = await bot.Contact.find({ id: 'tyutluyc' })
+    //   await contact.say(curDate)
+    // });
+    // log.info(job)
   }
 
   function onLogout(user: Contact) {
@@ -252,7 +265,7 @@ async function main() {
     console.debug('云端好友数量：', recordExisting.length)
     const wxids: string[] = []
     if (recordExisting.length) {
-      recordExisting.forEach((record: {fields:any, id: any }) => {
+      recordExisting.forEach((record: { fields: any, id: any }) => {
         wxids.push(record.fields.id)
       });
     }
@@ -283,7 +296,7 @@ async function main() {
       void await wait(200)
     }
 
-    console.debug('同步好友列表完成，更新好友数量：',recordsAll.length)
+    console.debug('同步好友列表完成，更新好友数量：', recordsAll.length)
 
   }
 
@@ -293,7 +306,7 @@ async function main() {
     console.debug('云端群数量：', recordExisting.length)
     const wxids: string[] = []
     if (recordExisting.length) {
-      recordExisting.forEach((record: {fields:any, id: any }) => {
+      recordExisting.forEach((record: { fields: any, id: any }) => {
         wxids.push(record.fields.id)
       });
     }
@@ -302,8 +315,8 @@ async function main() {
       if (item && !wxids.includes(item.id)) {
         const fields = {
           "id": item.id,
-          "topic": await item.topic()||'',
-          "ownerId": String(item.owner() || ''),
+          "topic": await item.topic() || '',
+          "ownerId": String(item.owner()?.id || ''),
           "avatar": String(await item.avatar() || ''),
         }
         const record = {
@@ -320,7 +333,7 @@ async function main() {
       void await wait(200)
     }
 
-    console.debug('同步群列表完成，更新群数量：',recordsAll.length)
+    console.debug('同步群列表完成，更新群数量：', recordsAll.length)
 
   }
 
@@ -346,8 +359,8 @@ async function main() {
     bot.on('room-join', roomJoin)
 
     bot.start()
-    .then(() => log.info('Starter Bot Started.'))
-    .catch((e: any) => log.error(JSON.stringify(e)))
+      .then(() => log.info('Starter Bot Started.'))
+      .catch((e: any) => log.error(JSON.stringify(e)))
 
     // try {
     //   bot.start()

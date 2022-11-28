@@ -1,6 +1,6 @@
 {
   "name": "openai-qa-bot",
-  "version": "2.0",
+  "version": "2.1.0",
   "description": "openai-qa-bot",
   "type": "module",
   "engines": {
@@ -19,7 +19,9 @@
     "lint:md": "markdownlint README.md",
     "lint:ts": "tsc --isolatedModules --noEmit",
     "lint:es": "eslint \"src/**/*.ts\" \"tests/**/*.spec.ts\" --ignore-pattern tests/fixtures/",
-    "lint-fix": "eslint --fix \"src/**/*.ts\" \"tests/**/*.spec.ts\""
+    "lint-fix": "eslint --fix \"src/**/*.ts\" \"tests/**/*.spec.ts\"",
+    "start:ts": "node --loader ts-node/esm index.ts",
+    "start:pm2": "pm2 start npm -- run start:ts"
   },
   "repository": {
     "type": "git",
@@ -37,10 +39,10 @@
     "dotenv": "^16.0.0",
     "exceljs": "^4.3.0",
     "file-box": "^1.4.12",
-    "forever": "^4.0.3",
     "fs": "^0.0.1-security",
     "moment": "^2.29.1",
     "njwt": "^1.2.0",
+    "node-schedule": "^2.1.0",
     "node-xlsx": "^0.21.0",
     "openai-sdk": "^1.0.1",
     "pm2": "^5.2.0",
@@ -54,17 +56,25 @@
     "wechaty-plugin-contrib": "^1.0.18",
     "wechaty-puppet-padlocal": "^1.11.13",
     "wechaty-puppet-wechat": "^1.18.4",
-    "wechaty-puppet-xp": "^1.12.3"
+    "wechaty-puppet-xp": "^1.12.4"
   },
   "devDependencies": {
     "@chatie/eslint-config": "^1.0.4",
     "@chatie/git-scripts": "^0.6.2",
     "@chatie/tsconfig": "^4.6.3",
+    "@types/jest": "^29.2.3",
     "@types/node": "^18.11.9",
     "@types/qrcode-terminal": "^0.12.0",
     "@types/request-promise": "^4.1.48",
     "check-node-version": "^4.2.1",
+    "cross-env": "^7.0.3",
     "is-pr": "^2.0.0",
-    "typescript": "^4.4.4"
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.3"
+  },
+  "git": {
+    "scripts": {
+      "pre-push": "npx git-scripts-pre-push"
+    }
   }
 }

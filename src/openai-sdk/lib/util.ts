@@ -1,7 +1,7 @@
-import { ResponseData } from './response'
+import type { ResponseData } from './response'
 import { TOKEN, EncodingAESKey } from './auth'
 import { api, ApiTypes } from './API'
-import { QueryData } from './query'
+import type { QueryData } from './query'
 const nJwt = require('njwt')
 const request = require('request')
 
@@ -32,6 +32,7 @@ async function transferAIBOT<T extends keyof ApiTypes> (nlpType: T, query: Query
     await request.post(`${api[nlpType]}/${TOKEN}`, {
       json: query,
     }, (error: any, stderr: any, stdout: ResponseData) => {
+      console.debug(stderr)
       if (error) {
         reject(error)
         return
@@ -54,6 +55,7 @@ async function transferNLP<T extends keyof ApiTypes> (nlpType: T, query: QueryDa
         query: token,
       },
     }, (error: any, stderr: any, stdout: ResponseData) => {
+      console.debug(stderr)
       if (error) {
         reject(error)
         return

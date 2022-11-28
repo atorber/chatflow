@@ -1,9 +1,9 @@
-import { ResponseCHAT } from './response'
+import type { ResponseCHAT } from './response'
 import {
   transferNLP,
   transferAIBOT,
 } from './util'
-import { QueryData } from './query'
+import type { QueryData } from './query'
 
 function chat (query: QueryData) {
   return transferNLP('CHAT', query) as Promise<ResponseCHAT>

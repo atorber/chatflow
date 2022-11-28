@@ -21,11 +21,11 @@ import {
   } from 'wechaty'
 
 import path from 'path'
-import os from 'os'
+// import os from 'os'
 
 const __dirname = path.resolve()
-const userInfo = os.userInfo()
-const rootPath = `${userInfo.homedir}\\Documents\\WeChat Files\\`
+// const userInfo = os.userInfo()
+// const rootPath = `${userInfo.homedir}\\Documents\\WeChat Files\\`
 
   // 定义一个延时方法
 const wait = (ms: number | undefined) => new Promise(resolve => setTimeout(resolve, ms))
@@ -189,7 +189,7 @@ async function aibot(sysConfig:any, talker:any, room:any, query:any) {
         }
 
         const resMsg = await chatAibot(queryData)
-        log.info(JSON.stringify(resMsg))
+        log.info(JSON.stringify({query:resMsg.title, answer:resMsg.answer}))
 
         if (resMsg.msgtype && resMsg.confidence > 0.8) {
             switch (resMsg.msgtype) {
