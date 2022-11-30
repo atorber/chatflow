@@ -11,7 +11,7 @@ const vikaConfig = {
 const vika = new VikaBot(vikaConfig)
 
 async function init (): Promise<void> {
-  await vika.init()
+  await vika.init('初始化配置系统表完成~')
 }
 
 // async function getFields (datasheetId: string): Promise<void> {

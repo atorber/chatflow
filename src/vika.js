@@ -28,7 +28,7 @@ class VikaBot {
     // 获取当前用户的空间站列表
     const spaceListResp = await this.vika.spaces.list()
     if (spaceListResp.success) {
-      console.table(spaceListResp.data.spaces)
+      console.log(spaceListResp.data.spaces)
       return spaceListResp.data.spaces
     } else {
       console.error(spaceListResp)
@@ -309,7 +309,7 @@ class VikaBot {
     const sysConfig = {
       VIKA_ONOFF: config['消息上传到维格表'] === '开启', // 维格表开启
       puppetName: config['puppet'],  // 支持wechaty-puppet-wechat、wechaty-puppet-xp、wechaty-puppet-padlocal
-      puppetToken: config['wechaty-token'],
+      puppetToken: config['wechaty-token']||'',
       WX_TOKEN: config['对话平台token'], // 微信对话平台token
       EncodingAESKey: config['对话平台EncodingAESKey'], // 微信对话平台EncodingAESKey
       WX_OPENAI_ONOFF: config['智能问答'] === '开启', // 微信对话平台开启
@@ -318,6 +318,8 @@ class VikaBot {
       DIFF_REPLY_ONOFF: config['不同群个性回复'] === '开启', // 开启不同群个性化回复
       linkWhiteList: ['ledongmao', 'xxxxxxx'],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
       imOpen: config['IM对话'] === '开启',  // 是否开启uve-im客户端，设置为true时，需要先 cd ./vue-im 然后 npm install 启动服务 npm run dev
+      mqtt_SUB_ONOFF: config['MQTT控制']==='开启',
+      mqtt_PUB_ONOFF: config['MQTT推送']==='开启',
       mqttUsername: config['MQTT用户名']||'',
       mqttPassword: config['MQTT密码']||'',
       mqttEndpoint: config['MQTT接入地址']||'',
@@ -334,13 +336,13 @@ class VikaBot {
 
   }
 
-  async checkInit() {
+  async checkInit(msg) {
     this.spaceId = await this.getSpaceId()
     console.log('空间ID:', this.spaceId)
 
     if (this.spaceId) {
       const tables = await this.getNodesList()
-      console.table(tables)
+      console.debug(tables)
 
       if (!tables['指令列表']) {
         console.error('缺少【指令列表】表，请运行 npm run init 自动创建系统表,然后再运行 npm start')
@@ -370,7 +372,7 @@ class VikaBot {
         this.roomListSheet = tables['群列表']
         this.roomWhiteListSheet = tables['群白名单']
         this.messageSheet = tables['消息记录']
-        console.log('================================================\n\n系统表齐全，启动成功啦~\n\n================================================\n')
+        console.log(`================================================\n\n${msg}\n\n================================================\n`)
       }
 
     } else {
@@ -386,7 +388,7 @@ class VikaBot {
     if (this.spaceId) {
 
       const tables = await this.getNodesList()
-      console.table(tables)
+      console.log(tables)
 
       await wait(2000)
 
@@ -646,6 +648,43 @@ class VikaBot {
               desc: 'puppet的token，仅当使用padlocal时需要填写',
             },
             {
+              name: 'MQTT控制',
+              type: 'SingleSelect',
+              property: {
+                options: [
+                  {
+                    id: 'optGKc3DuMP2J',
+                    name: '开启',
+                    color: 'deepPurple_0',
+                  },
+                  {
+                    id: 'optRT22XNkiR0',
+                    name: '关闭',
+                    color: 'indigo_0',
+                  },
+                ],
+              },
+              desc: '开启可以通过MQTT控制微信',
+            },            {
+              name: 'MQTT推送',
+              type: 'SingleSelect',
+              property: {
+                options: [
+                  {
+                    id: 'optGKc3DuMP2J',
+                    name: '开启',
+                    color: 'deepPurple_0',
+                  },
+                  {
+                    id: 'optRT22XNkiR0',
+                    name: '关闭',
+                    color: 'indigo_0',
+                  },
+                ],
+              },
+              desc: '开启后消息会发送到MQTT队列',
+            },
+            {
               name: 'MQTT用户名',
               type: 'SingleText',
               property: {
@@ -694,10 +733,12 @@ class VikaBot {
             IM对话: '关闭',
             puppet: 'wechaty-puppet-xp',
             'wechaty-token': '',
-            'MQTT用户名': '',
-            'MQTT密码': '',
-            'MQTT接入地址': '',
-            'MQTT端口号': '',
+            MQTT控制: '关闭',
+            MQTT推送: '关闭',
+            MQTT用户名: '',
+            MQTT密码: '',
+            MQTT接入地址: '',
+            MQTT端口号: '1883',
           },
         }]
         await this.createRecord(this.configSheet, recordsConfig)

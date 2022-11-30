@@ -10,7 +10,7 @@ function WechatyVikaPlugin (config) {
     //   await onScan(qrcode, status, vika)
     // })
     bot.on('login', async () => {
-      await vika.checkInit()
+      await vika.checkInit('vika插件载入系统配置完成，系统启动成功~')
     })
     bot.on('message', async (msg) => {
       await onMessage(msg, vika)

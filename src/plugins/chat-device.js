@@ -3,7 +3,7 @@ import { v4 } from 'uuid'
 import { FileBox } from 'file-box'
 import {
     // Contact, 
-    log, 
+    log,
     // Message, ScanStatus, Wechaty, UrlLink, MiniProgram
 } from "wechaty"
 import * as PUPPET from 'wechaty-puppet'
@@ -15,7 +15,7 @@ let chatdevice
 class ChatDevice {
     constructor(username, password, endpoint, port, botId) {
         this.bot
-        this.mqttclient = mqtt.connect(`mqtt://${endpoint}:${port||1883}`, {
+        this.mqttclient = mqtt.connect(`mqtt://${endpoint}:${port || 1883}`, {
             username: username,
             password: password,
             clientId: v4()
@@ -32,7 +32,7 @@ class ChatDevice {
         this.bot = bot
         this.mqttclient.on('connect', function () {
             this.isConnected = true
-            console.debug('connect to Wechaty mqtt----------')
+            console.log('================================================\n\nMQTT连接成功~\n\n================================================\n')
         })
         this.mqttclient.on('reconnect', function (e) {
             console.log('subscriber on reconnect')
@@ -79,7 +79,7 @@ class ChatDevice {
     }
 
     async onMessage(topic, message) {
-        log.info('mqtt onMessage:',topic,message.toString())
+        log.info('mqtt onMessage:', topic, message.toString())
         // const content = JSON.parse(message.toString())
         message = JSON.parse(message)
         const name = message.name

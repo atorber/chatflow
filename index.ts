@@ -44,7 +44,7 @@ import { ChatDevice } from './src/plugins/chat-device.js'
 
 let bot: any
 let sysConfig: any
-let chatdev: any
+let chatdev: any = {}
 if (process.env['VIKA_SPACENAME']) {
   configs.VIKA_SPACENAME = process.env['VIKA_SPACENAME']
 }
@@ -60,19 +60,22 @@ const vikaConfig = {
 // console.debug(vikaConfig)
 const vika = new VikaBot(vikaConfig)
 
-async function main() {
-  void await vika.checkInit()
-  // 获取系统配置信息
+async function getConfig(vika: any) {
   const configsRes = await vika.getConfig()
   sysConfig = configsRes[0]
-  log.info(sysConfig)
+  console.debug(sysConfig)
 
   configs.roomWhiteList = configsRes[1]
   configs.welcomeList = [] // 进群欢迎语白名单
 
   sysConfig = { ...configs, ...sysConfig }
-  log.info(sysConfig)
-  // console.debug(sysConfig)
+  return sysConfig
+}
+
+async function main() {
+  void await vika.checkInit('主程序载入系统配置成功，等待插件初始化...')
+  // 获取系统配置信息
+  await getConfig(vika)
 
   const wechatyConfig: any = {
     // 网页版微信
@@ -151,9 +154,11 @@ async function main() {
   async function onLogin(user: Contact) {
     log.info('StarterBot', '%s login', user.payload)
     log.info(JSON.stringify(user.payload))
-    if(sysConfig.mqttPassword){
-      chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort,user.id)
-      chatdev.init(bot)
+    if (sysConfig.mqttPassword && (sysConfig.mqtt_SUB_ONOFF || sysConfig.mqtt_PUB_ONOFF)) {
+      chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, user.id)
+      if (sysConfig.mqtt_SUB_ONOFF) {
+        chatdev.init(bot)
+      }
     }
     const rooms = await bot.Room.findAll()
     console.debug('当前最新微信群数量：', rooms.length)
@@ -181,13 +186,28 @@ async function main() {
   async function onMessage(message: Message) {
 
     log.info('onMessage', JSON.stringify(message))
-    chatdev.pub_message(message)
+    console.debug('onMessage', JSON.stringify(message))
+
+    if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
+      chatdev.pub_message(message)
+    }
 
     const talker = message.talker()
     const text = message.text()
     const room = message.room()
     const roomId = room?.id
     const topic = await room?.topic()
+
+    if (message.self() && text === '#更新配置') {
+      console.debug('热更新系统配置~')
+      try{
+        const newConfig = await getConfig(vika)
+        message.say('配置更新成功：'+JSON.stringify(newConfig))
+      }catch(e){
+        message.say('配置更新失败~')
+      }
+
+    }
 
     try {
       const isSelfMsg = message.self()
