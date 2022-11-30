@@ -38,11 +38,13 @@ import { VikaBot } from './src/vika.js'
 import { configData } from './src/plugins/im.js'
 import { wxai } from './src/plugins/wxai.js'
 
-import schedule from 'node-schedule'
+import { ChatDevice } from './src/plugins/chat-device.js'
+
+// import schedule from 'node-schedule'
 
 let bot: any
 let sysConfig: any
-
+let chatdev: any
 if (process.env['VIKA_SPACENAME']) {
   configs.VIKA_SPACENAME = process.env['VIKA_SPACENAME']
 }
@@ -149,6 +151,10 @@ async function main() {
   async function onLogin(user: Contact) {
     log.info('StarterBot', '%s login', user.payload)
     log.info(JSON.stringify(user.payload))
+    if(sysConfig.mqttPassword){
+      chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort,user.id)
+      chatdev.init(bot)
+    }
     const rooms = await bot.Room.findAll()
     console.debug('当前最新微信群数量：', rooms.length)
     updateRooms(rooms)
@@ -175,6 +181,7 @@ async function main() {
   async function onMessage(message: Message) {
 
     log.info('onMessage', JSON.stringify(message))
+    chatdev.pub_message(message)
 
     const talker = message.talker()
     const text = message.text()

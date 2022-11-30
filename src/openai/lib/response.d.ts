@@ -6,6 +6,7 @@
     SENSITIVE: string
  */
 export interface ResponseCHAT {
+    [x: string]: any;
     ans_node_id: number;
     ans_node_name: string;
     answer: string;

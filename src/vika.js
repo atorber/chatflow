@@ -147,7 +147,6 @@ class VikaBot {
     const records = [
       {
         fields: {
-          _id: ID,
           timeHms: timeHms,
           name: talker ? talker.name() : '未知',
           topic: topic || '--',
@@ -208,7 +207,6 @@ class VikaBot {
     const records = [
       {
         fields: {
-          _id: timeHms,
           timeHms: timeHms,
           name: 'system',
           topic: '--',
@@ -320,6 +318,10 @@ class VikaBot {
       DIFF_REPLY_ONOFF: config['不同群个性回复'] === '开启', // 开启不同群个性化回复
       linkWhiteList: ['ledongmao', 'xxxxxxx'],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
       imOpen: config['IM对话'] === '开启',  // 是否开启uve-im客户端，设置为true时，需要先 cd ./vue-im 然后 npm install 启动服务 npm run dev
+      mqttUsername: config['MQTT用户名']||'',
+      mqttPassword: config['MQTT密码']||'',
+      mqttEndpoint: config['MQTT接入地址']||'',
+      mqttPort: config['MQTT端口号']||1883,
     }
     let roomWhiteList = []
     const roomWhiteListRecords = await this.getRecords(this.roomWhiteListSheet, {})
@@ -643,6 +645,38 @@ class VikaBot {
               },
               desc: 'puppet的token，仅当使用padlocal时需要填写',
             },
+            {
+              name: 'MQTT用户名',
+              type: 'SingleText',
+              property: {
+
+              },
+              desc: 'MQTT用户名',
+            },
+             {
+              name: 'MQTT密码',
+              type: 'SingleText',
+              property: {
+
+              },
+              desc: 'MQTT接入地址',
+            }, 
+            {
+              name: 'mqtt-endpoint',
+              type: 'SingleText',
+              property: {
+
+              },
+              desc: 'MQTT接入地址',
+            }, 
+            {
+              name: 'MQTT端口号',
+              type: 'SingleText',
+              property: {
+
+              },
+              desc: 'MQTT端口号',
+            },
           ],
           name: '系统配置',
         }
@@ -660,6 +694,10 @@ class VikaBot {
             IM对话: '关闭',
             puppet: 'wechaty-puppet-xp',
             'wechaty-token': '',
+            'MQTT用户名': '',
+            'MQTT密码': '',
+            'MQTT接入地址': '',
+            'MQTT端口号': '',
           },
         }]
         await this.createRecord(this.configSheet, recordsConfig)
@@ -939,13 +977,6 @@ class VikaBot {
       if (!tables['消息记录']) {
         const messageSheet = {
           fields: [
-            {
-              name: '_id',
-              property: {
-                defaultValue: '',
-              },
-              type: 'SingleText',
-            },
             {
               name: 'timeHms',
               property: {
