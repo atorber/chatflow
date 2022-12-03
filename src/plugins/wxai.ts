@@ -63,10 +63,11 @@ async function wxai(sysConfig:any,bot:any, talker:any, room:any, message:any) {
                 log.info(`向 ${talker.name()} 发送消息...`)
 
                 if (room) {
-                    answer = text.length > 20 ? (answer.text + '\n------------------------------\n' + talker.name() + ':' + text.slice(0, 10) + '...') : (answer.text + '\n------------------------------\n' + talker.name() + ':' + text)
+                    // answer = text.length > 20 ? (answer.text + '\n------------------------------\n' + talker.name() + ':' + text.slice(0, 10) + '...') : (answer.text + '\n------------------------------\n' + talker.name() + ':' + text)
+                    answer = answer.text + '\n'
                     await room.say(answer, ...[talker])
                 } else {
-                    answer = answer.text
+                    answer = answer.text + '\n'
                     await message.say(answer)
                 }
 

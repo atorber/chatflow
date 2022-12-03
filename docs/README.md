@@ -191,9 +191,9 @@ git clone https://github.com/atorber/wechat-openai-qa-bot.git
 
 2. 安装nodejs，项目的tools目录下有相应的安装包node-v16.15.0-x64.zip，解压缩并安装；
 
-3. 下载WeChatSetup-v3.3.0.115并安装（点击下载[WeChatSetup-v3.3.0.115.exe](https://github.com/wechaty/wechaty-puppet-xp/releases/download/v0.5/WeChatSetup-v3.3.0.115.exe)）
+3. 在电脑上登陆微信，微信版本必须为[WeChatSetup-v3.6.0.18.exe](https://github.com/tom-snow/wechat-windows-versions/releases/download/v3.6.0.18/WeChatSetup-3.6.0.18.exe)
 
-> 特别注意目前支持的微信客户端版本为 WeChatSetup-v3.3.0.115,如果电脑上已经安装了其他版本的微信，需要卸载之后安装项目中的版本
+> 特别注意目前支持的微信客户端版本为 WeChatSetup-v3.6.0.18,如果电脑上已经安装了其他版本的微信，需要卸载之后安装项目中的版本
 
 ### 安装依赖
 

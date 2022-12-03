@@ -1,7 +1,7 @@
 /* eslint-disable sort-keys */
 /* eslint-disable no-console */
 
-import { VikaBot } from './src/vika.js'
+import { VikaBot } from './src/plugins/vika.js'
 import configs from './config.js'
 
 const vikaConfig = {

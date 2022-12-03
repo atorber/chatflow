@@ -34,7 +34,7 @@ npm install
 
 2. 分别登陆[微信对话开放平台](https://openai.weixin.qq.com/)和[vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973)官网注册账号并获取token
 
-3. 在电脑上登陆微信，微信版本必须为[WeChatSetup-v3.3.0.115.exe](https://github.com/wechaty/wechaty-puppet-xp/releases/download/v0.5/WeChatSetup-v3.3.0.115.exe)
+3. 在电脑上登陆微信，微信版本必须为[WeChatSetup-v3.6.0.18.exe](https://github.com/tom-snow/wechat-windows-versions/releases/download/v3.6.0.18/WeChatSetup-3.6.0.18.exe)
 
 4. 修改./config.js配置文件
 
@@ -266,7 +266,15 @@ sudo apt install libgbm1
 
 参考 https://www.npmjs.com/package/puppeteer?activeTab=readme
 
-### 6. 如果折腾半天也没有搞定，可以联系远程协助指导安装
+### 6. Windows微信客户端版本支持
+
+支持v3.3.0.115和v3.6.0.18，默认使用v3.6.0.18
+
+若使用v3.3.0.115需下载安装[WeChatSetup-v3.3.0.115.exe](https://github.com/wechaty/wechaty-puppet-xp/releases/download/v0.5/WeChatSetup-v3.3.0.115.exe)，同时更新运行`npm i wechaty-puppet-xp@1.11.14`更新依赖
+
+如果是更新代码，记得将package.json文件对应修改 `"wechaty-puppet-xp": "1.11.14"`，然后再运行`npm i`
+
+### 7. 如果没有搞定，可以联系远程协助指导安装
 
 提前下载好[向日葵](https://sunlogin.oray.com/download)软件并注册号账号，登陆后发控制码
 

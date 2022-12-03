@@ -63,14 +63,8 @@ const vikaConfig = {
 const vika = new VikaBot(vikaConfig)
 
 async function getConfig(vika: any) {
-  const configsRes = await vika.getConfig()
-  sysConfig = configsRes[0]
+  sysConfig = await vika.getConfig()
   console.debug(sysConfig)
-
-  configs.roomWhiteList = configsRes[1]
-  configs.welcomeList = [] // 进群欢迎语白名单
-
-  sysConfig = { ...configs, ...sysConfig }
   return sysConfig
 }
 
@@ -224,19 +218,22 @@ async function main() {
 
       if (room && roomId && !isSelfMsg) {
 
-        if (sysConfig.roomWhiteListOpen) {
-          const isInRoomWhiteList = sysConfig.roomWhiteList.includes(roomId)
-          if (isInRoomWhiteList) {
-            log.info('当前群在白名单内，请求问答...')
-            await wxai(sysConfig, bot, talker, room, message)
-          } else {
-            log.info('当前群不在白名单内，流程结束')
+        // 智能问答开启时执行
+        if(sysConfig.WX_OPENAI_ONOFF){
+          if (sysConfig.roomWhiteListOpen) {
+            const isInRoomWhiteList = sysConfig.roomWhiteList.includes(roomId)
+            if (isInRoomWhiteList) {
+              log.info('当前群在白名单内，请求问答...')
+              await wxai(sysConfig, bot, talker, room, message)
+            } else {
+              log.info('当前群不在白名单内，流程结束')
+            }
           }
-        }
-
-        if (!sysConfig.roomWhiteListOpen) {
-          log.info('系统未开启白名单，请求问答...')
-          await wxai(sysConfig, bot, talker, room, message)
+  
+          if (!sysConfig.roomWhiteListOpen) {
+            log.info('系统未开启白名单，请求问答...')
+            await wxai(sysConfig, bot, talker, room, message)
+          }
         }
 
         // IM服务开启时执行
@@ -263,7 +260,24 @@ async function main() {
       }
 
       if ((!room || !room.id) && !isSelfMsg) {
-        await wxai(sysConfig, bot, talker, undefined, message)
+
+        // 智能问答开启时执行
+        if(sysConfig.WX_OPENAI_ONOFF){
+        if (sysConfig.contactWhiteListOpen) {
+          const isInContactWhiteList = sysConfig.contactWhiteList.includes(talker.id)
+          if (isInContactWhiteList) {
+            log.info('当前好友在白名单内，请求问答...')
+            await wxai(sysConfig, bot, talker, undefined, message)
+          } else {
+            log.info('当前好友不在白名单内，流程结束')
+          }
+        }
+
+        if (!sysConfig.contactWhiteListOpen) {
+          log.info('系统未开启好友白名单,对所有好友有效，请求问答...')
+          await wxai(sysConfig, bot, talker, undefined, message)
+        }
+      }
       }
 
     } catch (e) {

@@ -306,7 +306,7 @@ class VikaBot {
   async getConfig() {
     const records = await this.getRecords(this.configSheet, {})
     const config = records[0].fields
-    const sysConfig = {
+    let sysConfig = {
       VIKA_ONOFF: config['消息上传到维格表'] === '开启', // 维格表开启
       puppetName: config['puppet'],  // 支持wechaty-puppet-wechat、wechaty-puppet-xp、wechaty-puppet-padlocal
       puppetToken: config['wechaty-token']||'',
@@ -314,9 +314,11 @@ class VikaBot {
       EncodingAESKey: config['对话平台EncodingAESKey'], // 微信对话平台EncodingAESKey
       WX_OPENAI_ONOFF: config['智能问答'] === '开启', // 微信对话平台开启
       roomWhiteListOpen: config['群白名单'] === '开启', // 群白名单功能
+      roomWhiteList:[],
+      contactWhiteListOpen: config['好友白名单'] === '开启', // 群白名单功能
+      contactWhiteList:[],
       AT_AHEAD: config['AT回复'] === '开启', // 只有机器人被@时回复
       DIFF_REPLY_ONOFF: config['不同群个性回复'] === '开启', // 开启不同群个性化回复
-      linkWhiteList: ['ledongmao', 'xxxxxxx'],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
       imOpen: config['IM对话'] === '开启',  // 是否开启uve-im客户端，设置为true时，需要先 cd ./vue-im 然后 npm install 启动服务 npm run dev
       mqtt_SUB_ONOFF: config['MQTT控制']==='开启',
       mqtt_PUB_ONOFF: config['MQTT推送']==='开启',
@@ -324,15 +326,22 @@ class VikaBot {
       mqttPassword: config['MQTT密码']||'',
       mqttEndpoint: config['MQTT接入地址']||'',
       mqttPort: config['MQTT端口号']||1883,
+      linkWhiteList: [],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
+      welcomeList:[]
     }
-    let roomWhiteList = []
+
     const roomWhiteListRecords = await this.getRecords(this.roomWhiteListSheet, {})
-
     for (let i = 0; i < roomWhiteListRecords.length; i++) {
-      roomWhiteList.push(roomWhiteListRecords[i].fields['群ID'])
+      sysConfig.roomWhiteList.push(roomWhiteListRecords[i].fields['群ID'])
     }
 
-    return [sysConfig, roomWhiteList]
+    const contactWhiteListRecords = await this.getRecords(this.contactWhiteListSheet, {})
+
+    for (let i = 0; i < contactWhiteListRecords.length; i++) {
+      sysConfig.contactWhiteList.push(contactWhiteListRecords[i].fields['好友ID'])
+    }
+
+    return sysConfig
 
   }
 
@@ -361,6 +370,9 @@ class VikaBot {
       } else if (!tables['群白名单']) {
         console.error('缺少【群白名单】表，请运行 npm run init 自动创建系统表,然后再运行 npm start')
 
+      } else if (!tables['好友白名单']) {
+        console.error('缺少【好友白名单】表，请运行 npm run init 自动创建系统表,然后再运行 npm start')
+
       } else if (!tables['消息记录']) {
         console.error('缺少【消息记录】表，请运行 npm run init 自动创建系统表,然后再运行 npm start')
 
@@ -371,6 +383,7 @@ class VikaBot {
         this.qaSheet = tables['智能问答列表']
         this.roomListSheet = tables['群列表']
         this.roomWhiteListSheet = tables['群白名单']
+        this.contactWhiteListSheet = tables['好友白名单']
         this.messageSheet = tables['消息记录']
         console.log(`================================================\n\n${msg}\n\n================================================\n`)
       }
@@ -581,6 +594,23 @@ class VikaBot {
               desc: '开启后只有白名单内的群会自动问答',
             },
             {
+              name: '好友白名单',
+              type: 'SingleSelect',
+              property: {
+                options: [
+                  {
+                    name: '开启',
+                    color: 'deepPurple_0',
+                  },
+                  {
+                    name: '关闭',
+                    color: 'indigo_0',
+                  },
+                ],
+              },
+              desc: '开启后只有白名单内的好友自动问答',
+            },
+            {
               name: '消息上传到维格表',
               type: 'SingleSelect',
               property: {
@@ -729,6 +759,7 @@ class VikaBot {
             对话平台token: '',
             不同群个性回复: '关闭',
             群白名单: '关闭',
+            好友白名单: '关闭',
             消息上传到维格表: '开启',
             IM对话: '关闭',
             puppet: 'wechaty-puppet-xp',
@@ -1012,6 +1043,41 @@ class VikaBot {
           name: '群白名单',
         }
         await this.createDataSheet('roomWhiteListSheet', '群白名单', roomWhiteListSheet.fields)
+        await wait(200)
+      }
+
+      if (!tables['好友白名单']) {
+        const contactWhiteListSheet = {
+          fields: [
+            {
+              id: 'fldxEzzn8r5ox',
+              name: '好友ID',
+              type: 'SingleText',
+              property: {
+                defaultValue: '',
+              },
+              editable: true,
+              isPrimary: true,
+            },
+            {
+              id: 'fld9s9Sz7kmo3',
+              name: '昵称',
+              type: 'SingleText',
+              property: {
+
+              },
+              editable: true,
+            },
+            {
+              id: 'fldKKH4aUXsWd',
+              name: '备注',
+              type: 'Text',
+              editable: true,
+            },
+          ],
+          name: '好友白名单',
+        }
+        await this.createDataSheet('contactWhiteListSheet', '好友白名单', contactWhiteListSheet.fields)
         await wait(200)
       }
 
