@@ -274,7 +274,32 @@ sudo apt install libgbm1
 
 如果是更新代码，记得将package.json文件对应修改 `"wechaty-puppet-xp": "1.11.14"`，然后再运行`npm i`
 
-### 7. 如果没有搞定，可以联系远程协助指导安装
+### 7. Windows系统错误提示Set ""PUPPETEER_SKIP_DOWNLOAD"" env variable to skip download.
+
+```
+"npm WARN deprecated @hapi/joi@16.1.8: Switch to 'npm install joi'
+npm WARN deprecated axios@0.19.2: Critical security vulnerability fixed in v0.21.1. For more information, see https://github.com/axios/axios/pull/3410
+npm ERR! code 1
+npm ERR! path C:\wechat-openai-qa-bot-main\node_modules\puppeteer
+npm ERR! command failed
+npm ERR! command C:\Windows\system32\cmd.exe /d /s /c node install.js
+npm ERR! ERROR: Failed to set up Chromium r982053! Set ""PUPPETEER_SKIP_DOWNLOAD"" env variable to skip download.
+npm ERR! Error: read ECONNRESET
+npm ERR!     at TLSWrap.onStreamRead (node:internal/stream_base_commons:217:20) {
+npm ERR!   errno: -4077,
+npm ERR!   code: 'ECONNRESET',
+npm ERR!   syscall: 'read'
+npm ERR! }
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\Administrator\AppData\Local\npm-cache\_logs\2022-12-03T10_06_08_935Z-debug-0.log"
+```
+
+安装puppeteer失败，此报错影响使用wechaty-puppet-wehcat，其他puppet不影响
+
+解决方案：设置环境变量 `set PUPPETEER_SKIP_DOWNLOAD='true'`，接着运行`npm i puppeteer`,再接着运行`npm i`
+
+### 8. 如果没有搞定，可以联系远程协助指导安装
 
 提前下载好[向日葵](https://sunlogin.oray.com/download)软件并注册号账号，登陆后发控制码
 
