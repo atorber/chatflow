@@ -3,7 +3,7 @@
 import { Vika } from '@vikadata/vika'
 import moment from 'moment'
 import { v4 } from 'uuid'
-import rp from 'request-promise'
+// import rp from 'request-promise'
 
 // 定义一个延时方法
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))

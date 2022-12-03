@@ -15,6 +15,7 @@ import {
   WechatyBuilder,
   log,
   Room,
+  Wechaty,
   // types,
 } from 'wechaty'
 // import * as PUPPET from 'wechaty-puppet'
@@ -34,13 +35,14 @@ import { FileBox } from 'file-box'
 import configs from './config.js'
 // import type { Puppet } from 'wechaty-puppet'
 import * as io from 'socket.io-client'
-import { VikaBot } from './src/vika.js'
+import { VikaBot } from './src/plugins/vika.js'
 import { configData } from './src/plugins/im.js'
 import { wxai } from './src/plugins/wxai.js'
 
 import { ChatDevice } from './src/plugins/chat-device.js'
+import { propertyMessage } from './src/plugins/msg-format.js'
 
-// import schedule from 'node-schedule'
+import schedule from 'node-schedule'
 
 let bot: any
 let sysConfig: any
@@ -160,23 +162,31 @@ async function main() {
         chatdev.init(bot)
       }
     }
-    const rooms = await bot.Room.findAll()
-    console.debug('当前最新微信群数量：', rooms.length)
-    updateRooms(rooms)
-    const contacts = await bot.Contact.findAll()
-    console.debug('当前微信最新联系人数量：', contacts.length)
-    updateContacts(contacts)
 
-    // 心跳5min发一次
-    // const rule = new schedule.RecurrenceRule();
-    // rule.second = 300;
-    // const job = schedule.scheduleJob(rule, async function () {
-    //   const curDate = '现在时间：' + new Date()
-    //   console.log(curDate);
-    //   const contact = await bot.Contact.find({ id: 'tyutluyc' })
-    //   await contact.say(curDate)
-    // });
-    // log.info(job)
+    // 更新云端好友和群
+    updateRooms(bot)
+    updateContacts(bot)
+
+    // 启动心跳，5min发一次
+    const rule = new schedule.RecurrenceRule();
+    rule.second = 0;
+    rule.minute = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+    const job = schedule.scheduleJob(rule, async function () {
+      const curDate = new Date().toLocaleString()
+      console.log(curDate);
+      try {
+        // const contact = await bot.Contact.find({ id: 'tyutluyc' })
+        await user.say(curDate)
+        if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
+          chatdev.pub_property(propertyMessage('lastActive', curDate))
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    });
+    log.info(job)
+
+    console.log(`================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n`)
   }
 
   function onLogout(user: Contact) {
@@ -200,10 +210,10 @@ async function main() {
 
     if (message.self() && text === '#更新配置') {
       console.debug('热更新系统配置~')
-      try{
+      try {
         const newConfig = await getConfig(vika)
-        message.say('配置更新成功：'+JSON.stringify(newConfig))
-      }catch(e){
+        message.say('配置更新成功：' + JSON.stringify(newConfig))
+      } catch (e) {
         message.say('配置更新失败~')
       }
 
@@ -286,7 +296,9 @@ async function main() {
     }
   }
 
-  async function updateContacts(contacts: Contact[]) {
+  async function updateContacts(bot: Wechaty) {
+    const contacts: Contact[] = await bot.Contact.findAll()
+    console.debug('当前微信最新联系人数量：', contacts.length)
     const recordsAll: any = []
     const recordExisting = await vika.getAllRecords(vika.contactSheet)
     console.debug('云端好友数量：', recordExisting.length)
@@ -327,7 +339,9 @@ async function main() {
 
   }
 
-  async function updateRooms(rooms: Room[]) {
+  async function updateRooms(bot: Wechaty) {
+    const rooms: Room[] = await bot.Room.findAll()
+    console.debug('当前最新微信群数量：', rooms.length)
     const recordsAll: any = []
     const recordExisting = await vika.getAllRecords(vika.roomListSheet)
     console.debug('云端群数量：', recordExisting.length)
@@ -373,11 +387,8 @@ async function main() {
   }
 
   if (missingConfiguration.length === 0) {
-
-    const vikaConfig = { token: configs.VIKA_TOKEN, spaceName: configs.VIKA_SPACENAME }
-
     bot.use(
-      WechatyVikaPlugin(vikaConfig),
+      WechatyVikaPlugin(vika),
     )
     bot.on('scan', onScan)
     bot.on('login', onLogin)

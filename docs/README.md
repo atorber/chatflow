@@ -206,7 +206,9 @@ git clone https://github.com/atorber/wechat-openai-qa-bot.git
 <img src="https://user-images.githubusercontent.com/104893934/178886782-66c60bde-71a5-45a5-84be-aabb199104c4.png" width="60%">
 
 
-3. 到项目目录下用鼠标点击地址栏复制文件路径，例如我当前的路径为 C:\Users\wechaty\Documents\GitHub\wechaty-wx-openai-link
+3. 到项目目录下用鼠标点击地址栏复制文件路径，例如当前的路径为 C:\Users\wechaty\Documents\GitHub\wechaty-wx-openai-link
+
+> 一定要查看自己的路径，不要直接copy
 
 <img src="https://user-images.githubusercontent.com/104893934/178886794-8e3be7d6-a64b-4810-b1fd-acdc934f2807.png" width="60%">
 
