@@ -98,4 +98,4 @@ export interface ResponseSENSITIVE {
     ];
 }
 export declare type ResponseData = ResponseCHAT | ResponseNER | ResponseSENSITIVE | ResponseSENTIMENT | ResponseTOKENIZE;
-export {};
+export {}

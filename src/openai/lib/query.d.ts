@@ -38,4 +38,4 @@ interface SENTIMENTQueryData extends baseQueryType {
 interface SENSITIVEQueryData extends baseQueryType {
 }
 export declare type QueryData = CHATQueryData | TOKENIZEQueryData | NERQueryData | SENTIMENTQueryData | SENSITIVEQueryData | USERQueryData | AIBOTQueryData;
-export {};
+export {}

@@ -1,5 +1,5 @@
-import { ResponseNER, ResponseSENTIMENT, ResponseSENSITIVE } from './response';
-import { QueryData } from './query';
+import { ResponseNER, ResponseSENTIMENT, ResponseSENSITIVE } from './response'
+import { QueryData } from './query'
 declare function tokenize(query: QueryData): Promise<unknown>;
 declare function ner(query: QueryData): Promise<ResponseNER>;
 declare function sentiment(query: QueryData): Promise<ResponseSENTIMENT>;
@@ -9,5 +9,5 @@ export declare const nlp: {
     ner: typeof ner;
     sentiment: typeof sentiment;
     sensitive: typeof sensitive;
-};
-export {};
+}
+export {}

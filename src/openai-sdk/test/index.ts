@@ -56,7 +56,7 @@ describe('nlp', () => {
       },
     })
     expect(nerRes).to.have.property('entities').with.lengthOf(2)
-    if(nerRes['entities']&&nerRes['entities'][0]){
+    if (nerRes['entities'] && nerRes['entities'][0]) {
       expect(nerRes['entities'][0]['type']).to.equal('number')
     }
   })

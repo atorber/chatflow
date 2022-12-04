@@ -1,8 +1,8 @@
-declare let TOKEN: string;
-declare let EncodingAESKey: string;
+declare let TOKEN: string
+declare let EncodingAESKey: string
 interface AuthOptions {
     TOKEN: string;
     EncodingAESKey: string;
 }
 declare function auth(opt: AuthOptions): void;
-export { auth, TOKEN, EncodingAESKey };
+export { auth, TOKEN, EncodingAESKey }

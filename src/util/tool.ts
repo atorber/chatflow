@@ -2,7 +2,7 @@
 const waitForMs = (ms: number | undefined) => new Promise(resolve => setTimeout(resolve, ms))
 
 export {
-    waitForMs
+  waitForMs,
 }
 
 export default waitForMs

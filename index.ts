@@ -69,7 +69,11 @@ async function getConfig(vika: any) {
 }
 
 async function main() {
-  void await vika.checkInit('主程序载入系统配置成功，等待插件初始化...')
+  const isReady = await vika.checkInit('主程序载入系统配置成功，等待插件初始化...')
+
+  if (!isReady) {
+    return
+  }
   // 获取系统配置信息
   await getConfig(vika)
 
@@ -149,7 +153,7 @@ async function main() {
 
   async function onLogin(user: Contact) {
     log.info('StarterBot', '%s login', user.payload)
-    await user.say('上线：'+new Date().toLocaleString())
+    await user.say('上线：' + new Date().toLocaleString())
     log.info(JSON.stringify(user.payload))
     if (sysConfig.mqttPassword && (sysConfig.mqtt_SUB_ONOFF || sysConfig.mqtt_PUB_ONOFF)) {
       chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, user.id)
@@ -171,7 +175,7 @@ async function main() {
         // const contact = await bot.Contact.find({ id: 'tyutluyc' })
         const curDate = new Date().toLocaleString()
         console.log(curDate);
-        await user.say('心跳：'+curDate)
+        await user.say('心跳：' + curDate)
         if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
           chatdev.pub_property(propertyMessage('lastActive', curDate))
         }
@@ -220,7 +224,7 @@ async function main() {
       if (room && roomId && !isSelfMsg) {
 
         // 智能问答开启时执行
-        if(sysConfig.WX_OPENAI_ONOFF){
+        if (sysConfig.WX_OPENAI_ONOFF) {
           if (sysConfig.roomWhiteListOpen) {
             const isInRoomWhiteList = sysConfig.roomWhiteList.includes(roomId)
             if (isInRoomWhiteList) {
@@ -230,7 +234,7 @@ async function main() {
               log.info('当前群不在白名单内，流程结束')
             }
           }
-  
+
           if (!sysConfig.roomWhiteListOpen) {
             log.info('系统未开启白名单，请求问答...')
             await wxai(sysConfig, bot, talker, room, message)
@@ -263,22 +267,22 @@ async function main() {
       if ((!room || !room.id) && !isSelfMsg) {
 
         // 智能问答开启时执行
-        if(sysConfig.WX_OPENAI_ONOFF){
-        if (sysConfig.contactWhiteListOpen) {
-          const isInContactWhiteList = sysConfig.contactWhiteList.includes(talker.id)
-          if (isInContactWhiteList) {
-            log.info('当前好友在白名单内，请求问答...')
+        if (sysConfig.WX_OPENAI_ONOFF) {
+          if (sysConfig.contactWhiteListOpen) {
+            const isInContactWhiteList = sysConfig.contactWhiteList.includes(talker.id)
+            if (isInContactWhiteList) {
+              log.info('当前好友在白名单内，请求问答...')
+              await wxai(sysConfig, bot, talker, undefined, message)
+            } else {
+              log.info('当前好友不在白名单内，流程结束')
+            }
+          }
+
+          if (!sysConfig.contactWhiteListOpen) {
+            log.info('系统未开启好友白名单,对所有好友有效，请求问答...')
             await wxai(sysConfig, bot, talker, undefined, message)
-          } else {
-            log.info('当前好友不在白名单内，流程结束')
           }
         }
-
-        if (!sysConfig.contactWhiteListOpen) {
-          log.info('系统未开启好友白名单,对所有好友有效，请求问答...')
-          await wxai(sysConfig, bot, talker, undefined, message)
-        }
-      }
       }
 
     } catch (e) {
