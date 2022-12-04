@@ -149,6 +149,7 @@ async function main() {
 
   async function onLogin(user: Contact) {
     log.info('StarterBot', '%s login', user.payload)
+    await user.say('上线：'+new Date().toLocaleString())
     log.info(JSON.stringify(user.payload))
     if (sysConfig.mqttPassword && (sysConfig.mqtt_SUB_ONOFF || sysConfig.mqtt_PUB_ONOFF)) {
       chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, user.id)
@@ -166,11 +167,11 @@ async function main() {
     rule.second = 0;
     rule.minute = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
     const job = schedule.scheduleJob(rule, async function () {
-      const curDate = new Date().toLocaleString()
-      console.log(curDate);
       try {
         // const contact = await bot.Contact.find({ id: 'tyutluyc' })
-        await user.say(curDate)
+        const curDate = new Date().toLocaleString()
+        console.log(curDate);
+        await user.say('心跳：'+curDate)
         if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
           chatdev.pub_property(propertyMessage('lastActive', curDate))
         }
