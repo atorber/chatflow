@@ -145,6 +145,7 @@ docker run -d --restart=always --env VIKA_TOKEN="维格表token" --env VIKA_SPAC
 
 ```
 docker run -d --restart=always --env VIKA_TOKEN="维格表token" --env VIKA_SPACENAME="维格表空间名称" atorber/wech
+```
 
 ## 视频演示及使用教程
 
