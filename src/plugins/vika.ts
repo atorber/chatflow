@@ -238,7 +238,7 @@ class VikaBot {
         messagePayload: text,
         wxid: 'system',
         roomid: '--',
-        messageType: 'qrcode',
+        messageType: 'heartbeat',
         file: files,
       },
     }
