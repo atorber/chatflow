@@ -175,7 +175,8 @@ async function main() {
         // const contact = await bot.Contact.find({ id: 'tyutluyc' })
         const curDate = new Date().toLocaleString()
         console.log(curDate);
-        await user.say('心跳：' + curDate)
+        // await user.say('心跳：' + curDate)
+        await vika.addHeartbeatRecord('心跳：' + curDate)
         if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
           chatdev.pub_property(propertyMessage('lastActive', curDate))
         }

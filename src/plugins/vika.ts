@@ -224,6 +224,28 @@ class VikaBot {
     }).catch(err => { console.error('调用vika写入接口失败：', err) })
   }
 
+  async addHeartbeatRecord(text: string) {
+
+    const curTime = this.getCurTime()
+    const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
+    const files:any = []
+
+    const record = {
+      fields: {
+        timeHms: timeHms,
+        name: 'system',
+        topic: '--',
+        messagePayload: text,
+        wxid: 'system',
+        roomid: '--',
+        messageType: 'qrcode',
+        file: files,
+      },
+    }
+
+    this.msgStore.push(record)
+  }
+
   async upload(file: ReadStream) {
     const datasheet = this.vika.datasheet(this.messageSheet)
     try {
