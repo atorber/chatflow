@@ -138,14 +138,12 @@ async function onMessage (message, vika) {
 
     if (file) {
       filePath = './' + file.name
-      // filePath = './2910842442594765389.jpg'
       try {
         const writeStream = fs.createWriteStream(filePath)
         await file.pipe(writeStream)
         await wait(500)
         const readerStream = fs.createReadStream(filePath)
         uploadedAttachments = await vika.upload(readerStream)
-        vika.addChatRecord(message, uploadedAttachments, msgType, text)
         fs.unlink(filePath, (err) => {
           console.debug('上传vika完成删除文件：', filePath, err)
         })
@@ -156,10 +154,9 @@ async function onMessage (message, vika) {
         })
       }
 
-    } else {
-    // console.debug(message)
-      vika.addChatRecord(message, uploadedAttachments, msgType, text)
     }
+
+    vika.addChatRecord(message, uploadedAttachments, msgType, text)
 
   } catch (e) {
     console.log('vika 写入失败：', e)

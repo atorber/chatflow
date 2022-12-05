@@ -7,6 +7,10 @@ import moment from 'moment'
 // import { v4 } from 'uuid'
 // import rp from 'request-promise'
 
+import {
+  log,
+} from 'wechaty'
+
 import { sheets, Sheets } from './lib/dataModel.js'
 
 // 定义一个延时方法
@@ -31,6 +35,7 @@ class VikaBot {
   configSheet!: string
   roomWhiteListSheet!: string
   contactWhiteListSheet!: string
+  msgStore!: any[]
 
   constructor(config: VikaBotConfigTypes) {
     if (!config.token) {
@@ -42,6 +47,7 @@ class VikaBot {
       this.spaceName = config.spaceName
       this.vika = new Vika({ token: this.token })
       this.spaceId = ''
+      this.msgStore = []
       // this.checkInit()
     }
   }
@@ -165,53 +171,21 @@ class VikaBot {
       text = JSON.stringify(uploadedAttachments)
     }
 
-    const records = [
-      {
-        fields: {
-          timeHms: timeHms,
-          name: talker ? talker.name() : '未知',
-          topic: topic || '--',
-          messagePayload: text,
-          wxid: talker.id !== 'null' ? talker.id : '--',
-          roomid: room && room.id ? room.id : '--',
-          messageType: msgType,
-          file: files,
-        },
+    const record = {
+      fields: {
+        timeHms: timeHms,
+        name: talker ? talker.name() : '未知',
+        topic: topic || '--',
+        messagePayload: text,
+        wxid: talker.id !== 'null' ? talker.id : '--',
+        roomid: room && room.id ? room.id : '--',
+        messageType: msgType,
+        file: files,
       },
-    ]
-
-    // let records = [
-    //   {
-    //     fields: {
-    //       id: ID,
-    //       timeHms: timeHms,
-    //       name: talker ? talker.name() : '未知',
-    //       topic: topic || '--',
-    //       text: text,
-    //       wxid: talker.id != 'null' ? talker.id : '--',
-    //       roomid: room && room.id ? room.id : '--',
-    //       messageType: msgType,
-    //       files: files
-    //     },
-    //   },
-    // ]
-
-    // console.debug(records)
-    const messageSheet = this.messageSheet
-    const datasheet = this.vika.datasheet(messageSheet)
-    try {
-      datasheet.records.create(records).then((response) => {
-        if (response.success) {
-          console.log('写入vika成功：', JSON.stringify(response.code))
-        } else {
-          console.error('调用vika写入接口成功，写入vika失败：', response)
-        }
-        return response
-      }).catch(err => { console.error('调用vika写入接口失败：', err) })
-    } catch (err) {
-      console.error(err)
     }
 
+    this.msgStore.push(record)
+    log.info('最新消息池长度：', this.msgStore.length);
   }
 
   async addScanRecord(uploadedAttachments: string, text: string) {
@@ -399,6 +373,31 @@ class VikaBot {
       console.error('指定空间不存在，请先创建空间，并在config.ts中配置VIKA_SPACENAME')
       return false
     }
+
+    const that = this
+    let timer_id = setInterval(async () => {
+      // log.info('待处理消息池长度：', that.msgStore.length||0);
+      if (that.msgStore.length && that.messageSheet) {
+        const end = that.msgStore.length < 10 ? that.msgStore.length : 10
+        const records = that.msgStore.splice(0, end)
+        const messageSheet = that.messageSheet
+        const datasheet = that.vika.datasheet(messageSheet)
+
+        try {
+          datasheet.records.create(records).then((response) => {
+            if (response.success) {
+              console.log('写入vika成功：',end, JSON.stringify(response.code))
+            } else {
+              console.error('调用vika写入接口成功，写入vika失败：', response)
+            }
+          }).catch(err => { console.error('调用vika写入接口失败：', err) })
+        } catch (err) {
+          console.error('调用datasheet.records.create失败：', err)
+        }
+      }
+    }, 250);
+
+    console.info(timer_id)
 
     return true
   }

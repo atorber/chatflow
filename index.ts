@@ -330,6 +330,12 @@ async function main() {
     for (let i = 0; i < contacts.length; i++) {
       let item = contacts[i]
       if (item && item.friend() && !wxids.includes(item.id)) {
+        let avatar = ''
+        try {
+          avatar = String(await item.avatar())
+        } catch (err) {
+
+        }
         const fields = {
           "id": item.id,
           "name": item.name(),
@@ -337,7 +343,7 @@ async function main() {
           "gender": String(item.gender() || ''),
           "friend": item.friend(),
           "type": String(item.type()),
-          "avatar": String(await item.avatar()),
+          "avatar": avatar,
           "phone": String(await item.phone())
         }
         const record = {
@@ -351,7 +357,7 @@ async function main() {
       const records = recordsAll.slice(i, i + 10)
       await vika.createRecord(vika.contactSheet, records)
       console.debug('好友列表同步中...', i + 10)
-      void await wait(200)
+      void await wait(250)
     }
 
     console.debug('同步好友列表完成，更新好友数量：', recordsAll.length)
@@ -390,7 +396,7 @@ async function main() {
       const records = recordsAll.slice(i, i + 10)
       await vika.createRecord(vika.roomListSheet, records)
       console.debug('群列表同步中...', i + 10)
-      void await wait(200)
+      void await wait(250)
     }
 
     console.debug('同步群列表完成，更新群数量：', recordsAll.length)
