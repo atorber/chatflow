@@ -370,7 +370,7 @@ const configSheet: Sheet = {
       desc: 'MQTT接入地址',
     },
     {
-      name: 'mqtt-endpoint',
+      name: 'MQTT接入地址',
       type: 'SingleText',
       property: {
         defaultValue: '',
