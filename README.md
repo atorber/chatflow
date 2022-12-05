@@ -129,6 +129,23 @@ npm run init
 npm run start
 ```
 
+## 在Docker中部署运行
+
+注意，因为wechaty-puppet-xp必须依赖Windows微信客户端，所以不能使用Docker，但使用wechaty-puppet-wehcat和wechaty-puppet-padlocal则可以用Doker来部署，最新代码已经默认wechaty-puppet-wehcat为初始化puppet，mac、linux系统直接拉取镜像即可运行（mac M1需要自行打包镜像）
+
+拉取和运行
+
+- 稳定版本
+
+```
+docker run -d --restart=always --env VIKA_TOKEN="维格表token" --env VIKA_SPACENAME="维格表空间名称" atorber/wechat-openai-qa-bot:v1.6.3
+```
+
+- 最新版本
+
+```
+docker run -d --restart=always --env VIKA_TOKEN="维格表token" --env VIKA_SPACENAME="维格表空间名称" atorber/wech
+
 ## 视频演示及使用教程
 
 [到项目官网查看视频教程](https://qabot.vlist.cc/)
