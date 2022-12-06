@@ -443,10 +443,13 @@ class VikaBot {
           const fields = sheet.fields
           await this.createDataSheet(k, sheet.name, fields)
           await wait(200)
-          const records = sheet.defaultRecords
-          if (records) {
-            await this.createRecord(this[k as keyof VikaBot], records)
-            await wait(200)
+          const defaultRecords = sheet.defaultRecords
+          if (defaultRecords) {
+            for(let i = 0;i*10<defaultRecords.length;i=i+10){
+              let records = defaultRecords.splice(i*10,i*10+10)
+              await this.createRecord(this[k as keyof VikaBot], records)
+              await wait(200)
+            }
             console.log(sheet.name + '初始化数据写入完成...')
           }
           console.log(sheet.name + '数据表配置完成...')

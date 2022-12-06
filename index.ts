@@ -47,6 +47,7 @@ import schedule from 'node-schedule'
 let bot: any
 let sysConfig: any
 let chatdev: any = {}
+let job:any
 if (process.env['VIKA_SPACENAME']) {
   configs.VIKA_SPACENAME = process.env['VIKA_SPACENAME']
 }
@@ -170,7 +171,7 @@ async function main() {
     const rule = new schedule.RecurrenceRule();
     rule.second = 0;
     rule.minute = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-    const job = schedule.scheduleJob(rule, async function () {
+    job = schedule.scheduleJob(rule, async function () {
       try {
         // const contact = await bot.Contact.find({ id: 'tyutluyc' })
         const curDate = new Date().toLocaleString()
@@ -191,6 +192,7 @@ async function main() {
 
   function onLogout(user: Contact) {
     log.info('StarterBot', '%s logout', user)
+    job.cancel();
   }
 
   async function onMessage(message: Message) {
