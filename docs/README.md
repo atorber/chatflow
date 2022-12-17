@@ -235,47 +235,34 @@ npm install
 
 <img src="https://user-images.githubusercontent.com/104893934/178886955-f2aed93a-0667-44ac-b657-a7dc6b901bc0.jpg" width="60%">
 
+4. 添加问答
 
-4. 批量导入问答
-
-<img src="https://user-images.githubusercontent.com/104893934/178886977-38854ae9-21d6-45f7-8963-09d0a827c13b.png" width="60%">
-
+在微信对话开放平台中添加问题，创建【通用问题】分类，所有群和好友可匹配，使用群名称创建分类，仅匹配对应群
 
 5. 选择项目中tools目录下的示例问答
 
 <img src="https://user-images.githubusercontent.com/104893934/178887001-53c16428-77da-4eba-8044-c9a9a2714174.png" width="60%">
 
-
-6. 上传问答
-
-<img src="https://user-images.githubusercontent.com/104893934/178887023-7508dd4a-c7b1-4ac1-a848-05ec909125fd.png" width="60%">
-
-
-7. 导入成功后问答列表
-
-<img src="https://user-images.githubusercontent.com/104893934/178887050-5a28fb3e-34c9-44fc-99b9-3413883ad995.png" width="60%">
-
-
-8. 上线发布
+6. 上线发布
 
 <img src="https://user-images.githubusercontent.com/104893934/178887066-d26a9c74-96c6-463a-8ac7-117b72e13dc4.png" width="60%">
 
-9. 发布成功
+7. 发布成功
 
 <img src="https://user-images.githubusercontent.com/104893934/178887079-5b17ab07-8e7f-4c8f-87bf-5ed7da546ad8.png" width="60%">
 
 
-10. 应用绑定，获取token
+8. 应用绑定，获取token
 
 <img src="https://user-images.githubusercontent.com/104893934/178887115-6a2b14cb-6ccc-43c6-961d-d5c1bbcd58b6.png" width="60%">
 
 
-11. 填写申请信息，提交后马上就会审核通过
+9. 填写申请信息，提交后马上就会审核通过
 
 <img src="https://user-images.githubusercontent.com/104893934/178887131-db6248c0-302d-418f-bfa6-0ca5952d3f40.png" width="60%">
 
 
-12. 开通成功，复制token备用
+10. 开通成功，复制token备用
 
 <img src="https://user-images.githubusercontent.com/104893934/178887148-88e681c2-db4e-4051-a94f-215a1231eabb.png" width="60%">
 
@@ -307,8 +294,6 @@ npm run start
 
 顺利的话，恭喜你已经拥有一个QA机器人，接下来你需要在简单问答中继续导入你需要的问答内容
 
-不顺利的话...请截图留言...
-
 - 程序运行成功
 
 <img src="https://user-images.githubusercontent.com/104893934/178887182-bb72a4f0-f2ff-4b52-b67e-d8832844c180.png" width="60%">
@@ -328,10 +313,6 @@ npm run dev
 3. 启动后浏览器中访问 http://localhost:8080/#/imServer 即可打开客服管理后台
 
 4. 到根目录运行`npm run start`启动主程序
-
-### 添加问答
-
-修改./tools/export_skills_70785_1651747894.csv ,添加需要的问答和答案，重新覆盖导入
 
 ## 效果展示
 
