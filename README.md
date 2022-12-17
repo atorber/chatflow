@@ -56,7 +56,7 @@ export default configs
 5. 初始化系统表，先运行，系统会自动在维格表中创建好初始化表格
 
 ```
-npm run init
+npm run sys-init
 ```
 
 <img width="817" alt="image" src="https://user-images.githubusercontent.com/104893934/203386340-f2c5cd44-1ecb-4b10-b248-cca84148c0f3.png">
@@ -114,7 +114,7 @@ Mac、Linux操作系统下运行(仅支持使用wechaty-puppet-wechat和wechaty-
 ```
 export VIKA_TOKEN="替换成自己的维格表token"
 export VIKA_SPACENAME="替换成你的维格表空间名称"
-npm run init
+npm run sys-init
 npm start
 ```
 
@@ -125,7 +125,7 @@ Windows操作系统下运行(支持使用wechaty-puppet-xp、wechaty-puppet-wech
 ```
 set VIKA_TOKEN="替换成自己的维格表token"
 set VIKA_SPACENAME="替换成你的维格表空间名称"
-npm run init
+npm run sys-init
 npm run start
 ```
 
@@ -319,6 +319,12 @@ npm ERR!     C:\Users\Administrator\AppData\Local\npm-cache\_logs\2022-12-03T10_
 
 ### 8. 如果没有搞定，可以联系远程协助指导安装
 
-提前下载好[向日葵](https://sunlogin.oray.com/download)软件并注册号账号，登陆后发控制码
+1. 提前下载好[向日葵](https://sunlogin.oray.com/download)软件并注册号账号，登陆后发控制码
 
 <img src="https://user-images.githubusercontent.com/104893934/167300700-19c6283b-584c-48f4-bc10-7418cc7528f3.png" width="60%">
+
+2. 下载并安装好vs code编辑器
+
+3. 下载并安装好GithubDesktop
+
+请务必做好以上准备之后再联系

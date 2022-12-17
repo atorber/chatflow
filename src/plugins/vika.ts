@@ -378,7 +378,7 @@ class VikaBot {
         if (sheet) {
           if (!tables[sheet.name]) {
             sheetCount = sheetCount + 1
-            console.error(`缺少【${sheet.name}】表，请运行 npm run init 自动创建系统表,然后再运行 npm start`)
+            console.error(`缺少【${sheet.name}】表，请运行 npm run sys-init 自动创建系统表,然后再运行 npm start`)
           } else {
             this[k as keyof VikaBot] = tables[sheet?.name]
           }
@@ -419,7 +419,7 @@ class VikaBot {
       }
     }, 250);
 
-    console.info(timer_id)
+    // console.info(timer_id)
 
     return true
   }

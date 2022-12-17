@@ -77,9 +77,20 @@ async function main() {
         token: sysConfig.puppetToken,
       },
     },
+    // wechaty-puppet-service
+    'wechaty-puppet-service': {
+      name: 'openai-qa-bot',
+      puppet: 'wechaty-puppet-service',
+      puppetOptions: {
+        token: sysConfig.puppetToken,
+      },
+    },
   }
 
-  bot = WechatyBuilder.build(wechatyConfig[sysConfig.puppetName])
+  const ops = wechatyConfig[sysConfig.puppetName]
+  console.debug(ops)
+
+  bot = WechatyBuilder.build(ops)
 
   async function onScan(qrcode: string, status: ScanStatus) {
     console.debug(qrcode)

@@ -40,14 +40,14 @@ import { configData } from './src/plugins/im.js'
 import { wxai } from './src/plugins/wxai.js'
 
 import { ChatDevice } from './src/plugins/chat-device.js'
-import { propertyMessage } from './src/plugins/msg-format.js'
+import { propertyMessage, eventMessage } from './src/plugins/msg-format.js'
 
 import schedule from 'node-schedule'
 
-let bot: any
+let bot: Wechaty
 let sysConfig: any
 let chatdev: any = {}
-let job:any
+let job: any
 if (process.env['VIKA_SPACENAME']) {
   configs.VIKA_SPACENAME = process.env['VIKA_SPACENAME']
 }
@@ -100,9 +100,20 @@ async function main() {
         token: sysConfig.puppetToken,
       },
     },
+    // wechaty-puppet-service
+    'wechaty-puppet-service': {
+      name: 'openai-qa-bot',
+      puppet: 'wechaty-puppet-service',
+      puppetOptions: {
+        token: sysConfig.puppetToken,
+      },
+    },
   }
 
-  bot = WechatyBuilder.build(wechatyConfig[sysConfig.puppetName])
+  const ops = wechatyConfig[sysConfig.puppetName]
+  console.debug(ops)
+
+  bot = WechatyBuilder.build(ops)
 
   async function onScan(qrcode: string, status: ScanStatus) {
     console.debug(qrcode)
@@ -154,7 +165,8 @@ async function main() {
 
   async function onLogin(user: Contact) {
     log.info('StarterBot', '%s login', user.payload)
-    await user.say('上线：' + new Date().toLocaleString())
+    const curDate = new Date().toLocaleString()
+    await user.say('上线：' + curDate)
     log.info(JSON.stringify(user.payload))
     if (sysConfig.mqttPassword && (sysConfig.mqtt_SUB_ONOFF || sysConfig.mqtt_PUB_ONOFF)) {
       chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, user.id)
@@ -174,7 +186,6 @@ async function main() {
     job = schedule.scheduleJob(rule, async function () {
       try {
         // const contact = await bot.Contact.find({ id: 'tyutluyc' })
-        const curDate = new Date().toLocaleString()
         console.log(curDate);
         // await user.say('心跳：' + curDate)
         await vika.addHeartbeatRecord('心跳：' + curDate)
@@ -199,35 +210,45 @@ async function main() {
 
     log.info('onMessage', JSON.stringify(message))
     console.debug('onMessage', JSON.stringify(message))
-
+    const curDate = new Date().toLocaleString()
     if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
-      chatdev.pub_message(message)
+      /*
+      将消息通过mqtt通道上报到云端
+      */
+      // chatdev.pub_message(message)
+      chatdev.pub_event(eventMessage('onMessage', { curDate }))
+
     }
 
     const talker = message.talker()
-    const text = message.text()
+    let text = message.text()
     const room = message.room()
     const roomId = room?.id
     const topic = await room?.topic()
+    const keyWord = bot.currentUser.name()
+    const isSelfMsg = message.self()
 
-    if (message.self() && text === '#更新配置') {
+    console.debug('keyWord is:', keyWord)
+
+    if (isSelfMsg && text === '#更新配置') {
       console.debug('热更新系统配置~')
       try {
         const newConfig = await getConfig(vika)
-        message.say('配置更新成功：' + JSON.stringify(newConfig))
+        // message.say('配置更新成功：' + JSON.stringify(newConfig))
+        console.debug(newConfig)
+        message.say('配置更新成功~')
+
       } catch (e) {
         message.say('配置更新失败~')
       }
-
     }
 
     try {
-      const isSelfMsg = message.self()
 
       if (room && roomId && !isSelfMsg) {
 
         // 智能问答开启时执行
-        if (sysConfig.WX_OPENAI_ONOFF) {
+        if (sysConfig.WX_OPENAI_ONOFF && ((text.indexOf(keyWord) != -1 && sysConfig.AT_AHEAD) || !sysConfig.AT_AHEAD)) {
           if (sysConfig.roomWhiteListOpen) {
             const isInRoomWhiteList = sysConfig.roomWhiteList.includes(roomId)
             if (isInRoomWhiteList) {
@@ -268,9 +289,8 @@ async function main() {
       }
 
       if ((!room || !room.id) && !isSelfMsg) {
-
         // 智能问答开启时执行
-        if (sysConfig.WX_OPENAI_ONOFF) {
+        if (sysConfig.WX_OPENAI_ONOFF && ((text.indexOf(keyWord) != -1 && sysConfig.AT_AHEAD) || !sysConfig.AT_AHEAD)) {
           if (sysConfig.contactWhiteListOpen) {
             const isInContactWhiteList = sysConfig.contactWhiteList.includes(talker.id)
             if (isInContactWhiteList) {
@@ -423,6 +443,15 @@ async function main() {
     bot.on('logout', onLogout)
     bot.on('message', onMessage)
     bot.on('room-join', roomJoin)
+    bot.on('error', (err) => {
+      log.error(JSON.stringify(err))
+      try {
+        job.cancel()
+      } catch (e) {
+        log.error(JSON.stringify(e))
+      }
+
+    })
 
     bot.start()
       .then(() => log.info('Starter Bot Started.'))

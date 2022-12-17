@@ -96,7 +96,7 @@ export default configs
 5. 初始化系统表，先运行，系统会自动在维格表中创建好初始化表格
 
 ```
-npm run init
+npm run sys-init
 ```
 
 <img width="817" alt="image" src="https://user-images.githubusercontent.com/104893934/203386340-f2c5cd44-1ecb-4b10-b248-cca84148c0f3.png">
@@ -154,7 +154,7 @@ Mac、Linux操作系统下运行(仅支持使用wechaty-puppet-wechat和wechaty-
 ```
 export VIKA_TOKEN="替换成自己的维格表token"
 export VIKA_SPACENAME="替换成你的维格表空间名称"
-npm run init
+npm run sys-init
 npm start
 ```
 
@@ -165,7 +165,7 @@ Windows操作系统下运行(支持使用wechaty-puppet-xp、wechaty-puppet-wech
 ```
 set VIKA_TOKEN="替换成自己的维格表token"
 set VIKA_SPACENAME="替换成你的维格表空间名称"
-npm run init
+npm run sys-init
 npm run start
 ```
 
