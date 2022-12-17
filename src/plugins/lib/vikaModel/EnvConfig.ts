@@ -13,25 +13,24 @@ const recordRes = {
             {
                 "recordId": "recrEIHXFV14w",
                 "createdAt": 1671304478000,
-                "updatedAt": 1671306600000,
+                "updatedAt": 1671308763000,
                 "fields": {
                     "配置项": "WechatyPuppet",
                     "标识": "puppetName",
                     "配置组": "机器人",
                     "说明": "可选值：\nwechaty-puppet-wechat\nwechaty-puppet-xp\nwechaty-puppet-padlocal\nwechaty-puppet-service",
-                    "值（只修改此列）": "wechaty-puppet-service"
+                    "值（只修改此列）": "wechaty-puppet-wechat"
                 }
             },
             {
                 "recordId": "rec99fo7LJIXP",
                 "createdAt": 1671304478000,
-                "updatedAt": 1671305975000,
+                "updatedAt": 1671308940000,
                 "fields": {
-                    "配置项": "PadlocalToken",
+                    "配置项": "WechatyToken",
                     "标识": "puppetToken",
                     "配置组": "机器人",
-                    "说明": "使用wechaty-puppet-padlocal时需配置此token",
-                    "值（只修改此列）": "puppet_wxwork_9e22691b25c36e00"
+                    "说明": "使用wechaty-puppet-padlocal、wechaty-puppet-service时需配置此token",
                 }
             },
             {
