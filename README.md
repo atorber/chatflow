@@ -6,7 +6,7 @@
 
 本项目使用wechat机器人快速实现一个免费的QA问答系统，如果你是一个社群工作者、拼团团长、业务群运营经理，使用这个项目可以帮助你解决一些重复性问答。
 
-乐大喜奔，已适配网页版微信，linux、mac、Windows均可运行。
+已适配网页版微信，linux、mac、Windows均可运行。
 
 ### 功能列表
 
@@ -149,17 +149,15 @@ docker run -d --restart=always --env VIKA_TOKEN="维格表token" --env VIKA_SPAC
 
 ## 视频演示及使用教程
 
-[到项目官网查看视频教程](https://qabot.vlist.cc/)
+到项目官网 [查看视频教程](https://qabot.vlist.cc/)
 
-## 快速体验
+## 常见问题及解决方案
 
-如果你对以上操作感觉困难而不能使用，添加 ledongmao 微信，提供你需要的问答清单，我们可以提供一个免费的机器人供体验
+1. 加入QQ群 583830241 在线交流，添加 ledongmao 微信
 
-当然，最好的反馈方式是在这里 https://github.com/choogoo/wechat-openai-qa-bot/issues 提交一个issues
+2. 到 [项目语雀知识库](https://www.yuque.com/atorber/oegota/ibnui5v8mob11d70) 查看常用问题
 
-## 在线交流
-
-QQ群 583830241
+3. 提交一个issues https://github.com/choogoo/wechat-openai-qa-bot/issues 
 
 ## 效果展示
 
@@ -232,99 +230,3 @@ QQ群 583830241
 - [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973) —— 将过去复杂的IT数据库技术，做得像表格一样简单(如果要注册，通过这个链接，或者使用邀请码 55152973 )
 
 - [vue-im](https://github.com/polk6/vue-im) —— 由@polk6开源的客服web项目，实现客服后台回复咨询消息
-
-## 常见问题
-
-**遇到任何报错，一定记得第一时间查看报错信息，即使看不懂，起码复制或截图，否则没有人能仅凭几句语焉不详帮你解决问题**
-
-### 1. 环境依赖
-
-- nodejs > 16 且 npm > 7
-
-使用wechaty-puppet-xp时需使用Windows > 10操作
-
-### 2. 切换网页版微信
-
-在”系统配置“表中修改”puppet“并重启程序
-
-### 3. 安装依赖时提示需要Visual Studio 2017+
-
-去微软官网下载[Visual Studio 2022](https://visualstudio.microsoft.com/zh-hans/thank-you-downloading-visual-studio/?sku=Community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030&passive=false)并安装
-
-<img src="https://user-images.githubusercontent.com/104893934/167300714-49a0dc40-8857-4e81-a780-80e63af74d97.png" width="60%">
-
-### 4. ubuntu系统下使用wechaty-puppet-wechat缺少依赖解决方法
-
-根据报错信息参考 https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md
-
-尝试运行如下命令
-
-```
-sudo apt install gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget libgbm1
-```
-
-安装单个依赖
-
-```
-sudo apt install libgbm1
-```
-
-### 5. mac M1环境下运行报错
-
-报错信息
-
-```
-09:24:09 INFO Starter Bot Started. 
-09:24:26 ERR PuppetWeChatBridge start() exception: TimeoutError: Timed out after 30000 ms while trying to connect to the browser! Only Chrome at revision r982053 is guaranteed to work.
-09:24:26 ERR PuppetWeChat initBridge() exception: Timed out after 30000 ms while trying to connect to the browser! Only Chrome at revision r982053 is guaranteed to work.
-09:24:26 ERR PuppetWeChat initBridge() this.bridge.stop() rejection: Error: no page
-```
-
-解决方案,设置环境变量 `export PUPPETEER_EXPERIMENTAL_CHROMIUM_MAC_ARM=RAM` 
-
-参考 https://www.npmjs.com/package/puppeteer?activeTab=readme
-
-### 6. Windows微信客户端版本支持
-
-支持v3.3.0.115和v3.6.0.18，默认使用v3.6.0.18
-
-若使用v3.3.0.115需下载安装[WeChatSetup-v3.3.0.115.exe](https://github.com/wechaty/wechaty-puppet-xp/releases/download/v0.5/WeChatSetup-v3.3.0.115.exe)，同时更新运行`npm i wechaty-puppet-xp@1.11.14`更新依赖
-
-如果是更新代码，记得将package.json文件对应修改 `"wechaty-puppet-xp": "1.11.14"`，然后再运行`npm i`
-
-### 7. Windows系统错误提示Set ""PUPPETEER_SKIP_DOWNLOAD"" env variable to skip download.
-
-```
-"npm WARN deprecated @hapi/joi@16.1.8: Switch to 'npm install joi'
-npm WARN deprecated axios@0.19.2: Critical security vulnerability fixed in v0.21.1. For more information, see https://github.com/axios/axios/pull/3410
-npm ERR! code 1
-npm ERR! path C:\wechat-openai-qa-bot-main\node_modules\puppeteer
-npm ERR! command failed
-npm ERR! command C:\Windows\system32\cmd.exe /d /s /c node install.js
-npm ERR! ERROR: Failed to set up Chromium r982053! Set ""PUPPETEER_SKIP_DOWNLOAD"" env variable to skip download.
-npm ERR! Error: read ECONNRESET
-npm ERR!     at TLSWrap.onStreamRead (node:internal/stream_base_commons:217:20) {
-npm ERR!   errno: -4077,
-npm ERR!   code: 'ECONNRESET',
-npm ERR!   syscall: 'read'
-npm ERR! }
-
-npm ERR! A complete log of this run can be found in:
-npm ERR!     C:\Users\Administrator\AppData\Local\npm-cache\_logs\2022-12-03T10_06_08_935Z-debug-0.log"
-```
-
-安装puppeteer失败，此报错影响使用wechaty-puppet-wehcat，其他puppet不影响
-
-解决方案：设置环境变量 `set PUPPETEER_SKIP_DOWNLOAD='true'`，接着运行`npm i puppeteer`,再接着运行`npm i`
-
-### 8. 如果没有搞定，可以联系远程协助指导安装
-
-1. 提前下载好[向日葵](https://sunlogin.oray.com/download)软件并注册号账号，登陆后发控制码
-
-<img src="https://user-images.githubusercontent.com/104893934/167300700-19c6283b-584c-48f4-bc10-7418cc7528f3.png" width="60%">
-
-2. 下载并安装好vs code编辑器
-
-3. 下载并安装好GithubDesktop
-
-请务必做好以上准备之后再联系
