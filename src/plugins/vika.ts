@@ -11,7 +11,10 @@ import {
   log,
 } from 'wechaty'
 
-import { sheets, Sheets } from './lib/dataModel.js'
+import type { Sheets, Field } from './lib/vikaModel/Model.js'
+import { sheets } from './lib/vikaModel/index.js'
+
+// import { sheets } from './lib/dataModel.js'
 
 // 定义一个延时方法
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
@@ -33,6 +36,7 @@ class VikaBot {
   qaSheet: any
   roomListSheet: any
   configSheet!: string
+  switchSheet!: string
   roomWhiteListSheet!: string
   contactWhiteListSheet!: string
   msgStore!: any[]
@@ -56,7 +60,7 @@ class VikaBot {
     // 获取当前用户的空间站列表
     const spaceListResp = await this.vika.spaces.list()
     if (spaceListResp.success) {
-      console.log(spaceListResp.data.spaces)
+      // console.log(spaceListResp.data.spaces)
       return spaceListResp.data.spaces
     } else {
       console.error(spaceListResp)
@@ -124,6 +128,7 @@ class VikaBot {
       console.log(`系统表【${name}】创建成功，表ID【${res.data.id}】`)
 
       this[key as keyof VikaBot] = res.data.id
+      this[name as keyof VikaBot] = res.data.id
       await this.clearBlankLines(res.data.id)
 
       return res.data
@@ -228,7 +233,7 @@ class VikaBot {
 
     const curTime = this.getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
-    const files:any = []
+    const files: any = []
 
     const record = {
       fields: {
@@ -321,32 +326,41 @@ class VikaBot {
   }
 
   async getConfig() {
-    const records = await this.getRecords(this.configSheet, {})
-    const config = records[0].fields
-    const roomWhiteList: any[] = []
-    const contactWhiteList: any[] = []
-    const sysConfig = {
-      VIKA_ONOFF: config['消息上传到维格表'] === '开启', // 维格表开启
-      puppetName: config['puppet'],  // 支持wechaty-puppet-wechat、wechaty-puppet-xp、wechaty-puppet-padlocal
-      puppetToken: config['wechaty-token'] || '',
-      WX_TOKEN: config['对话平台token'], // 微信对话平台token
-      EncodingAESKey: config['对话平台EncodingAESKey'], // 微信对话平台EncodingAESKey
-      WX_OPENAI_ONOFF: config['智能问答'] === '开启', // 微信对话平台开启
-      roomWhiteListOpen: config['群白名单'] === '开启', // 群白名单功能
-      roomWhiteList,
-      contactWhiteListOpen: config['好友白名单'] === '开启', // 群白名单功能
-      contactWhiteList,
-      AT_AHEAD: config['AT回复'] === '开启', // 只有机器人被@时回复
-      DIFF_REPLY_ONOFF: config['不同群个性回复'] === '开启', // 开启不同群个性化回复
-      imOpen: config['IM对话'] === '开启',  // 是否开启uve-im客户端，设置为true时，需要先 cd ./vue-im 然后 npm install 启动服务 npm run dev
-      mqtt_SUB_ONOFF: config['MQTT控制'] === '开启',
-      mqtt_PUB_ONOFF: config['MQTT推送'] === '开启',
-      mqttUsername: config['MQTT用户名'] || '',
-      mqttPassword: config['MQTT密码'] || '',
-      mqttEndpoint: config['MQTT接入地址'] || '',
-      mqttPort: config['MQTT端口号'] || 1883,
-      linkWhiteList: [],  // 群内链接检测白名单，白名单里成员发布的卡片、链接消息不提示
-      welcomeList: [],
+    const configRecords = await this.getRecords(this.configSheet, {})
+    const switchRecords = await this.getRecords(this.switchSheet, {})
+    // console.debug(configRecords)
+    // console.debug(switchRecords)
+
+    // const sysConfig = {
+    //   VIKA_ONOFF: config['消息上传到维格表'] === '开启', // 维格表开启
+    //   puppetName: config['puppet'],  // 支持wechaty-puppet-wechat、wechaty-puppet-xp、wechaty-puppet-padlocal
+    //   puppetToken: config['wechaty-token'] || '',
+    //   WX_TOKEN: config['对话平台token'], // 微信对话平台token
+    //   EncodingAESKey: config['对话平台EncodingAESKey'], // 微信对话平台EncodingAESKey
+    //   WX_OPENAI_ONOFF: config['智能问答'] === '开启', // 微信对话平台开启
+    //   roomWhiteListOpen: config['群白名单'] === '开启', // 群白名单功能
+    //   contactWhiteListOpen: config['好友白名单'] === '开启', // 群白名单功能
+    //   AT_AHEAD: config['AT回复'] === '开启', // 只有机器人被@时回复
+    //   DIFF_REPLY_ONOFF: config['不同群个性回复'] === '开启', // 开启不同群个性化回复
+    //   imOpen: config['IM对话'] === '开启',  // 是否开启uve-im客户端，设置为true时，需要先 cd ./vue-im 然后 npm install 启动服务 npm run dev
+    //   mqtt_SUB_ONOFF: config['MQTT控制'] === '开启',
+    //   mqtt_PUB_ONOFF: config['MQTT推送'] === '开启',
+    //   mqttUsername: config['MQTT用户名'] || '',
+    //   mqttPassword: config['MQTT密码'] || '',
+    //   mqttEndpoint: config['MQTT接入地址'] || '',
+    //   mqttPort: config['MQTT端口号'] || 1883,
+    // }
+
+    const sysConfig: any = {}
+    sysConfig.roomWhiteList = []
+    sysConfig.contactWhiteList = []
+
+    for (let i = 0; i < configRecords.length; i++) {
+      sysConfig[configRecords[i].fields['标识']] = configRecords[i].fields['值（只修改此列）']||''
+    }
+
+    for (let i = 0; i < switchRecords.length; i++) {
+      sysConfig[switchRecords[i].fields['标识']] = switchRecords[i].fields['启用状态（只修改此列）'] === '开启'
     }
 
     const roomWhiteListRecords: any[] = await this.getRecords(this.roomWhiteListSheet, {})
@@ -355,10 +369,11 @@ class VikaBot {
     }
 
     const contactWhiteListRecords = await this.getRecords(this.contactWhiteListSheet, {})
-
     for (let i = 0; i < contactWhiteListRecords.length; i++) {
       sysConfig.contactWhiteList.push(contactWhiteListRecords[i].fields['好友ID'])
     }
+
+    // console.debug(sysConfig)
 
     return sysConfig
 
@@ -370,7 +385,7 @@ class VikaBot {
     let sheetCount = 0
     if (this.spaceId) {
       const tables = await this.getNodesList()
-      console.debug(tables)
+      // console.debug(tables)
 
       for (let k in sheets) {
         const sheet = sheets[k as keyof Sheets]
@@ -408,7 +423,7 @@ class VikaBot {
         try {
           datasheet.records.create(records).then((response) => {
             if (response.success) {
-              console.log('写入vika成功：',end, JSON.stringify(response.code))
+              console.log('写入vika成功：', end, JSON.stringify(response.code))
             } else {
               console.error('调用vika写入接口成功，写入vika失败：', response)
             }
@@ -419,7 +434,7 @@ class VikaBot {
       }
     }, 250);
 
-    // console.info(timer_id)
+    console.info(timer_id)
 
     return true
   }
@@ -432,27 +447,92 @@ class VikaBot {
     if (this.spaceId) {
 
       const tables = await this.getNodesList()
-      console.log(tables)
+      // console.log(tables)
 
       await wait(1000)
 
       for (let k in sheets) {
+        // console.debug(this)
         const sheet = sheets[k as keyof Sheets]
         // console.log(k, sheet)
         if (sheet && !tables[sheet.name]) {
           const fields = sheet.fields
-          await this.createDataSheet(k, sheet.name, fields)
+          const newFields: Field[] = []
+          for (let j = 0; j < fields.length; j++) {
+            let field = fields[j]
+            let newField: Field = {
+              type: field?.type || '',
+              name: field?.name || '',
+              desc: field?.desc || ''
+            }
+
+            switch (field?.type) {
+              case 'SingleText':
+                newField.property = field.property || {}
+                break
+              case 'SingleSelect':
+                const options = field.property.options
+                newField.property = {}
+                newField.property.defaultValue = field.property.defaultValue || options[0].name
+                newField.property.options = []
+                for (let z = 0; z < options.length; z++) {
+                  let option = {
+                    name: options[z].name,
+                    color: options[z].color.value
+                  }
+                  newField.property.options.push(option)
+                }
+                break
+              case 'Text':
+                break
+              case 'DateTime':
+                newField.property = {}
+                newField.property.dateFormat = "YYYY-MM-DD"
+                newField.property.includeTime = true
+                newField.property.timeFormat = 'HH:mm'
+                newField.property.autoFill = true
+                break
+              case 'Checkbox':
+                newField.property = {
+                  icon: 'white_check_mark',
+                }
+                break
+              case 'MagicLink':
+                newField.property = {}
+                newField.property.foreignDatasheetId = this[field.desc as keyof VikaBot]
+                break
+              case 'Attachment':
+                break
+              default:
+                break
+            }
+            if (field?.type !== 'MagicLink' || (field?.type === 'MagicLink' && field?.desc)) {
+              newFields.push(newField)
+            }
+          }
+
+          // console.debug(newFields)
+
+          await this.createDataSheet(k, sheet.name, newFields)
           await wait(200)
           const defaultRecords = sheet.defaultRecords
           if (defaultRecords) {
-            for(let i = 0;i*10<defaultRecords.length;i=i+10){
-              let records = defaultRecords.splice(i*10,i*10+10)
+            // console.debug(defaultRecords.length)
+            const count = Math.ceil(defaultRecords.length / 10)
+            for (let i = 0; i < count; i++) {
+              let records = defaultRecords.splice(0, 10)
+              console.log('写入：', records.length)
               await this.createRecord(this[k as keyof VikaBot], records)
               await wait(200)
             }
             console.log(sheet.name + '初始化数据写入完成...')
           }
           console.log(sheet.name + '数据表配置完成...')
+        } else if (sheet) {
+          this[k as keyof VikaBot] = tables[sheet.name]
+          this[sheet?.name as keyof VikaBot] = tables[sheet.name]
+        } else {
+
         }
       }
 
