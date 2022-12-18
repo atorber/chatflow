@@ -4,7 +4,7 @@ import type {
     Field
 } from './Model'
 
-const vikaRes = {
+const vikaRes ={
     "code": 200,
     "success": true,
     "data": {
@@ -101,11 +101,27 @@ const vikaRes = {
                             }
                         },
                         {
+                            "id": "optiiAF9BNYKj",
+                            "name": "每月",
+                            "color": {
+                                "name": "yellow_0",
+                                "value": "#FFF6D8"
+                            }
+                        },
+                        {
                             "id": "optnWPpccOnnb",
                             "name": "每小时",
                             "color": {
                                 "name": "teal_0",
                                 "value": "#D6F3E8"
+                            }
+                        },
+                        {
+                            "id": "optrcSxCfZzyR",
+                            "name": "每分钟",
+                            "color": {
+                                "name": "green_0",
+                                "value": "#DCF3D1"
                             }
                         }
                     ]

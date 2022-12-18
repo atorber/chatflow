@@ -432,52 +432,88 @@ async function main() {
   }
 
   async function startJobs(tasks: any, bot: Wechaty) {
-    const jobs = {}
     for (let i = 0; i < tasks.length; i++) {
       const task: any = tasks[i]
-      const curTimeF = new Date(task.time)
+      const curTimeF = new Date(task.time+8*60*60*1000)
 
-      const curRule = new schedule.RecurrenceRule();
-      curRule.year = '*'
-      curRule.dayOfWeek = '*'
-      curRule.month = '*'
-      curRule.dayOfMonth = '*'
-      curRule.hour = curTimeF.getHours()
-      curRule.minute = curTimeF.getMinutes()
-      curRule.second = 0
+      let curRule = '* * * * * *';
+      let dayOfWeek: any = '*'
+      let month: any = '*'
+      let dayOfMonth: any = '*'
+      let hour: any = curTimeF.getHours()
+      let minute: any = curTimeF.getMinutes()
+      let second = 0
 
       switch (task.cycle) {
         case '每天':
-
           break
         case '每周':
-          curRule.dayOfWeek = curTimeF.getDay()
+          dayOfWeek = curTimeF.getDay()
+          break
+        case '每月':
+          month = curTimeF.getMonth
           break
         case '每小时':
-          curRule.hour = '*'
+          hour = '*'
+          break
+        case '每分钟':
+          hour = '*'
+          minute = '*'
           break
         default:
-          curRule.year = curTimeF.getFullYear()
-          curRule.month = curTimeF.getMonth()
-          curRule.dayOfMonth = curTimeF.getDate()
+          month = curTimeF.getMonth()
+          dayOfMonth = curTimeF.getDate()
           break
 
       }
-
+      curRule = `${second} ${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
       console.debug(curRule)
 
-      let curJob = schedule.scheduleJob(curRule, async function () {
-        try {
-          // const contact = await bot.Contact.find({ id: 'tyutluyc' })
-          console.debug(curRule);
-          // await user.say('心跳：' + curDate)
-        } catch (err) {
-          console.error(err)
-        }
-      });
-      let tsakId: string = task.id || ''
-      jobs[tsakId] = curJob
-      console.debug(jobs)
+      try {
+        let curJob = schedule.scheduleJob(curRule, async () => {
+          try {
+            const curDate = new Date()
+            console.debug('定时任务：', curTimeF, curRule, curDate, JSON.stringify(task));
+            // await user.say('心跳：' + curDate)
+
+            try{
+              if (task.contacts.length) {
+                const contact = await bot.Contact.find({ id: task.contacts[0] })
+                await contact?.say(task.msg)
+                await wait(200)
+              }   
+            }catch(e){
+              console.error("发送好友定时任务失败:", e)
+
+            }
+
+            try{
+              if (task.rooms.length) {
+                const room = await bot.Room.find({ id: task.rooms[0] })
+                await room?.say(task.msg)
+                await wait(200)
+              } 
+            }catch(e){
+              console.error("发送群定时任务失败:", e)
+
+            }
+
+          } catch (err) {
+            console.error(err)
+          }
+        });
+        // console.debug(task)
+        // console.debug(curJob)
+        // let tsakId: string = task.id || ''
+        // if (tsakId) {
+        //   jobs[tsakId] = curJob || {}
+        // }
+        console.debug(jobs)
+      } catch (e) {
+        console.error("创建定时任务失败:", e)
+      }
+
+
     }
   }
 

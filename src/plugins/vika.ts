@@ -430,7 +430,7 @@ class VikaBot {
     }
 
 
-    console.debug(timedTasks)
+    // console.debug(timedTasks)
 
     return timedTasks
 
