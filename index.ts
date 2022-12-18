@@ -48,6 +48,7 @@ let bot: Wechaty
 let sysConfig: any
 let chatdev: any = {}
 let job: any
+let jobs: any
 if (process.env['VIKA_SPACENAME']) {
   configs.VIKA_SPACENAME = process.env['VIKA_SPACENAME']
 }
@@ -197,6 +198,10 @@ async function main() {
       }
     });
     log.info(job)
+
+    const tasks = await vika.getTimedTask()
+
+    startJobs(tasks, bot)
 
     console.log(`================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n`)
   }
@@ -424,6 +429,56 @@ async function main() {
 
     console.debug('同步群列表完成，更新群数量：', recordsAll.length)
 
+  }
+
+  async function startJobs(tasks: any, bot: Wechaty) {
+    const jobs = {}
+    for (let i = 0; i < tasks.length; i++) {
+      const task: any = tasks[i]
+      const curTimeF = new Date(task.time)
+
+      const curRule = new schedule.RecurrenceRule();
+      curRule.year = '*'
+      curRule.dayOfWeek = '*'
+      curRule.month = '*'
+      curRule.dayOfMonth = '*'
+      curRule.hour = curTimeF.getHours()
+      curRule.minute = curTimeF.getMinutes()
+      curRule.second = 0
+
+      switch (task.cycle) {
+        case '每天':
+
+          break
+        case '每周':
+          curRule.dayOfWeek = curTimeF.getDay()
+          break
+        case '每小时':
+          curRule.hour = '*'
+          break
+        default:
+          curRule.year = curTimeF.getFullYear()
+          curRule.month = curTimeF.getMonth()
+          curRule.dayOfMonth = curTimeF.getDate()
+          break
+
+      }
+
+      console.debug(curRule)
+
+      let curJob = schedule.scheduleJob(curRule, async function () {
+        try {
+          // const contact = await bot.Contact.find({ id: 'tyutluyc' })
+          console.debug(curRule);
+          // await user.say('心跳：' + curDate)
+        } catch (err) {
+          console.error(err)
+        }
+      });
+      let tsakId: string = task.id || ''
+      jobs[tsakId] = curJob
+      console.debug(jobs)
+    }
   }
 
   const missingConfiguration = []

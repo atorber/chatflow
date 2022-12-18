@@ -7,6 +7,8 @@ import moment from 'moment'
 // import { v4 } from 'uuid'
 // import rp from 'request-promise'
 
+// import schedule from 'node-schedule'
+
 import {
   log,
 } from 'wechaty'
@@ -399,7 +401,7 @@ class VikaBot {
     for (let i = 0; i < taskRecords.length; i++) {
       const task = taskRecords[i]
       let taskConfig: any = {
-        id:task.recordId,
+        id: task.recordId,
         msg: task.fields['内容'],
         time: task.fields['时间'],
         cycle: task.fields['周期'],
@@ -592,7 +594,8 @@ class VikaBot {
       }
 
       console.log('================================================\n\n初始化系统表完成,运行 npm start 启动系统\n\n================================================\n')
-      // this.getTimedTask()
+
+      // const tasks = await this.getTimedTask()
     } else {
       console.error('指定空间不存在，请先创建空间，并在config.ts中配置VIKA_SPACENAME')
     }
