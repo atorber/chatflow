@@ -39,6 +39,7 @@ class VikaBot {
   switchSheet!: string
   roomWhiteListSheet!: string
   contactWhiteListSheet!: string
+  noticeSheet!: string
   msgStore!: any[]
 
   constructor(config: VikaBotConfigTypes) {
@@ -356,7 +357,7 @@ class VikaBot {
     sysConfig.contactWhiteList = []
 
     for (let i = 0; i < configRecords.length; i++) {
-      sysConfig[configRecords[i].fields['标识']] = configRecords[i].fields['值（只修改此列）']||''
+      sysConfig[configRecords[i].fields['标识']] = configRecords[i].fields['值（只修改此列）'] || ''
     }
 
     for (let i = 0; i < switchRecords.length; i++) {
@@ -376,6 +377,60 @@ class VikaBot {
     // console.debug(sysConfig)
 
     return sysConfig
+
+  }
+
+  async getTimedTask() {
+    const taskRecords = await this.getRecords(this.noticeSheet, {})
+    // console.debug(taskRecords)
+
+    const timedTasks: any = []
+
+    let taskFields: Field[] = sheets['noticeSheet']?.fields || []
+    let taskFieldDic: any = {}
+
+    for (let i = 0; i < taskFields.length; i++) {
+      let taskField: Field | undefined = taskFields[i]
+      if (taskFields && taskField !== undefined && taskFields[i]?.desc) {
+        taskFieldDic[taskField.name] = taskField.desc
+      }
+    }
+
+    for (let i = 0; i < taskRecords.length; i++) {
+      const task = taskRecords[i]
+      let taskConfig: any = {
+        id:task.recordId,
+        msg: task.fields['内容'],
+        time: task.fields['时间'],
+        cycle: task.fields['周期'],
+        contacts: [],
+        rooms: []
+      }
+
+      if (taskConfig.msg && taskConfig.time && (task.fields['接收好友'].length || task.fields['接收群'].length)) {
+
+        if (task.fields['接收群'] && task.fields['接收群'].length) {
+          const roomRecords = await this.getRecords(this.roomListSheet, { recordIds: task.fields['接收群'] })
+          // console.debug(roomRecords)
+          roomRecords.forEach(async (item: any) => {
+            taskConfig.rooms.push(item.fields.id);
+          })
+        }
+        if (task.fields['接收好友'] && task.fields['接收好友'].length) {
+          const contactRecords = await this.getRecords(this.contactSheet, { recordIds: task.fields['接收好友'] })
+          // console.debug(contactRecords)
+          contactRecords.forEach(async (item: any) => {
+            taskConfig.contacts.push(item.fields.id);
+          })
+        }
+        timedTasks.push(taskConfig)
+      }
+    }
+
+
+    console.debug(timedTasks)
+
+    return timedTasks
 
   }
 
@@ -537,7 +592,7 @@ class VikaBot {
       }
 
       console.log('================================================\n\n初始化系统表完成,运行 npm start 启动系统\n\n================================================\n')
-
+      // this.getTimedTask()
     } else {
       console.error('指定空间不存在，请先创建空间，并在config.ts中配置VIKA_SPACENAME')
     }
