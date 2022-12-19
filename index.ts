@@ -434,7 +434,8 @@ async function main() {
   async function startJobs(tasks: any, bot: Wechaty) {
     for (let i = 0; i < tasks.length; i++) {
       const task: any = tasks[i]
-      const curTimeF = new Date(task.time+8*60*60*1000)
+      const curTimeF = new Date(task.time)
+      // const curTimeF = new Date(task.time+8*60*60*1000)
 
       let curRule = '* * * * * *';
       let dayOfWeek: any = '*'

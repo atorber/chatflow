@@ -47,9 +47,9 @@ async function wxai(sysConfig: any, bot: any, talker: any, room: any, message: a
     let text = message.text()
     const keyWord = bot.currentUser.name()
 
-    if (text.indexOf(keyWord)!=-1&&text.length>4) {
-        let index = text.lastIndexOf(keyWord) + keyWord.length-1;
-        text = text.substring(index+1,text.length);
+    if (text.indexOf(keyWord) != -1 && text.length > 4) {
+        let index = text.lastIndexOf(keyWord) + keyWord.length - 1;
+        text = text.substring(index + 1, text.length);
     }
 
     let answer: any = {}
@@ -213,7 +213,6 @@ async function aibot(sysConfig: any, talker: any, room: any, query: any) {
                 const resMsg = await chatAibot(queryData)
 
                 log.info('对话返回：', JSON.stringify(resMsg))
-                log.info('对话返回：', resMsg)
 
                 if (resMsg.msgtype && resMsg.confidence > 0.8) {
                     switch (resMsg.msgtype) {
