@@ -127,12 +127,37 @@ const vikaRes ={
                     ]
                 },
                 "editable": true
+            },
+            {
+                "id": "fldiC33Rgidk5",
+                "name": "启用状态",
+                "type": "SingleSelect",
+                "property": {
+                    "options": [
+                        {
+                            "id": "optJAukD9h9vd",
+                            "name": "开启",
+                            "color": {
+                                "name": "deepPurple_0",
+                                "value": "#E5E1FC"
+                            }
+                        },
+                        {
+                            "id": "optXdfUlXCcYG",
+                            "name": "关闭",
+                            "color": {
+                                "name": "indigo_0",
+                                "value": "#DDE7FF"
+                            }
+                        }
+                    ]
+                },
+                "editable": true
             }
         ]
     },
     "message": "SUCCESS"
 }
-
 const defaultRecords: any[] = []
 
 const fields: Field[] = vikaRes.data.fields
