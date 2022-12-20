@@ -139,14 +139,23 @@ npm run start
 
 ## 在Docker中部署运行
 
-注意，因为wechaty-puppet-xp必须依赖Windows微信客户端，所以不能使用Docker，但使用wechaty-puppet-wehcat和wechaty-puppet-padlocal则可以用Doker来部署，最新代码已经默认wechaty-puppet-wehcat为初始化puppet，mac、linux系统直接拉取镜像即可运行（mac M1需要自行打包镜像）
+注意，因为wechaty-puppet-xp必须依赖Windows微信客户端，所以不能使用Docker，但使用、、wechaty-puppet-padlocal、wechaty-puppet-service则可以用Doker来部署，最新代码已经默认wechaty-puppet-wehcat为初始化puppet，mac、linux系统直接拉取镜像即可运行（mac M1需要自行打包镜像）
 
-拉取和运行
+### Wechaty-Puppet支持
+
+|puppet名称|支持平台	|需要token	|付费|	备注|
+|--|--|--|--|--|
+|wechaty-puppet-wechat|	Windows、Linux、macOS	|否|	否	|windows版本|
+|wechaty-puppet-xp|Windows|	否|	否	|网页版wechat|
+|wechaty-puppet-padlocal👍|	Windows、Linux、macOS|	是	|是	|
+|wechaty-puppet-service👍|	Windows、Linux、macOS|	是	|是	|企业微信|
+
+### 拉取和运行
 
 - 稳定版本
 
 ```
-docker run -d --restart=always --env VIKA_TOKEN="维格表token" --env VIKA_SPACENAME="维格表空间名称" atorber/wechat-openai-qa-bot:v1.6.3
+docker run -d --restart=always --env VIKA_TOKEN="维格表token" --env VIKA_SPACENAME="维格表空间名称" atorber/wechat-openai-qa-bot:v1.8.2
 ```
 
 - 最新版本
