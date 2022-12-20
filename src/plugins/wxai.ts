@@ -74,7 +74,7 @@ async function wxai(sysConfig: any, bot: any, talker: any, room: any, message: a
     }
 
     //   log.info(JSON.stringify(answer))
-    console.debug(JSON.stringify(answer))
+    console.debug('回复消息：', JSON.stringify(answer))
 
     if (answer.messageType) {
         switch (answer.messageType) {
@@ -211,15 +211,19 @@ async function aibot(sysConfig: any, talker: any, room: any, query: any) {
                 }
 
                 const resMsg = await chatAibot(queryData)
-
-                log.info('对话返回：', JSON.stringify(resMsg))
+                console.debug(resMsg)
+                log.info('对话返回原始：', resMsg)
+                // log.info('对话返回：', JSON.stringify(resMsg).replace(/[\r\n]/g, "").replace(/\ +/g, ""))
+                log.info('回答内容：', resMsg.msgtype, resMsg.query, resMsg.answer)
+                // console.debug(resMsg.query)
+                // console.debug(resMsg.answer)
 
                 if (resMsg.msgtype && resMsg.confidence > 0.8) {
                     switch (resMsg.msgtype) {
                         case 'text':
                             answer = {
                                 messageType: types.Message.Text,
-                                text: resMsg.answer,
+                                text: resMsg.answer || resMsg.msg[0].content,
                             }
                             break
                         case 'miniprogrampage':
@@ -250,8 +254,10 @@ async function aibot(sysConfig: any, talker: any, room: any, query: any) {
                             break
                     }
 
-                    if (sysConfig.DIFF_REPLY_ONOFF && room && (resMsg.skill_name !== topic && resMsg.skill_name !== '通用问题')) {
-                        answer = {}
+                    if (sysConfig.DIFF_REPLY_ONOFF) {
+                        if (room && (resMsg.skill_name !== topic && resMsg.skill_name !== '通用问题')) {
+                            answer = {}
+                        }
                     }
                 }
             } catch (err) {

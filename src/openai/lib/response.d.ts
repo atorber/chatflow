@@ -7,6 +7,7 @@
  */
 export interface ResponseCHAT {
     [x: string]: any;
+    query:string;
     ans_node_id: number;
     ans_node_name: string;
     answer: string;

@@ -335,11 +335,11 @@ async function main() {
     const nameList = inviteeList.map(c => c.name()).join(',')
     log.info(`Room ${await room.topic()} got new member ${nameList}, invited by ${inviter}`)
     if (sysConfig.welcomeList.includes(room.id)) {
-      const newer = inviteeList[0]
-      if (newer) {
-        const newers: [Contact] = [newer]
-        await room.say(`欢迎加入${await room.topic()},请阅读群公告~`, ...newers)
-      }
+      // const newer = inviteeList[0]
+      // if (newer) {
+      //   const newers: [Contact] = [newer]
+      //   await room.say(`欢迎加入${await room.topic()},请阅读群公告~`, ...newers)
+      // }
     }
   }
 

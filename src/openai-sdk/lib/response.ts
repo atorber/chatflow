@@ -10,6 +10,7 @@
 export interface ResponseCHAT {
     ans_node_id: number,
     ans_node_name: string,
+    query:string,
     answer: string,
     answer_open: number,
     answer_type: string,
