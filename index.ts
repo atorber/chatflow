@@ -241,10 +241,10 @@ async function main() {
         const newConfig = await getConfig(vika)
         // message.say('配置更新成功：' + JSON.stringify(newConfig))
         console.debug(newConfig)
-        message.say('配置更新成功~')
+        message.say(keyWord + '配置更新成功~')
 
       } catch (e) {
-        message.say('配置更新失败~')
+        message.say(keyWord + '配置更新失败~')
       }
     }
 
@@ -477,24 +477,24 @@ async function main() {
             console.debug('定时任务：', curTimeF, curRule, curDate, JSON.stringify(task));
             // await user.say('心跳：' + curDate)
 
-            try{
+            try {
               if (task.contacts.length) {
                 const contact = await bot.Contact.find({ id: task.contacts[0] })
                 await contact?.say(task.msg)
                 await wait(200)
-              }   
-            }catch(e){
+              }
+            } catch (e) {
               console.error("发送好友定时任务失败:", e)
 
             }
 
-            try{
+            try {
               if (task.rooms.length) {
                 const room = await bot.Room.find({ id: task.rooms[0] })
                 await room?.say(task.msg)
                 await wait(200)
-              } 
-            }catch(e){
+              }
+            } catch (e) {
               console.error("发送群定时任务失败:", e)
 
             }
