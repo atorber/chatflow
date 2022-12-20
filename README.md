@@ -10,17 +10,25 @@
 
 ### 功能列表
 
+- 功能开关
+
+![image](https://user-images.githubusercontent.com/104893934/208631837-74232f1c-122c-420f-8bd5-0a5b5fb9c8ac.png)
+
+- 可视化配置环境变量
+
+![image](https://user-images.githubusercontent.com/104893934/208632380-8c6260e7-a592-4f65-85f5-1d873e041dfe.png)
+
 |功能|描述|
 |--|--|
 | 智能问答|可以自定义问答内容，智能匹配答案，支持相似问题匹配，例如“什么时候到货？”“亲，几时到货”“亲，什么时候到货”均能匹配（基于微信对话开放平台，免费）|
 |千群千面|多个群相同问题不同回答内容,例如“何时到货？”,A群中回答“今天到”，B群中回答“明天到货”|
 |群白名单|支持配置群白名单，白名单内群开启机器人问答，未配置问题答案的群不会受到机器人干扰|
-|非群主链接检测|支持非群主小程序卡片、网页链接分享检测，自动提醒、警告发送者撤回|
 |消息存档|群聊天消息存档到表格（基于vika维格表，免费）|
 |客服后台|简单客服后台，可以把群内消息按发言人列表区分|
-|团购订单转换|支持快团团订货单转换，原始表发送到群即可自动转换为按楼栋统计表|
 |MQTT消息推送|支持配置一个MQTTQ消息队列，将消息推送到队列当中|
 |远程控制发消息|支持通过MQTT控制机器人向指定好友或群发消息|
+|非群主链接检测|支持非群主小程序卡片、网页链接分享检测，自动提醒、警告发送者撤回|
+|团购订单转换|支持快团团订货单转换，原始表发送到群即可自动转换为按楼栋统计表|
 
 ## 快速开始
 
@@ -131,14 +139,23 @@ npm run start
 
 ## 在Docker中部署运行
 
-注意，因为wechaty-puppet-xp必须依赖Windows微信客户端，所以不能使用Docker，但使用wechaty-puppet-wehcat和wechaty-puppet-padlocal则可以用Doker来部署，最新代码已经默认wechaty-puppet-wehcat为初始化puppet，mac、linux系统直接拉取镜像即可运行（mac M1需要自行打包镜像）
+注意，因为wechaty-puppet-xp必须依赖Windows微信客户端，所以不能使用Docker，但使用、、wechaty-puppet-padlocal、wechaty-puppet-service则可以用Doker来部署，最新代码已经默认wechaty-puppet-wehcat为初始化puppet，mac、linux系统直接拉取镜像即可运行（mac M1需要自行打包镜像）
 
-拉取和运行
+### Wechaty-Puppet支持
+
+|puppet名称|支持平台	|需要token	|付费|	备注|
+|--|--|--|--|--|
+|wechaty-puppet-wechat|	Windows、Linux、macOS	|否|	否	|windows版本|
+|wechaty-puppet-xp|Windows|	否|	否	|网页版wechat|
+|wechaty-puppet-padlocal👍|	Windows、Linux、macOS|	是	|是	|
+|wechaty-puppet-service👍|	Windows、Linux、macOS|	是	|是	|企业微信|
+
+### 拉取和运行
 
 - 稳定版本
 
 ```
-docker run -d --restart=always --env VIKA_TOKEN="维格表token" --env VIKA_SPACENAME="维格表空间名称" atorber/wechat-openai-qa-bot:v1.6.3
+docker run -d --restart=always --env VIKA_TOKEN="维格表token" --env VIKA_SPACENAME="维格表空间名称" atorber/wechat-openai-qa-bot:v1.8.2
 ```
 
 - 最新版本
