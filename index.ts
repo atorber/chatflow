@@ -446,6 +446,19 @@ async function main() {
       let second = 0
 
       switch (task.cycle) {
+        case '每季度':
+          month = curTimeF.getMonth()
+          let addMonth = []
+          for (let i = 0; i < 4; i++) {
+            if (month + 3 <= 11) {
+              addMonth.push(month)
+            } else {
+              addMonth.push(month - 9)
+            }
+            month = month + 3
+          }
+          month = addMonth
+          break
         case '每天':
           break
         case '每周':
@@ -456,6 +469,22 @@ async function main() {
           break
         case '每小时':
           hour = '*'
+          break
+        case '每30分钟':
+          hour = '*'
+          minute = '30'
+          break
+        case '每15分钟':
+          hour = '*'
+          minute = '15'
+          break
+        case '每10分钟':
+          hour = '*'
+          minute = '10'
+          break
+        case '每5分钟':
+          hour = '*'
+          minute = '5'
           break
         case '每分钟':
           hour = '*'

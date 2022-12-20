@@ -123,6 +123,46 @@ const vikaRes ={
                                 "name": "green_0",
                                 "value": "#DCF3D1"
                             }
+                        },
+                        {
+                            "id": "optt9JWn7cSbF",
+                            "name": "每5分钟",
+                            "color": {
+                                "name": "orange_0",
+                                "value": "#FFEECC"
+                            }
+                        },
+                        {
+                            "id": "optkEeIO3oiGP",
+                            "name": "每10分钟",
+                            "color": {
+                                "name": "tangerine_0",
+                                "value": "#FFE4CC"
+                            }
+                        },
+                        {
+                            "id": "opt6FET9p070f",
+                            "name": "每15分钟",
+                            "color": {
+                                "name": "pink_0",
+                                "value": "#FFE2E8"
+                            }
+                        },
+                        {
+                            "id": "optWUcO5sbqGN",
+                            "name": "每30分钟",
+                            "color": {
+                                "name": "red_0",
+                                "value": "#F9D8D7"
+                            }
+                        },
+                        {
+                            "id": "optQuO5UYFHrZ",
+                            "name": "每季度",
+                            "color": {
+                                "name": "deepPurple_0",
+                                "value": "#E5E1FC"
+                            }
                         }
                     ]
                 },
