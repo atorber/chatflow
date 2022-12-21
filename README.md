@@ -69,11 +69,9 @@ npm run sys-init
 
 在维格表查看系统表是否创建成功
 
-<img width="1439" alt="image" src="https://user-images.githubusercontent.com/104893934/208944128-0a1a65e3-0bed-45af-9efa-326fd6ec494f.png">
+<img width="1438" alt="image" src="https://user-images.githubusercontent.com/104893934/208945350-65825003-fc34-451b-88af-cb6877a800fc.png">
 
 6. 程序默认使用wechaty-puppet-wechat，三大系统均可使用
-
-<img width="1438" alt="image" src="https://user-images.githubusercontent.com/104893934/208945350-65825003-fc34-451b-88af-cb6877a800fc.png">
 
 7. 启动程序
 
@@ -88,11 +86,17 @@ npm start
 
 8.开启智能问答功能
 
-8.1 设置微信对话平台token，填写"系统配置表"中的 【对话平台token】、【对话平台EncodingAESKey】并开启智能问答
+8.1 设置微信对话平台token，填写"环境变量"表中的 【对话平台token】、【对话平台EncodingAESKey】并在"功能开关"表中开启智能问答
 
-<img width="1310" alt="image" src="https://user-images.githubusercontent.com/104893934/203387234-7ceaee5c-650f-448d-a4f6-59a2153d5de7.png">
+<img width="1436" alt="image" src="https://user-images.githubusercontent.com/104893934/208946437-d2e2251c-e8dc-4332-b482-78f995cdee26.png">
 
-8.2 设置群白名单,将群加入到问答白名单，在“群白名单”表中，加入需要开启的群ID（roomid），群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
+<img width="1439" alt="image" src="https://user-images.githubusercontent.com/104893934/208946777-2123ce1e-b858-41e6-8e32-2b11e9749a13.png">
+
+添加一个简单问题到微信对话开放平台，测试对应群内智能问答内容
+
+8.2 如果不希望每个群都开启智能问答，需设置群白名单,首先需要将上图中的群白名单开关设置为开启
+
+然后将群加入到问答白名单，在“群白名单”表中，加入需要开启的群ID（roomid），群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
 
 - 获取群ID
 
