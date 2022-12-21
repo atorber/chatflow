@@ -71,19 +71,18 @@ npm run sys-init
 
 在维格表查看系统表是否创建成功
 
-<img width="1437" alt="image" src="https://user-images.githubusercontent.com/104893934/203386602-a243a23d-6864-4565-8742-c16d06f78ed2.png">
+<img width="1439" alt="image" src="https://user-images.githubusercontent.com/104893934/208944128-0a1a65e3-0bed-45af-9efa-326fd6ec494f.png">
 
-6. 设置使用的puppet，程序默认使用wechaty-puppet-xp（仅Windows系统下可使用），mac、linux系统需切换到wechaty-puppet-xp或wechaty-puppet-padlocal
+6. 程序默认使用wechaty-puppet-wechat，三大系统均可使用
 
-> 快速启用可使用免费的wechaty-puppet-xp
-
-<img width="1384" alt="image" src="https://user-images.githubusercontent.com/104893934/203387787-46ec974c-3568-4fa6-a8c4-3e569f58aee1.png">
+<img width="1438" alt="image" src="https://user-images.githubusercontent.com/104893934/208945350-65825003-fc34-451b-88af-cb6877a800fc.png">
 
 7. 启动程序
 
 ```
 npm start
 ```
+出现二维码之后，扫码二维码登陆微信
 
 看到如下界面，说明运行成功了
 
