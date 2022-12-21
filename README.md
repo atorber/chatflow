@@ -67,8 +67,6 @@ export default configs
 npm run sys-init
 ```
 
-<img width="817" alt="image" src="https://user-images.githubusercontent.com/104893934/203386340-f2c5cd44-1ecb-4b10-b248-cca84148c0f3.png">
-
 在维格表查看系统表是否创建成功
 
 <img width="1439" alt="image" src="https://user-images.githubusercontent.com/104893934/208944128-0a1a65e3-0bed-45af-9efa-326fd6ec494f.png">
