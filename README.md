@@ -145,8 +145,8 @@ npm run start
 
 |puppet名称|支持平台	|需要token	|付费|	备注|
 |--|--|--|--|--|
-|wechaty-puppet-wechat|	Windows、Linux、macOS	|否|	否	|windows版本|
-|wechaty-puppet-xp|Windows|	否|	否	|网页版wechat|
+|wechaty-puppet-wechat|	Windows、Linux、macOS	|否|	否	|网页版wechat|
+|wechaty-puppet-xp|Windows|	否|	否	|仅支持windows|
 |wechaty-puppet-padlocal👍|	Windows、Linux、macOS|	是	|是	|
 |wechaty-puppet-service👍|	Windows、Linux、macOS|	是	|是	|企业微信|
 
