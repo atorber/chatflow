@@ -197,11 +197,9 @@ async function main() {
         console.error(err)
       }
     });
-    log.info(job)
+    log.info('下一次心跳调用时间：', job.nextInvocation())
 
-    const tasks = await vika.getTimedTask()
-
-    startJobs(tasks, bot)
+    updateJobs(bot)
 
     console.log(`================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n`)
   }
@@ -245,6 +243,17 @@ async function main() {
 
       } catch (e) {
         message.say(keyWord + '配置更新失败~')
+      }
+    }
+
+    if (isSelfMsg && text === '#更新提醒') {
+      console.debug('热更新通知任务~')
+      try {
+        updateJobs(bot)
+        message.say(keyWord + '，提醒任务更新成功~')
+
+      } catch (e) {
+        message.say(keyWord + '，提醒任务更新失败~')
       }
     }
 
@@ -431,119 +440,120 @@ async function main() {
 
   }
 
-  async function startJobs(tasks: any, bot: Wechaty) {
-    for (let i = 0; i < tasks.length; i++) {
-      const task: any = tasks[i]
-      const curTimeF = new Date(task.time)
-      // const curTimeF = new Date(task.time+8*60*60*1000)
+  async function updateJobs(bot: Wechaty) {
+    try {
+      const tasks = await vika.getTimedTask()
+      schedule.gracefulShutdown();
+      for (let i = 0; i < tasks.length; i++) {
+        const task: any = tasks[i]
+        if (task.active) {
+          const curTimeF = new Date(task.time)
+          // const curTimeF = new Date(task.time+8*60*60*1000)
+          let curRule = '* * * * * *';
+          let dayOfWeek: any = '*'
+          let month: any = '*'
+          let dayOfMonth: any = '*'
+          let hour: any = curTimeF.getHours()
+          let minute: any = curTimeF.getMinutes()
+          let second = 0
 
-      let curRule = '* * * * * *';
-      let dayOfWeek: any = '*'
-      let month: any = '*'
-      let dayOfMonth: any = '*'
-      let hour: any = curTimeF.getHours()
-      let minute: any = curTimeF.getMinutes()
-      let second = 0
+          switch (task.cycle) {
+            case '每季度':
+              month = curTimeF.getMonth()
+              let addMonth = []
+              for (let i = 0; i < 4; i++) {
+                if (month + 3 <= 11) {
+                  addMonth.push(month)
+                } else {
+                  addMonth.push(month - 9)
+                }
+                month = month + 3
+              }
+              month = addMonth
+              break
+            case '每天':
+              break
+            case '每周':
+              dayOfWeek = curTimeF.getDay()
+              break
+            case '每月':
+              month = curTimeF.getMonth()
+              break
+            case '每小时':
+              hour = '*'
+              break
+            case '每30分钟':
+              hour = '*'
+              minute = [0, 30]
+              break
+            case '每15分钟':
+              hour = '*'
+              minute = [0, 15, 30, 45]
+              break
+            case '每10分钟':
+              hour = '*'
+              minute = [0, 10, 20, 30, 40, 50]
+              break
+            case '每5分钟':
+              hour = '*'
+              minute = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+              break
+            case '每分钟':
+              hour = '*'
+              minute = '*'
+              break
+            default:
+              month = curTimeF.getMonth()
+              dayOfMonth = curTimeF.getDate()
+              break
 
-      switch (task.cycle) {
-        case '每季度':
-          month = curTimeF.getMonth()
-          let addMonth = []
-          for (let i = 0; i < 4; i++) {
-            if (month + 3 <= 11) {
-              addMonth.push(month)
-            } else {
-              addMonth.push(month - 9)
-            }
-            month = month + 3
           }
-          month = addMonth
-          break
-        case '每天':
-          break
-        case '每周':
-          dayOfWeek = curTimeF.getDay()
-          break
-        case '每月':
-          month = curTimeF.getMonth
-          break
-        case '每小时':
-          hour = '*'
-          break
-        case '每30分钟':
-          hour = '*'
-          minute = '30'
-          break
-        case '每15分钟':
-          hour = '*'
-          minute = '15'
-          break
-        case '每10分钟':
-          hour = '*'
-          minute = '10'
-          break
-        case '每5分钟':
-          hour = '*'
-          minute = '5'
-          break
-        case '每分钟':
-          hour = '*'
-          minute = '*'
-          break
-        default:
-          month = curTimeF.getMonth()
-          dayOfMonth = curTimeF.getDate()
-          break
+          curRule = `${second} ${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
+          console.debug(curRule)
 
-      }
-      curRule = `${second} ${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
-      console.debug(curRule)
-
-      try {
-        let curJob = schedule.scheduleJob(curRule, async () => {
           try {
-            const curDate = new Date()
-            console.debug('定时任务：', curTimeF, curRule, curDate, JSON.stringify(task));
-            // await user.say('心跳：' + curDate)
+            let curJob = schedule.scheduleJob(task.id, curRule, async () => {
+              try {
+                const curDate = new Date()
+                console.debug('定时任务：', curTimeF, curRule, curDate, JSON.stringify(task));
+                // await user.say('心跳：' + curDate)
 
-            try {
-              if (task.contacts.length) {
-                const contact = await bot.Contact.find({ id: task.contacts[0] })
-                await contact?.say(task.msg)
-                await wait(200)
+                try {
+                  if (task.contacts.length) {
+                    const contact = await bot.Contact.find({ id: task.contacts[0] })
+                    await contact?.say(task.msg)
+                    await wait(200)
+                  }
+                } catch (e) {
+                  console.error("发送好友定时任务失败:", e)
+
+                }
+
+                try {
+                  if (task.rooms.length) {
+                    const room = await bot.Room.find({ id: task.rooms[0] })
+                    await room?.say(task.msg)
+                    await wait(200)
+                  }
+                } catch (e) {
+                  console.error("发送群定时任务失败:", e)
+
+                }
+
+              } catch (err) {
+                console.error(err)
               }
-            } catch (e) {
-              console.error("发送好友定时任务失败:", e)
-
-            }
-
-            try {
-              if (task.rooms.length) {
-                const room = await bot.Room.find({ id: task.rooms[0] })
-                await room?.say(task.msg)
-                await wait(200)
-              }
-            } catch (e) {
-              console.error("发送群定时任务失败:", e)
-
-            }
-
-          } catch (err) {
-            console.error(err)
+            });
+            // console.debug(task)
+            // console.debug(curJob)
+            // let tsakId: string = task.id || ''
+          } catch (e) {
+            console.error("创建定时任务失败:", e)
           }
-        });
-        // console.debug(task)
-        // console.debug(curJob)
-        // let tsakId: string = task.id || ''
-        // if (tsakId) {
-        //   jobs[tsakId] = curJob || {}
-        // }
-        console.debug(jobs)
-      } catch (e) {
-        console.error("创建定时任务失败:", e)
+        }
       }
-
-
+    } catch (err: any) {
+      log.error(err)
     }
   }
 

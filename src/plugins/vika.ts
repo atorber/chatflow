@@ -406,7 +406,8 @@ class VikaBot {
         time: task.fields['时间'],
         cycle: task.fields['周期'],
         contacts: [],
-        rooms: []
+        rooms: [],
+        active:task.fields['启用状态']==='开启',
       }
 
       if (taskConfig.msg && taskConfig.time && (task.fields['接收好友'].length || task.fields['接收群'].length)) {
