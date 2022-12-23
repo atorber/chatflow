@@ -8,7 +8,7 @@ const recordRes = {
     "code": 200,
     "success": true,
     "data": {
-        "total": 6,
+        "total": 7,
         "records": [
             {
                 "recordId": "recUqpQPkMrQO",
@@ -23,56 +23,66 @@ const recordRes = {
             {
                 "recordId": "reck2x7TobP0D",
                 "createdAt": 1670218148000,
-                "updatedAt": 1670218148000,
+                "updatedAt": 1671812102000,
                 "fields": {
                     "指令名称": "更新白名单",
                     "类型": "系统指令",
-                    "说明": "更新群白名单，白名单变动时需主动更新白名单"
+                    "说明": "TBD更新群白名单，白名单变动时需主动更新白名单"
                 }
             },
             {
                 "recordId": "recuczAHqUTOv",
                 "createdAt": 1670218148000,
-                "updatedAt": 1670218148000,
+                "updatedAt": 1671812106000,
                 "fields": {
                     "指令名称": "更新问答",
                     "类型": "系统指令",
-                    "说明": "更新微信对话平台中的问答列表"
+                    "说明": "TBD更新微信对话平台中的问答列表"
                 }
             },
             {
                 "recordId": "recZi3MqRfoLP",
                 "createdAt": 1670218148000,
-                "updatedAt": 1670218148000,
+                "updatedAt": 1671812111000,
                 "fields": {
                     "指令名称": "更新机器人",
                     "类型": "系统指令",
-                    "说明": "更新机器人的群列表和好友列表"
+                    "说明": "TBD更新机器人的群列表和好友列表"
                 }
             },
             {
                 "recordId": "recRr9P8QmRyA",
                 "createdAt": 1670218148000,
-                "updatedAt": 1670218148000,
+                "updatedAt": 1671812116000,
                 "fields": {
                     "指令名称": "启用问答",
                     "类型": "群指令",
-                    "说明": "当前群启用智能问答"
+                    "说明": "TBD当前群启用智能问答"
                 }
             },
             {
                 "recordId": "rec0Ya8vDiV86",
                 "createdAt": 1670218148000,
-                "updatedAt": 1670218148000,
+                "updatedAt": 1671812120000,
                 "fields": {
                     "指令名称": "关闭问答",
                     "类型": "群指令",
-                    "说明": "当前群关闭智能问答"
+                    "说明": "TBD当前群关闭智能问答"
+                }
+            },
+            {
+                "recordId": "receuIOdNUz8T",
+                "createdAt": 1671682513000,
+                "updatedAt": 1671682529000,
+                "fields": {
+                    "指令名称": "更新提醒",
+                    "类型": "系统指令",
+                    "说明": "更新通知提醒任务"
                 }
             }
         ],
         "pageNum": 1,
-        "pageSize": 6
+        "pageSize": 7
     },
     "message": "SUCCESS"
 }

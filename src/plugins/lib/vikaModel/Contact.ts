@@ -82,36 +82,6 @@ const vikaRes = {
                 "name": "file",
                 "type": "Attachment",
                 "editable": true
-            },
-            {
-                "id": "fld0reGOMyTGV",
-                "name": "通知提醒",
-                "type": "MagicLink",
-                "property": {
-                    "foreignDatasheetId": "dst6ocBSnPBUf7okNl",
-                    "brotherFieldId": "fldfqyrfkWBBy"
-                },
-                "editable": true
-            },
-            {
-                "id": "fldsnqqpYglrI",
-                "name": "好友分组",
-                "type": "MagicLink",
-                "property": {
-                    "foreignDatasheetId": "dsttzJxMEqxZ0m5UHZ",
-                    "brotherFieldId": "fld77XnB5JGWf"
-                },
-                "editable": true
-            },
-            {
-                "id": "fldByiWFJNvtP",
-                "name": "通知提醒 2",
-                "type": "MagicLink",
-                "property": {
-                    "foreignDatasheetId": "dst6ocBSnPBUf7okNl",
-                    "brotherFieldId": "fldm7Ay6hZvq1"
-                },
-                "editable": true
             }
         ]
     },

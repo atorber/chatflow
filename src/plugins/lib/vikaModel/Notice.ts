@@ -4,7 +4,7 @@ import type {
     Field
 } from './Model'
 
-const vikaRes ={
+const vikaRes = {
     "code": 200,
     "success": true,
     "data": {

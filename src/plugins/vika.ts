@@ -132,8 +132,8 @@ class VikaBot {
 
       this[key as keyof VikaBot] = res.data.id
       this[name as keyof VikaBot] = res.data.id
-      await this.clearBlankLines(res.data.id)
-
+      const delres = await this.clearBlankLines(res.data.id)
+      console.log(`删除空白行创建成功，`, delres)
       return res.data
     } catch (error) {
       console.error(name, error)
@@ -145,12 +145,15 @@ class VikaBot {
   async createRecord(datasheetId: string, records: ICreateRecordsReqParams) {
     const datasheet = await this.vika.datasheet(datasheetId)
 
-    const res = await datasheet.records.create(records)
-
-    if (res.success) {
-      // console.log(res.data.records)
-    } else {
-      console.error(res)
+    try {
+      const res = await datasheet.records.create(records)
+      if (res.success) {
+        // console.log(res.data.records)
+      } else {
+        console.error('记录写入维格表失败：', res)
+      }
+    } catch (err) {
+      console.error('请求维格表写入失败：', err)
     }
 
   }
@@ -275,13 +278,14 @@ class VikaBot {
   }
 
   async deleteRecords(datasheetId: string, recordsIds: string | any[]) {
-    const datasheet = await this.vika.datasheet(datasheetId)
+    console.debug('接收到的待删除IDs：',datasheetId,recordsIds)
+    const datasheet = this.vika.datasheet(datasheetId)
     const response = await datasheet.records.delete(recordsIds)
 
     if (response.success) {
-      // console.log(`删除${recordsIds.length}条记录`)
+      console.log(`删除${recordsIds.length}条记录`)
     } else {
-      console.error(response)
+      console.error('删除记录失败：', response)
     }
   }
 
@@ -319,13 +323,17 @@ class VikaBot {
   }
 
   async clearBlankLines(datasheetId: any) {
+    // const datasheet = await this.vika.datasheet(datasheetId)
     const records = await this.getRecords(datasheetId, {})
+    // console.debug(records)
     const recordsIds = []
     for (const i in records) {
       recordsIds.push(records[i].recordId)
+      // await datasheet.records.delete(records[i].recordId)
+      // await wait(200)
     }
+    // console.debug(recordsIds)
     await this.deleteRecords(datasheetId, recordsIds)
-
   }
 
   async getConfig() {
@@ -407,7 +415,7 @@ class VikaBot {
         cycle: task.fields['周期'],
         contacts: [],
         rooms: [],
-        active:task.fields['启用状态']==='开启',
+        active: task.fields['启用状态'] === '开启',
       }
 
       if (taskConfig.msg && taskConfig.time && (task.fields['接收好友'].length || task.fields['接收群'].length)) {

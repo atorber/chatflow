@@ -35,16 +35,6 @@ const vikaRes = {
                 "name": "备注",
                 "type": "Text",
                 "editable": true
-            },
-            {
-                "id": "fldNqvOAzEkxC",
-                "name": "通知提醒",
-                "type": "MagicLink",
-                "property": {
-                    "foreignDatasheetId": "dst6ocBSnPBUf7okNl",
-                    "brotherFieldId": "fldXq00SDGvS9"
-                },
-                "editable": true
             }
         ]
     },
