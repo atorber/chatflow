@@ -44,7 +44,7 @@ const __dirname = path.resolve()
 // const userInfo = os.userInfo()
 // const rootPath = `${userInfo.homedir}\\Documents\\WeChat Files\\`
 
-async function wxai(sysConfig: any, bot: Wechaty, talker: Contact, room: Room|undefined, message: Message) {
+async function wxai(sysConfig: any, bot: Wechaty, talker: Contact, room: Room | undefined, message: Message) {
     // const talker = message.talker()
     //   const roomid = room ? room.id : ''
     let text = message.text()
@@ -87,13 +87,14 @@ async function wxai(sysConfig: any, bot: Wechaty, talker: Contact, room: Room|un
                 if (room) {
                     // answer = text.length > 20 ? (answer.text + '\n------------------------------\n' + talker.name() + ':' + text.slice(0, 10) + '...') : (answer.text + '\n------------------------------\n' + talker.name() + ':' + text)
                     answer = answer.text + '\n'
+                    // console.debug(answer)
                     await room.say(answer, ...[talker])
-                    storeSentMessage(answer,undefined,room)
+                    storeSentMessage(bot.currentUser, answer, undefined, room)
 
                 } else {
                     answer = answer.text + '\n'
                     await message.say(answer)
-                    storeSentMessage(answer,message.talker(),undefined)
+                    storeSentMessage(bot.currentUser, answer, message.talker(), undefined)
                 }
 
                 break
@@ -103,10 +104,10 @@ async function wxai(sysConfig: any, bot: Wechaty, talker: Contact, room: Room|un
 
                 if (room) {
                     await room.say(fileBox)
-                    storeSentMessage(fileBox.toString(),undefined,room)
+                    storeSentMessage(bot.currentUser, fileBox.toString(), undefined, room)
                 } else {
                     await message.say(fileBox)
-                    storeSentMessage(fileBox.toString(),message.talker(),undefined)
+                    storeSentMessage(bot.currentUser, fileBox.toString(), message.talker(), undefined)
                 }
 
                 break
@@ -125,11 +126,11 @@ async function wxai(sysConfig: any, bot: Wechaty, talker: Contact, room: Room|un
                 let sayRes
                 if (room) {
                     sayRes = await room.say(miniProgram)
-                    storeSentMessage(miniProgram.toString(),undefined,message.room())
+                    storeSentMessage(bot.currentUser, miniProgram.toString(), undefined, message.room())
 
                 } else {
                     sayRes = await message.say(miniProgram)
-                    storeSentMessage(miniProgram.toString(),message.talker(),undefined)
+                    storeSentMessage(bot.currentUser, miniProgram.toString(), message.talker(), undefined)
                 }
 
                 break
@@ -220,7 +221,7 @@ async function aibot(sysConfig: any, talker: any, room: any, query: any) {
                 }
 
                 const resMsg = await chatAibot(queryData)
-                console.debug(resMsg)
+                // console.debug(resMsg)
                 log.info('对话返回原始：', resMsg)
                 // log.info('对话返回：', JSON.stringify(resMsg).replace(/[\r\n]/g, "").replace(/\ +/g, ""))
                 log.info('回答内容：', resMsg.msgtype, resMsg.query, resMsg.answer)

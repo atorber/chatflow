@@ -250,7 +250,7 @@ async function main() {
         text = keyWord + '，配置更新成功~'
       }
       message.say(text)
-      storeSentMessage(text, message.room() ? undefined : message.talker(), message.room())
+      storeSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room())
     }
 
     if (isSelfMsg && text === '#更新提醒') {
@@ -262,7 +262,7 @@ async function main() {
         text = keyWord + '，提醒任务更新失败~'
       }
       message.say(text)
-      storeSentMessage(text, message.room() ? undefined : message.talker(), message.room())
+      storeSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room())
     }
 
     try {
@@ -453,7 +453,7 @@ async function main() {
       const tasks = await vika.getTimedTask()
       schedule.gracefulShutdown();
       jobs = {}
-      console.debug(tasks)
+      // console.debug(tasks)
       for (let i = 0; i < tasks.length; i++) {
         const task: any = tasks[i]
         if (task.active) {
@@ -533,7 +533,7 @@ async function main() {
                     const contact = await bot.Contact.find({ id: task.contacts[0] })
                     if (contact) {
                       await contact.say(task.msg)
-                      storeSentMessage(task.msg, contact, undefined)
+                      storeSentMessage(bot.currentUser, task.msg, contact, undefined)
                       await wait(200)
                     }
                   }
@@ -547,7 +547,7 @@ async function main() {
                     const room = await bot.Room.find({ id: task.rooms[0] })
                     if (room) {
                       await room.say(task.msg)
-                      storeSentMessage(task.msg, undefined, room)
+                      storeSentMessage(bot.currentUser, task.msg, undefined, room)
                       await wait(200)
                     }
                   }
@@ -567,7 +567,7 @@ async function main() {
         }
       }
     } catch (err: any) {
-      log.error('更新通知消息列表任务失败：',err)
+      log.error('更新通知消息列表任务失败：', err)
     }
   }
 
@@ -656,7 +656,7 @@ async function main() {
           const contact = await bot.Contact.find({ id: contactId })
           if (room) {
             await room.say(data.msg.content, ...[contact])
-            storeSentMessage(data.msg.content, undefined, room)
+            storeSentMessage(bot.currentUser, data.msg.content, undefined, room)
           }
 
           // configData.msg.avatarUrl = data.serverChatEn.avatarUrl;

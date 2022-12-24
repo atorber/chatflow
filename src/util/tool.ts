@@ -8,17 +8,18 @@ import type {
 } from 'wechaty'
 
 
-async function storeSentMessage(text: string, talker?: Contact, room?: Room) {
+async function storeSentMessage(userSelf: Contact, text: string, talker?: Contact, room?: Room) {
+    // console.debug('发送的消息：', text)
     const curTime = new Date().getTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
     const record = {
         fields: {
             timeHms,
-            name: 'botSelf',
+            name: userSelf.name(),
             topic: room ? (await room?.topic() || '--') : (talker?.name() || '--'),
             messagePayload: text,
-            wxid: talker?.id !== 'null' ? talker?.id : '--',
-            roomid:  room ? (room?.id || '--') : (talker?.id || '--'),
+            wxid: room && talker ? (talker?.id !== 'null' ? talker?.id : '--') : userSelf.id,
+            roomid: room ? (room?.id || '--') : (talker?.id || '--'),
             messageType: 'selfSent',
         },
     }

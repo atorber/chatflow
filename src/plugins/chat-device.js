@@ -399,7 +399,7 @@ async function send(params, bot) {
             if (room) {
                 try {
                     await room.say(msg)
-                    storeSentMessage(msg, undefined, room)
+                    storeSentMessage(this.bot.currentUser, msg, undefined, room)
                 } catch (err) {
                     console.error(err)
                 }
@@ -411,7 +411,7 @@ async function send(params, bot) {
             if (contact) {
                 try {
                     await contact.say(msg)
-                    storeSentMessage(msg, contact, undefined)
+                    storeSentMessage(this.bot.currentUser, msg, contact, undefined)
                 } catch (err) {
                     console.error(err)
                 }
@@ -430,7 +430,7 @@ async function sendAt(params, bot) {
         atUserList.push(cur_contact);
     }
     await room.say(params.messagePayload, ...atUserList)
-    storeSentMessage(params.messagePayload, undefined, room)
+    storeSentMessage(this.bot.currentUser, params.messagePayload, undefined, room)
 }
 
 async function createRoom(params, bot) {
@@ -445,7 +445,7 @@ async function createRoom(params, bot) {
     // await room.topic(params.topic)
 
     await room.say('你的专属群创建完成')
-    storeSentMessage('你的专属群创建完成', undefined, room)
+    storeSentMessage(this.bot.currentUser, '你的专属群创建完成', undefined, room)
 }
 
 async function getQrcod(params, bot, chatdevice) {

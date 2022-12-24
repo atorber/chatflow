@@ -1,6 +1,6 @@
 {
   "name": "openai-qa-bot",
-  "version": "1.8.6",
+  "version": "1.9.0",
   "description": "openai-qa-bot",
   "type": "module",
   "engines": {
