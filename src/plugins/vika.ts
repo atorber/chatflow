@@ -133,7 +133,7 @@ class VikaBot {
       this[key as keyof VikaBot] = res.data.id
       this[name as keyof VikaBot] = res.data.id
       const delres = await this.clearBlankLines(res.data.id)
-      console.log(`删除空白行创建成功，`, delres)
+      console.log(`删除空白行：`, delres)
       return res.data
     } catch (error) {
       console.error(name, error)
@@ -278,10 +278,10 @@ class VikaBot {
   }
 
   async deleteRecords(datasheetId: string, recordsIds: string | any[]) {
-    console.debug('接收到的待删除IDs：',datasheetId,recordsIds)
+    // console.debug('操作数据表ID：', datasheetId)
+    // console.debug('待删除记录IDs：', recordsIds)
     const datasheet = this.vika.datasheet(datasheetId)
     const response = await datasheet.records.delete(recordsIds)
-
     if (response.success) {
       console.log(`删除${recordsIds.length}条记录`)
     } else {
@@ -323,14 +323,11 @@ class VikaBot {
   }
 
   async clearBlankLines(datasheetId: any) {
-    // const datasheet = await this.vika.datasheet(datasheetId)
     const records = await this.getRecords(datasheetId, {})
     // console.debug(records)
     const recordsIds = []
     for (const i in records) {
       recordsIds.push(records[i].recordId)
-      // await datasheet.records.delete(records[i].recordId)
-      // await wait(200)
     }
     // console.debug(recordsIds)
     await this.deleteRecords(datasheetId, recordsIds)
@@ -367,21 +364,29 @@ class VikaBot {
     sysConfig.contactWhiteList = []
 
     for (let i = 0; i < configRecords.length; i++) {
-      sysConfig[configRecords[i].fields['标识']] = configRecords[i].fields['值（只修改此列）'] || ''
+      if (configRecords[i].fields['标识']) {
+        sysConfig[configRecords[i].fields['标识']] = configRecords[i].fields['值（只修改此列）'] || ''
+      }
     }
 
     for (let i = 0; i < switchRecords.length; i++) {
-      sysConfig[switchRecords[i].fields['标识']] = switchRecords[i].fields['启用状态（只修改此列）'] === '开启'
+      if (switchRecords[i].fields['标识']) {
+        sysConfig[switchRecords[i].fields['标识']] = switchRecords[i].fields['启用状态（只修改此列）'] === '开启'
+      }
     }
 
     const roomWhiteListRecords: any[] = await this.getRecords(this.roomWhiteListSheet, {})
     for (let i = 0; i < roomWhiteListRecords.length; i++) {
-      sysConfig.roomWhiteList.push(roomWhiteListRecords[i].fields['群ID'])
+      if (roomWhiteListRecords[i].fields['群ID']) {
+        sysConfig.roomWhiteList.push(roomWhiteListRecords[i].fields['群ID'])
+      }
     }
 
     const contactWhiteListRecords = await this.getRecords(this.contactWhiteListSheet, {})
     for (let i = 0; i < contactWhiteListRecords.length; i++) {
-      sysConfig.contactWhiteList.push(contactWhiteListRecords[i].fields['好友ID'])
+      if (contactWhiteListRecords[i].fields['好友ID']) {
+        sysConfig.contactWhiteList.push(contactWhiteListRecords[i].fields['好友ID'])
+      }
     }
 
     // console.debug(sysConfig)
@@ -418,7 +423,7 @@ class VikaBot {
         active: task.fields['启用状态'] === '开启',
       }
 
-      if (taskConfig.msg && taskConfig.time && (task.fields['接收好友'].length || task.fields['接收群'].length)) {
+      if (taskConfig.msg && taskConfig.time && (task.fields['接收好友'] || task.fields['接收群'])) {
 
         if (task.fields['接收群'] && task.fields['接收群'].length) {
           const roomRecords = await this.getRecords(this.roomListSheet, { recordIds: task.fields['接收群'] })
@@ -439,7 +444,7 @@ class VikaBot {
     }
 
 
-    // console.debug(timedTasks)
+    // console.debug(2, timedTasks)
 
     return timedTasks
 
@@ -480,6 +485,9 @@ class VikaBot {
     const that = this
     let timer_id = setInterval(async () => {
       // log.info('待处理消息池长度：', that.msgStore.length||0);
+      that.msgStore = that.msgStore.concat(global.sentMessage)
+      global.sentMessage = []
+
       if (that.msgStore.length && that.messageSheet) {
         const end = that.msgStore.length < 10 ? that.msgStore.length : 10
         const records = that.msgStore.splice(0, end)

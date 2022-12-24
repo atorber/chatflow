@@ -6,12 +6,12 @@ import commandSheet from './CommandList.js'
 import configSheet from './EnvConfig.js'
 import switchSheet from './Switch.js'
 import contactSheet from './Contact.js'
-import qaSheet from './QaList.js'
+// import qaSheet from './QaList.js'
 import roomListSheet from './Room.js'
 import roomWhiteListSheet from './RoomWhiteList.js'
 import contactWhiteListSheet from './ContactWhiteList.js'
 import noticeSheet from './Notice.js'
-import groupSheet from './ContactGroup.js'
+// import groupSheet from './ContactGroup.js'
 
 const sheets: Sheets = {
     configSheet,
@@ -19,10 +19,10 @@ const sheets: Sheets = {
     commandSheet,
     contactSheet,
     roomListSheet,
-    qaSheet,
+    // qaSheet,
     roomWhiteListSheet,
     contactWhiteListSheet,
-    groupSheet,
+    // groupSheet,
     noticeSheet,
     messageSheet,
 }

@@ -11,17 +11,23 @@ import { FileBox } from 'file-box'
 // import excel2order from '../excel.js'
 
 import {
-    // Contact,
-    // Room,
-    // Message,
+    Contact,
+    Room,
+    Message,
     // ScanStatus,
     // WechatyBuilder,
     log,
     types,
+    Wechaty
 } from 'wechaty'
 
 import path from 'path'
 // import os from 'os'
+
+import {
+    waitForMs as wait,
+    storeSentMessage
+} from '../util/tool.js'
 
 import { ChatGPTAPI } from 'chatgpt'
 
@@ -38,10 +44,7 @@ const __dirname = path.resolve()
 // const userInfo = os.userInfo()
 // const rootPath = `${userInfo.homedir}\\Documents\\WeChat Files\\`
 
-// 定义一个延时方法
-const wait = (ms: number | undefined) => new Promise(resolve => setTimeout(resolve, ms))
-
-async function wxai(sysConfig: any, bot: any, talker: any, room: any, message: any) {
+async function wxai(sysConfig: any, bot: Wechaty, talker: Contact, room: Room|undefined, message: Message) {
     // const talker = message.talker()
     //   const roomid = room ? room.id : ''
     let text = message.text()
@@ -53,21 +56,21 @@ async function wxai(sysConfig: any, bot: any, talker: any, room: any, message: a
     }
 
     let answer: any = {}
-    if (message.type() === bot.Message.Type.Text && room) {
+    if (message.type() === types.Message.Text && room) {
         answer = await aibot(sysConfig, talker, room, text)
     }
 
-    if (message.type() === bot.Message.Type.Text && !room) {
+    if (message.type() === types.Message.Text && !room) {
         answer = await aibot(sysConfig, talker, undefined, text)
     }
 
-    if (room && message.type() === bot.Message.Type.MiniProgram && !sysConfig.linkWhiteList.includes(talker.id)) {
+    if (room && message.type() === types.Message.MiniProgram && !sysConfig.linkWhiteList.includes(talker.id)) {
         const miniProgram = await message.toMiniProgram()
         text = `${miniProgram.title()?.slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
         answer = await aibot(sysConfig, talker, room, text)
     }
 
-    if (room && message.type() === bot.Message.Type.Url && !sysConfig.linkWhiteList.includes(talker.id)) {
+    if (room && message.type() === types.Message.Url && !sysConfig.linkWhiteList.includes(talker.id)) {
         const urllink = await message.toUrlLink()
         text = `${urllink.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
         answer = await aibot(sysConfig, talker, room, text)
@@ -85,9 +88,12 @@ async function wxai(sysConfig: any, bot: any, talker: any, room: any, message: a
                     // answer = text.length > 20 ? (answer.text + '\n------------------------------\n' + talker.name() + ':' + text.slice(0, 10) + '...') : (answer.text + '\n------------------------------\n' + talker.name() + ':' + text)
                     answer = answer.text + '\n'
                     await room.say(answer, ...[talker])
+                    storeSentMessage(answer,undefined,room)
+
                 } else {
                     answer = answer.text + '\n'
                     await message.say(answer)
+                    storeSentMessage(answer,message.talker(),undefined)
                 }
 
                 break
@@ -97,8 +103,10 @@ async function wxai(sysConfig: any, bot: any, talker: any, room: any, message: a
 
                 if (room) {
                     await room.say(fileBox)
+                    storeSentMessage(fileBox.toString(),undefined,room)
                 } else {
                     await message.say(fileBox)
+                    storeSentMessage(fileBox.toString(),message.talker(),undefined)
                 }
 
                 break
@@ -117,11 +125,12 @@ async function wxai(sysConfig: any, bot: any, talker: any, room: any, message: a
                 let sayRes
                 if (room) {
                     sayRes = await room.say(miniProgram)
+                    storeSentMessage(miniProgram.toString(),undefined,message.room())
+
                 } else {
                     sayRes = await message.say(miniProgram)
+                    storeSentMessage(miniProgram.toString(),message.talker(),undefined)
                 }
-
-                log.info(sayRes)
 
                 break
             }
@@ -133,7 +142,7 @@ async function wxai(sysConfig: any, bot: any, talker: any, room: any, message: a
 
     }
 
-    if (message.type() === bot.Message.Type.Attachment) {
+    if (message.type() === types.Message.Attachment) {
         try {
             const file = await message.toFileBox()
             const fileName = file.name
@@ -155,7 +164,7 @@ async function wxai(sysConfig: any, bot: any, talker: any, room: any, message: a
 
     }
 
-    // if (message.type() === bot.Message.Type.Image) {
+    // if (message.type() === types.Message.Image) {
     //   await wait(1000)
     //   try {
     //     const file = await message.toFileBox()

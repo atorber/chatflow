@@ -41,8 +41,14 @@ import { wxai } from './src/plugins/wxai.js'
 
 import { ChatDevice } from './src/plugins/chat-device.js'
 import { propertyMessage, eventMessage } from './src/plugins/msg-format.js'
+import {
+  waitForMs as wait,
+  storeSentMessage
+} from './src/util/tool.js'
 
 import schedule from 'node-schedule'
+
+global.sentMessage = []
 
 let bot: Wechaty
 let sysConfig: any
@@ -200,7 +206,6 @@ async function main() {
     log.info('下一次心跳调用时间：', job.nextInvocation())
 
     updateJobs(bot)
-
     console.log(`================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n`)
   }
 
@@ -235,26 +240,29 @@ async function main() {
 
     if (isSelfMsg && text === '#更新配置') {
       console.debug('热更新系统配置~')
+      let text = ''
       try {
         const newConfig = await getConfig(vika)
         // message.say('配置更新成功：' + JSON.stringify(newConfig))
         console.debug(newConfig)
-        message.say(keyWord + '配置更新成功~')
-
+        text = keyWord + '，配置更新成功~'
       } catch (e) {
-        message.say(keyWord + '配置更新失败~')
+        text = keyWord + '，配置更新成功~'
       }
+      message.say(text)
+      storeSentMessage(text, message.room() ? undefined : message.talker(), message.room())
     }
 
     if (isSelfMsg && text === '#更新提醒') {
       console.debug('热更新通知任务~')
       try {
         updateJobs(bot)
-        message.say(keyWord + '，提醒任务更新成功~')
-
+        text = keyWord + '，提醒任务更新成功~'
       } catch (e) {
-        message.say(keyWord + '，提醒任务更新失败~')
+        text = keyWord + '，提醒任务更新失败~'
       }
+      message.say(text)
+      storeSentMessage(text, message.room() ? undefined : message.talker(), message.room())
     }
 
     try {
@@ -444,6 +452,8 @@ async function main() {
     try {
       const tasks = await vika.getTimedTask()
       schedule.gracefulShutdown();
+      jobs = {}
+      console.debug(tasks)
       for (let i = 0; i < tasks.length; i++) {
         const task: any = tasks[i]
         if (task.active) {
@@ -512,7 +522,7 @@ async function main() {
           console.debug(curRule)
 
           try {
-            let curJob = schedule.scheduleJob(task.id, curRule, async () => {
+            schedule.scheduleJob(task.id, curRule, async () => {
               try {
                 const curDate = new Date()
                 console.debug('定时任务：', curTimeF, curRule, curDate, JSON.stringify(task));
@@ -521,8 +531,11 @@ async function main() {
                 try {
                   if (task.contacts.length) {
                     const contact = await bot.Contact.find({ id: task.contacts[0] })
-                    await contact?.say(task.msg)
-                    await wait(200)
+                    if (contact) {
+                      await contact.say(task.msg)
+                      storeSentMessage(task.msg, contact, undefined)
+                      await wait(200)
+                    }
                   }
                 } catch (e) {
                   console.error("发送好友定时任务失败:", e)
@@ -532,8 +545,11 @@ async function main() {
                 try {
                   if (task.rooms.length) {
                     const room = await bot.Room.find({ id: task.rooms[0] })
-                    await room?.say(task.msg)
-                    await wait(200)
+                    if (room) {
+                      await room.say(task.msg)
+                      storeSentMessage(task.msg, undefined, room)
+                      await wait(200)
+                    }
                   }
                 } catch (e) {
                   console.error("发送群定时任务失败:", e)
@@ -544,16 +560,14 @@ async function main() {
                 console.error(err)
               }
             });
-            // console.debug(task)
-            // console.debug(curJob)
-            // let tsakId: string = task.id || ''
+            jobs[task.id] = task
           } catch (e) {
             console.error("创建定时任务失败:", e)
           }
         }
       }
     } catch (err: any) {
-      log.error(err)
+      log.error('更新通知消息列表任务失败：',err)
     }
   }
 
@@ -642,6 +656,7 @@ async function main() {
           const contact = await bot.Contact.find({ id: contactId })
           if (room) {
             await room.say(data.msg.content, ...[contact])
+            storeSentMessage(data.msg.content, undefined, room)
           }
 
           // configData.msg.avatarUrl = data.serverChatEn.avatarUrl;
@@ -718,8 +733,5 @@ async function main() {
   }
 
 }
-
-// 定义一个延时方法
-const wait = (ms: number | undefined) => new Promise(resolve => setTimeout(resolve, ms))
 
 void main()

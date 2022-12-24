@@ -27,17 +27,17 @@ const vikaRes = {
                 "editable": true,
                 "desc": "好友列表"
             },
-            {
-                "id": "fldXq00SDGvS9",
-                "name": "接收分组",
-                "type": "MagicLink",
-                "property": {
-                    "foreignDatasheetId": "dsttzJxMEqxZ0m5UHZ",
-                    "brotherFieldId": "fldNqvOAzEkxC"
-                },
-                "editable": true,
-                "desc": "好友分组"
-            },
+            // {
+            //     "id": "fldXq00SDGvS9",
+            //     "name": "接收分组",
+            //     "type": "MagicLink",
+            //     "property": {
+            //         "foreignDatasheetId": "dsttzJxMEqxZ0m5UHZ",
+            //         "brotherFieldId": "fldNqvOAzEkxC"
+            //     },
+            //     "editable": true,
+            //     "desc": "好友分组"
+            // },
             {
                 "id": "fldJ1TvTV1T8c",
                 "name": "接收群",
@@ -48,17 +48,6 @@ const vikaRes = {
                 },
                 "editable": true,
                 "desc": "群列表"
-            },
-            {
-                "id": "fldm7Ay6hZvq1",
-                "name": "@群成员",
-                "type": "MagicLink",
-                "property": {
-                    "foreignDatasheetId": "dstbutP3T8WorWLlbq",
-                    "brotherFieldId": "fldByiWFJNvtP"
-                },
-                "editable": true,
-                "desc": "好友列表"
             },
             {
                 "id": "fldoCm0thVXmq",
