@@ -452,7 +452,7 @@ class VikaBot {
 
   async checkInit(msg: string) {
     this.spaceId = await this.getSpaceId()
-    console.log('空间ID:', this.spaceId)
+    // console.log('空间ID:', this.spaceId)
     let sheetCount = 0
     if (this.spaceId) {
       const tables = await this.getNodesList()
@@ -483,7 +483,7 @@ class VikaBot {
     }
 
     const that = this
-    let timer_id = setInterval(async () => {
+    setInterval(async () => {
       // log.info('待处理消息池长度：', that.msgStore.length||0);
       that.msgStore = that.msgStore.concat(global.sentMessage)
       global.sentMessage = []
@@ -508,15 +508,13 @@ class VikaBot {
       }
     }, 250);
 
-    console.info(timer_id)
-
     return true
   }
 
   async init() {
 
     this.spaceId = await this.getSpaceId()
-    console.log('空间ID:', this.spaceId)
+    // console.log('空间ID:', this.spaceId)
 
     if (this.spaceId) {
 

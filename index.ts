@@ -72,7 +72,7 @@ const vika = new VikaBot(vikaConfig)
 
 async function getConfig(vika: any) {
   sysConfig = await vika.getConfig()
-  console.debug(sysConfig)
+  console.debug(JSON.stringify(sysConfig))
   return sysConfig
 }
 
@@ -82,43 +82,25 @@ async function main() {
   if (!isReady) {
     return
   }
+
   // 获取系统配置信息
   await getConfig(vika)
-
-  const wechatyConfig: any = {
-    // 网页版微信
-    'wechaty-puppet-wechat': {
-      name: 'openai-qa-bot',
-      puppet: 'wechaty-puppet-wechat',
-      puppetOptions: {
-        uos: true,
-      },
-    },
-    // Windows桌面版微信
-    'wechaty-puppet-xp': {
-      name: 'openai-qa-bot',
-      puppet: 'wechaty-puppet-xp',
-    },
-    // pad-local
-    'wechaty-puppet-padlocal': {
-      name: 'openai-qa-bot',
-      puppet: 'wechaty-puppet-padlocal',
-      puppetOptions: {
-        token: sysConfig.puppetToken,
-      },
-    },
-    // wechaty-puppet-service
-    'wechaty-puppet-service': {
-      name: 'openai-qa-bot',
-      puppet: 'wechaty-puppet-service',
-      puppetOptions: {
-        token: sysConfig.puppetToken,
-      },
+  const ops = {
+    name: 'openai-qa-bot',
+    puppet: sysConfig.puppetName,
+    puppetOptions: {
+      token: sysConfig.puppetToken,
+      uos: true,
     },
   }
 
-  const ops = wechatyConfig[sysConfig.puppetName]
-  console.debug(ops)
+  // console.debug(ops)
+
+  if (sysConfig.puppetName == 'wechaty-puppet-service') {
+    process.env['WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT'] = 'true'
+  }
+
+  console.debug(process.env['WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT'])
 
   bot = WechatyBuilder.build(ops)
 
@@ -566,8 +548,10 @@ async function main() {
           }
         }
       }
+      console.debug('通知提醒任务初始化完成，创建任务数量：', tasks.length)
+
     } catch (err: any) {
-      log.error('更新通知消息列表任务失败：', err)
+      log.error('更新通知提醒列表任务失败：', err)
     }
   }
 
