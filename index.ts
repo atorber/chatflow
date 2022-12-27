@@ -168,11 +168,27 @@ async function main() {
     updateRooms(bot)
     updateContacts(bot)
 
+    // // 启动心跳，5min发一次
+    // const rule = new schedule.RecurrenceRule();
+    // rule.second = 0;
+    // rule.minute = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+    // job = schedule.scheduleJob(rule, async function () {
+    //   try {
+    //     // const contact = await bot.Contact.find({ id: 'tyutluyc' })
+    //     console.log(curDate);
+    //     // await user.say('心跳：' + curDate)
+    //     await vika.addHeartbeatRecord('心跳：' + curDate)
+    //     if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
+    //       chatdev.pub_property(propertyMessage('lastActive', curDate))
+    //     }
+    //   } catch (err) {
+    //     console.error(err)
+    //   }
+    // });
+    // log.info('下一次心跳调用时间：', job.nextInvocation())
+
     // 启动心跳，5min发一次
-    const rule = new schedule.RecurrenceRule();
-    rule.second = 0;
-    rule.minute = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-    job = schedule.scheduleJob(rule, async function () {
+    setInterval(async () => {
       try {
         // const contact = await bot.Contact.find({ id: 'tyutluyc' })
         console.log(curDate);
@@ -184,8 +200,7 @@ async function main() {
       } catch (err) {
         console.error(err)
       }
-    });
-    log.info('下一次心跳调用时间：', job.nextInvocation())
+    }, 300000);
 
     updateJobs(bot)
     console.log(`================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n`)
@@ -548,7 +563,7 @@ async function main() {
           }
         }
       }
-      console.debug('通知提醒任务初始化完成，创建任务数量：', tasks.length)
+      console.debug('通知提醒任务初始化完成，创建任务数量：', Object.keys(jobs).length)
 
     } catch (err: any) {
       log.error('更新通知提醒列表任务失败：', err)
