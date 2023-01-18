@@ -89,7 +89,7 @@ async function main() {
     name: 'openai-qa-bot',
     puppet: sysConfig.puppetName,
     puppetOptions: {
-      token: sysConfig.puppetToken,
+      token: sysConfig.puppetToken||"null",
       uos: true,
     },
   }
@@ -98,6 +98,10 @@ async function main() {
 
   if (sysConfig.puppetName == 'wechaty-puppet-service') {
     process.env['WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT'] = 'true'
+  }
+
+  if (sysConfig.puppetName == 'wechaty-puppet-wechat') {
+    delete ops.puppetOptions.token
   }
 
   console.debug(process.env['WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT'])
