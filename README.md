@@ -1,6 +1,6 @@
 # Wechat-Openai-QA-Bot
 
-[访问官网了解更多信息](https://qabot.vlist.cc/)
+[访问项目语雀文档了解更多信息](https://www.yuque.com/atorber/oegota)
 
 ## 简介
 
