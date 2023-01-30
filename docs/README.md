@@ -1,4 +1,4 @@
-# 最新文档已迁移至语雀，请移步 https://www.yuque.com/atorber/oegota
+> 最新文档已迁移至语雀，请移步 https://www.yuque.com/atorber/oegota
 
 ## 简介
 
