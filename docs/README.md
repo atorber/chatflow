@@ -1,6 +1,6 @@
-> 最新文档已迁移至语雀，请移步 https://www.yuque.com/atorber/oegota
-
 ## 简介
+
+> 最新文档已迁移至语雀，请移步 https://www.yuque.com/atorber/oegota
 
 本项目使用wechat机器人快速实现一个免费的QA问答系统，如果你是一个社群工作者、拼团团长、业务群运营经理，使用这个项目可以帮助你解决一些重复性问答。
 
