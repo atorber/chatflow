@@ -55,13 +55,18 @@ let sysConfig: any
 let chatdev: any = {}
 let job: any
 let jobs: any
-if (process.env['VIKA_SPACENAME']) {
+
+// console.debug(configs)
+
+if (!configs.VIKA_TOKEN&&process.env['VIKA_TOKEN']) {
+  configs.VIKA_TOKEN = process.env['VIKA_TOKEN']
+}
+
+if (!configs.VIKA_SPACENAME&&process.env['VIKA_SPACENAME']) {
   configs.VIKA_SPACENAME = process.env['VIKA_SPACENAME']
 }
 
-if (process.env['VIKA_TOKEN']) {
-  configs.VIKA_TOKEN = process.env['VIKA_TOKEN']
-}
+// console.debug(configs)
 
 const vikaConfig = {
   spaceName: configs.VIKA_SPACENAME,
