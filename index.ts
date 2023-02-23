@@ -425,11 +425,17 @@ async function main() {
     for (let i = 0; i < rooms.length; i++) {
       let item = rooms[i]
       if (item && !wxids.includes(item.id)) {
+        let avatar = ''
+        try{
+          avatar = await item.avatar()
+        }catch(err){
+          console.error(err)
+        }
         const fields = {
           "id": item.id,
           "topic": await item.topic() || '',
           "ownerId": String(item.owner()?.id || ''),
-          "avatar": String(await item.avatar() || ''),
+          "avatar": avatar,
         }
         const record = {
           fields
