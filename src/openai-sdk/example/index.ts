@@ -1,3 +1,7 @@
+/* eslint-disable promise/always-return */
+/* eslint-disable no-console */
+/* eslint-disable import/extensions */
+/* eslint-disable sort-keys */
 import {
   init,
   chat,

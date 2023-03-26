@@ -616,17 +616,6 @@ async function main() {
       .then(() => log.info('Starter Bot Started.'))
       .catch((e: any) => log.error(JSON.stringify(e)))
 
-    // try {
-    //   bot.start()
-    //     .then(() => log.info('Starter Bot Started.'))
-    //     .catch((e: any) => log.error(JSON.stringify(e)))
-    // } catch (e) {
-    //   void await wait(1000)
-    //   bot.start()
-    //     .then(() => log.info('Starter Bot Started.'))
-    //     .catch((e: any) => log.error(JSON.stringify(e)))
-    // }
-
   } else {
     log.error('\n======================================\n\n', `错误提示：\n缺少${missingConfiguration.join()}配置参数,请检查config.js文件\n\n======================================`)
     log.info(configs)

@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable sort-keys */
 import {
   init,
   // chat,
@@ -50,7 +52,7 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
   let text = message.text()
   const keyWord = bot.currentUser.name()
 
-  if (text.indexOf(keyWord) != -1 && text.length > 4) {
+  if (text.indexOf(keyWord) !== -1 && text.length > 4) {
     const index = text.lastIndexOf(keyWord) + keyWord.length - 1
     text = text.substring(index + 1, text.length)
   }
@@ -180,6 +182,15 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
 
 async function aibot (sysConfig: any, talker: any, room: any, query: any) {
   let answer = {}
+  const roomid = room?.id
+  const wxid = talker.id
+  const nickName = talker.name()
+  const topic = await room?.topic()
+  const content = query
+
+  // log.info(opt)
+
+  let answerJson
   switch (callBot) {
     case 'WxOpenai':
       // log.info('开始请求微信对话平台...')
@@ -187,14 +198,6 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
         EncodingAESKey: sysConfig.EncodingAESKey,
         TOKEN: sysConfig.WX_TOKEN,
       })
-
-      const roomid = room?.id
-      const wxid = talker.id
-      const nickName = talker.name()
-      const topic = await room?.topic()
-      // log.info(opt)
-
-      let answerJson
 
       try {
         const username = room ? (nickName + '/' + topic) : nickName
@@ -275,7 +278,6 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
       }
       break
     case 'ChatGPT':
-      const content = query
       try {
         const api = new ChatGPTAPI({ sessionToken: config.ChatGPTSessionToken })
         // ensure the API is properly authenticated (optional)

@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable no-undef */
+/* eslint-disable import/extensions */
+/* eslint-disable sort-keys */
 import { expect } from 'chai'
 import {
   init,
@@ -31,7 +35,7 @@ describe('chatAibot', () => {
     const chatRes = await chatAibot({
       signature,
       query:'谁是超哥',
-      first_priority_skills:['Moments'],
+      first_priority_skills:[ 'Moments' ],
     })
     expect(chatRes.ans_node_name).to.equal('Moments')
   })

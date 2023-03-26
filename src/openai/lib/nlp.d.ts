@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 import { ResponseNER, ResponseSENTIMENT, ResponseSENSITIVE } from './response'
 import { QueryData } from './query'
 declare function tokenize(query: QueryData): Promise<unknown>;

@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable no-async-promise-executor */
+/* eslint-disable import/extensions */
+/* eslint-disable no-console */
 import type { ResponseData } from './response'
 import { TOKEN, EncodingAESKey } from './auth'
 import { api, ApiTypes } from './API'

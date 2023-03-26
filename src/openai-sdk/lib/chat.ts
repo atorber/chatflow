@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 import type { ResponseCHAT } from './response'
 import {
   transferNLP,

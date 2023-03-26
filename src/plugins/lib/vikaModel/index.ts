@@ -1,5 +1,6 @@
+/* eslint-disable sort-keys */
 import type {
-    Sheets
+  Sheets,
 } from './Model'
 import messageSheet from './Message.js'
 import commandSheet from './CommandList.js'
@@ -14,21 +15,21 @@ import noticeSheet from './Notice.js'
 // import groupSheet from './ContactGroup.js'
 
 const sheets: Sheets = {
-    configSheet,
-    switchSheet,
-    commandSheet,
-    contactSheet,
-    roomListSheet,
-    // qaSheet,
-    roomWhiteListSheet,
-    contactWhiteListSheet,
-    // groupSheet,
-    noticeSheet,
-    messageSheet,
+  configSheet,
+  switchSheet,
+  commandSheet,
+  contactSheet,
+  roomListSheet,
+  // qaSheet,
+  roomWhiteListSheet,
+  contactWhiteListSheet,
+  // groupSheet,
+  noticeSheet,
+  messageSheet,
 }
 
 export {
-    sheets,
+  sheets,
 }
 
 export default sheets

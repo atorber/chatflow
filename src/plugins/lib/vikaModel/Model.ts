@@ -36,12 +36,12 @@ type Sheets = {
 }
 
 export {
-    FieldType,
-    type Field,
-    type FieldSingleText,
-    type FieldSingleSelect,
-    type FieldText,
-    type Record,
-    type Sheet,
-    type Sheets
+  FieldType,
+  type Field,
+  type FieldSingleText,
+  type FieldSingleSelect,
+  type FieldText,
+  type Record,
+  type Sheet,
+  type Sheets,
 }

@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 // import { type } from 'os'
 
 export { chat, chatAibot } from './lib/chat'

@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 import { ApiTypes } from './API'
 import { QueryData } from './query'
 declare function checkInit(): string;

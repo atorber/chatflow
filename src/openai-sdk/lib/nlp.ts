@@ -1,3 +1,5 @@
+/* eslint-disable sort-keys */
+/* eslint-disable import/extensions */
 import type { ResponseNER, ResponseSENTIMENT, ResponseSENSITIVE } from './response'
 import { transferNLP } from './util'
 import type { QueryData } from './query'

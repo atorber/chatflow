@@ -1,3 +1,4 @@
+/* eslint-disable promise/always-return */
 /* eslint-disable no-console */
 /* eslint-disable sort-keys */
 import { ICreateRecordsReqParams, Vika } from '@vikadata/vika'
@@ -44,7 +45,7 @@ class VikaBot {
   noticeSheet!: string
   msgStore!: any[]
 
-  constructor(config: VikaBotConfigTypes) {
+  constructor (config: VikaBotConfigTypes) {
     if (!config.token) {
       console.error('未配置token，请在config.ts中配置')
     } else if (!config.spaceName) {
@@ -59,7 +60,7 @@ class VikaBot {
     }
   }
 
-  async getAllSpaces() {
+  async getAllSpaces () {
     // 获取当前用户的空间站列表
     const spaceListResp = await this.vika.spaces.list()
     if (spaceListResp.success) {
@@ -71,7 +72,7 @@ class VikaBot {
     }
   }
 
-  async getSpaceId() {
+  async getSpaceId () {
     const spaceList: any = await this.getAllSpaces()
     for (const i in spaceList) {
       if (spaceList[i].name === this.spaceName) {
@@ -86,7 +87,7 @@ class VikaBot {
     }
   }
 
-  async getNodesList() {
+  async getNodesList () {
     // 获取指定空间站的一级文件目录
     const nodeListResp = await this.vika.nodes.list({ spaceId: this.spaceId })
     const tables: any = {}
@@ -105,7 +106,7 @@ class VikaBot {
     return tables
   }
 
-  async getSheetFields(datasheetId: string) {
+  async getSheetFields (datasheetId: string) {
     const datasheet = await this.vika.datasheet(datasheetId)
     const fieldsResp = await datasheet.fields.list()
     let fields: any = []
@@ -118,7 +119,7 @@ class VikaBot {
     return fields
   }
 
-  async createDataSheet(key: string, name: string, fields: { name: string; type: string }[]) {
+  async createDataSheet (key: string, name: string, fields: { name: string; type: string }[]) {
 
     const datasheetRo = {
       fields,
@@ -133,7 +134,7 @@ class VikaBot {
       this[key as keyof VikaBot] = res.data.id
       this[name as keyof VikaBot] = res.data.id
       const delres = await this.clearBlankLines(res.data.id)
-      console.log(`删除空白行：`, delres)
+      console.log('删除空白行：', delres)
       return res.data
     } catch (error) {
       console.error(name, error)
@@ -142,7 +143,7 @@ class VikaBot {
     }
   }
 
-  async createRecord(datasheetId: string, records: ICreateRecordsReqParams) {
+  async createRecord (datasheetId: string, records: ICreateRecordsReqParams) {
     const datasheet = await this.vika.datasheet(datasheetId)
 
     try {
@@ -158,7 +159,7 @@ class VikaBot {
 
   }
 
-  async addChatRecord(msg: { talker: () => any; to: () => any; type: () => any; text: () => any; room: () => any; id: any }, uploadedAttachments: any, msgType: any, text: string) {
+  async addChatRecord (msg: { talker: () => any; to: () => any; type: () => any; text: () => any; room: () => any; id: any }, uploadedAttachments: any, msgType: any, text: string) {
     // console.debug(msg)
     // console.debug(JSON.stringify(msg))
     const talker = msg.talker()
@@ -184,7 +185,7 @@ class VikaBot {
 
     const record = {
       fields: {
-        timeHms: timeHms,
+        timeHms,
         name: talker ? talker.name() : '未知',
         topic: topic || '--',
         messagePayload: text,
@@ -196,10 +197,10 @@ class VikaBot {
     }
 
     this.msgStore.push(record)
-    log.info('最新消息池长度：', this.msgStore.length);
+    log.info('最新消息池长度：', this.msgStore.length)
   }
 
-  async addScanRecord(uploadedAttachments: string, text: string) {
+  async addScanRecord (uploadedAttachments: string, text: string) {
 
     const curTime = this.getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
@@ -211,7 +212,7 @@ class VikaBot {
     const records = [
       {
         fields: {
-          timeHms: timeHms,
+          timeHms,
           name: 'system',
           topic: '--',
           messagePayload: text,
@@ -235,7 +236,7 @@ class VikaBot {
     }).catch(err => { console.error('调用vika写入接口失败：', err) })
   }
 
-  async addHeartbeatRecord(text: string) {
+  async addHeartbeatRecord (text: string) {
 
     const curTime = this.getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
@@ -243,7 +244,7 @@ class VikaBot {
 
     const record = {
       fields: {
-        timeHms: timeHms,
+        timeHms,
         name: 'system',
         topic: '--',
         messagePayload: text,
@@ -257,7 +258,7 @@ class VikaBot {
     this.msgStore.push(record)
   }
 
-  async upload(file: ReadStream) {
+  async upload (file: ReadStream) {
     const datasheet = this.vika.datasheet(this.messageSheet)
     try {
       const resp = await datasheet.upload(file)
@@ -277,7 +278,7 @@ class VikaBot {
 
   }
 
-  async deleteRecords(datasheetId: string, recordsIds: string | any[]) {
+  async deleteRecords (datasheetId: string, recordsIds: string | any[]) {
     // console.debug('操作数据表ID：', datasheetId)
     // console.debug('待删除记录IDs：', recordsIds)
     const datasheet = this.vika.datasheet(datasheetId)
@@ -289,7 +290,7 @@ class VikaBot {
     }
   }
 
-  async getRecords(datasheetId: string, query = {}) {
+  async getRecords (datasheetId: string, query = {}) {
     let records: any = []
     const datasheet = await this.vika.datasheet(datasheetId)
     // 分页获取记录，默认返回第一页
@@ -304,7 +305,7 @@ class VikaBot {
     return records
   }
 
-  async getAllRecords(datasheetId: string) {
+  async getAllRecords (datasheetId: string) {
     let records = []
     const datasheet = await this.vika.datasheet(datasheetId)
     const response: any = await datasheet.records.queryAll()
@@ -322,7 +323,7 @@ class VikaBot {
     return records
   }
 
-  async clearBlankLines(datasheetId: any) {
+  async clearBlankLines (datasheetId: any) {
     const records = await this.getRecords(datasheetId, {})
     // console.debug(records)
     const recordsIds = []
@@ -333,7 +334,7 @@ class VikaBot {
     await this.deleteRecords(datasheetId, recordsIds)
   }
 
-  async getConfig() {
+  async getConfig () {
     const configRecords = await this.getRecords(this.configSheet, {})
     const switchRecords = await this.getRecords(this.switchSheet, {})
     // console.debug(configRecords)
@@ -395,17 +396,18 @@ class VikaBot {
 
   }
 
-  async getTimedTask() {
+  async getTimedTask () {
     const taskRecords = await this.getRecords(this.noticeSheet, {})
     // console.debug(taskRecords)
 
     const timedTasks: any = []
 
-    let taskFields: Field[] = sheets['noticeSheet']?.fields || []
-    let taskFieldDic: any = {}
+    const taskFields: Field[] = sheets['noticeSheet']?.fields || []
+    const taskFieldDic: any = {}
 
     for (let i = 0; i < taskFields.length; i++) {
-      let taskField: Field | undefined = taskFields[i]
+      const taskField: Field | undefined = taskFields[i]
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (taskFields && taskField !== undefined && taskFields[i]?.desc) {
         taskFieldDic[taskField.name] = taskField.desc
       }
@@ -413,7 +415,7 @@ class VikaBot {
 
     for (let i = 0; i < taskRecords.length; i++) {
       const task = taskRecords[i]
-      let taskConfig: any = {
+      const taskConfig: any = {
         id: task.recordId,
         msg: task.fields['内容'],
         time: task.fields['时间'],
@@ -429,20 +431,19 @@ class VikaBot {
           const roomRecords = await this.getRecords(this.roomListSheet, { recordIds: task.fields['接收群'] })
           // console.debug(roomRecords)
           roomRecords.forEach(async (item: any) => {
-            taskConfig.rooms.push(item.fields.id);
+            taskConfig.rooms.push(item.fields.id)
           })
         }
         if (task.fields['接收好友'] && task.fields['接收好友'].length) {
           const contactRecords = await this.getRecords(this.contactSheet, { recordIds: task.fields['接收好友'] })
           // console.debug(contactRecords)
           contactRecords.forEach(async (item: any) => {
-            taskConfig.contacts.push(item.fields.id);
+            taskConfig.contacts.push(item.fields.id)
           })
         }
         timedTasks.push(taskConfig)
       }
     }
-
 
     // console.debug(2, timedTasks)
 
@@ -450,7 +451,7 @@ class VikaBot {
 
   }
 
-  async checkInit(msg: string) {
+  async checkInit (msg: string) {
     this.spaceId = await this.getSpaceId()
     // console.log('空间ID:', this.spaceId)
     let sheetCount = 0
@@ -458,7 +459,7 @@ class VikaBot {
       const tables = await this.getNodesList()
       // console.debug(tables)
 
-      for (let k in sheets) {
+      for (const k in sheets) {
         const sheet = sheets[k as keyof Sheets]
         // console.log(k, sheet)
         if (sheet) {
@@ -466,7 +467,7 @@ class VikaBot {
             sheetCount = sheetCount + 1
             console.error(`缺少【${sheet.name}】表，请运行 npm run sys-init 自动创建系统表,然后再运行 npm start`)
           } else {
-            this[k as keyof VikaBot] = tables[sheet?.name]
+            this[k as keyof VikaBot] = tables[sheet.name]
           }
         }
       }
@@ -506,12 +507,12 @@ class VikaBot {
           console.error('调用datasheet.records.create失败：', err)
         }
       }
-    }, 250);
+    }, 250)
 
     return true
   }
 
-  async init() {
+  async init () {
 
     this.spaceId = await this.getSpaceId()
     // console.log('空间ID:', this.spaceId)
@@ -523,7 +524,7 @@ class VikaBot {
 
       await wait(1000)
 
-      for (let k in sheets) {
+      for (const k in sheets) {
         // console.debug(this)
         const sheet = sheets[k as keyof Sheets]
         // console.log(k, sheet)
@@ -531,26 +532,25 @@ class VikaBot {
           const fields = sheet.fields
           const newFields: Field[] = []
           for (let j = 0; j < fields.length; j++) {
-            let field = fields[j]
-            let newField: Field = {
+            const field = fields[j]
+            const newField: Field = {
               type: field?.type || '',
               name: field?.name || '',
-              desc: field?.desc || ''
+              desc: field?.desc || '',
             }
-
+            const options = field.property.options
             switch (field?.type) {
               case 'SingleText':
                 newField.property = field.property || {}
                 break
               case 'SingleSelect':
-                const options = field.property.options
                 newField.property = {}
                 newField.property.defaultValue = field.property.defaultValue || options[0].name
                 newField.property.options = []
                 for (let z = 0; z < options.length; z++) {
-                  let option = {
+                  const option = {
                     name: options[z].name,
-                    color: options[z].color.value
+                    color: options[z].color.value,
                   }
                   newField.property.options.push(option)
                 }
@@ -559,7 +559,7 @@ class VikaBot {
                 break
               case 'DateTime':
                 newField.property = {}
-                newField.property.dateFormat = "YYYY-MM-DD"
+                newField.property.dateFormat = 'YYYY-MM-DD'
                 newField.property.includeTime = true
                 newField.property.timeFormat = 'HH:mm'
                 newField.property.autoFill = true
@@ -578,7 +578,7 @@ class VikaBot {
               default:
                 break
             }
-            if (field?.type !== 'MagicLink' || (field?.type === 'MagicLink' && field?.desc)) {
+            if (field?.type !== 'MagicLink' || (field.type === 'MagicLink' && field.desc)) {
               newFields.push(newField)
             }
           }
@@ -588,11 +588,12 @@ class VikaBot {
           await this.createDataSheet(k, sheet.name, newFields)
           await wait(200)
           const defaultRecords = sheet.defaultRecords
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           if (defaultRecords) {
             // console.debug(defaultRecords.length)
             const count = Math.ceil(defaultRecords.length / 10)
             for (let i = 0; i < count; i++) {
-              let records = defaultRecords.splice(0, 10)
+              const records = defaultRecords.splice(0, 10)
               console.log('写入：', records.length)
               await this.createRecord(this[k as keyof VikaBot], records)
               await wait(200)
@@ -602,10 +603,8 @@ class VikaBot {
           console.log(sheet.name + '数据表配置完成...')
         } else if (sheet) {
           this[k as keyof VikaBot] = tables[sheet.name]
-          this[sheet?.name as keyof VikaBot] = tables[sheet.name]
-        } else {
-
-        }
+          this[sheet.name as keyof VikaBot] = tables[sheet.name]
+        } else { /* empty */ }
       }
 
       console.log('================================================\n\n初始化系统表完成,运行 npm start 启动系统\n\n================================================\n')
@@ -616,7 +615,7 @@ class VikaBot {
     }
   }
 
-  getCurTime() {
+  getCurTime () {
     // timestamp是整数，否则要parseInt转换
     const timestamp = new Date().getTime()
     const timezone = 8 // 目标时区时间，东八区
