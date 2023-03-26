@@ -484,7 +484,7 @@ class VikaBot {
     }
 
     const that = this
-    setInterval(async () => {
+    setInterval(() => {
       // log.info('待处理消息池长度：', that.msgStore.length||0);
       that.msgStore = that.msgStore.concat(global.sentMessage)
       global.sentMessage = []
@@ -538,12 +538,15 @@ class VikaBot {
               name: field?.name || '',
               desc: field?.desc || '',
             }
-            const options = field.property.options
+            console.debug(field)
+            let options
             switch (field?.type) {
               case 'SingleText':
                 newField.property = field.property || {}
+                newFields.push(newField)
                 break
               case 'SingleSelect':
+                options = field.property.options
                 newField.property = {}
                 newField.property.defaultValue = field.property.defaultValue || options[0].name
                 newField.property.options = []
@@ -554,8 +557,10 @@ class VikaBot {
                   }
                   newField.property.options.push(option)
                 }
+                newFields.push(newField)
                 break
               case 'Text':
+                newFields.push(newField)
                 break
               case 'DateTime':
                 newField.property = {}
@@ -563,24 +568,31 @@ class VikaBot {
                 newField.property.includeTime = true
                 newField.property.timeFormat = 'HH:mm'
                 newField.property.autoFill = true
+                newFields.push(newField)
                 break
               case 'Checkbox':
                 newField.property = {
                   icon: 'white_check_mark',
                 }
+                newFields.push(newField)
                 break
               case 'MagicLink':
                 newField.property = {}
                 newField.property.foreignDatasheetId = this[field.desc as keyof VikaBot]
+                if (field.desc) {
+                  newFields.push(newField)
+                }
                 break
               case 'Attachment':
+                newFields.push(newField)
                 break
               default:
+                newFields.push(newField)
                 break
             }
-            if (field?.type !== 'MagicLink' || (field.type === 'MagicLink' && field.desc)) {
-              newFields.push(newField)
-            }
+            // if (field?.type !== 'MagicLink' || (field.type === 'MagicLink' && field.desc)) {
+            //   newFields.push(newField)
+            // }
           }
 
           // console.debug(newFields)

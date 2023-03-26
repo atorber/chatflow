@@ -9,22 +9,15 @@ import fs from 'fs'
 
 import {
   Contact,
-  // Room,
   Message,
   ScanStatus,
-  WechatyBuilder,
   log,
   Room,
   Wechaty,
+  WechatyBuilder,
   // types,
 } from 'wechaty'
 // import * as PUPPET from 'wechaty-puppet'
-// import {
-//   OneToManyRoomConnector,
-//   OneToManyRoomConnectorConfig,
-//   ManyToOneRoomConnector,
-//   ManyToOneRoomConnectorConfig,
-// } from 'wechaty-plugin-contrib'
 
 import qrcodeTerminal from 'qrcode-terminal'
 
@@ -56,13 +49,11 @@ let chatdev: any = {}
 let job: any
 let jobs: any
 
-// console.debug(configs)
-
-if (!configs.VIKA_TOKEN&&process.env['VIKA_TOKEN']) {
+if (!configs.VIKA_TOKEN && process.env['VIKA_TOKEN']) {
   configs.VIKA_TOKEN = process.env['VIKA_TOKEN']
 }
 
-if (!configs.VIKA_SPACENAME&&process.env['VIKA_SPACENAME']) {
+if (!configs.VIKA_SPACENAME && process.env['VIKA_SPACENAME']) {
   configs.VIKA_SPACENAME = process.env['VIKA_SPACENAME']
 }
 
@@ -94,7 +85,7 @@ async function main() {
     name: 'openai-qa-bot',
     puppet: sysConfig.puppetName,
     puppetOptions: {
-      token: sysConfig.puppetToken||"null",
+      token: sysConfig.puppetToken || "null",
       uos: true,
     },
   }
