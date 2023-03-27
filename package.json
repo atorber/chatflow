@@ -1,6 +1,6 @@
 {
   "name": "openai-qa-bot",
-  "version": "1.9.7",
+  "version": "1.9.8",
   "description": "openai-qa-bot",
   "type": "module",
   "engines": {
@@ -71,5 +71,10 @@
     "is-pr": "^2.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.3"
+  },
+  "git": {
+    "scripts": {
+      "pre-push": "npx git-scripts-pre-push"
+    }
   }
 }
