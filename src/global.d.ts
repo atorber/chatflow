@@ -1,5 +1,5 @@
 declare global {
-    let sentMessage:any []
+    var sentMessage:any[]
 }
 
 export { }

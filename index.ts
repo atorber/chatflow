@@ -41,7 +41,11 @@ import {
 
 import schedule from 'node-schedule'
 
-global.sentMessage = []
+globalThis.sentMessage = []
+
+function add2sentMessage (record:any) {
+  globalThis.sentMessage.push(record)
+}
 
 let bot: Wechaty
 let sysConfig: any
@@ -66,13 +70,13 @@ const vikaConfig = {
 // console.debug(vikaConfig)
 const vika = new VikaBot(vikaConfig)
 
-async function getConfig(vika: any) {
+async function getConfig (vika: any) {
   sysConfig = await vika.getConfig()
   console.debug(JSON.stringify(sysConfig))
   return sysConfig
 }
 
-async function main() {
+async function main () {
   const isReady = await vika.checkInit('主程序载入系统配置成功，等待插件初始化...')
 
   if (!isReady) {
@@ -104,7 +108,7 @@ async function main() {
 
   bot = WechatyBuilder.build(ops)
 
-  async function onScan(qrcode: string, status: ScanStatus) {
+  async function onScan (qrcode: string, status: ScanStatus) {
     console.debug(qrcode)
     if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
       const qrcodeUrl = encodeURIComponent(qrcode)
@@ -152,7 +156,7 @@ async function main() {
     }
   }
 
-  async function onLogin(user: Contact) {
+  async function onLogin (user: Contact) {
     log.info('StarterBot', '%s login', user.payload)
     const curDate = new Date().toLocaleString()
     await user.say('上线：' + curDate)
@@ -206,12 +210,12 @@ async function main() {
     console.log(`================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n`)
   }
 
-  function onLogout(user: Contact) {
+  function onLogout (user: Contact) {
     log.info('StarterBot', '%s logout', user)
     job.cancel();
   }
 
-  async function onMessage(message: Message) {
+  async function onMessage (message: Message) {
 
     log.info('onMessage', JSON.stringify(message))
     console.debug('onMessage', JSON.stringify(message))
@@ -247,7 +251,7 @@ async function main() {
         text = keyWord + '，配置更新成功~'
       }
       message.say(text)
-      storeSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room())
+      add2sentMessage(storeSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room()))
     }
 
     if (isSelfMsg && text === '#更新提醒') {
@@ -259,7 +263,7 @@ async function main() {
         text = keyWord + '，提醒任务更新失败~'
       }
       message.say(text)
-      storeSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room())
+      add2sentMessage(storeSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room()))
     }
 
     try {
@@ -345,7 +349,7 @@ async function main() {
 
   }
 
-  async function roomJoin(room: { topic: () => any; id: any; say: (arg0: string, arg1: any) => any }, inviteeList: any[], inviter: any) {
+  async function roomJoin (room: { topic: () => any; id: any; say: (arg0: string, arg1: any) => any }, inviteeList: any[], inviter: any) {
     const nameList = inviteeList.map(c => c.name()).join(',')
     log.info(`Room ${await room.topic()} got new member ${nameList}, invited by ${inviter}`)
     // if (sysConfig.welcomeList.includes(room.id)) {
@@ -357,7 +361,7 @@ async function main() {
     // }
   }
 
-  async function updateContacts(bot: Wechaty) {
+  async function updateContacts (bot: Wechaty) {
     const contacts: Contact[] = await bot.Contact.findAll()
     console.debug('当前微信最新联系人数量：', contacts.length)
     const recordsAll: any = []
@@ -406,7 +410,7 @@ async function main() {
 
   }
 
-  async function updateRooms(bot: Wechaty) {
+  async function updateRooms (bot: Wechaty) {
     const rooms: Room[] = await bot.Room.findAll()
     console.debug('当前最新微信群数量：', rooms.length)
     const recordsAll: any = []
@@ -421,10 +425,10 @@ async function main() {
     for (let i = 0; i < rooms.length; i++) {
       let item = rooms[i]
       if (item && !wxids.includes(item.id)) {
-        let avatar = ''
+        let avatar:any
         try{
           avatar = await item.avatar()
-        }catch(err){
+        }catch(err) {
           console.error(err)
         }
         const fields = {
@@ -451,7 +455,7 @@ async function main() {
 
   }
 
-  async function updateJobs(bot: Wechaty) {
+  async function updateJobs (bot: Wechaty) {
     try {
       const tasks = await vika.getTimedTask()
       schedule.gracefulShutdown();
@@ -536,7 +540,7 @@ async function main() {
                     const contact = await bot.Contact.find({ id: task.contacts[0] })
                     if (contact) {
                       await contact.say(task.msg)
-                      storeSentMessage(bot.currentUser, task.msg, contact, undefined)
+      add2sentMessage(storeSentMessage(bot.currentUser, task.msg, contact, undefined))
                       await wait(200)
                     }
                   }
@@ -550,7 +554,9 @@ async function main() {
                     const room = await bot.Room.find({ id: task.rooms[0] })
                     if (room) {
                       await room.say(task.msg)
-                      storeSentMessage(bot.currentUser, task.msg, undefined, room)
+                      
+      add2sentMessage(storeSentMessage(bot.currentUser, task.msg, undefined, room))
+
                       await wait(200)
                     }
                   }
@@ -650,7 +656,7 @@ async function main() {
           const contact = await bot.Contact.find({ id: contactId })
           if (room) {
             await room.say(data.msg.content, ...[contact])
-            storeSentMessage(bot.currentUser, data.msg.content, undefined, room)
+            add2sentMessage(storeSentMessage(bot.currentUser, data.msg.content, undefined, room))
           }
 
           // configData.msg.avatarUrl = data.serverChatEn.avatarUrl;
@@ -672,7 +678,7 @@ async function main() {
    * @param {String} msg.content 消息内容
    * @param {Function} successCallback 添加消息后的回调
    */
-  function addChatMsg(msg: { role: any; contentType: any; content?: string; createTime?: any }, successCallback: { (): void; (): any }) {
+  function addChatMsg (msg: { role: any; contentType: any; content?: string; createTime?: any }, successCallback: { (): void; (): any }) {
     // 1.设定默认值
     msg.role = msg.role == undefined ? 'sys' : msg.role
     msg.contentType = msg.contentType == undefined ? 'text' : msg.contentType
@@ -706,7 +712,7 @@ async function main() {
    * 发送消息
    * @param {Object} rs 回调对象
    */
-  function sendMsg(rs: any) {
+  function sendMsg (rs: any) {
     const msg = rs.msg
     msg.role = 'client'
     msg.avatarUrl = configData.clientChatEn.avatarUrl

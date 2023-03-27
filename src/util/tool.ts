@@ -23,8 +23,7 @@ async function storeSentMessage (userSelf: Contact, text: string, talker?: Conta
       messageType: 'selfSent',
     },
   }
-
-  global.sentMessage.push(record)
+  return record
 }
 
 // 定义一个延时方法

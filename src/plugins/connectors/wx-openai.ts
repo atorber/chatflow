@@ -125,13 +125,12 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
           title: answer.text.title,
         })
 
-        let sayRes
         if (room) {
-          sayRes = await room.say(miniProgram)
+          await room.say(miniProgram)
           storeSentMessage(bot.currentUser, miniProgram.toString(), undefined, message.room())
 
         } else {
-          sayRes = await message.say(miniProgram)
+          await message.say(miniProgram)
           storeSentMessage(bot.currentUser, miniProgram.toString(), message.talker(), undefined)
         }
 

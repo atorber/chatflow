@@ -37,7 +37,7 @@
 
 1. 下载源码并安装依赖
 
-```
+```javascript
 git clone https://github.com/choogoo/wechat-openai-qa-bot.git
 cd ./wechat-openai-qa-bot
 npm install
