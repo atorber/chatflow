@@ -131,6 +131,8 @@ npm run start
 |wechaty-puppet-padlocal👍| Windows、Linux、macOS| 是 |是 |
 |wechaty-puppet-service👍| Windows、Linux、macOS| 是 |是 |企业微信|
 
+> 特别注意，Wechaty-Puppet是wechaty的概念，本项目不涉及机器人开发，只是使用wechaty项目进行业务功能实现，什么是[Wechaty](https://wechaty.js.org/)请点击链接进行了解学习
+
 ### 拉取和运行
 
 - 稳定版本
