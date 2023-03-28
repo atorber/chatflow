@@ -121,5 +121,5 @@ package-lock.json
 .gitpod.yml
 openai-qa-bot.memory-card.json
 quick.bat
-# config.js
+src/config.js
 tester.js
