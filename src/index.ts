@@ -22,22 +22,22 @@ import {
 import qrcodeTerminal from 'qrcode-terminal'
 
 // import WechatyVikaPlugin from 'wechaty-vika-link'
-import WechatyVikaPlugin from './src/index.js'
+import WechatyVikaPlugin from './plugins/index.js'
 
 import { FileBox } from 'file-box'
 import configs from './config.js'
 // import type { Puppet } from 'wechaty-puppet'
 import * as io from 'socket.io-client'
-import { VikaBot } from './src/plugins/vika.js'
-import { configData } from './src/plugins/im.js'
-import { wxai } from './src/plugins/wxai.js'
+import { VikaBot } from './plugins/vika.js'
+import { configData } from './plugins/im.js'
+import { wxai } from './plugins/wxai.js'
 
-import { ChatDevice } from './src/plugins/chat-device.js'
-import { propertyMessage, eventMessage } from './src/plugins/msg-format.js'
+import { ChatDevice } from './plugins/chat-device.js'
+import { propertyMessage, eventMessage } from './plugins/msg-format.js'
 import {
   waitForMs as wait,
-  storeSentMessage
-} from './src/util/tool.js'
+  storeSentMessage,
+} from './util/tool.js'
 
 import schedule from 'node-schedule'
 
@@ -89,7 +89,7 @@ async function main () {
     name: 'openai-qa-bot',
     puppet: sysConfig.puppetName,
     puppetOptions: {
-      token: sysConfig.puppetToken || "null",
+      token: sysConfig.puppetToken || 'null',
       uos: true,
     },
   }
@@ -159,7 +159,6 @@ async function main () {
   async function onLogin (user: Contact) {
     log.info('StarterBot', '%s login', user.payload)
     const curDate = new Date().toLocaleString()
-    await user.say('上线：' + curDate)
     log.info(JSON.stringify(user.payload))
     if (sysConfig.mqttPassword && (sysConfig.mqtt_SUB_ONOFF || sysConfig.mqtt_PUB_ONOFF)) {
       chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, user.id)
@@ -168,9 +167,15 @@ async function main () {
       }
     }
 
-    // 更新云端好友和群
-    updateRooms(bot)
-    updateContacts(bot)
+    try {
+      await user.say('上线：' + curDate)
+      // 更新云端好友和群
+      await updateRooms(bot)
+      await updateContacts(bot)
+
+    } catch (err) {
+      console.error(err)
+    }
 
     // // 启动心跳，5min发一次
     // const rule = new schedule.RecurrenceRule();
@@ -192,27 +197,27 @@ async function main () {
     // log.info('下一次心跳调用时间：', job.nextInvocation())
 
     // 启动心跳，5min发一次
-    setInterval(async () => {
+    setInterval(() => {
       try {
         // const contact = await bot.Contact.find({ id: 'tyutluyc' })
-        console.log(curDate);
+        console.log(curDate)
         // await user.say('心跳：' + curDate)
-        await vika.addHeartbeatRecord('心跳：' + curDate)
+        // vika.addHeartbeatRecord('心跳：' + curDate)
         if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
           chatdev.pub_property(propertyMessage('lastActive', curDate))
         }
       } catch (err) {
         console.error(err)
       }
-    }, 300000);
+    }, 300000)
 
-    updateJobs(bot)
-    console.log(`================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n`)
+    await updateJobs(bot)
+    console.log('================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n')
   }
 
   function onLogout (user: Contact) {
     log.info('StarterBot', '%s logout', user)
-    job.cancel();
+    job.cancel()
   }
 
   async function onMessage (message: Message) {
@@ -250,19 +255,19 @@ async function main () {
       } catch (e) {
         text = keyWord + '，配置更新成功~'
       }
-      message.say(text)
+      await message.say(text)
       add2sentMessage(storeSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room()))
     }
 
     if (isSelfMsg && text === '#更新提醒') {
       console.debug('热更新通知任务~')
       try {
-        updateJobs(bot)
+        await updateJobs(bot)
         text = keyWord + '，提醒任务更新成功~'
       } catch (e) {
         text = keyWord + '，提醒任务更新失败~'
       }
-      message.say(text)
+      await message.say(text)
       add2sentMessage(storeSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room()))
     }
 
@@ -371,10 +376,10 @@ async function main () {
     if (recordExisting.length) {
       recordExisting.forEach((record: { fields: any, id: any }) => {
         wxids.push(record.fields.id)
-      });
+      })
     }
     for (let i = 0; i < contacts.length; i++) {
-      let item = contacts[i]
+      const item = contacts[i]
       if (item && item.friend() && !wxids.includes(item.id)) {
         let avatar = ''
         try {
@@ -383,17 +388,17 @@ async function main () {
 
         }
         const fields = {
-          "id": item.id,
-          "name": item.name(),
-          "alias": String(await item.alias() || ''),
-          "gender": String(item.gender() || ''),
-          "friend": item.friend(),
-          "type": String(item.type()),
-          "avatar": avatar,
-          "phone": String(await item.phone())
+          id: item.id,
+          name: item.name(),
+          alias: String(await item.alias() || ''),
+          gender: String(item.gender() || ''),
+          friend: item.friend(),
+          type: String(item.type()),
+          avatar,
+          phone: String(await item.phone()),
         }
         const record = {
-          fields
+          fields,
         }
         recordsAll.push(record)
       }
@@ -420,25 +425,25 @@ async function main () {
     if (recordExisting.length) {
       recordExisting.forEach((record: { fields: any, id: any }) => {
         wxids.push(record.fields.id)
-      });
+      })
     }
     for (let i = 0; i < rooms.length; i++) {
-      let item = rooms[i]
+      const item = rooms[i]
       if (item && !wxids.includes(item.id)) {
         let avatar:any
-        try{
+        try {
           avatar = await item.avatar()
-        }catch(err) {
+        } catch (err) {
           console.error(err)
         }
         const fields = {
-          "id": item.id,
-          "topic": await item.topic() || '',
-          "ownerId": String(item.owner()?.id || ''),
-          "avatar": avatar,
+          id: item.id,
+          topic: await item.topic() || '',
+          ownerId: String(item.owner()?.id || ''),
+          avatar,
         }
         const record = {
-          fields
+          fields,
         }
         recordsAll.push(record)
       }
@@ -458,7 +463,7 @@ async function main () {
   async function updateJobs (bot: Wechaty) {
     try {
       const tasks = await vika.getTimedTask()
-      schedule.gracefulShutdown();
+      schedule.gracefulShutdown()
       jobs = {}
       // console.debug(tasks)
       for (let i = 0; i < tasks.length; i++) {
@@ -466,18 +471,17 @@ async function main () {
         if (task.active) {
           const curTimeF = new Date(task.time)
           // const curTimeF = new Date(task.time+8*60*60*1000)
-          let curRule = '* * * * * *';
+          let curRule = '* * * * * *'
           let dayOfWeek: any = '*'
           let month: any = '*'
           let dayOfMonth: any = '*'
           let hour: any = curTimeF.getHours()
           let minute: any = curTimeF.getMinutes()
-          let second = 0
-
+          const second = 0
+          const addMonth = []
           switch (task.cycle) {
             case '每季度':
               month = curTimeF.getMonth()
-              let addMonth = []
               for (let i = 0; i < 4; i++) {
                 if (month + 3 <= 11) {
                   addMonth.push(month)
@@ -501,19 +505,19 @@ async function main () {
               break
             case '每30分钟':
               hour = '*'
-              minute = [0, 30]
+              minute = [ 0, 30 ]
               break
             case '每15分钟':
               hour = '*'
-              minute = [0, 15, 30, 45]
+              minute = [ 0, 15, 30, 45 ]
               break
             case '每10分钟':
               hour = '*'
-              minute = [0, 10, 20, 30, 40, 50]
+              minute = [ 0, 10, 20, 30, 40, 50 ]
               break
             case '每5分钟':
               hour = '*'
-              minute = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+              minute = [ 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55 ]
               break
             case '每分钟':
               hour = '*'
@@ -525,14 +529,14 @@ async function main () {
               break
 
           }
-          curRule = `${second} ${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
+          curRule = `${second} ${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`
           console.debug(curRule)
 
           try {
             schedule.scheduleJob(task.id, curRule, async () => {
               try {
                 const curDate = new Date()
-                console.debug('定时任务：', curTimeF, curRule, curDate, JSON.stringify(task));
+                console.debug('定时任务：', curTimeF, curRule, curDate, JSON.stringify(task))
                 // await user.say('心跳：' + curDate)
 
                 try {
@@ -540,12 +544,12 @@ async function main () {
                     const contact = await bot.Contact.find({ id: task.contacts[0] })
                     if (contact) {
                       await contact.say(task.msg)
-      add2sentMessage(storeSentMessage(bot.currentUser, task.msg, contact, undefined))
+                      add2sentMessage(storeSentMessage(bot.currentUser, task.msg, contact, undefined))
                       await wait(200)
                     }
                   }
                 } catch (e) {
-                  console.error("发送好友定时任务失败:", e)
+                  console.error('发送好友定时任务失败:', e)
 
                 }
 
@@ -554,24 +558,24 @@ async function main () {
                     const room = await bot.Room.find({ id: task.rooms[0] })
                     if (room) {
                       await room.say(task.msg)
-                      
-      add2sentMessage(storeSentMessage(bot.currentUser, task.msg, undefined, room))
+
+                      add2sentMessage(storeSentMessage(bot.currentUser, task.msg, undefined, room))
 
                       await wait(200)
                     }
                   }
                 } catch (e) {
-                  console.error("发送群定时任务失败:", e)
+                  console.error('发送群定时任务失败:', e)
 
                 }
 
               } catch (err) {
                 console.error(err)
               }
-            });
+            })
             jobs[task.id] = task
           } catch (e) {
-            console.error("创建定时任务失败:", e)
+            console.error('创建定时任务失败:', e)
           }
         }
       }
@@ -585,7 +589,7 @@ async function main () {
   const missingConfiguration = []
 
   for (const key in configs) {
-    if (!configs[key] && !['imOpen', 'DIFF_REPLY_ONOFF'].includes(key)) {
+    if (!configs[key] && ![ 'imOpen', 'DIFF_REPLY_ONOFF' ].includes(key)) {
       missingConfiguration.push(key)
     }
   }
@@ -655,7 +659,7 @@ async function main () {
           const room = await bot.Room.find({ id: roomId })
           const contact = await bot.Contact.find({ id: contactId })
           if (room) {
-            await room.say(data.msg.content, ...[contact])
+            await room.say(data.msg.content, ...[ contact ])
             add2sentMessage(storeSentMessage(bot.currentUser, data.msg.content, undefined, room))
           }
 
@@ -723,7 +727,7 @@ async function main () {
       configData.socket.emit('CLIENT_SEND_MSG', {
         serverChatId: configData.serverChatEn.serverChatId,
         clientChatEn: configData.clientChatEn,
-        msg: msg,
+        msg,
       })
 
       // log.debug(configData.serverChatEn.serverChatId)

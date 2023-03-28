@@ -1,5 +1,5 @@
-import onMessage from './handlers/on-message.js'
-import onScan from './handlers/on-scan.js'
+import onMessage from '../handlers/on-message.js'
+import onScan from '../handlers/on-scan.js'
 
 function WechatyVikaPlugin (vika) {
   return function (bot) {

@@ -1,6 +1,6 @@
 {
   "name": "openai-qa-bot",
-  "version": "1.9.9",
+  "version": "1.9.10",
   "description": "openai-qa-bot",
   "type": "module",
   "engines": {
@@ -8,11 +8,11 @@
     "npm": ">=7"
   },
   "scripts": {
-    "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node index.ts",
-    "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node index.ts",
-    "sys-init": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node init.ts",
-    "init": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node init.ts",
-    "checker": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node puppet-checker.ts",
+    "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
+    "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
+    "sys-init": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/init.ts",
+    "init": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/init.ts",
+    "checker": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/puppet-checker.ts",
     "rm-temp": "rm -r temp; mkdir temp",
     "rm-cache": "rm -r cache; mkdir cache",
     "lint": "npm run lint:es && npm run lint:ts && npm run lint:md",
@@ -70,10 +70,5 @@
     "is-pr": "^2.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.3"
-  },
-  "git": {
-    "scripts": {
-      "pre-push": "npx git-scripts-pre-push"
-    }
   }
 }

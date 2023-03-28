@@ -17,10 +17,10 @@ import {
 } from 'wechaty'
 
 import qrcodeTerminal from 'qrcode-terminal'
-import WechatyVikaPlugin from './src/index.js'
+import WechatyVikaPlugin from './plugins/index.js'
 
 import configs from './config.js'
-import { VikaBot } from './src/plugins/vika.js'
+import { VikaBot } from './plugins/vika.js'
 
 let bot: any
 let sysConfig: any
@@ -40,13 +40,13 @@ const vikaConfig = {
 // console.debug(vikaConfig)
 const vika = new VikaBot(vikaConfig)
 
-async function getConfig(vika: any) {
+async function getConfig (vika: any) {
   sysConfig = await vika.getConfig()
   console.debug(sysConfig)
   return sysConfig
 }
 
-async function main() {
+async function main () {
   const isReady = await vika.checkInit('主程序载入系统配置成功，等待插件初始化...')
 
   if (!isReady) {
@@ -92,7 +92,7 @@ async function main() {
 
   bot = WechatyBuilder.build(ops)
 
-  async function onScan(qrcode: string, status: ScanStatus) {
+  async function onScan (qrcode: string, status: ScanStatus) {
     console.debug(qrcode)
     if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
       const qrcodeUrl = encodeURIComponent(qrcode)
@@ -110,26 +110,26 @@ async function main() {
     }
   }
 
-  async function onLogin(user: Contact) {
+  async function onLogin (user: Contact) {
     log.info('StarterBot', '%s login', user.payload)
     await user.say('上线：' + new Date().toLocaleString())
     log.info(JSON.stringify(user.payload))
 
-    console.log(`================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n`)
+    console.log('================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n')
   }
 
-  function onLogout(user: Contact) {
+  function onLogout (user: Contact) {
     log.info('StarterBot', '%s logout', user)
   }
 
-  async function onMessage(message: Message) {
+  async function onMessage (message: Message) {
 
     log.info('onMessage', JSON.stringify(message))
     console.debug('onMessage', JSON.stringify(message))
 
   }
 
-  async function roomJoin(room: { topic: () => any; id: any; say: (arg0: string, arg1: any) => any }, inviteeList: any[], inviter: any) {
+  async function roomJoin (room: { topic: () => any; id: any; say: (arg0: string, arg1: any) => any }, inviteeList: any[], inviter: any) {
     const nameList = inviteeList.map(c => c.name()).join(',')
     log.info(`Room ${await room.topic()} got new member ${nameList}, invited by ${inviter}`)
   }
@@ -137,7 +137,7 @@ async function main() {
   const missingConfiguration = []
 
   for (const key in configs) {
-    if (!configs[key] && !['imOpen', 'DIFF_REPLY_ONOFF'].includes(key)) {
+    if (!configs[key] && ![ 'imOpen', 'DIFF_REPLY_ONOFF' ].includes(key)) {
       missingConfiguration.push(key)
     }
   }
