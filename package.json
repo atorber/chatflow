@@ -1,6 +1,6 @@
 {
   "name": "openai-qa-bot",
-  "version": "1.9.8",
+  "version": "1.9.9",
   "description": "openai-qa-bot",
   "type": "module",
   "engines": {
@@ -55,8 +55,7 @@
     "wechaty-plugin-contrib": "^1.0.18",
     "wechaty-puppet-padlocal": "^1.11.13",
     "wechaty-puppet-service": "^1.19.8",
-    "wechaty-puppet-wechat": "^1.18.4",
-    "wechaty-puppet-xp": "^1.12.7"
+    "wechaty-puppet-wechat": "^1.18.4"
   },
   "devDependencies": {
     "@chatie/eslint-config": "^1.0.4",
