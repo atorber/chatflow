@@ -8,27 +8,35 @@ import {
   WechatyBuilder,
   log,
 } from 'wechaty'
+import { FileBox } from 'file-box'
 
+// 导入html-to-docx模块
+import htmlToDocx from 'html-to-docx'
 import qrcodeTerminal from 'qrcode-terminal'
 
 // 导入语雀相关模块
 import Yuque from '@yuque/sdk'
-// import { type } from 'os'
 
 // 创建一个语雀客户端对象，使用环境变量中的token和repoId（需要提前设置）
 const yuqueClient = new Yuque({
-  token:process.env['YUQUE_TOKEN'],
+  token:process.env['YUQUE_TOKEN'] || 'xxx',
 })
-const repoId = process.env['YUQUE_REPO_ID']
+const repoId = process.env['YUQUE_REPO_ID'] || 'xxx'
 
 // 创建一个Wechaty实例
+// const bot = WechatyBuilder.build({
+//   name: 'meeting-bot',
+// })
+
 const bot = WechatyBuilder.build({
-  name: 'meeting-bot',
+  name: 'ding-dong-bot',
+  puppet: 'wechaty-puppet-xp',
 })
 
 type Meeting = {
   isMeeting:boolean
   meetingLog:string
+  meetingLogDoc:string
   title:string
   room:Room
 }
@@ -86,12 +94,15 @@ async function onMessage (msg: Message) {
         // 设置当前状态为在会议中，并保存当前群聊对象和时间戳为会议标题
         const time = new Date().toLocaleString()
         const meetingLog = `## 开始时间\n ${time}\n\n## 内容记录\n`
+        const meetingLogDoc = `<h2>开始时间</h2><br> ${time}<br><h2>内容记录</h2><br>`
+        const title = await meetingRoom.topic() + '-' + time
 
         const meeting:Meeting = {
           isMeeting:true,
           meetingLog,
+          meetingLogDoc,
           room:meetingRoom,
-          title:await meetingRoom.topic() + '-' + time,
+          title,
         }
 
         meetings[meetingRoom.id] = meeting
@@ -109,13 +120,12 @@ async function onMessage (msg: Message) {
     // 设置当前状态为不在会议中，并清空当前群聊对象和时间戳为会议标题
     const meetingRoom = msg.room()
     if (meetingRoom) {
-      if (meetings[meetingRoom.id]?.isMeeting) {
+      if (meetings[meetingRoom.id] && meetings[meetingRoom.id]?.isMeeting) {
         // 设置当前状态为在会议中，并保存当前群聊对象和时间戳为会议标题
-
         meetings[meetingRoom.id]!.isMeeting = false
+
         // 回复“结束记录”
         await msg.say('结束记录')
-
       } else {
 
         // 回复“未在会议中，发送 #开会 开始会议”
@@ -174,16 +184,53 @@ async function onMessage (msg: Message) {
 
   }
 
+  // 如果消息来自群聊，并且内容是 #会议纪要 ，则导出会议期间的聊天记录到语雀文档中，并回复文档链接或错误信息。
+  if (msg.room() && msg.room() !== undefined && text === '#会议纪要文档') {
+
+    const meetingRoom = msg.room()
+    if (meetingRoom) {
+      // 判断当前群是否在会议中
+      if (meetings[meetingRoom.id] && meetings[meetingRoom.id]?.isMeeting) {
+        // 回复“已经在会议中”
+        await msg.say('先发送 #结束 结束会议之后再导出会议纪要')
+      } else if (!meetings[meetingRoom.id]) {
+        // 回复“没有可导出的会议纪要”
+        await msg.say('没有可导出的会议纪要')
+      } else {
+        // 导出会议纪要
+        const meeting:Meeting|undefined = meetings[meetingRoom.id]
+        try {
+          // 使用html-to-docx库将会议聊天信息转换为word文档的buffer对象
+          const buffer = await htmlToDocx(meeting?.meetingLogDoc)
+          const reg = /[^a-zA-Z0-9]/g
+          // 将buffer对象转换为FileBox对象，用于发送文件
+          const fileBox = FileBox.fromBuffer(buffer, `${meeting?.title.replace(reg, '')}.docx`)
+
+          // 发送文件给群聊
+          await msg.say(fileBox)
+          delete meetings[meetingRoom.id]
+
+        } catch (err) {
+
+          // 如果出现错误，打印错误信息，并回复给群聊
+          log.error('MeetingBot', err)
+          await msg.say('导出会议纪要失败，请重试~')
+        }
+      }
+    }
+
+  }
+
   // 如果消息来自群聊，并且当前状态是在会议中，则将消息内容追加到聊天记录中
   if (msg.room() && msg.room() !== undefined) {
     const meetingRoom = msg.room()
 
-    if (meetingRoom && meetings[meetingRoom.id] && meetings[meetingRoom.id] !== undefined && meetings[meetingRoom.id]?.isMeeting) {
+    if (meetingRoom && meetings[meetingRoom.id] && meetings[meetingRoom.id]?.isMeeting) {
       const meeting = meetings[meetingRoom.id]
       // 获取消息发送者的昵称和内容，拼接成一行记录，并追加到聊天记录中
       const name = sender.name() || '未知用户'
-      const line = `- ${new Date().toLocaleString()} ${name}: ${text}\n`
-      meeting!.meetingLog += line
+      meeting!.meetingLog += `- ${new Date().toLocaleString()} ${name}: ${text}\n`
+      meeting!.meetingLogDoc += `${new Date().toLocaleString()} <br>${name}: ${text}<br>`
     }
 
   }

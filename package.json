@@ -1,6 +1,6 @@
 {
   "name": "openai-qa-bot",
-  "version": "1.9.11",
+  "version": "1.9.12",
   "description": "openai-qa-bot",
   "type": "module",
   "engines": {
@@ -10,6 +10,8 @@
   "scripts": {
     "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
     "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
+    "start:store": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/plugins/store-messages-locally.ts",
+    "start:meet": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/plugins/store-messages-locally.ts",
     "sys-init": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/init.ts",
     "init": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/init.ts",
     "checker": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/puppet-checker.ts",
@@ -19,7 +21,7 @@
     "lint:md": "markdownlint README.md",
     "lint:ts": "tsc --isolatedModules --noEmit",
     "lint:es": "eslint \"src/**/*.ts\" \"tests/**/*.spec.ts\" --ignore-pattern tests/fixtures/",
-    "lint-fix": "eslint --fix \"src/**/*.ts\" \"tests/**/*.spec.ts\""
+    "lint-fix": "eslint --fix \"src/**/*.ts\""
   },
   "repository": {
     "type": "git",
@@ -39,6 +41,7 @@
     "exceljs": "^4.3.0",
     "file-box": "^1.4.12",
     "fs": "^0.0.1-security",
+    "html-to-docx": "^1.8.0",
     "moment": "^2.29.1",
     "mqtt": "^4.3.7",
     "njwt": "^1.2.0",
@@ -55,7 +58,8 @@
     "wechaty-plugin-contrib": "^1.0.18",
     "wechaty-puppet-padlocal": "^1.11.13",
     "wechaty-puppet-service": "^1.19.8",
-    "wechaty-puppet-wechat": "^1.18.4"
+    "wechaty-puppet-wechat": "^1.18.4",
+    "wechaty-puppet-xp": "^1.12.7"
   },
   "devDependencies": {
     "@chatie/eslint-config": "^1.0.4",
