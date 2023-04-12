@@ -1,13 +1,15 @@
 #!/bin/bash
 
 # 检查 Node.js 是否已经安装
-if command -v node > /dev/null 2>&1; then
-  # 如果已经安装，则直接运行程序
-  run_program
-else
-  # 如果未安装，则下载并安装 Node.js
-  install_node
-fi
+function check_node {
+  if command -v node > /dev/null 2>&1; then
+    # 如果已经安装，则直接运行程序
+    run_program
+  else
+    # 如果未安装，则下载并安装 Node.js
+    install_node
+  fi
+}
 
 install_node() {
   # 下载 Node.js 安装程序
@@ -38,12 +40,17 @@ install_node_from_file() {
 }
 
 run_program() {
+  SCRIPT_RELATIVE_DIR=$(dirname "${BASH_SOURCE}")
+  cd $SCRIPT_RELATIVE_DIR
   # 运行程序
   npm install
   npm run sys-init
   npm start
   echo "bot was started successfully."
 }
+
+# 调用检查 Node.js 的函数
+check_node
 
 # 等待用户按下回车键后退出脚本
 read -p "Press [Enter] key to exit."
