@@ -430,9 +430,9 @@ async function main () {
     for (let i = 0; i < rooms.length; i++) {
       const item = rooms[i]
       if (item && !wxids.includes(item.id)) {
-        let avatar:any = ''
+        let avatar:any = 'null'
         try {
-          avatar = await item.avatar()
+          avatar = String(await item.avatar())
         } catch (err) {
           console.error(err)
         }
