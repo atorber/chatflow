@@ -96,15 +96,19 @@ async function main () {
 
   // console.debug(ops)
 
-  if (sysConfig.puppetName == 'wechaty-puppet-service') {
+  if (sysConfig.puppetName === 'wechaty-puppet-service') {
     process.env['WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT'] = 'true'
   }
 
-  if (sysConfig.puppetName == 'wechaty-puppet-wechat') {
+  if (sysConfig.puppetName === 'wechaty-puppet-wechat' || sysConfig.puppetName == 'wechaty-puppet-wechat4u') {
     delete ops.puppetOptions.token
   }
 
-  console.debug(process.env['WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT'])
+  if (sysConfig.puppetName !== 'wechaty-puppet-wechat') {
+    delete (ops.puppetOptions as any).uos
+  }
+
+  // console.debug(process.env['WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT'])
 
   bot = WechatyBuilder.build(ops)
 

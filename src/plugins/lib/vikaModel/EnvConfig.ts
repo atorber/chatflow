@@ -19,8 +19,8 @@ const recordRes = {
           配置项: 'WechatyPuppet',
           标识: 'puppetName',
           配置组: '机器人',
-          说明: '可选值：\nwechaty-puppet-wechat\nwechaty-puppet-xp\nwechaty-puppet-padlocal\nwechaty-puppet-service',
-          '值（只修改此列）': 'wechaty-puppet-wechat',
+          说明: '可选值：\nwechaty-puppet-wechat4u\nwechaty-puppet-wechat\nwechaty-puppet-xp\nwechaty-puppet-padlocal\nwechaty-puppet-service',
+          '值（只修改此列）': 'wechaty-puppet-wechat4u',
         },
       },
       {
