@@ -13,6 +13,7 @@ import {
   ScanStatus,
   log,
   Room,
+  types,
   Wechaty,
   WechatyBuilder,
   // types,
@@ -298,7 +299,7 @@ async function main () {
         }
 
         // IM服务开启时执行
-        if (sysConfig.imOpen && bot.Message.Type.Text === message.type()) {
+        if (sysConfig.imOpen && types.Message.Text === message.type()) {
           configData.clientChatEn.clientChatId = talker.id + ' ' + room.id
           configData.clientChatEn.clientChatName = talker.name() + '@' + topic
           // log.debug(configData)
