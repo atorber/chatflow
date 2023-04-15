@@ -101,7 +101,7 @@ async function main () {
     process.env['WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT'] = 'true'
   }
 
-  if (sysConfig.puppetName === 'wechaty-puppet-wechat' || sysConfig.puppetName == 'wechaty-puppet-wechat4u') {
+  if (sysConfig.puppetName === 'wechaty-puppet-wechat' || sysConfig.puppetName == 'wechaty-puppet-wechat4u' || sysConfig.puppetName == 'wechaty-puppet-xp' || sysConfig.puppetName == 'wechaty-puppet-engine') {
     delete ops.puppetOptions.token
   }
 
