@@ -8,8 +8,8 @@
     "npm": ">=7"
   },
   "scripts": {
-    "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
-    "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
+    "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/bot.ts",
+    "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/bot.ts",
     "start:store": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/plugins/store-messages-locally.ts",
     "start:meet": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/plugins/store-messages-locally.ts",
     "sys-init": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/init.ts",
@@ -58,7 +58,7 @@
     "uuid": "^9.0.0",
     "wechaty": "^1.20.2",
     "wechaty-plugin-contrib": "^1.0.18",
-    "wechaty-puppet-engine": "^1.0.4",
+    "wechaty-puppet-engine": "^1.0.20",
     "wechaty-puppet-padlocal": "^1.11.13",
     "wechaty-puppet-service": "^1.19.8",
     "wechaty-puppet-wechat4u": "^1.13.15",
