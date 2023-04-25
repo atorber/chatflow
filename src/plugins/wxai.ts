@@ -236,7 +236,12 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
                   text: resMsg.answer,
                 }
               }
-
+              break
+            case 'multimsg':
+              answer = {
+                messageType: types.Message.Text,
+                text:JSON.parse(resMsg.answer).multimsg[0],
+              }
               break
             default:
               log.info(JSON.stringify({ msg: '没有命中关键字', nickName, query, roomid, topic }))
