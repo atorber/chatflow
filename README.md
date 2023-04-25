@@ -1,4 +1,4 @@
-# Wechat-Openai-QA-Bot
+# wechat-qa-bot
 
 [访问项目语雀文档了解更多信息](https://www.yuque.com/atorber/oegota)
 
