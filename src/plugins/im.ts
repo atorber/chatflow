@@ -1,5 +1,15 @@
 /* eslint-disable sort-keys */
 
+import {
+  log,
+  Room,
+  Wechaty,
+} from 'wechaty'
+import * as io from 'socket.io-client'
+import {
+  formatSentMessage,
+} from '../util/tool.js'
+
 // IM相关配置
 const configData = {
   chatInfoEn: {
@@ -103,4 +113,59 @@ function sendMsg (rs: any) {
   //   addChatMsg(msg)
 }
 
-export { configData, addChatMsg, sendMsg }
+function imclient (bot:Wechaty, vika:any, configData:any) {
+  let socket: any = {}
+  try {
+    socket = io.connect('http://localhost:3001')
+    configData.socket = socket
+    socket.on('connect', () => {
+      // 客户端上线
+      socket.emit('CLIENT_ON', {
+        clientChatEn: configData.clientChatEn,
+        serverChatId: configData.serverChatEn.serverChatId,
+      })
+
+      // 服务端链接
+      socket.on('SERVER_CONNECTED', (data: { serverChatEn: { serverChatId: string; serverChatName: string; avatarUrl: string } }) => {
+        // 1)获取客服消息
+        configData.serverChatEn = data.serverChatEn
+
+        // 2)添加消息
+        addChatMsg({
+          content: '客服 ' + configData.serverChatEn.serverChatName + ' 为你服务',
+          contentType: 'text',
+          role: 'sys',
+        }, () => { })
+      })
+
+      // 接受服务端信息
+      socket.on('SERVER_SEND_MSG', async (data: any) => {
+        log.info(data)
+        // if (data.msg && data.msg.role === 'server') {
+        //   data.msg.role = 'client'
+        //   sendMsg(data)
+        // }
+        try {
+          const roomId = data.msg.clientChatId.split(' ')[1]
+          const contactId = data.msg.clientChatId.split(' ')[0]
+          const room:Room|undefined = await bot.Room.find({ id: roomId })
+          const contact = await bot.Contact.find({ id: contactId })
+          if (room) {
+            await room.say(data.msg.content, ...[ contact ])
+            vika.addRecord(await formatSentMessage(bot.currentUser, data.msg.content, undefined, room))
+          }
+
+          // configData.msg.avatarUrl = data.serverChatEn.avatarUrl;
+        } catch (e) {
+          log.error('发送消息失败：', JSON.stringify(e))
+        }
+
+      })
+    })
+  } catch (err) {
+    log.error('连接失败：', err)
+  }
+  return socket
+}
+
+export { configData, addChatMsg, sendMsg, imclient }

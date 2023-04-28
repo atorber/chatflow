@@ -1,7 +1,6 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 import 'dotenv/config.js'
 import fs from 'fs'
-
 import {
   Contact,
   Message,
@@ -14,13 +13,12 @@ import {
 } from 'wechaty'
 
 import qrcodeTerminal from 'qrcode-terminal'
-
 import { FileBox } from 'file-box'
 import {
   VikaBot,
   configData,
-  addChatMsg,
   sendMsg,
+  imclient,
   wxai,
   ChatDevice,
   propertyMessage,
@@ -28,13 +26,11 @@ import {
 
 } from './plugins/index.js'
 import { configs, config } from './config.js'
-import * as io from 'socket.io-client'
 import {
   waitForMs as wait,
   formatSentMessage,
 } from './util/tool.js'
 import schedule from 'node-schedule'
-
 import { db } from './db/tables.js'
 
 log.info('db:', db)
@@ -549,19 +545,30 @@ async function roomJoin (room: { topic: () => any; id: any; say: (arg0: string, 
   // }
 }
 
+async function onError (err:any) {
+  log.error('bot.onError:', JSON.stringify(err))
+  try {
+    job.cancel()
+  } catch (e) {
+    log.error('销毁定时任务失败：', JSON.stringify(e))
+  }
+}
+
 async function main (vika:any) {
-  const isReady = await vika.checkInit('主程序载入系统配置成功，等待插件初始化...')
-  if (!isReady) {
+  // 初始化获取配置信息
+  const initReady = await vika.checkInit('主程序载入系统配置成功，等待插件初始化...')
+  if (!initReady) {
     return
   }
 
   // 获取系统配置信息
   sysConfig = await vika.getConfig()
   config.botConfig.bot = sysConfig
+  const configReady = checkConfig(configs)
 
-  bot = getBot(sysConfig)
-
-  if (checkConfig(configs)) {
+  // 配置齐全，启动机器人
+  if (configReady) {
+    bot = getBot(sysConfig)
     bot.on('scan', onScan)
 
     if (sysConfig.puppetName === 'wechaty-puppet-xp') {
@@ -574,75 +581,19 @@ async function main (vika:any) {
     bot.on('logout', onLogout)
     bot.on('message', onMessage)
     bot.on('room-join', roomJoin)
-    bot.on('error', (err) => {
-      log.error('bot.onError:', JSON.stringify(err))
-      try {
-        job.cancel()
-      } catch (e) {
-        log.error('销毁定时任务失败：', JSON.stringify(e))
-      }
-    })
+    bot.on('error', onError)
 
     bot.start()
       .then(() => log.info('Starter Bot Started.'))
       .catch((e: any) => log.error('bot运行异常：', JSON.stringify(e)))
-  }
 
-  if (sysConfig.imOpen) {
-    try {
-      socket = io.connect('http://localhost:3001')
-      configData.socket = socket
-      socket.on('connect', () => {
-        // 客户端上线
-        socket.emit('CLIENT_ON', {
-          clientChatEn: configData.clientChatEn,
-          serverChatId: configData.serverChatEn.serverChatId,
-        })
-
-        // 服务端链接
-        socket.on('SERVER_CONNECTED', (data: { serverChatEn: { serverChatId: string; serverChatName: string; avatarUrl: string } }) => {
-          // 1)获取客服消息
-          configData.serverChatEn = data.serverChatEn
-
-          // 2)添加消息
-          addChatMsg({
-            content: '客服 ' + configData.serverChatEn.serverChatName + ' 为你服务',
-            contentType: 'text',
-            role: 'sys',
-          }, () => { })
-        })
-
-        // 接受服务端信息
-        socket.on('SERVER_SEND_MSG', async (data: any) => {
-          log.info(data)
-          // if (data.msg && data.msg.role === 'server') {
-          //   data.msg.role = 'client'
-          //   sendMsg(data)
-          // }
-          try {
-            const roomId = data.msg.clientChatId.split(' ')[1]
-            const contactId = data.msg.clientChatId.split(' ')[0]
-            const room = await bot.Room.find({ id: roomId })
-            const contact = await bot.Contact.find({ id: contactId })
-            if (room) {
-              await room.say(data.msg.content, ...[ contact ])
-              vika.addRecord(await formatSentMessage(bot.currentUser, data.msg.content, undefined, room))
-            }
-
-            // configData.msg.avatarUrl = data.serverChatEn.avatarUrl;
-          } catch (e) {
-            log.error('发送消息失败：', JSON.stringify(e))
-          }
-
-        })
-      })
-    } catch (err) {
-      log.error('连接失败：', err)
+    if (sysConfig.imOpen) {
+      socket = imclient(bot, vika, configData)
     }
-
   }
 }
 
+// 检查维格表配置并启动
 if (vikaConfig.spaceName && vikaConfig.token) {
   vika = new VikaBot(vikaConfig)
   void main(vika)
