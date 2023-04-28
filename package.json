@@ -1,6 +1,6 @@
 {
   "name": "openai-qa-bot",
-  "version": "1.9.14",
+  "version": "1.10.0",
   "description": "openai-qa-bot",
   "type": "module",
   "engines": {
@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/bot.ts",
+    "start:index": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
     "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/bot.ts",
     "start:store": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/plugins/store-messages-locally.ts",
     "start:meet": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/plugins/store-messages-locally.ts",
@@ -45,6 +46,7 @@
     "install": "^0.13.0",
     "moment": "^2.29.1",
     "mqtt": "^4.3.7",
+    "nedb-promises": "^6.2.1",
     "njwt": "^1.2.0",
     "node-schedule": "^2.1.0",
     "node-xlsx": "^0.21.0",

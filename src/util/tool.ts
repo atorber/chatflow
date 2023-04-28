@@ -8,7 +8,7 @@ import type {
   // WechatyBuilder,
 } from 'wechaty'
 
-async function storeSentMessage (userSelf: Contact, text: string, talker?: Contact, room?: Room) {
+async function formatSentMessage (userSelf: Contact, text: string, talker: Contact|undefined, room: Room|undefined) {
   // console.debug('发送的消息：', text)
   const curTime = new Date().getTime()
   const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
@@ -31,7 +31,7 @@ const waitForMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms)
 
 export {
   waitForMs,
-  storeSentMessage,
+  formatSentMessage,
 }
 
 export default waitForMs

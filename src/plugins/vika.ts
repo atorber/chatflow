@@ -10,17 +10,24 @@ import moment from 'moment'
 
 // import schedule from 'node-schedule'
 
+import fs from 'fs'
+import console from 'console'
+
 import {
+  Contact,
   log,
+  Message,
+  Room,
+  ScanStatus,
+  types,
 } from 'wechaty'
+import { FileBox } from 'file-box'
 
 import type { Sheets, Field } from './lib/vikaModel/Model.js'
 import { sheets } from './lib/vikaModel/index.js'
+import { waitForMs as wait } from '../util/tool.js'
 
 // import { sheets } from './lib/dataModel.js'
-
-// 定义一个延时方法
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 type VikaBotConfigTypes = {
   spaceName: string,
@@ -144,6 +151,7 @@ class VikaBot {
   }
 
   async createRecord (datasheetId: string, records: ICreateRecordsReqParams) {
+    log.info('createRecord:', records)
     const datasheet = await this.vika.datasheet(datasheetId)
 
     try {
@@ -195,9 +203,18 @@ class VikaBot {
         file: files,
       },
     }
-
+    // log.info('addChatRecord:', JSON.stringify(record))
     this.msgStore.push(record)
     log.info('最新消息池长度：', this.msgStore.length)
+  }
+
+  addRecord (record:any) {
+    log.info('addRecord:', JSON.stringify(record))
+    if (record.fields) {
+      this.msgStore.push(record)
+      log.info('最新消息池长度：', this.msgStore.length)
+    }
+
   }
 
   async addScanRecord (uploadedAttachments: string, text: string) {
@@ -224,7 +241,7 @@ class VikaBot {
       },
     ]
 
-    // console.debug(records)
+    log.info('addScanRecord:', records)
     const datasheet = this.vika.datasheet(this.messageSheet)
     datasheet.records.create(records).then((response) => {
       if (response.success) {
@@ -254,7 +271,7 @@ class VikaBot {
         file: files,
       },
     }
-
+    log.info('addHeartbeatRecord:', JSON.stringify(record))
     this.msgStore.push(record)
   }
 
@@ -265,10 +282,6 @@ class VikaBot {
       if (resp.success) {
         const uploadedAttachments = resp.data
         console.debug('上传成功', uploadedAttachments)
-        // await vika.datasheet('dstWUHwzTHd2YQaXEE').records.create([{
-        //   'title': '标题 A',
-        //   'photos': [uploadedAttachments]
-        // }])
         return uploadedAttachments
       }
     } catch (error: any) {
@@ -390,9 +403,318 @@ class VikaBot {
       }
     }
 
-    // console.debug(sysConfig)
+    log.info('sysConfig:', JSON.stringify(sysConfig))
 
     return sysConfig
+
+  }
+
+  async onMessage (message:Message) {
+    try {
+
+      let uploadedAttachments = ''
+      const msgType = types.Message[message.type()]
+      let file:any = ''
+      let filePath = ''
+      let text = ''
+
+      let urlLink
+      let miniProgram
+
+      switch (message.type()) {
+        // 文本消息
+        case types.Message.Text:
+          text = message.text()
+          break
+
+          // 图片消息
+
+        case types.Message.Image:
+
+          try {
+            // await wait(2500)
+            // const img = await message.toImage()
+            // file = await img.thumbnail()
+            file = await message.toFileBox()
+
+          } catch (e) {
+            console.error('Image解析失败：', e)
+            file = ''
+          }
+
+          break
+
+        // 链接卡片消息
+        case types.Message.Url:
+          urlLink = await message.toUrlLink()
+          text = JSON.stringify(JSON.parse(JSON.stringify(urlLink)).payload)
+          // file = await message.toFileBox();
+          break
+
+        // 小程序卡片消息
+        case types.Message.MiniProgram:
+
+          miniProgram = await message.toMiniProgram()
+
+          text = JSON.stringify(JSON.parse(JSON.stringify(miniProgram)).payload)
+
+          // console.debug(miniProgram)
+          /*
+          miniProgram: 小程序卡片数据
+          {
+            appid: "wx363a...",
+            description: "贝壳找房 - 真房源",
+            title: "美国白宫，10室8厅9卫，99999刀/月",
+            iconUrl: "http://mmbiz.qpic.cn/mmbiz_png/.../640?wx_fmt=png&wxfrom=200",
+            pagePath: "pages/home/home.html...",
+            shareId: "0_wx363afd5a1384b770_..._1615104758_0",
+            thumbKey: "84db921169862291...",
+            thumbUrl: "3051020100044a304802010002046296f57502033d14...",
+            username: "gh_8a51...@app"
+          }
+         */
+          break
+
+        // 语音消息
+        case types.Message.Audio:
+
+          try {
+            file = await message.toFileBox()
+
+          } catch (e) {
+            console.error('Audio解析失败：', e)
+            file = ''
+          }
+
+          break
+
+        // 视频消息
+        case types.Message.Video:
+
+          try {
+            file = await message.toFileBox()
+
+          } catch (e) {
+            console.error('Video解析失败：', e)
+            file = ''
+          }
+          break
+
+        // 动图表情消息
+        case types.Message.Emoticon:
+
+          try {
+            file = await message.toFileBox()
+
+          } catch (e) {
+            console.error('Emoticon解析失败：', e)
+            file = ''
+          }
+
+          break
+
+        // 文件消息
+        case types.Message.Attachment:
+
+          try {
+            file = await message.toFileBox()
+
+          } catch (e) {
+            console.error('Attachment解析失败：', e)
+            file = ''
+          }
+
+          break
+        // 文件消息
+        case types.Message.Location:
+
+          // const location = await message.toLocation()
+          // text = JSON.stringify(JSON.parse(JSON.stringify(location)).payload)
+          break
+        case types.Message.Unknown:
+          // const location = await message.toLocation()
+          // text = JSON.stringify(JSON.parse(JSON.stringify(location)).payload)
+          break
+        // 其他消息
+        default:
+          break
+      }
+
+      if (file) {
+        filePath = './' + file.name
+        try {
+          const writeStream = fs.createWriteStream(filePath)
+          await file.pipe(writeStream)
+          await wait(500)
+          const readerStream = fs.createReadStream(filePath)
+          uploadedAttachments = await this.upload(readerStream)
+          fs.unlink(filePath, (err) => {
+            console.debug('上传vika完成删除文件：', filePath, err)
+          })
+        } catch {
+          console.debug('上传失败：', filePath)
+          fs.unlink(filePath, (err) => {
+            console.debug('上传vika失败删除文件', filePath, err)
+          })
+        }
+
+      }
+
+      if (message.type() !== types.Message.Unknown) {
+        await this.addChatRecord(message, uploadedAttachments, msgType, text)
+      }
+
+    } catch (e) {
+      console.log('vika 写入失败：', e)
+    }
+  }
+
+  async onScan (qrcode:string, status:ScanStatus) {
+    console.debug(qrcode, status)
+
+    if (status ===  ScanStatus.Waiting || status === ScanStatus.Timeout) {
+      const qrcodeImageUrl = [
+        'https://wechaty.js.org/qrcode/',
+        encodeURIComponent(qrcode),
+      ].join('')
+      log.info('qrcodeImageUrl: %s', qrcodeImageUrl)
+
+      try {
+        let uploadedAttachments = ''
+        let file:any = ''
+        let filePath = ''
+        const text = qrcodeImageUrl
+
+        try {
+          file = FileBox.fromUrl(
+            qrcodeImageUrl,
+            'logo.jpg',
+          )
+          file.toFile('/tmp/file-box-logo.jpg')
+
+          // await wait(1000)
+          // console.debug('file=======================',file)
+        } catch (e) {
+          console.error('Image解析失败：', e)
+        }
+
+        if (file) {
+          filePath = './' + file.name
+          try {
+            const writeStream = fs.createWriteStream(filePath)
+            await file.pipe(writeStream)
+            await wait(200)
+            const readerStream = fs.createReadStream(filePath)
+            uploadedAttachments = await this.upload(readerStream)
+            await this.addScanRecord(uploadedAttachments, text)
+            fs.unlink(filePath, (err) => {
+              console.debug('上传vika完成删除文件：', filePath, err)
+            })
+          } catch {
+            console.debug('上传失败：', filePath)
+            fs.unlink(filePath, (err) => {
+              console.debug('上传vika失败删除文件', filePath, err)
+            })
+          }
+
+        }
+
+      } catch (e) {
+        console.log('vika 写入失败：', e)
+      }
+
+    }
+  }
+
+  async updateContacts (contacts:Contact[]) {
+    log.info('当前微信最新联系人数量：', contacts.length)
+    const recordsAll: any = []
+    const recordExisting = await this.getAllRecords(this.contactSheet)
+    log.info('云端好友数量：', recordExisting.length)
+    const wxids: string[] = []
+    if (recordExisting.length) {
+      recordExisting.forEach((record: { fields: any, id: any }) => {
+        wxids.push(record.fields.id)
+      })
+    }
+    for (let i = 0; i < contacts.length; i++) {
+      const item = contacts[i]
+      if (item && item.friend() && !wxids.includes(item.id)) {
+        let avatar = ''
+        try {
+          avatar = String(await item.avatar())
+        } catch (err) {
+
+        }
+        const fields = {
+          alias: String(await item.alias() || ''),
+          avatar,
+          friend: item.friend(),
+          gender: String(item.gender() || ''),
+          id: item.id,
+          name: item.name(),
+          phone: String(await item.phone()),
+          type: String(item.type()),
+        }
+        const record = {
+          fields,
+        }
+        recordsAll.push(record)
+      }
+    }
+
+    for (let i = 0; i < recordsAll.length; i = i + 10) {
+      const records = recordsAll.slice(i, i + 10)
+      await this.createRecord(this.contactSheet, records)
+      log.info('好友列表同步中...', i + 10)
+      void await wait(250)
+    }
+
+    log.info('同步好友列表完成，更新好友数量：', recordsAll.length)
+
+  }
+
+  async updateRooms (rooms: Room[]) {
+    log.info('当前最新微信群数量：', rooms.length)
+    const recordsAll: any = []
+    const recordExisting = await this.getAllRecords(this.roomListSheet)
+    log.info('云端群数量：', recordExisting.length)
+    const wxids: string[] = []
+    if (recordExisting.length) {
+      recordExisting.forEach((record: { fields: any, id: any }) => {
+        wxids.push(record.fields.id)
+      })
+    }
+    for (let i = 0; i < rooms.length; i++) {
+      const item = rooms[i]
+      if (item && !wxids.includes(item.id)) {
+        let avatar:any = 'null'
+        try {
+          avatar = String(await item.avatar())
+        } catch (err) {
+          log.error('获取群头像失败：', err)
+        }
+        const fields = {
+          avatar,
+          id: item.id,
+          ownerId: String(item.owner()?.id || ''),
+          topic: await item.topic() || '',
+        }
+        const record = {
+          fields,
+        }
+        recordsAll.push(record)
+      }
+    }
+
+    for (let i = 0; i < recordsAll.length; i = i + 10) {
+      const records = recordsAll.slice(i, i + 10)
+      await this.createRecord(this.roomListSheet, records)
+      log.info('群列表同步中...', i + 10)
+      void await wait(250)
+    }
+
+    log.info('同步群列表完成，更新群数量：', recordsAll.length)
 
   }
 
@@ -486,15 +808,15 @@ class VikaBot {
     const that = this
     setInterval(() => {
       // log.info('待处理消息池长度：', that.msgStore.length||0);
-      that.msgStore = that.msgStore.concat(global.sentMessage)
-      global.sentMessage = []
+      // that.msgStore = that.msgStore.concat(global.sentMessage)
+      // global.sentMessage = []
 
       if (that.msgStore.length && that.messageSheet) {
         const end = that.msgStore.length < 10 ? that.msgStore.length : 10
         const records = that.msgStore.splice(0, end)
         const messageSheet = that.messageSheet
         const datasheet = that.vika.datasheet(messageSheet)
-
+        // log.info('写入vika的消息：', JSON.stringify(records))
         try {
           datasheet.records.create(records).then((response) => {
             if (response.success) {

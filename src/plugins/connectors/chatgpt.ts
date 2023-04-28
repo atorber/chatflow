@@ -28,7 +28,7 @@ import path from 'path'
 
 import {
   waitForMs as wait,
-  storeSentMessage,
+  formatSentMessage,
 } from '../util/tool.js'
 
 import { ChatGPTAPI } from 'chatgpt'
@@ -91,12 +91,12 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
           answer = answer.text + '\n'
           // console.debug(answer)
           await room.say(answer, ...[ talker ])
-          storeSentMessage(bot.currentUser, answer, undefined, room)
+          formatSentMessage(bot.currentUser, answer, undefined, room)
 
         } else {
           answer = answer.text + '\n'
           await message.say(answer)
-          storeSentMessage(bot.currentUser, answer, message.talker(), undefined)
+          formatSentMessage(bot.currentUser, answer, message.talker(), undefined)
         }
 
         break
@@ -106,10 +106,10 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
 
         if (room) {
           await room.say(fileBox)
-          storeSentMessage(bot.currentUser, fileBox.toString(), undefined, room)
+          formatSentMessage(bot.currentUser, fileBox.toString(), undefined, room)
         } else {
           await message.say(fileBox)
-          storeSentMessage(bot.currentUser, fileBox.toString(), message.talker(), undefined)
+          formatSentMessage(bot.currentUser, fileBox.toString(), message.talker(), undefined)
         }
 
         break
@@ -127,11 +127,11 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
 
         if (room) {
           await room.say(miniProgram)
-          storeSentMessage(bot.currentUser, miniProgram.toString(), undefined, message.room())
+          formatSentMessage(bot.currentUser, miniProgram.toString(), undefined, message.room())
 
         } else {
           await message.say(miniProgram)
-          storeSentMessage(bot.currentUser, miniProgram.toString(), message.talker(), undefined)
+          formatSentMessage(bot.currentUser, miniProgram.toString(), message.talker(), undefined)
         }
 
         break

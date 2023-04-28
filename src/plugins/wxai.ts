@@ -28,7 +28,7 @@ import {
 
 import {
   // waitForMs as wait,
-  storeSentMessage,
+  formatSentMessage,
 } from '../util/tool.js'
 
 import { ChatGPTAPI } from 'chatgpt'
@@ -91,12 +91,12 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
           answer = answer.text + '\n'
           // console.debug(answer)
           await room.say(answer, ...[ talker ])
-          await storeSentMessage(bot.currentUser, answer, undefined, room)
+          await formatSentMessage(bot.currentUser, answer, undefined, room)
 
         } else {
           answer = answer.text + '\n'
           await message.say(answer)
-          await storeSentMessage(bot.currentUser, answer, message.talker(), undefined)
+          await formatSentMessage(bot.currentUser, answer, message.talker(), undefined)
         }
 
         break
@@ -106,10 +106,10 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
 
         if (room) {
           await room.say(fileBox)
-          await storeSentMessage(bot.currentUser, fileBox.toString(), undefined, room)
+          await formatSentMessage(bot.currentUser, fileBox.toString(), undefined, room)
         } else {
           await message.say(fileBox)
-          await storeSentMessage(bot.currentUser, fileBox.toString(), message.talker(), undefined)
+          await formatSentMessage(bot.currentUser, fileBox.toString(), message.talker(), undefined)
         }
 
         break
@@ -127,11 +127,11 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
 
         if (room) {
           await room.say(miniProgram)
-          await storeSentMessage(bot.currentUser, miniProgram.toString(), undefined, message.room())
+          await formatSentMessage(bot.currentUser, miniProgram.toString(), undefined, message.room())
 
         } else {
           await message.say(miniProgram)
-          await storeSentMessage(bot.currentUser, miniProgram.toString(), message.talker(), undefined)
+          await formatSentMessage(bot.currentUser, miniProgram.toString(), message.talker(), undefined)
         }
 
         break

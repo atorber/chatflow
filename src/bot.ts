@@ -26,7 +26,7 @@ import qrcodeTerminal from 'qrcode-terminal'
 import WechatyVikaPlugin from './plugins/index.js'
 
 import { FileBox } from 'file-box'
-import configs from './config.js'
+import { configs } from './config.js'
 // import type { Puppet } from 'wechaty-puppet'
 import * as io from 'socket.io-client'
 import { VikaBot } from './plugins/vika.js'
@@ -37,16 +37,10 @@ import { ChatDevice } from './plugins/chat-device.js'
 import { propertyMessage, eventMessage } from './plugins/msg-format.js'
 import {
   waitForMs as wait,
-  storeSentMessage,
+  formatSentMessage,
 } from './util/tool.js'
 
 import schedule from 'node-schedule'
-
-globalThis.sentMessage = []
-
-function add2sentMessage (record:any) {
-  globalThis.sentMessage.push(record)
-}
 
 let bot: Wechaty
 let sysConfig: any
@@ -54,19 +48,19 @@ let chatdev: any = {}
 let job: any
 let jobs: any
 
-if (!configs.VIKA_TOKEN && process.env['VIKA_TOKEN']) {
-  configs.VIKA_TOKEN = process.env['VIKA_TOKEN']
+if (!configs['VIKA_TOKEN'] && process.env['VIKA_TOKEN']) {
+  configs['VIKA_TOKEN'] = process.env['VIKA_TOKEN']
 }
 
-if (!configs.VIKA_SPACENAME && process.env['VIKA_SPACENAME']) {
-  configs.VIKA_SPACENAME = process.env['VIKA_SPACENAME']
+if (!configs['VIKA_SPACENAME'] && process.env['VIKA_SPACENAME']) {
+  configs['VIKA_SPACENAME'] = process.env['VIKA_SPACENAME']
 }
 
 // console.debug(configs)
 
 const vikaConfig = {
-  spaceName: configs.VIKA_SPACENAME,
-  token: configs.VIKA_TOKEN,
+  spaceName: configs['VIKA_SPACENAME'],
+  token: configs['VIKA_TOKEN'],
 }
 // console.debug(vikaConfig)
 const vika = new VikaBot(vikaConfig)
@@ -224,7 +218,7 @@ async function main () {
     log.info('StarterBot is ready')
     const curDate = new Date().toLocaleString()
     if (sysConfig.mqttPassword && (sysConfig.mqtt_SUB_ONOFF || sysConfig.mqtt_PUB_ONOFF)) {
-      chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, (this as Wechaty).id)
+      chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, bot.currentUser.id)
       if (sysConfig.mqtt_SUB_ONOFF) {
         chatdev.init(bot)
       }
@@ -319,7 +313,7 @@ async function main () {
         text = keyWord + '，配置更新成功~'
       }
       await message.say(text)
-      add2sentMessage(storeSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room()))
+      vika.addRecord(await formatSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room()))
     }
 
     if (isSelfMsg && text === '#更新提醒') {
@@ -331,7 +325,7 @@ async function main () {
         text = keyWord + '，提醒任务更新失败~'
       }
       await message.say(text)
-      add2sentMessage(storeSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room()))
+      vika.addRecord(await formatSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room()))
     }
 
     try {
@@ -607,7 +601,7 @@ async function main () {
                     const contact = await bot.Contact.find({ id: task.contacts[0] })
                     if (contact) {
                       await contact.say(task.msg)
-                      add2sentMessage(storeSentMessage(bot.currentUser, task.msg, contact, undefined))
+                      vika.addRecord(await formatSentMessage(bot.currentUser, task.msg, contact, undefined))
                       await wait(200)
                     }
                   }
@@ -622,7 +616,7 @@ async function main () {
                     if (room) {
                       await room.say(task.msg)
 
-                      add2sentMessage(storeSentMessage(bot.currentUser, task.msg, undefined, room))
+                      vika.addRecord(await formatSentMessage(bot.currentUser, task.msg, undefined, room))
 
                       await wait(200)
                     }
@@ -689,7 +683,7 @@ async function main () {
 
   } else {
     log.error('\n======================================\n\n', `错误提示：\n缺少${missingConfiguration.join()}配置参数,请检查config.js文件\n\n======================================`)
-    log.info(configs)
+    log.info('configs:', configs)
   }
 
   let socket: any
@@ -730,7 +724,7 @@ async function main () {
           const contact = await bot.Contact.find({ id: contactId })
           if (room) {
             await room.say(data.msg.content, ...[ contact ])
-            add2sentMessage(storeSentMessage(bot.currentUser, data.msg.content, undefined, room))
+            vika.addRecord(await formatSentMessage(bot.currentUser, data.msg.content, undefined, room))
           }
 
           // configData.msg.avatarUrl = data.serverChatEn.avatarUrl;
