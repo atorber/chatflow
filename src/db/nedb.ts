@@ -1,38 +1,34 @@
-/*
-https://github.com/leochen-g/wechaty-web-panel
-Leo_chen
-*/
-
 import Datastore from 'nedb'
-function DB(database) {
-  let options = {
-    filename: database,
+function DB (this: any, database: any) {
+  const options = {
     autoload: true,
+    filename: database,
   }
   this.db = new Datastore(options)
 }
-DB.prototype.limit = function (offset, limit) {
+
+DB.prototype.limit = function (offset: number, limit: number) {
   this.offset = offset || 0
   this.limit = limit || 15
   return this
 }
-DB.prototype.sort = function (orderby) {
+DB.prototype.sort = function (orderby: any) {
   this.orderby = orderby
   return this
 }
-DB.prototype.find = function (query, select) {
+DB.prototype.find = function (query: any, select: any) {
   return new Promise((resolve, reject) => {
-    let stmt = this.db.find(query || {})
+    const stmt = this.db.find(query || {})
     if (this.orderby !== undefined) {
       stmt.sort(this.orderby)
     }
     if (this.offset !== undefined) {
       stmt.skip(this.offset).limit(this.limit)
     }
-    if (select != undefined) {
+    if (select !== undefined) {
       stmt.projection(select || {})
     }
-    stmt.exec((err, docs) => {
+    stmt.exec((err: any, docs: unknown) => {
       if (err) {
         return reject(err)
       }
@@ -40,16 +36,16 @@ DB.prototype.find = function (query, select) {
     })
   })
 }
-DB.prototype.findOne = function (query, select) {
+DB.prototype.findOne = function (query: any, select: any) {
   return new Promise((resolve, reject) => {
-    let stmt = this.db.findOne(query || {})
+    const stmt = this.db.findOne(query || {})
     if (this.sort !== undefined) {
       stmt.sort(this.sort)
     }
-    if (select != undefined) {
+    if (select !== undefined) {
       stmt.projection(select || {})
     }
-    stmt.exec((err, doc) => {
+    stmt.exec((err: any, doc: unknown) => {
       if (err) {
         return reject(err)
       }
@@ -57,9 +53,9 @@ DB.prototype.findOne = function (query, select) {
     })
   })
 }
-DB.prototype.insert = function (values) {
+DB.prototype.insert = function (values: any) {
   return new Promise((resolve, reject) => {
-    this.db.insert(values, (err, newDoc) => {
+    this.db.insert(values, (err: any, newDoc: unknown) => {
       if (err) {
         return reject(err)
       }
@@ -67,9 +63,9 @@ DB.prototype.insert = function (values) {
     })
   })
 }
-DB.prototype.update = function (query, values, options) {
+DB.prototype.update = function (query: any, values: any, options: any) {
   return new Promise((resolve, reject) => {
-    this.db.update(query || {}, values || {}, options || {}, (err, numAffected) => {
+    this.db.update(query || {}, values || {}, options || {}, (err: any, numAffected: unknown) => {
       if (err) {
         return reject(err)
       }
@@ -77,9 +73,9 @@ DB.prototype.update = function (query, values, options) {
     })
   })
 }
-DB.prototype.remove = function (query, options) {
+DB.prototype.remove = function (query: any, options: any) {
   return new Promise((resolve, reject) => {
-    this.db.remove(query || {}, options || {}, (err, numAffected) => {
+    this.db.remove(query || {}, options || {}, (err: any, numAffected: unknown) => {
       if (err) {
         return reject(err)
       }
@@ -87,6 +83,6 @@ DB.prototype.remove = function (query, options) {
     })
   })
 }
-export default (database) => {
-  return new DB(database)
+export default (database: any) => {
+  return DB(database)
 }

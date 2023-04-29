@@ -20,6 +20,7 @@ import {
   Room,
   ScanStatus,
   types,
+  Wechaty,
 } from 'wechaty'
 import { FileBox } from 'file-box'
 
@@ -570,151 +571,152 @@ class VikaBot {
   }
 
   async onScan (qrcode:string, status:ScanStatus) {
-    console.debug(qrcode, status)
-
-    if (status ===  ScanStatus.Waiting || status === ScanStatus.Timeout) {
+    if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
+      const qrcodeUrl = encodeURIComponent(qrcode)
       const qrcodeImageUrl = [
         'https://wechaty.js.org/qrcode/',
-        encodeURIComponent(qrcode),
+        qrcodeUrl,
       ].join('')
-      log.info('qrcodeImageUrl: %s', qrcodeImageUrl)
+      // log.info('StarterBot', 'vika onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
 
+      let uploadedAttachments = ''
+      let file: FileBox
+      let filePath = 'qrcode.png'
       try {
-        let uploadedAttachments = ''
-        let file:any = ''
-        let filePath = ''
-        const text = qrcodeImageUrl
-
+        file = FileBox.fromQRCode(qrcode)
+        filePath = './' + file.name
         try {
-          file = FileBox.fromUrl(
-            qrcodeImageUrl,
-            'logo.jpg',
-          )
-          file.toFile('/tmp/file-box-logo.jpg')
-
-          // await wait(1000)
-          // console.debug('file=======================',file)
-        } catch (e) {
-          console.error('Image解析失败：', e)
-        }
-
-        if (file) {
-          filePath = './' + file.name
-          try {
-            const writeStream = fs.createWriteStream(filePath)
-            await file.pipe(writeStream)
-            await wait(200)
-            const readerStream = fs.createReadStream(filePath)
-            uploadedAttachments = await this.upload(readerStream)
-            await this.addScanRecord(uploadedAttachments, text)
-            fs.unlink(filePath, (err) => {
-              console.debug('上传vika完成删除文件：', filePath, err)
-            })
-          } catch {
-            console.debug('上传失败：', filePath)
-            fs.unlink(filePath, (err) => {
-              console.debug('上传vika失败删除文件', filePath, err)
-            })
-          }
-
+          const writeStream = fs.createWriteStream(filePath)
+          await file.pipe(writeStream)
+          await wait(200)
+          const readerStream = fs.createReadStream(filePath)
+          uploadedAttachments = await this.upload(readerStream)
+          const text = qrcodeImageUrl
+          await this.addScanRecord(uploadedAttachments, text)
+          fs.unlink(filePath, (err) => {
+            log.info('二维码上传vika完成删除文件：', filePath, err)
+          })
+        } catch {
+          log.info('二维码上传失败：', filePath)
+          fs.unlink(filePath, (err) => {
+            log.info('二维码上传vika失败删除文件', filePath, err)
+          })
         }
 
       } catch (e) {
-        console.log('vika 写入失败：', e)
+        log.info('二维码vika 写入失败：', e)
       }
 
+    } else {
+      log.info('StarterBot', 'vika onScan: %s(%s)', ScanStatus[status], status)
     }
   }
 
-  async updateContacts (contacts:Contact[]) {
-    log.info('当前微信最新联系人数量：', contacts.length)
-    const recordsAll: any = []
-    const recordExisting = await this.getAllRecords(this.contactSheet)
-    log.info('云端好友数量：', recordExisting.length)
-    const wxids: string[] = []
-    if (recordExisting.length) {
-      recordExisting.forEach((record: { fields: any, id: any }) => {
-        wxids.push(record.fields.id)
-      })
-    }
-    for (let i = 0; i < contacts.length; i++) {
-      const item = contacts[i]
-      if (item && item.friend() && !wxids.includes(item.id)) {
-        let avatar = ''
-        try {
-          avatar = String(await item.avatar())
-        } catch (err) {
-
-        }
-        const fields = {
-          alias: String(await item.alias() || ''),
-          avatar,
-          friend: item.friend(),
-          gender: String(item.gender() || ''),
-          id: item.id,
-          name: item.name(),
-          phone: String(await item.phone()),
-          type: String(item.type()),
-        }
-        const record = {
-          fields,
-        }
-        recordsAll.push(record)
+  async updateContacts (bot:Wechaty) {
+    let updateCount = 0
+    try {
+      const contacts: Contact[] = await bot.Contact.findAll()
+      log.info('当前微信最新联系人数量：', contacts.length)
+      const recordsAll: any = []
+      const recordExisting = await this.getAllRecords(this.contactSheet)
+      log.info('云端好友数量：', recordExisting.length)
+      const wxids: string[] = []
+      if (recordExisting.length) {
+        recordExisting.forEach((record: { fields: any, id: any }) => {
+          wxids.push(record.fields.id)
+        })
       }
-    }
+      for (let i = 0; i < contacts.length; i++) {
+        const item = contacts[i]
+        if (item && item.friend() && !wxids.includes(item.id)) {
+          let avatar = ''
+          try {
+            avatar = String(await item.avatar())
+          } catch (err) {
 
-    for (let i = 0; i < recordsAll.length; i = i + 10) {
-      const records = recordsAll.slice(i, i + 10)
-      await this.createRecord(this.contactSheet, records)
-      log.info('好友列表同步中...', i + 10)
-      void await wait(250)
-    }
+          }
+          const fields = {
+            alias: String(await item.alias() || ''),
+            avatar,
+            friend: item.friend(),
+            gender: String(item.gender() || ''),
+            id: item.id,
+            name: item.name(),
+            phone: String(await item.phone()),
+            type: String(item.type()),
+          }
+          const record = {
+            fields,
+          }
+          recordsAll.push(record)
+        }
+      }
 
-    log.info('同步好友列表完成，更新好友数量：', recordsAll.length)
+      for (let i = 0; i < recordsAll.length; i = i + 10) {
+        const records = recordsAll.slice(i, i + 10)
+        await this.createRecord(this.contactSheet, records)
+        log.info('好友列表同步中...', i + 10)
+        updateCount = updateCount + 10
+        void await wait(250)
+      }
+
+      log.info('同步好友列表完成，更新好友数量：', updateCount)
+    } catch (err) {
+      log.error('更新好友列表失败：', err)
+
+    }
 
   }
 
-  async updateRooms (rooms: Room[]) {
-    log.info('当前最新微信群数量：', rooms.length)
-    const recordsAll: any = []
-    const recordExisting = await this.getAllRecords(this.roomListSheet)
-    log.info('云端群数量：', recordExisting.length)
-    const wxids: string[] = []
-    if (recordExisting.length) {
-      recordExisting.forEach((record: { fields: any, id: any }) => {
-        wxids.push(record.fields.id)
-      })
-    }
-    for (let i = 0; i < rooms.length; i++) {
-      const item = rooms[i]
-      if (item && !wxids.includes(item.id)) {
-        let avatar:any = 'null'
-        try {
-          avatar = String(await item.avatar())
-        } catch (err) {
-          log.error('获取群头像失败：', err)
-        }
-        const fields = {
-          avatar,
-          id: item.id,
-          ownerId: String(item.owner()?.id || ''),
-          topic: await item.topic() || '',
-        }
-        const record = {
-          fields,
-        }
-        recordsAll.push(record)
+  async updateRooms (bot: Wechaty) {
+    let updateCount = 0
+    try {
+      const rooms: Room[] = await bot.Room.findAll()
+      log.info('当前最新微信群数量：', rooms.length)
+      const recordsAll: any = []
+      const recordExisting = await this.getAllRecords(this.roomListSheet)
+      log.info('云端群数量：', recordExisting.length)
+      const wxids: string[] = []
+      if (recordExisting.length) {
+        recordExisting.forEach((record: { fields: any, id: any }) => {
+          wxids.push(record.fields.id)
+        })
       }
-    }
+      for (let i = 0; i < rooms.length; i++) {
+        const item = rooms[i]
+        if (item && !wxids.includes(item.id)) {
+          let avatar:any = 'null'
+          try {
+            avatar = String(await item.avatar())
+          } catch (err) {
+            log.error('获取群头像失败：', err)
+          }
+          const fields = {
+            avatar,
+            id: item.id,
+            ownerId: String(item.owner()?.id || ''),
+            topic: await item.topic() || '',
+          }
+          const record = {
+            fields,
+          }
+          recordsAll.push(record)
+        }
+      }
 
-    for (let i = 0; i < recordsAll.length; i = i + 10) {
-      const records = recordsAll.slice(i, i + 10)
-      await this.createRecord(this.roomListSheet, records)
-      log.info('群列表同步中...', i + 10)
-      void await wait(250)
-    }
+      for (let i = 0; i < recordsAll.length; i = i + 10) {
+        const records = recordsAll.slice(i, i + 10)
+        await this.createRecord(this.roomListSheet, records)
+        log.info('群列表同步中...', i + 10)
+        updateCount = updateCount + 10
+        void await wait(250)
+      }
 
-    log.info('同步群列表完成，更新群数量：', recordsAll.length)
+      log.info('同步群列表完成，更新群数量：', updateCount)
+    } catch (err) {
+      log.error('更新群列表失败：', err)
+
+    }
 
   }
 

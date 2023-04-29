@@ -1,12 +1,12 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 import 'dotenv/config.js'
-import fs from 'fs'
+// import fs from 'fs'
 import {
   Contact,
   Message,
   ScanStatus,
   log,
-  Room,
+  // Room,
   types,
   Wechaty,
   WechatyBuilder,
@@ -14,10 +14,14 @@ import {
 
 import qrcodeTerminal from 'qrcode-terminal'
 import { FileBox } from 'file-box'
+import { createWriteStream } from 'fs'
+import XLSX from 'xlsx'
+import csv from 'fast-csv'
 import {
   VikaBot,
   configData,
   sendMsg,
+  sendNotice,
   imclient,
   wxai,
   ChatDevice,
@@ -55,16 +59,6 @@ const vikaConfig = {
   token: configs['VIKA_TOKEN'],
 }
 // log.info(vikaConfig)
-
-// function add2sentMessage (record: any) {
-//   db.message.insert(record, (err: any, newDoc: any) => {
-//     if (err) {
-//       log.error('db.message.insert', err)
-//     } else {
-//       log.info('db.message.insert', newDoc)
-//     }
-//   })
-// }
 
 function getBot (sysConfig: any) {
   const ops:any = {
@@ -111,6 +105,82 @@ function checkConfig (configs: { [key: string]: any }) {
     return false
   }
   return true
+}
+
+async function relpy (bot:Wechaty, vika:any, replyText:string, message:Message) {
+  await message.say(replyText)
+  vika.addRecord(await formatSentMessage(bot.currentUser, replyText, message.room() ? undefined : message.talker(), message.room()))
+}
+
+async function exportContactsAndRoomsToCSV () {
+  // 获取所有联系人和群聊
+  const contacts = await bot.Contact.findAll()
+  const rooms = await bot.Room.findAll()
+
+  // 准备CSV数据
+  const csvData = []
+  contacts.forEach((contact:Contact) => {
+    if (contact.friend()) {
+      csvData.push({  ID: contact.id, Name:Buffer.from(contact.name(), 'utf-8').toString() || '未知', Type:'Contact' })
+    }
+  })
+
+  for (const room of rooms) {
+    csvData.push({  ID:room.id, Name:Buffer.from(await room.topic(), 'utf-8').toString() || '未知', Type:'Room' })
+  }
+
+  log.info('通讯录原始数据：', csvData)
+
+  const fileName = './db/contacts_and_rooms.csv'
+  const writeStream = createWriteStream(fileName)
+  const csvStream = csv.format({ headers: true })
+  csvStream.pipe(writeStream).on('end', () => {
+    log.info('CSV file written successfully')
+  })
+
+  csvData.forEach((item) => {
+    csvStream.write(item)
+  })
+
+  csvStream.end()
+
+  // 返回FileBox对象
+  return FileBox.fromFile(fileName)
+}
+
+async function exportContactsAndRoomsToXLSX () {
+  // 获取所有联系人和群聊
+  const contacts = await bot.Contact.findAll()
+  const rooms = await bot.Room.findAll()
+
+  // 准备联系人和群聊数据
+  const contactsData = [ [ 'Name', 'ID' ] ]
+  const roomsData = [ [ 'Name', 'ID' ] ]
+  contacts.forEach((contact) => {
+    if (contact.friend()) {
+      contactsData.push([ contact.name(), contact.id ])
+    }
+  })
+
+  for (const room of rooms) {
+    roomsData.push([ await room.topic(), room.id ])
+  }
+
+  // 创建一个新的工作簿
+  const workbook = XLSX.utils.book_new()
+
+  // 将数据添加到工作簿的不同sheet中
+  const contactsSheet = XLSX.utils.aoa_to_sheet(contactsData)
+  const roomsSheet = XLSX.utils.aoa_to_sheet(roomsData)
+  XLSX.utils.book_append_sheet(workbook, contactsSheet, 'Contacts')
+  XLSX.utils.book_append_sheet(workbook, roomsSheet, 'Rooms')
+
+  // 将工作簿写入文件
+  const fileName = './db/contacts_and_rooms.xlsx'
+  XLSX.writeFile(workbook, fileName)
+
+  // 返回FileBox对象
+  return FileBox.fromFile(fileName)
 }
 
 async function updateJobs (bot: Wechaty, vika:any) {
@@ -237,8 +307,10 @@ async function updateJobs (bot: Wechaty, vika:any) {
 }
 
 async function onScan (qrcode: string, status: ScanStatus) {
+  // 上传二维码到维格表，可通过扫码维格表中二维码登录
   await vika.onScan(qrcode, status)
-  log.info(qrcode)
+
+  // 控制台显示二维码
   if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
     const qrcodeUrl = encodeURIComponent(qrcode)
     const qrcodeImageUrl = [
@@ -246,36 +318,7 @@ async function onScan (qrcode: string, status: ScanStatus) {
       qrcodeUrl,
     ].join('')
     log.info('StarterBot', 'onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
-
     qrcodeTerminal.generate(qrcode, { small: true })  // show qrcode on console
-
-    let uploadedAttachments = ''
-    let file: FileBox
-    let filePath = 'qrcode.png'
-    try {
-      file = FileBox.fromQRCode(qrcode)
-      filePath = './' + file.name
-      try {
-        const writeStream = fs.createWriteStream(filePath)
-        await file.pipe(writeStream)
-        await wait(200)
-        const readerStream = fs.createReadStream(filePath)
-        uploadedAttachments = await vika.upload(readerStream)
-        const text = qrcodeImageUrl
-        await vika.addScanRecord(uploadedAttachments, text)
-        fs.unlink(filePath, (err) => {
-          log.info('上传vika完成删除文件：', filePath, err)
-        })
-      } catch {
-        log.info('上传失败：', filePath)
-        fs.unlink(filePath, (err) => {
-          log.info('上传vika失败删除文件', filePath, err)
-        })
-      }
-
-    } catch (e) {
-      log.info('vika 写入失败：', e)
-    }
 
   } else {
     log.info('StarterBot', 'onScan: %s(%s)', ScanStatus[status], status)
@@ -283,9 +326,10 @@ async function onScan (qrcode: string, status: ScanStatus) {
 }
 
 async function onLogin (user: Contact) {
-  log.info('StarterBot', '%s login', user.payload)
-  const curDate = new Date().toLocaleString()
-  log.info(JSON.stringify(user.payload))
+  log.info('StarterBot', '%s login', user)
+  log.info('当前登录的账号信息：', JSON.stringify(user))
+
+  // 启动MQTT通道
   if (sysConfig.mqttPassword && (sysConfig.mqtt_SUB_ONOFF || sysConfig.mqtt_PUB_ONOFF)) {
     chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, user.id)
     if (sysConfig.mqtt_SUB_ONOFF) {
@@ -293,43 +337,17 @@ async function onLogin (user: Contact) {
     }
   }
 
-  try {
-    await user.say('上线：' + curDate)
-    // 更新云端好友和群
-    const rooms: Room[] = await bot.Room.findAll()
-    await vika.updateRooms(rooms)
-    const contacts: Contact[] = await bot.Contact.findAll()
-    await vika.updateContacts(contacts)
-  } catch (err) {
-    log.error('更新好友和群列表失败：', err)
-  }
+  const curDate = new Date().toLocaleString()
+  await user.say('上线：' + curDate)
 
-  // // 启动心跳，5min发一次
-  // const rule = new schedule.RecurrenceRule();
-  // rule.second = 0;
-  // rule.minute = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-  // job = schedule.scheduleJob(rule, async function () {
-  //   try {
-  //     // const contact = await bot.Contact.find({ id: 'tyutluyc' })
-  //     log.info(curDate);
-  //     // await user.say('心跳：' + curDate)
-  //     await vika.addHeartbeatRecord('心跳：' + curDate)
-  //     if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
-  //       chatdev.pub_property(propertyMessage('lastActive', curDate))
-  //     }
-  //   } catch (err) {
-  //     log.error(err)
-  //   }
-  // });
-  // log.info('下一次心跳调用时间：', job.nextInvocation())
+  // 更新云端好友和群
+  await vika.updateRooms(bot)
+  await vika.updateContacts(bot)
 
-  // 启动心跳，5min发一次
+  // 如果开启了MQTT推送，心跳同步到MQTT,每30s一次
   setInterval(() => {
     try {
-      // const contact = await bot.Contact.find({ id: 'tyutluyc' })
       log.info(curDate)
-      // await user.say('心跳：' + curDate)
-      // vika.addHeartbeatRecord('心跳：' + curDate)
       if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
         chatdev.pub_property(propertyMessage('lastActive', curDate))
       }
@@ -338,58 +356,35 @@ async function onLogin (user: Contact) {
     }
   }, 300000)
 
+  // 启动用户定时通知提醒任务
   await updateJobs(bot, vika)
   log.info('================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n')
 }
 
 async function onReady () {
-  log.info('StarterBot is ready')
-  const curDate = new Date().toLocaleString()
+  const user: Contact = bot.currentUser
+  log.info('StarterBot', '%s ready', user)
+  log.info('当前登录的账号信息：', JSON.stringify(user))
+
+  // 启动MQTT通道
   if (sysConfig.mqttPassword && (sysConfig.mqtt_SUB_ONOFF || sysConfig.mqtt_PUB_ONOFF)) {
-    chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, bot.currentUser.id)
+    chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, user.id)
     if (sysConfig.mqtt_SUB_ONOFF) {
       chatdev.init(bot)
     }
   }
 
-  try {
-    // await user.say('上线：' + curDate)
-    // 更新云端好友和群
-    const rooms: Room[] = await bot.Room.findAll()
-    await vika.updateRooms(rooms)
-    const contacts: Contact[] = await bot.Contact.findAll()
-    await vika.updateContacts(contacts)
+  const curDate = new Date().toLocaleString()
+  await user.say('上线：' + curDate)
 
-  } catch (err) {
-    log.error('更新群和好友列表失败：', err)
-  }
+  // 更新云端好友和群
+  await vika.updateRooms(bot)
+  await vika.updateContacts(bot)
 
-  // // 启动心跳，5min发一次
-  // const rule = new schedule.RecurrenceRule();
-  // rule.second = 0;
-  // rule.minute = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-  // job = schedule.scheduleJob(rule, async function () {
-  //   try {
-  //     // const contact = await bot.Contact.find({ id: 'tyutluyc' })
-  //     log.info(curDate);
-  //     // await user.say('心跳：' + curDate)
-  //     await vika.addHeartbeatRecord('心跳：' + curDate)
-  //     if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
-  //       chatdev.pub_property(propertyMessage('lastActive', curDate))
-  //     }
-  //   } catch (err) {
-  //     log.error('心跳发送失败：', err)
-  //   }
-  // });
-  // log.info('下一次心跳调用时间：', job.nextInvocation())
-
-  // 启动心跳，5min发一次
+  // 如果开启了MQTT推送，心跳同步到MQTT,每30s一次
   setInterval(() => {
     try {
-      // const contact = await bot.Contact.find({ id: 'tyutluyc' })
       log.info(curDate)
-      // await user.say('心跳：' + curDate)
-      // vika.addHeartbeatRecord('心跳：' + curDate)
       if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
         chatdev.pub_property(propertyMessage('lastActive', curDate))
       }
@@ -398,6 +393,7 @@ async function onReady () {
     }
   }, 300000)
 
+  // 启动用户定时通知提醒任务
   await updateJobs(bot, vika)
   log.info('================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n')
 }
@@ -411,6 +407,8 @@ async function onMessage (message: Message) {
   // log.info('onMessage', JSON.stringify(message))
   await vika.onMessage(message)
   const curDate = new Date().toLocaleString()
+
+  // MQTT上报
   if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
     /*
     将消息通过mqtt通道上报到云端
@@ -421,45 +419,99 @@ async function onMessage (message: Message) {
   }
 
   const talker = message.talker()
-  let text = message.text()
+  const text = message.text()
   const room = message.room()
   const roomId = room?.id
   const topic = await room?.topic()
   const keyWord = bot.currentUser.name()
   const isSelfMsg = message.self()
-
   log.info('keyWord is:', keyWord)
-
-  if (isSelfMsg && (text === '#指令列表' || text === '#帮助')) {
-    text = '操作指令说明：\n\n#更新配置 更新全部配置\n#更新提醒 更新定时提醒任务\n'
-    await message.say(text)
+  if (isSelfMsg) {
+    await sendNotice(bot, message)
   }
 
-  if (isSelfMsg && (text === '#更新配置' || text === '#更新')) {
+  let replyText: string = ''
+  if (isSelfMsg && (text === '#指令列表' || text === '#帮助')) {
+    replyText = `操作指令说明：\n
+    #更新配置 更新全部配置
+    #更新提醒 更新定时提醒任务
+    #更新通讯录 更新维格表通信录
+    #下载csv通讯录 下载通讯录csv表
+    #下载xlsx通讯录 下载通讯录csv表
+    #下载通知模板 下载通知模板`
+
+    await relpy(bot, vika, replyText, message)
+  }
+
+  if (isSelfMsg && text === '#更新配置') {
     log.info('热更新系统配置~')
-    let text = ''
     try {
       sysConfig = await vika.getConfig()
       // message.say('配置更新成功：' + JSON.stringify(newConfig))
       log.info('newConfig', sysConfig)
-      text = keyWord + '，配置更新成功~'
+      replyText = '配置更新成功~'
     } catch (e) {
-      text = keyWord + '，配置更新成功~'
+      replyText = '配置更新成功~'
     }
-    await message.say(text)
-    vika.addRecord(await formatSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room()))
+
+    await relpy(bot, vika, replyText, message)
   }
 
   if (isSelfMsg && text === '#更新提醒') {
     log.info('热更新通知任务~')
     try {
       await updateJobs(bot, vika)
-      text = keyWord + '，提醒任务更新成功~'
+      replyText = '提醒任务更新成功~'
     } catch (e) {
-      text = keyWord + '，提醒任务更新失败~'
+      replyText = '提醒任务更新失败~'
     }
-    await message.say(text)
-    vika.addRecord(await formatSentMessage(bot.currentUser, text, message.room() ? undefined : message.talker(), message.room()))
+
+    await relpy(bot, vika, replyText, message)
+  }
+
+  if (isSelfMsg && text === '#更新通讯录') {
+    log.info('热更新通讯录到维格表~')
+    try {
+      await vika.updateContacts(bot)
+      await vika.updateRooms(bot)
+      replyText = '通讯录更新成功~'
+    } catch (e) {
+      replyText = '通讯录更新失败~'
+    }
+
+    await relpy(bot, vika, replyText, message)
+  }
+
+  if (isSelfMsg && text === '#下载csv通讯录') {
+    log.info('下载通讯录到csv表~')
+    try {
+      const fileBox = await exportContactsAndRoomsToCSV()
+      await message.say(fileBox)
+    } catch (err) {
+      log.error('exportContactsAndRoomsToCSV', err)
+    }
+
+  }
+
+  if (isSelfMsg && text === '#下载xlsx通讯录') {
+    log.info('下载通讯录到xlsx表~')
+    try {
+      const fileBox = await exportContactsAndRoomsToXLSX()
+      await message.say(fileBox)
+    } catch (err) {
+      log.error('exportContactsAndRoomsToXLSX', err)
+    }
+  }
+
+  if (isSelfMsg && text === '#下载通知模板') {
+    log.info('下载通知模板~')
+    try {
+      const fileBox = FileBox.fromFile('./src/templates/群发通知模板.xlsx')
+      await message.say(fileBox)
+    } catch (err) {
+      log.error('下载模板失败', err)
+      await message.say('下载失败，请重试~')
+    }
   }
 
   try {
@@ -532,17 +584,14 @@ async function onMessage (message: Message) {
   }
 }
 
-async function roomJoin (room: { topic: () => any; id: any; say: (arg0: string, arg1: any) => any }, inviteeList: any[], inviter: any) {
+async function roomJoin (room: { topic: () => any; id: any; say: (arg0: string, arg1: any) => any }, inviteeList: Contact[], inviter: any) {
   const nameList = inviteeList.map(c => c.name()).join(',')
   log.info(`Room ${await room.topic()} got new member ${nameList}, invited by ${inviter}`)
 
-  // if (sysConfig.welcomeList.includes(room.id)) {
-  //   const newer = inviteeList[0]
-  //   if (newer) {
-  //     const newers: [Contact] = [newer]
-  //     await room.say(`欢迎加入${await room.topic()},请阅读群公告~`, ...newers)
-  //   }
-  // }
+  // 进群欢迎语，仅对开启了进群欢迎语白名单的群有效
+  if (sysConfig.welcomeList.includes(room.id) && inviteeList.length) {
+    await room.say(`欢迎加入${await room.topic()},请阅读群公告~`, inviteeList)
+  }
 }
 
 async function onError (err:any) {

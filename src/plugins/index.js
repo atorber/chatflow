@@ -5,9 +5,11 @@ import { VikaBot } from './vika.js'
 import {
   configData,
   addChatMsg,
+  imclient,
   sendMsg,
 } from './im.js'
 import { wxai } from './wxai.js'
+import { sendNotice } from './group-notice.js'
 
 import { ChatDevice } from './chat-device.js'
 import { propertyMessage, eventMessage } from './msg-format.js'
@@ -30,8 +32,10 @@ export {
   WechatyVikaPlugin,
   VikaBot,
   configData,
+  imclient,
   addChatMsg,
   sendMsg,
+  sendNotice,
   wxai,
   ChatDevice,
   propertyMessage,

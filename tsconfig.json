@@ -16,6 +16,9 @@
     "examples/**/*.ts",
     "scripts/**/*.ts",
     "src/**/*.ts",
-    "tests/**/*.spec.ts", "src/wx-open-ai.js", "src/plugins/msg-format.js",
+    "tests/**/*.spec.ts",
+    "src/wx-open-ai.js",
+    "src/plugins/msg-format.js",
+    "src/db/*.js"
   ]
 }
