@@ -119,6 +119,7 @@ package-lock.json
 openai-qa-bot.memory-card.json
 quick.bat
 src/config.js
+src/config.ts
 tester.js
 db/*.db
 db/*.csv
