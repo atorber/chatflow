@@ -496,7 +496,7 @@ async function onMessage (message: Message) {
     }
   }
 
-  if (isSelfMsg && text === '#下载xlsx通讯录') {
+  if (isSelfMsg && text === '#下载通讯录') {
     log.info('下载通讯录到xlsx表~')
     try {
       const fileBox = await exportContactsAndRoomsToXLSX()

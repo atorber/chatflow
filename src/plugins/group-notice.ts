@@ -19,7 +19,7 @@ async function sendTextMessage (contact: Contact, text: string): Promise<boolean
 
 async function sendNotice (bot:Wechaty, msg: Message) {
   log.info('sendNotice:', msg.talker().id)
-
+  await delay(3000)
   // 检测群消息
   if (msg.type() === types.Message.Attachment) {
     const file = await msg.toFileBox()
