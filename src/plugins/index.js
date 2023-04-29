@@ -13,6 +13,7 @@ import { sendNotice } from './group-notice.js'
 
 import { ChatDevice } from './chat-device.js'
 import { propertyMessage, eventMessage } from './msg-format.js'
+import { getFormattedRideInfo } from './riding.js'
 
 function WechatyVikaPlugin (vika) {
   return function (bot) {
@@ -34,6 +35,7 @@ export {
   configData,
   imclient,
   addChatMsg,
+  getFormattedRideInfo,
   sendMsg,
   sendNotice,
   wxai,

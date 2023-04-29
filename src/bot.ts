@@ -90,6 +90,10 @@ function getBot (sysConfig: any) {
   return bot
 }
 
+function getNow () {
+  return new Date().toLocaleString()
+}
+
 function checkConfig (configs: { [key: string]: any }) {
   const missingConfiguration = []
 
@@ -436,8 +440,7 @@ async function onMessage (message: Message) {
     #更新配置 更新全部配置
     #更新提醒 更新定时提醒任务
     #更新通讯录 更新维格表通信录
-    #下载csv通讯录 下载通讯录csv表
-    #下载xlsx通讯录 下载通讯录csv表
+    #下载通讯录 下载通讯录xlsx表
     #下载通知模板 下载通知模板`
 
     await relpy(bot, vika, replyText, message)
@@ -454,7 +457,7 @@ async function onMessage (message: Message) {
       replyText = '配置更新成功~'
     }
 
-    await relpy(bot, vika, replyText, message)
+    await relpy(bot, vika, getNow() + replyText, message)
   }
 
   if (isSelfMsg && text === '#更新提醒') {
@@ -466,7 +469,7 @@ async function onMessage (message: Message) {
       replyText = '提醒任务更新失败~'
     }
 
-    await relpy(bot, vika, replyText, message)
+    await relpy(bot, vika, getNow() + replyText, message)
   }
 
   if (isSelfMsg && text === '#更新通讯录') {
@@ -479,7 +482,7 @@ async function onMessage (message: Message) {
       replyText = '通讯录更新失败~'
     }
 
-    await relpy(bot, vika, replyText, message)
+    await relpy(bot, vika, getNow() + replyText, message)
   }
 
   if (isSelfMsg && text === '#下载csv通讯录') {
@@ -489,8 +492,8 @@ async function onMessage (message: Message) {
       await message.say(fileBox)
     } catch (err) {
       log.error('exportContactsAndRoomsToCSV', err)
+      await message.say('下载失败~')
     }
-
   }
 
   if (isSelfMsg && text === '#下载xlsx通讯录') {

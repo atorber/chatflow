@@ -9,8 +9,8 @@ type Configs = {
 
 // 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
 const configs:Configs = {
-  VIKA_TOKEN: 'uskxRh69OpBZ3UK959A8093', // VIKA维格表token
-  VIKA_SPACENAME: 'bot-dev', // VIKA维格表空间名称，修改为自己的空间名称
+  VIKA_TOKEN: '替换成你的维格表token', // VIKA维格表token
+  VIKA_SPACENAME: '替换成你的维格表空间', // VIKA维格表空间名称，修改为自己的空间名称
 }
 
 const botConfig:configTypes.BotConfig = {

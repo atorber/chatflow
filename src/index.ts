@@ -22,6 +22,7 @@ import {
   configData,
   sendMsg,
   sendNotice,
+  getFormattedRideInfo,
   imclient,
   wxai,
   ChatDevice,
@@ -520,6 +521,22 @@ async function onMessage (message: Message) {
   try {
 
     if (room && roomId && !isSelfMsg) {
+
+      // 检测顺风车信息并格式化
+      // const KEYWORD_LIST = [ '人找车', '车找人' ]
+      // try {
+      //   // 判断消息中是否包含关键字
+      //   if (KEYWORD_LIST.some(keyword => message.text().includes(keyword))) {
+      //     const replyMsg = await getFormattedRideInfo(message)
+      //     if (replyMsg) {
+      //       const replyText = replyMsg.choices[0].message.content.replace(/\r/g, '')
+      //       log.info('回复内容：', replyText)
+      //       await room.say(replyText)
+      //     }
+      //   }
+      // } catch (err) {
+
+      // }
 
       // 智能问答开启时执行
       if (sysConfig.WX_OPENAI_ONOFF && ((text.indexOf(keyWord) !== -1 && sysConfig.AT_AHEAD) || !sysConfig.AT_AHEAD)) {
