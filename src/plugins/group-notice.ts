@@ -75,8 +75,8 @@ async function sendNotice (bot:Wechaty, msg: Message) {
 
           const updatedFile = FileBox.fromBuffer(updatedBuffer, 'res_' + file.name)
           log.info('updatedFile:', updatedFile)
-          await msg.say(updatedFile)
           await msg.say(`通知发送完成，成功${successCount}人，失败${failureCount}人，详情查看excel文件`)
+          await msg.say(updatedFile)
           // if (failedWxids.length > 0) {
           //   await msg.say(`发送失败的wxid：\n${failedWxids.join('\n')}`)
           // }
