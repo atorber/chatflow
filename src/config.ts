@@ -4,7 +4,7 @@
     "baseConfig": {
         "VIKA_TOKEN": "修改为自己的维格表token",
         "VIKA_SPACENAME": "修改为自己的维格表空间名称",
-        "puppetName": "wechaty-puppet-wechat4u",
+        "puppetName": "wechaty-puppet-wechat4u", //可选值：wechaty-puppet-wechat4u、wechaty-puppet-wechat、wechaty-puppet-xp、wechaty-puppet-engine、wechaty-puppet-padlocal、wechaty-puppet-service
         "puppetToken": ""
     },
 }
