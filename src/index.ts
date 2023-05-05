@@ -680,21 +680,21 @@ async function onMessage (message: Message) {
           config.baseConfig.VIKA_TOKEN = vikaConfig.token
           config.baseConfig.VIKA_SPACENAME = vikaConfig.spaceName
           await updateConfig(config)
-          await message.say('配置成功，初始化中，请稍后...')
+          await talker.say('配置成功，初始化中，请稍后...')
           log.info('初始化系统~')
           try {
             await vika.init()
-            await message.say('初始化系统表完成~')
+            await talker.say('初始化系统表完成~')
           } catch (err) {
             log.error('初始化系统失败', err)
-            await message.say('初始化系统失败，请发送 #初始化 重试~')
+            await talker.say('初始化系统失败，请发送 #初始化 重试~')
           }
         } else {
-          await message.say(Prompts.a)
+          await talker.say(Prompts.a)
         }
       } catch (err) {
         log.error('解析失败：', err)
-        await message.say(Prompts.a)
+        await talker.say(Prompts.a)
       }
     }
   }
