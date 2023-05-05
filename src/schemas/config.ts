@@ -14,6 +14,8 @@ type AppConfig = {
     bot: {
       puppet: string;
       token: string;
+      VIKA_TOKEN?: string
+      VIKA_SPACENAME?: string
       [key : string]:any
     };
     command: {
@@ -43,6 +45,38 @@ type AppConfig = {
     roomConfig: RoomConfig;
   };
 
+  type AIType = 'WxOpenai' | string;
+
+interface SysConfig {
+  adminRoomTopic:string
+  welcomeList: string[];
+  roomWhiteList: string[];
+  contactWhiteList: string[];
+  puppetName: string;
+  puppetToken: string;
+  aiType: AIType;
+  WX_TOKEN: string;
+  EncodingAESKey: string;
+  ChatGPTAEmail: string;
+  ChatGPTAPassword: string;
+  ChatGPTASessionToken: string;
+  mqttUsername: string;
+  mqttPassword: string;
+  mqttEndpoint: string;
+  mqttPort: string;
+  WEB_HOOK: string;
+  WX_OPENAI_ONOFF: boolean;
+  AT_AHEAD: boolean;
+  DIFF_REPLY_ONOFF: boolean;
+  roomWhiteListOpen: boolean;
+  contactWhiteListOpen: boolean;
+  VIKA_ONOFF: boolean;
+  WEB_HOOK_ONOFF: boolean;
+  mqtt_PUB_ONOFF: boolean;
+  mqtt_SUB_ONOFF: boolean;
+  imOpen: boolean;
+}
+
 export {
   type AppConfig,
   type AppConfigs,
@@ -50,4 +84,5 @@ export {
   type ContactConfig,
   type RoomConfig,
   type Config,
+  type SysConfig,
 }

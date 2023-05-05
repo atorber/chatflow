@@ -2,11 +2,11 @@
 /* eslint-disable no-console */
 
 import { VikaBot } from './plugins/vika.js'
-import configs from './config.js'
+import { baseConfig } from './config.js'
 
 const vikaConfig = {
-  spaceName: process.env['VIKA_SPACENAME'] || configs.VIKA_SPACENAME,
-  token: process.env['VIKA_TOKEN'] || configs.VIKA_TOKEN,
+  spaceName:  baseConfig['VIKA_SPACENAME'] || process.env['VIKA_SPACENAME'],
+  token: baseConfig['VIKA_TOKEN'] || process.env['VIKA_TOKEN'],
 }
 const vika = new VikaBot(vikaConfig)
 

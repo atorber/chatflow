@@ -29,7 +29,7 @@ import {
   eventMessage,
 
 } from './plugins/index.js'
-import { configs, config } from './config.js'
+import { baseConfig, config } from './config.js'
 import {
   waitForMs as wait,
   formatSentMessage,
@@ -49,14 +49,14 @@ let jobs: any
 let vika: any
 let socket: any = {}
 
-configs['VIKA_TOKEN'] = configs['VIKA_TOKEN'] || process.env['VIKA_TOKEN'] || ''
-configs['VIKA_SPACENAME'] = configs['VIKA_SPACENAME'] || process.env['VIKA_SPACENAME'] || ''
+baseConfig['VIKA_TOKEN'] = baseConfig['VIKA_TOKEN'] || process.env['VIKA_TOKEN'] || ''
+baseConfig['VIKA_SPACENAME'] = baseConfig['VIKA_SPACENAME'] || process.env['VIKA_SPACENAME'] || ''
 
-// log.info(configs)
+// log.info(baseConfig)
 
 const vikaConfig = {
-  spaceName: configs['VIKA_SPACENAME'],
-  token: configs['VIKA_TOKEN'],
+  spaceName: baseConfig['VIKA_SPACENAME'],
+  token: baseConfig['VIKA_TOKEN'],
 }
 // log.info(vikaConfig)
 
@@ -104,9 +104,9 @@ function checkConfig (configs: { [key: string]: any }) {
   }
 
   if (missingConfiguration.length > 0) {
-    log.error('\n======================================\n\n', `错误提示：\n缺少${missingConfiguration.join()}配置参数,请检查config.js文件\n\n======================================`)
+    log.error('\n======================================\n\n', `错误提示：\n缺少${missingConfiguration.join()}配置参数,请检查环境变量表\n\n======================================`)
     log.info('bot configs:', configs)
-    return false
+    return true
   }
   return true
 }
@@ -607,6 +607,7 @@ async function onError (err:any) {
 }
 
 async function main (vika:any) {
+  await vika.init()
   // 初始化获取配置信息
   const initReady = await vika.checkInit('主程序载入系统配置成功，等待插件初始化...')
   if (!initReady) {
@@ -616,7 +617,7 @@ async function main (vika:any) {
   // 获取系统配置信息
   sysConfig = await vika.getConfig()
   config.botConfig.bot = sysConfig
-  const configReady = checkConfig(configs)
+  const configReady = checkConfig(sysConfig)
 
   // 配置齐全，启动机器人
   if (configReady) {
@@ -650,5 +651,6 @@ if (vikaConfig.spaceName && vikaConfig.token) {
   vika = new VikaBot(vikaConfig)
   void main(vika)
 } else {
-  log.error('vikaConfig配置错误，请检查config.ts文件')
+  log.error('\n================================================\n\nvikaConfig配置缺少token或spaceName，请检查config.json文件\n\n================================================\n')
+
 }

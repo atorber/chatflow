@@ -403,7 +403,7 @@ class VikaBot {
         sysConfig.contactWhiteList.push(contactWhiteListRecords[i].fields['好友ID'])
       }
     }
-
+    sysConfig.welcomeList = []
     log.info('sysConfig:', JSON.stringify(sysConfig))
 
     return sysConfig
@@ -946,8 +946,10 @@ class VikaBot {
       console.log('================================================\n\n初始化系统表完成,运行 npm start 启动系统\n\n================================================\n')
 
       // const tasks = await this.getTimedTask()
+      return true
     } else {
       console.error('指定空间不存在，请先创建空间，并在config.ts中配置VIKA_SPACENAME')
+      return false
     }
   }
 

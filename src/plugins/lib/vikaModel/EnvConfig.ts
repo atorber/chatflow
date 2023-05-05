@@ -12,13 +12,25 @@ const recordRes = {
     total: 13,
     records: [
       {
+        recordId: 'recm3YUoiY3lX',
+        fields: {
+          配置组: '基本配置',
+          配置组标识: 'base',
+          配置项: '管理群',
+          标识: 'adminRoomTopic',
+          '值（只修改此列）': '大师是群主',
+          说明: '管理群名称，需尽量保持名称复杂，避免重名群干扰',
+        },
+      },
+      {
         recordId: 'recrEIHXFV14w',
         createdAt: 1671304478000,
         updatedAt: 1671308763000,
         fields: {
           配置项: 'WechatyPuppet',
           标识: 'puppetName',
-          配置组: '机器人',
+          配置组: 'Wechaty',
+          配置组标识: 'wechaty',
           说明: '可选值：\nwechaty-puppet-wechat4u\nwechaty-puppet-wechat\nwechaty-puppet-xp\nwechaty-puppet-padlocal\nwechaty-puppet-service',
           '值（只修改此列）': 'wechaty-puppet-wechat4u',
         },
@@ -30,7 +42,8 @@ const recordRes = {
         fields: {
           配置项: 'WechatyToken',
           标识: 'puppetToken',
-          配置组: '机器人',
+          配置组: 'Wechaty',
+          配置组标识: 'wechaty',
           说明: '使用wechaty-puppet-padlocal、wechaty-puppet-service时需配置此token',
         },
       },
@@ -41,7 +54,8 @@ const recordRes = {
         fields: {
           配置项: 'AI对话平台Type',
           标识: 'aiType',
-          配置组: '智能问答',
+          配置组: '自动问答',
+          配置组标识: 'auto-qa',
           说明: 'TODO-可选值：\nWxOpenai\nChatGPT',
           '值（只修改此列）': 'WxOpenai',
         },
@@ -53,7 +67,8 @@ const recordRes = {
         fields: {
           配置项: '微信对话开放平台Token',
           标识: 'WX_TOKEN',
-          配置组: '智能问答',
+          配置组: '微信开放对话平台',
+          配置组标识: 'wx-open-ai',
           说明: '微信对话开放平台中获取',
         },
       },
@@ -174,6 +189,14 @@ const vikaRes = {
       {
         id: 'fldswxMTbHJwr',
         name: '配置组',
+        type: 'SingleText',
+        property: {},
+        editable: true,
+        isPrimary: true,
+      },
+      {
+        id: 'fldswxMTbHJwr',
+        name: '配置组标识',
         type: 'SingleText',
         property: {},
         editable: true,

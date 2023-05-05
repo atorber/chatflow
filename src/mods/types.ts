@@ -5,6 +5,7 @@ import type {
   ContactConfig,
   RoomConfig,
   Config,
+  SysConfig,
 } from '../schemas/mod.js'
 
 export {
@@ -14,4 +15,5 @@ export {
   type ContactConfig,
   type RoomConfig,
   type Config,
+  type SysConfig,
 }
