@@ -10,12 +10,17 @@
 }
 */
 import fs from 'fs'
-let config:any = fs.readFileSync('src/config.json', 'utf8')
-config = JSON.parse(config)
+import type { types as configTypes } from './mods/mod.js'
+const config:configTypes.Config = JSON.parse(fs.readFileSync('src/config.json', 'utf8'))
 type Configs = {
   [key: string]: any;
 }
 // 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
-const baseConfig:Configs = config.baseConfig
+const baseConfig:Configs = {
+  VIKA_SPACENAME: config.botConfig.vika.spaceName,
+  VIKA_TOKEN: config.botConfig.vika.token,
+  puppetName: config.botConfig.wechaty.puppet,
+  puppetToken: config.botConfig.wechaty.token,
+}
 
 export { baseConfig, config }

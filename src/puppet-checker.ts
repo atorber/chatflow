@@ -6,6 +6,8 @@
 /* eslint-disable sort-keys */
 import 'dotenv/config.js'
 
+import type { types as configTypes } from './mods/mod.js'
+
 import {
   Contact,
   // Room,
@@ -19,23 +21,23 @@ import {
 import qrcodeTerminal from 'qrcode-terminal'
 import WechatyVikaPlugin from './plugins/index.js'
 
-import configs from './config.js'
+import { baseConfig } from './config.js'
 import { VikaBot } from './plugins/vika.js'
 
 let bot: any
-let sysConfig: any
+let sysConfig: configTypes.SysConfig
 
 if (process.env['VIKA_SPACENAME']) {
-  configs.VIKA_SPACENAME = process.env['VIKA_SPACENAME']
+  baseConfig['VIKA_SPACENAME'] = process.env['VIKA_SPACENAME']
 }
 
 if (process.env['VIKA_TOKEN']) {
-  configs.VIKA_TOKEN = process.env['VIKA_TOKEN']
+  baseConfig['VIKA_TOKEN'] = process.env['VIKA_TOKEN']
 }
 
 const vikaConfig = {
-  spaceName: configs.VIKA_SPACENAME,
-  token: configs.VIKA_TOKEN,
+  spaceName: baseConfig['VIKA_SPACENAME'],
+  token: baseConfig['VIKA_TOKEN'],
 }
 // console.debug(vikaConfig)
 const vika = new VikaBot(vikaConfig)
@@ -136,8 +138,8 @@ async function main () {
 
   const missingConfiguration = []
 
-  for (const key in configs) {
-    if (!configs[key] && ![ 'imOpen', 'DIFF_REPLY_ONOFF' ].includes(key)) {
+  for (const key in baseConfig) {
+    if (!baseConfig[key] && ![ 'imOpen', 'DIFF_REPLY_ONOFF' ].includes(key)) {
       missingConfiguration.push(key)
     }
   }
@@ -158,7 +160,7 @@ async function main () {
 
   } else {
     log.error('\n======================================\n\n', `错误提示：\n缺少${missingConfiguration.join()}配置参数,请检查config.js文件\n\n======================================`)
-    log.info(configs)
+    log.info('baseConfig:', baseConfig)
   }
 
 }

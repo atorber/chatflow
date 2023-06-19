@@ -41,21 +41,155 @@ npm install
 
 2.分别登陆[微信对话开放平台](https://openai.weixin.qq.com/)和[vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973)官网注册账号并获取token
 
-3.在电脑上登陆微信，微信版本必须为[WeChatSetup-v3.6.0.18.exe](https://github.com/tom-snow/wechat-windows-versions/releases/download/v3.6.0.18/WeChatSetup-3.6.0.18.exe)
-
-4.修改./config.js配置文件
+3.重命名src/config.json.example文件为config.json修改./config.js配置文件
 
 快速开始仅需要修改VIKA_TOKEN、VIKA_SPACENAME配置项,其他配置项暂时无需修改
 
-```javascript
-/* eslint-disable sort-keys */
-// 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
-const configs = {
-  VIKA_TOKEN: '替换成自己的维格表token', // VIKA维格表token
-  VIKA_SPACENAME: '替换成你的维格表空间名称', // VIKA维格表空间名称，修改为自己的空间名称
-}
+```json
+{
+	"botInfo": {
 
-export default configs
+	},
+	"functionOnStatus": {
+		"autoQa": {
+			"autoReply": true,
+			"atReply": false,
+			"customReply": false,
+			"roomWhitelist": true,
+			"contactWhitelist": false
+		},
+		"vika": {
+			"useVika": false,
+			"uploadMessageToVika": false,
+			"autoMaticCloud": false
+		},
+		"webHook": {
+			"webhookMessagePush": false
+		},
+		"mqtt": {
+			"mqttMessagePush": false,
+			"mqttControl": true
+		},
+		"im": {
+			"imChat": false
+		}
+	},
+	"botConfig": {
+		"base": {
+			"welcomeMessageForJoinRoom": "",
+			"welcomeMessageForAddFriend": ""
+		},
+		"wechaty": {
+			"puppet": "wechaty-puppet-wechat",
+			"token": ""
+		},
+		"vika": {
+			"spaceName": "bot-test",
+			"token": ""
+		},
+		"adminRoom": {
+			"adminRoomId": "管理员群ID",
+			"adminRoomTopic": "管理员群名称"
+		},
+		"autoQa": {
+			"type": "chatGpt"
+		},
+		"wxOpenAi": {
+			"token": "",
+			"encodingAesKey": ""
+		},
+		"chatGpt": {
+			"key": "你的openai api key",
+			"endpoint": "https://www.openai-proxy.com"
+		},
+		"mqtt": {
+			"username": "",
+			"password": "",
+			"endpoint": "",
+			"port": 1883
+		},
+		"webHook": {
+			"url": "",
+			"token": "",
+			"username": "",
+			"password": ""
+		},
+		"yuQue": {
+			"token": "",
+			"nameSpace": ""
+		}
+	},
+	"apps": {
+		"riding": {
+			"config": {},
+			"isOpen": true
+		}
+	},
+	"command": {
+		"bot": {
+			"reboot": "#重启机器人",
+			"selfInfo": "#机器人信息"
+		},
+		"contact": {
+			"findall": "#联系人列表"
+		},
+		"room": {
+			"findall": "#群列表"
+		}
+	},
+	"welcomeList": [],
+	"roomWhiteList": [],
+	"contactWhiteList": [],
+	"contactConfig": {
+		"tyutluyc": {
+			"app": "waiting",
+			"apps": {
+				"qa": {
+					"config": {},
+					"isOpen": true
+				},
+				"riding": {
+					"config": {},
+					"isOpen": true
+				}
+			}
+		},
+		"tyutluyc2": {
+			"app": "waiting",
+			"apps": {
+				"qa": {
+					"config": {},
+					"isOpen": true
+				},
+				"riding": {
+					"config": {},
+					"isOpen": true
+				}
+			}
+		}
+	},
+	"roomConfig": {
+		"21341182572@chatroom": {
+			"app": "waiting",
+			"apps": {
+				"qa": {
+					"config": {},
+					"isOpen": true
+				},
+				"riding": {
+					"config": {},
+					"isOpen": true
+				},
+				"welcomeMessage": {
+					"config": {
+						"welcomeMessageForJoinRoom": "欢迎加入，请阅读群公告~"
+					},
+					"isOpen": true
+				}
+			}
+		}
+	}
+}
 ```
 
 > 只有加入到roomWhiteList里的群才会开启只能问答机器人
@@ -107,7 +241,7 @@ npm start
 
 Windows操作系统下运行(支持使用wechaty-puppet-xp、wechaty-puppet-wechat、wechaty-puppet-padlocal)
 
-推荐使用 wechaty-puppet-xp
+推荐使用 wechaty-puppet-xp（在电脑上登陆微信，微信版本必须为[WeChatSetup-v3.6.0.18.exe](https://github.com/tom-snow/wechat-windows-versions/releases/download/v3.6.0.18/WeChatSetup-3.6.0.18.exe)）
 
 ```Shell
 set VIKA_TOKEN="替换成自己的维格表token"
@@ -214,3 +348,7 @@ atorber/wechat-openai-qa-bot:latest
 - [vue-im](https://github.com/polk6/vue-im)
 
   由@polk6开源的客服web项目，实现客服后台回复咨询消息
+
+  ## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=choogoo/chatflow&type=Date)](https://star-history.com/#choogoo/chatflow&Date)

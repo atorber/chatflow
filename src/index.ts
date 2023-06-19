@@ -22,7 +22,7 @@ import {
   configData,
   sendMsg,
   sendNotice,
-  getFormattedRideInfo,
+  // getFormattedRideInfo,
   imclient,
   wxai,
   ChatDevice,
@@ -31,7 +31,7 @@ import {
 
 } from './plugins/index.js'
 import type { types as configTypes } from './mods/mod.js'
-import { baseConfig, config } from './config.js'
+import { config } from './config.js'
 import {
   waitForMs as wait,
   formatSentMessage,
@@ -48,15 +48,23 @@ enum Prompts {
   b = '启动成功，请输入"维格表token+空间名称"，中间用加号分开，例如：\nuskxRhxxxxxxxx3UK959A8093+wechatbot'
 }
 
+enum KeyWords {
+  HelpText = '#帮助',
+  SetAdminText = '#设置为管理群',
+  UpdateConfig = '#更新配置',
+  UpdateNotice = '#更新提醒',
+  UpdateContactList = '#更新通讯录'
+  // ExportDoc = '#导出文档'
+}
+
 let bot: Wechaty
-let puppet = baseConfig['puppetName'] || process.env['WECHATY_PUPPET']
-let token = baseConfig['puppetToken'] || process.env['WECHATY_TOKEN']
-const vikaConfig = {
-  spaceName: baseConfig['VIKA_SPACENAME'] || process.env['VIKA_SPACENAME'],
-  token: baseConfig['VIKA_TOKEN'] || process.env['VIKA_TOKEN'],
+let puppet = config.botConfig.wechaty.puppet || process.env['WECHATY_PUPPET'] || ''
+let token = config.botConfig.wechaty.token || process.env['WECHATY_TOKEN']
+const vikaConfig:configTypes.VikaConfig = {
+  spaceName: config.botConfig.vika.spaceName || process.env['VIKA_SPACENAME'],
+  token: config.botConfig.vika.token || process.env['VIKA_TOKEN'],
 }
 // log.info(vikaConfig)
-let sysConfig: configTypes.SysConfig
 let chatdev: any = {}
 // let job: any
 let jobs: any
@@ -64,20 +72,33 @@ let vika: any
 let isVikaOk: boolean = false
 let socket: any = {}
 
-// log.info(baseConfig)
+function updateBaseConfig (config: configTypes.BotConfig) {
+  puppet = config.wechaty.puppet || puppet
+  token = config.wechaty.token || token
+}
 
-function updateBaseConfig (config: configTypes.SysConfig) {
-  puppet = config['puppetName'] || puppet
-  token = config['puppetToken'] || token
+function updateVikaConfig (textArr:any) {
+  vikaConfig.spaceName = textArr[1]
+  vikaConfig.token = textArr[0]
+}
+
+async function getCloudConfig () {
+  const newConfig = await vika.downConfigFromVika()
+  config.botConfig = newConfig.botConfig
+  config.functionOnStatus = newConfig.functionOnStatus
+  config.contactWhiteList = newConfig.contactWhiteList
+  config.roomWhiteList = newConfig.roomWhiteList
+  config.welcomeList = newConfig.welcomeList
 }
 
 function updateConfig (config:any) {
-  fs.writeFileSync('src/config.json', JSON.stringify(config))
+  fs.writeFileSync('src/config.json', JSON.stringify(config, null, '\t'))
 }
 
 async function createVika () {
   try {
     vika = new VikaBot(vikaConfig)
+    // 初始化系统表
     await vika.init()
 
     // 初始化获取配置信息
@@ -86,15 +107,13 @@ async function createVika () {
       return
     }
 
-    // 获取系统配置信息
-    sysConfig = await vika.getConfig()
-    log.info('config:', JSON.stringify(config))
     const configReady = checkConfig(config)
-    updateBaseConfig(config)
+    updateBaseConfig(config.botConfig)
     // 配置齐全，启动机器人
     if (configReady) {
       return vika
     }
+    return false
   } catch {
     return false
   }
@@ -134,13 +153,15 @@ function getNow () {
   return new Date().toLocaleString()
 }
 
-function checkConfig (config: { [key: string]: any }) {
+function checkConfig (config: configTypes.Config) {
   const missingConfiguration = []
 
-  for (const key in config) {
-    if (!config[key] && ![ 'imOpen', 'DIFF_REPLY_ONOFF' ].includes(key)) {
-      missingConfiguration.push(key)
-    }
+  if (!config.botConfig.wechaty.puppet) {
+    missingConfiguration.push('wechaty.puppet')
+  }
+
+  if (!config.botConfig.vika.token) {
+    missingConfiguration.push('vika.token')
   }
 
   if (missingConfiguration.length > 0) {
@@ -153,7 +174,9 @@ function checkConfig (config: { [key: string]: any }) {
 
 async function relpy (bot: Wechaty, vika: any, replyText: string, message: Message) {
   await message.say(replyText)
-  vika.addRecord(await formatSentMessage(bot.currentUser, replyText, message.room() ? undefined : message.talker(), message.room()))
+  if (isVikaOk) {
+    vika.addRecord(await formatSentMessage(bot.currentUser, replyText, message.room() ? undefined : message.talker(), message.room()))
+  }
 }
 
 async function exportContactsAndRoomsToCSV () {
@@ -372,14 +395,16 @@ async function onScan (qrcode: string, status: ScanStatus) {
 async function onLogin (user: Contact) {
   log.info('StarterBot', '%s login', user)
   log.info('当前登录的账号信息：', JSON.stringify(user))
+  config.botInfo = user.payload as configTypes.BotInfo
+  await updateConfig(config)
 
   if (isVikaOk) {
     const curDate = new Date().toLocaleString()
     await user.say('上线：' + curDate)
     // 启动MQTT通道
-    if (sysConfig.mqttPassword && (sysConfig.mqtt_SUB_ONOFF || sysConfig.mqtt_PUB_ONOFF)) {
-      chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, user.id)
-      if (sysConfig.mqtt_SUB_ONOFF) {
+    if (config.botConfig.mqtt.password && (config.functionOnStatus.mqtt.mqttControl || config.functionOnStatus.mqtt.mqttMessagePush)) {
+      chatdev = new ChatDevice(config.botConfig.mqtt.username, config.botConfig.mqtt.password, config.botConfig.mqtt.endpoint, config.botConfig.mqtt.port, user.id)
+      if (config.functionOnStatus.mqtt.mqttControl) {
         chatdev.init(bot)
       }
     }
@@ -392,7 +417,7 @@ async function onLogin (user: Contact) {
     setInterval(() => {
       try {
         log.info(curDate)
-        if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
+        if (chatdev && config.functionOnStatus.mqtt.mqttMessagePush) {
           chatdev.pub_property(propertyMessage('lastActive', curDate))
         }
       } catch (err) {
@@ -413,14 +438,16 @@ async function onReady () {
   const user: Contact = bot.currentUser
   log.info('StarterBot', '%s ready', user)
   log.info('当前登录的账号信息：', JSON.stringify(user))
+  config.botInfo = user.payload as configTypes.BotInfo
+  await updateConfig(config)
 
   if (isVikaOk) {
     const curDate = new Date().toLocaleString()
     await user.say('上线：' + curDate)
     // 启动MQTT通道
-    if (sysConfig.mqttPassword && (sysConfig.mqtt_SUB_ONOFF || sysConfig.mqtt_PUB_ONOFF)) {
-      chatdev = new ChatDevice(sysConfig.mqttUsername, sysConfig.mqttPassword, sysConfig.mqttEndpoint, sysConfig.mqttPort, user.id)
-      if (sysConfig.mqtt_SUB_ONOFF) {
+    if (config.botConfig.mqtt.password && (config.functionOnStatus.mqtt.mqttControl || config.functionOnStatus.mqtt.mqttMessagePush)) {
+      chatdev = new ChatDevice(config.botConfig.mqtt.username, config.botConfig.mqtt.password, config.botConfig.mqtt.endpoint, config.botConfig.mqtt.port, user.id)
+      if (config.functionOnStatus.mqtt.mqttControl) {
         chatdev.init(bot)
       }
     }
@@ -433,7 +460,7 @@ async function onReady () {
     setInterval(() => {
       try {
         log.info(curDate)
-        if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
+        if (chatdev && config.functionOnStatus.mqtt.mqttMessagePush) {
           chatdev.pub_property(propertyMessage('lastActive', curDate))
         }
       } catch (err) {
@@ -470,50 +497,47 @@ async function onMessage (message: Message) {
   let isAdminRoom: boolean = false
   log.info('keyWord is:', keyWord)
 
-  if (isVikaOk) {
-    await vika.onMessage(message)
-    // MQTT上报
-    if (chatdev && sysConfig.mqtt_PUB_ONOFF) {
-    /*
-    将消息通过mqtt通道上报到云端
-    */
-      // chatdev.pub_message(message)
-      chatdev.pub_event(eventMessage('onMessage', { curDate }))
+  if (room && room.id) {
+    if (message.self() && text === KeyWords.SetAdminText) {
+      config.botConfig['adminRoom'] = {
+        adminRoomId: room.id,
+        adminRoomTopic:await room.topic(),
+      }
+      await updateConfig(config)
+      await message.say('设置管理群成功')
     }
-    if (room || isSelfMsg) {
-      isAdminRoom = (topic !== undefined && topic === sysConfig.adminRoomTopic) || isSelfMsg
+  }
 
-      if (isAdminRoom) {
-        await sendNotice(bot, message)
-      }
+  isAdminRoom = (roomId && roomId === config.botConfig.adminRoom.adminRoomId) || isSelfMsg
 
-      let replyText: string = ''
-      if (isAdminRoom && (text === '#指令列表' || text === '#帮助')) {
-        replyText = `操作指令说明：
-  #更新配置 更新全部配置
-  #更新提醒 更新定时提醒任务
-  #更新通讯录 更新维格表通信录
-  #下载通讯录 下载通讯录xlsx表
-  #下载通知模板 下载通知模板`
+  if (isAdminRoom) {
+    await sendNotice(bot, message)
 
-        await relpy(bot, vika, replyText, message)
-      }
+    let replyText: string = ''
+    if (text === '#指令列表' || text === '#帮助') {
+      replyText = `操作指令说明：
+#更新配置 更新全部配置
+#更新提醒 更新定时提醒任务
+#更新通讯录 更新维格表通信录
+#下载通讯录 下载通讯录xlsx表
+#下载通知模板 下载通知模板`
 
-      if (isAdminRoom && text === '#更新配置') {
+      await relpy(bot, vika, replyText, message)
+    }
+
+    if (isVikaOk && [ '#更新配置', '#更新提醒', '#更新通讯录', '#上传配置' ].includes(text)) {
+      if (text === KeyWords.UpdateConfig) {
         log.info('热更新系统配置~')
         try {
-          sysConfig = await vika.getConfig()
-          // message.say('配置更新成功：' + JSON.stringify(newConfig))
-          log.info('newConfig', sysConfig)
+          await getCloudConfig()
           replyText = '配置更新成功~'
         } catch (e) {
           replyText = '配置更新成功~'
         }
-
         await relpy(bot, vika, getNow() + replyText, message)
       }
 
-      if (isAdminRoom && text === '#更新提醒') {
+      if (text === KeyWords.UpdateNotice) {
         log.info('热更新通知任务~')
         try {
           await updateJobs(bot, vika)
@@ -525,7 +549,7 @@ async function onMessage (message: Message) {
         await relpy(bot, vika, getNow() + replyText, message)
       }
 
-      if (isAdminRoom && text === '#更新通讯录') {
+      if (text === KeyWords.UpdateContactList) {
         log.info('热更新通讯录到维格表~')
         try {
           await vika.updateContacts(bot)
@@ -538,134 +562,167 @@ async function onMessage (message: Message) {
         await relpy(bot, vika, getNow() + replyText, message)
       }
 
-      if (isAdminRoom && text === '#下载csv通讯录') {
-        log.info('下载通讯录到csv表~')
+      if (text === '#上传配置') {
+        log.info('上传配置信息到维格表~')
         try {
-          const fileBox = await exportContactsAndRoomsToCSV()
-          await message.say(fileBox)
-        } catch (err) {
-          log.error('exportContactsAndRoomsToCSV', err)
-          await message.say('下载失败~')
+          await vika.updateConfigToVika(config)
+          replyText = '上传配置信息成功~'
+        } catch (e) {
+          replyText = '上传配置信息失败~'
         }
+        await relpy(bot, vika, getNow() + replyText, message)
       }
 
-      if (isAdminRoom && text === '#下载通讯录') {
-        log.info('下载通讯录到xlsx表~')
+      if (text === '#下载配置') {
+        log.info('上传配置信息到维格表~')
         try {
-          const fileBox = await exportContactsAndRoomsToXLSX()
-          await message.say(fileBox)
-        } catch (err) {
-          log.error('exportContactsAndRoomsToXLSX', err)
+          await getCloudConfig()
+          replyText = '下载配置信息成功~'
+        } catch (e) {
+          replyText = '下载配置信息失败~'
         }
-      }
-
-      if (isAdminRoom && text === '#下载通知模板') {
-        log.info('下载通知模板~')
-        try {
-          const fileBox = FileBox.fromFile('./src/templates/群发通知模板.xlsx')
-          await message.say(fileBox)
-        } catch (err) {
-          log.error('下载模板失败', err)
-          await message.say('下载失败，请重试~')
-        }
-      }
-
-      if (isAdminRoom && text === '#初始化') {
-        log.info('初始化系统~')
-        try {
-          await vika.init()
-          await message.say('初始化系统表完成~')
-        } catch (err) {
-          log.error('初始化系统失败', err)
-          await message.say('初始化系统失败，请重试~')
-        }
+        await relpy(bot, vika, getNow() + replyText, message)
       }
 
     }
 
-    try {
+    if (!isVikaOk && [ '#更新配置', '#更新提醒', '#更新通讯录' ].includes(text)) {
+      await message.say('未配置维格表，指令无效')
+    }
 
-      if (room && roomId && !isSelfMsg) {
+    if (text === '#下载csv通讯录') {
+      log.info('下载通讯录到csv表~')
+      try {
+        const fileBox = await exportContactsAndRoomsToCSV()
+        await message.say(fileBox)
+      } catch (err) {
+        log.error('exportContactsAndRoomsToCSV', err)
+        await message.say('下载失败~')
+      }
+    }
 
-        // 检测顺风车信息并格式化
-        // const KEYWORD_LIST = [ '人找车', '车找人' ]
-        // try {
-        //   // 判断消息中是否包含关键字
-        //   if (KEYWORD_LIST.some(keyword => message.text().includes(keyword))) {
-        //     const replyMsg = await getFormattedRideInfo(message)
-        //     if (replyMsg) {
-        //       const replyText = replyMsg.choices[0].message.content.replace(/\r/g, '')
-        //       log.info('回复内容：', replyText)
-        //       await room.say(replyText)
-        //     }
-        //   }
-        // } catch (err) {
+    if (text === '#下载通讯录') {
+      log.info('下载通讯录到xlsx表~')
+      try {
+        const fileBox = await exportContactsAndRoomsToXLSX()
+        await message.say(fileBox)
+      } catch (err) {
+        log.error('exportContactsAndRoomsToXLSX', err)
+      }
+    }
 
-        // }
+    if (text === '#下载通知模板') {
+      log.info('下载通知模板~')
+      try {
+        const fileBox = FileBox.fromFile('./src/templates/群发通知模板.xlsx')
+        await message.say(fileBox)
+      } catch (err) {
+        log.error('下载模板失败', err)
+        await message.say('下载失败，请重试~')
+      }
+    }
 
-        // 智能问答开启时执行
-        if (sysConfig.WX_OPENAI_ONOFF && ((text.indexOf(keyWord) !== -1 && sysConfig.AT_AHEAD) || !sysConfig.AT_AHEAD)) {
-          if (sysConfig.roomWhiteListOpen) {
-            const isInRoomWhiteList = sysConfig.roomWhiteList.includes(roomId)
-            if (isInRoomWhiteList) {
-              log.info('当前群在白名单内，请求问答...')
-              await wxai(sysConfig, bot, talker, room, message)
-            } else {
-              log.info('当前群不在白名单内，流程结束')
-            }
+    if (text === '#初始化') {
+      log.info('初始化系统~')
+      try {
+        await vika.init()
+        await message.say('初始化系统表完成~')
+      } catch (err) {
+        log.error('初始化系统失败', err)
+        await message.say('初始化系统失败，请重试~')
+      }
+    }
+
+  }
+
+  try {
+    if (room && roomId && !isSelfMsg) {
+      // 检测顺风车信息并格式化
+      // const KEYWORD_LIST = [ '人找车', '车找人' ]
+      // try {
+      //   // 判断消息中是否包含关键字
+      //   if (KEYWORD_LIST.some(keyword => message.text().includes(keyword))) {
+      //     const replyMsg = await getFormattedRideInfo(message)
+      //     if (replyMsg) {
+      //       const replyText = replyMsg.choices[0].message.content.replace(/\r/g, '')
+      //       log.info('回复内容：', replyText)
+      //       await room.say(replyText)
+      //     }
+      //   }
+      // } catch (err) {
+
+      // }
+
+      // 智能问答开启时执行
+      if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
+        if (config.functionOnStatus.autoQa.roomWhitelist) {
+          const isInRoomWhiteList = config.roomWhiteList.includes(roomId)
+          if (isInRoomWhiteList) {
+            log.info('当前群在白名单内，请求问答...')
+            await wxai(config, bot, talker, room, message)
+          } else {
+            log.info('当前群不在白名单内，流程结束')
           }
-
-          if (!sysConfig.roomWhiteListOpen) {
-            log.info('系统未开启白名单，请求问答...')
-            await wxai(sysConfig, bot, talker, room, message)
-          }
+        } else {
+          log.info('系统未开启白名单，请求问答...')
+          await wxai(config, bot, talker, room, message)
         }
+      }
+    }
 
-        // IM服务开启时执行
-        if (sysConfig.imOpen && types.Message.Text === message.type()) {
-          configData.clientChatEn.clientChatId = talker.id + ' ' + room.id
-          configData.clientChatEn.clientChatName = talker.name() + '@' + topic
-          // log.debug(configData)
-          socket.emit('CLIENT_ON', {
-            clientChatEn: configData.clientChatEn,
-            serverChatId: configData.serverChatEn.serverChatId,
-          })
-          const data = {
-            msg: {
-              avatarUrl: '/static/image/im_server_avatar.png',
-              content: text,
-              contentType: 'text',
-              role: 'client',
-            },
+    if ((!room || !room.id) && !isSelfMsg) {
+      // 智能问答开启时执行
+      if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
+        if (config.functionOnStatus.autoQa.contactWhitelist) {
+          const isInContactWhiteList = config.contactWhiteList.includes(talker.id)
+          if (isInContactWhiteList) {
+            log.info('当前好友在白名单内，请求问答...')
+            await wxai(config, bot, talker, undefined, message)
+          } else {
+            log.info('当前好友不在白名单内，流程结束')
           }
-          log.info(JSON.stringify(data))
-          sendMsg(data)
+        } else {
+          log.info('系统未开启好友白名单,对所有好友有效，请求问答...')
+          await wxai(config, bot, talker, undefined, message)
         }
+      }
+    }
+  } catch (e) {
+    log.error('发起请求wxai失败', e)
+  }
 
+  if (isVikaOk) {
+    await vika.onMessage(message)
+    // MQTT上报
+    if (chatdev && config.functionOnStatus.mqtt.mqttMessagePush) {
+    /*
+    将消息通过mqtt通道上报到云端
+    */
+      // chatdev.pub_message(message)
+      chatdev.pub_event(eventMessage('onMessage', { curDate }))
+    }
+    if (room && roomId && !isSelfMsg) {
+      // IM服务开启时执行
+      if (config.functionOnStatus.im.imChat && types.Message.Text === message.type()) {
+        configData.clientChatEn.clientChatId = talker.id + ' ' + room.id
+        configData.clientChatEn.clientChatName = talker.name() + '@' + topic
+        // log.debug(configData)
+        socket.emit('CLIENT_ON', {
+          clientChatEn: configData.clientChatEn,
+          serverChatId: configData.serverChatEn.serverChatId,
+        })
+        const data = {
+          msg: {
+            avatarUrl: '/static/image/im_server_avatar.png',
+            content: text,
+            contentType: 'text',
+            role: 'client',
+          },
+        }
+        log.info(JSON.stringify(data))
+        sendMsg(data)
       }
 
-      if ((!room || !room.id) && !isSelfMsg) {
-        // 智能问答开启时执行
-        if (sysConfig.WX_OPENAI_ONOFF && ((text.indexOf(keyWord) !== -1 && sysConfig.AT_AHEAD) || !sysConfig.AT_AHEAD)) {
-          if (sysConfig.contactWhiteListOpen) {
-            const isInContactWhiteList = sysConfig.contactWhiteList.includes(talker.id)
-            if (isInContactWhiteList) {
-              log.info('当前好友在白名单内，请求问答...')
-              await wxai(sysConfig, bot, talker, undefined, message)
-            } else {
-              log.info('当前好友不在白名单内，流程结束')
-            }
-          }
-
-          if (!sysConfig.contactWhiteListOpen) {
-            log.info('系统未开启好友白名单,对所有好友有效，请求问答...')
-            await wxai(sysConfig, bot, talker, undefined, message)
-          }
-        }
-      }
-
-    } catch (e) {
-      log.error('发起请求wxai失败', e)
     }
   } else {
     if (message.self() && message.type() === types.Message.Text && text !== Prompts.a && text !== Prompts.b && text.includes('+')) {
@@ -673,12 +730,10 @@ async function onMessage (message: Message) {
         const textArr = text.split('+')
         log.info(JSON.stringify(textArr))
         if (text.length > 23 && text.length < 33 && textArr.length === 2) {
-          vikaConfig.spaceName = textArr[1]
-          vikaConfig.token = textArr[0]
+          updateVikaConfig(textArr)
           await createVika()
           isVikaOk = true
-          config.baseConfig.VIKA_TOKEN = vikaConfig.token
-          config.baseConfig.VIKA_SPACENAME = vikaConfig.spaceName
+          config.botConfig.vika = vikaConfig
           await updateConfig(config)
           await talker.say('配置成功，初始化中，请稍后...')
           log.info('初始化系统~')
@@ -704,8 +759,13 @@ async function roomJoin (room: { topic: () => any; id: any; say: (arg0: string, 
   const nameList = inviteeList.map(c => c.name()).join(',')
   log.info(`Room ${await room.topic()} got new member ${nameList}, invited by ${inviter}`)
 
+  // const contact:Contact | undefined = await bot.Contact.find({ id: 'xxxx' })
+  // if (contact) {
+  //   await bot.Friendship.del(contact)
+  // }
+
   // 进群欢迎语，仅对开启了进群欢迎语白名单的群有效
-  if (isVikaOk && sysConfig.welcomeList.includes(room.id) && inviteeList.length) {
+  if (isVikaOk && config.welcomeList?.includes(room.id) && inviteeList.length) {
     await room.say(`欢迎加入${await room.topic()},请阅读群公告~`, inviteeList)
   }
 }
@@ -753,7 +813,7 @@ async function main (vika: any) {
     .then(() => log.info('Starter Bot Started.'))
     .catch((e: any) => log.error('bot运行异常：', JSON.stringify(e)))
 
-  if (isVikaOk && sysConfig.imOpen) {
+  if (isVikaOk && config.functionOnStatus.im.imChat) {
     socket = imclient(bot, vika, configData)
   }
 }
