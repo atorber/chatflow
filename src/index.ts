@@ -144,7 +144,7 @@ function checkConfig (config: { [key: string]: any }) {
   }
 
   if (missingConfiguration.length > 0) {
-    log.error('\n======================================\n\n', `错误提示：\n缺少${missingConfiguration.join()}配置参数,请检查config.js文件\n\n======================================`)
+    // log.error('\n======================================\n\n', `错误提示：\n缺少${missingConfiguration.join()}配置参数,请检查config.js文件\n\n======================================`)
     log.info('bot config:', config)
     return false
   }
