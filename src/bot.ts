@@ -342,7 +342,7 @@ async function onLogin (user: Contact) {
   }
 
   const curDate = new Date().toLocaleString()
-  await user.say('上线：' + curDate)
+  // await user.say('上线：' + curDate)
 
   // 更新云端好友和群
   await vika.updateRooms(bot)
@@ -379,7 +379,7 @@ async function onReady () {
   }
 
   const curDate = new Date().toLocaleString()
-  await user.say('上线：' + curDate)
+  // await user.say('上线：' + curDate)
 
   // 更新云端好友和群
   await vika.updateRooms(bot)
