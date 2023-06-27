@@ -1,5 +1,5 @@
 {
-  "name": "openai-qa-bot",
+  "name": "chatflow",
   "version": "1.11.3",
   "description": "openai-qa-bot",
   "type": "module",
