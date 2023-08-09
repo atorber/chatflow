@@ -121,7 +121,7 @@ async function createVika () {
 
 function getBot () {
   const ops: any = {
-    name: 'qa-bot',
+    name: 'chatflow',
     puppet,
     puppetOptions: {
       token,

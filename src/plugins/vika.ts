@@ -763,7 +763,7 @@ class VikaBot {
         await this.createRecord(this.contactSheet, records)
         log.info('好友列表同步中...', i + 10)
         updateCount = updateCount + 10
-        void await wait(250)
+        void await wait(1000)
       }
 
       log.info('同步好友列表完成，更新好友数量：', updateCount)
@@ -815,7 +815,7 @@ class VikaBot {
         await this.createRecord(this.roomListSheet, records)
         log.info('群列表同步中...', i + 10)
         updateCount = updateCount + 10
-        void await wait(250)
+        void await wait(1000)
       }
 
       log.info('同步群列表完成，更新群数量：', updateCount)
@@ -937,7 +937,7 @@ class VikaBot {
           console.error('调用datasheet.records.create失败：', err)
         }
       }
-    }, 250)
+    }, 1000)
 
     return true
   }

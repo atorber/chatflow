@@ -199,7 +199,7 @@ type RoomConfig = {
 };
 
 type Config = {
-  botInfo: BotInfo;
+  botInfo: BotInfo|{};
   functionOnStatus: FunctionOnStatus;
   botConfig: BotConfig;
   welcomeList?: Array<string>;
