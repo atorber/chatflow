@@ -1,16 +1,16 @@
 import type {
-  AppConfig,
-  AppConfigs,
   BotConfig,
+  BotInfo,
   ContactConfig,
   RoomConfig,
   Config,
   SysConfig,
+  VikaConfig,
 } from './config.js'
 
 export {
-  type AppConfig,
-  type AppConfigs,
+  type VikaConfig,
+  type BotInfo,
   type BotConfig,
   type ContactConfig,
   type RoomConfig,

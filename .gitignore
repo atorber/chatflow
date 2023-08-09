@@ -124,3 +124,4 @@ tester.js
 db/*.db
 db/*.csv
 db/*.xlsx
+src/config.json

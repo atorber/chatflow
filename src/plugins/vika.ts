@@ -52,6 +52,8 @@ class VikaBot {
   contactWhiteListSheet!: string
   noticeSheet!: string
   msgStore!: any[]
+  envsOnVika!:any[]
+  switchsOnVika!:any[]
 
   constructor (config: VikaBotConfigTypes) {
     if (!config.token) {
@@ -348,6 +350,83 @@ class VikaBot {
     await this.deleteRecords(datasheetId, recordsIds)
   }
 
+  async updateConfigToVika (config:any) {
+    const functionOnStatus = config.functionOnStatus
+    const botConfig = config.botConfig
+    log.info('functionOnStatus', functionOnStatus)
+    log.info('botConfig', botConfig)
+
+  }
+
+  async downConfigFromVika () {
+    const configRecords = await this.getRecords(this.configSheet, {})
+    const switchRecords = await this.getRecords(this.switchSheet, {})
+    // console.debug(configRecords)
+    // console.debug(switchRecords)
+
+    const sysConfig: any = {}
+    const botConfig: any = {}
+    const botConfigIdMap: any = {}
+    const functionOnStatus:any = {}
+    const functionOnStatusIdMap:any = {}
+    const roomWhiteList:any = []
+    const contactWhiteList:any = []
+    const welcomeList:any = []
+
+    for (let i = 0; i < configRecords.length; i++) {
+      const fields = configRecords[i].fields
+      const recordId = configRecords[i].recordId
+
+      if (!botConfig[fields['配置组标识']]) {
+        botConfig[fields['配置组标识']] = {}
+      }
+
+      botConfig[fields['配置组标识']][fields['标识']] = fields['值']
+      botConfigIdMap[fields['配置组标识']][fields['标识']] = recordId
+    }
+
+    this.envsOnVika = botConfigIdMap
+
+    for (let i = 0; i < switchRecords.length; i++) {
+      const fields = switchRecords[i].fields
+      const recordId = switchRecords[i].recordId
+
+      if (!functionOnStatus[fields['配置组标识']]) {
+        functionOnStatus[fields['配置组标识']] = {}
+      }
+      functionOnStatus[fields['配置组标识']][fields['标识']] = fields['启用状态'] === '开启'
+      functionOnStatusIdMap[fields['配置组标识']][fields['标识']] = recordId
+    }
+
+    this.switchsOnVika = functionOnStatusIdMap
+
+    const roomWhiteListRecords: any[] = await this.getRecords(this.roomWhiteListSheet, {})
+    for (let i = 0; i < roomWhiteListRecords.length; i++) {
+      if (roomWhiteListRecords[i].fields['群ID']) {
+        roomWhiteList.push(roomWhiteListRecords[i].fields['群ID'])
+      }
+    }
+
+    const contactWhiteListRecords = await this.getRecords(this.contactWhiteListSheet, {})
+    for (let i = 0; i < contactWhiteListRecords.length; i++) {
+      if (contactWhiteListRecords[i].fields['好友ID']) {
+        contactWhiteList.push(contactWhiteListRecords[i].fields['好友ID'])
+      }
+    }
+    log.info('sysConfig:', JSON.stringify(sysConfig, null, '\t'))
+    log.info('botConfig', JSON.stringify(botConfig, null, '\t'))
+    log.info('functionOnStatus', JSON.stringify(functionOnStatus, null, '\t'))
+
+    sysConfig.functionOnStatus = functionOnStatus
+    sysConfig.botConfig = botConfig
+    sysConfig.contactWhiteList = contactWhiteList
+    sysConfig.roomWhiteList = roomWhiteList
+    sysConfig.welcomeList = welcomeList
+
+    return sysConfig
+
+  }
+
   async getConfig () {
     const configRecords = await this.getRecords(this.configSheet, {})
     const switchRecords = await this.getRecords(this.switchSheet, {})
@@ -375,20 +454,45 @@ class VikaBot {
     // }
 
     const sysConfig: any = {}
+    const botConfig: any = {}
+    const botConfigIdMap: any = {}
+    const functionOnStatus:any = {}
+    const functionOnStatusIdMap:any = {}
     sysConfig.roomWhiteList = []
     sysConfig.contactWhiteList = []
 
     for (let i = 0; i < configRecords.length; i++) {
-      if (configRecords[i].fields['标识']) {
-        sysConfig[configRecords[i].fields['标识']] = configRecords[i].fields['值（只修改此列）'] || ''
+      const fields = configRecords[i].fields
+      const recordId = configRecords[i].recordId
+
+      if (fields['标识']) {
+        sysConfig[configRecords[i].fields['标识']] = fields['值（只修改此列）'] || ''
       }
+      if (!botConfig[fields['配置组标识']]) {
+        botConfig[fields['配置组标识']] = {}
+      }
+
+      botConfig[fields['配置组标识']][fields['标识']] = fields['值（只修改此列）'] || fields['值']
+      botConfigIdMap[fields['配置组标识']][fields['标识']] = recordId
+
     }
 
+    this.envsOnVika = botConfigIdMap
+
     for (let i = 0; i < switchRecords.length; i++) {
-      if (switchRecords[i].fields['标识']) {
-        sysConfig[switchRecords[i].fields['标识']] = switchRecords[i].fields['启用状态（只修改此列）'] === '开启'
+      const fields = switchRecords[i].fields
+      const recordId = switchRecords[i].recordId
+      if (fields['标识']) {
+        sysConfig[switchRecords[i].fields['标识']] = fields['启用状态（只修改此列）'] === '开启'
       }
+      if (!functionOnStatus[fields['配置组标识']]) {
+        functionOnStatus[fields['配置组标识']] = {}
+      }
+      functionOnStatus[fields['配置组标识']][fields['标识']] = fields['启用状态（只修改此列）'] === '开启' || fields['启用状态'] === '开启'
+      functionOnStatusIdMap[fields['配置组标识']][fields['标识']] = recordId
     }
+
+    this.switchsOnVika = functionOnStatusIdMap
 
     const roomWhiteListRecords: any[] = await this.getRecords(this.roomWhiteListSheet, {})
     for (let i = 0; i < roomWhiteListRecords.length; i++) {
@@ -404,7 +508,9 @@ class VikaBot {
       }
     }
     sysConfig.welcomeList = []
-    log.info('sysConfig:', JSON.stringify(sysConfig))
+    log.info('sysConfig:', JSON.stringify(sysConfig, null, '\t'))
+    log.info('botConfig', JSON.stringify(botConfig, null, '\t'))
+    log.info('functionOnStatus', JSON.stringify(functionOnStatus, null, '\t'))
 
     return sysConfig
 
@@ -797,13 +903,13 @@ class VikaBot {
       }
 
       if (sheetCount === 0) {
-        console.log(`================================================\n\n${msg}\n\n================================================\n`)
+        console.log(`\n================================================\n\n${msg}\n\n================================================\n`)
       } else {
         return false
       }
 
     } else {
-      console.error('指定空间不存在，请先创建空间，并在config.ts中配置VIKA_SPACENAME')
+      console.error('指定空间不存在，请先创建空间，并在config.json中配置vika信息')
       return false
     }
 
@@ -943,12 +1049,12 @@ class VikaBot {
         } else { /* empty */ }
       }
 
-      console.log('================================================\n\n初始化系统表完成,运行 npm start 启动系统\n\n================================================\n')
+      console.log('\n================================================\n\n初始化系统表完成,运行 npm start 启动系统\n\n================================================\n')
 
       // const tasks = await this.getTimedTask()
       return true
     } else {
-      console.error('指定空间不存在，请先创建空间，并在config.ts中配置VIKA_SPACENAME')
+      console.error('指定空间不存在，请先创建空间，并在config.json中配置vika信息')
       return false
     }
   }

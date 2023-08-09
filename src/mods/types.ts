@@ -1,7 +1,7 @@
 import type {
-  AppConfig,
-  AppConfigs,
+  VikaConfig,
   BotConfig,
+  BotInfo,
   ContactConfig,
   RoomConfig,
   Config,
@@ -9,8 +9,8 @@ import type {
 } from '../schemas/mod.js'
 
 export {
-  type AppConfig,
-  type AppConfigs,
+  type VikaConfig,
+  type BotInfo,
   type BotConfig,
   type ContactConfig,
   type RoomConfig,
