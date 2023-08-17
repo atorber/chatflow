@@ -15,12 +15,12 @@
     "npm": ">=7"
   },
   "scripts": {
+    "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/ding-dong-bot.ts",
+    "ding": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/ding-dong-bot.ts",
     "build": "tsc && tsc -p tsconfig.cjs.json",
     "clean": "shx rm -fr dist/*",
     "dist": "npm-run-all clean build dist:commonjs",
     "dist:commonjs": "jq -n \"{ type: \\\"commonjs\\\" }\" > dist/cjs/package.json",
-    "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
-    "ding": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/ding-dong-bot.ts",
     "test": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/test.ts",
     "start:index": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
     "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/bot.ts",
@@ -106,10 +106,5 @@
   ],
   "publishConfig": {
     "tag": "next"
-  },
-  "git": {
-    "scripts": {
-      "pre-push": "npx git-scripts-pre-push"
-    }
   }
 }
