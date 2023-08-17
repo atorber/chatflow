@@ -43,153 +43,45 @@ npm install
 
 3.重命名src/config.json.example文件为config.json修改./config.js配置文件
 
-快速开始仅需要修改VIKA_TOKEN、VIKA_SPACENAME配置项,其他配置项暂时无需修改
+快速开始仅需要修改VIKA_TOKEN、VIKA_SPACE_NAME配置项,其他配置项暂时无需修改
 
-```json
-{
-	"botInfo": {
+```.env
+# 维格表配置
+VIKA_SPACE_NAME="" # 维格表空间名称，注意是名称而不是ID
+VIKA_TOKEN="" #维格表token
 
-	},
-	"functionOnStatus": {
-		"autoQa": {
-			"autoReply": true,
-			"atReply": false,
-			"customReply": false,
-			"roomWhitelist": true,
-			"contactWhitelist": false
-		},
-		"vika": {
-			"useVika": false,
-			"uploadMessageToVika": false,
-			"autoMaticCloud": false
-		},
-		"webHook": {
-			"webhookMessagePush": false
-		},
-		"mqtt": {
-			"mqttMessagePush": false,
-			"mqttControl": true
-		},
-		"im": {
-			"imChat": false
-		}
-	},
-	"botConfig": {
-		"base": {
-			"welcomeMessageForJoinRoom": "",
-			"welcomeMessageForAddFriend": ""
-		},
-		"wechaty": {
-			"puppet": "wechaty-puppet-wechat",
-			"token": ""
-		},
-		"vika": {
-			"spaceName": "bot-test",
-			"token": ""
-		},
-		"adminRoom": {
-			"adminRoomId": "管理员群ID",
-			"adminRoomTopic": "管理员群名称"
-		},
-		"autoQa": {
-			"type": "chatGpt"
-		},
-		"wxOpenAi": {
-			"token": "",
-			"encodingAesKey": ""
-		},
-		"chatGpt": {
-			"key": "你的openai api key",
-			"endpoint": "https://www.openai-proxy.com"
-		},
-		"mqtt": {
-			"username": "",
-			"password": "",
-			"endpoint": "",
-			"port": 1883
-		},
-		"webHook": {
-			"url": "",
-			"token": "",
-			"username": "",
-			"password": ""
-		},
-		"yuQue": {
-			"token": "",
-			"nameSpace": ""
-		}
-	},
-	"apps": {
-		"riding": {
-			"config": {},
-			"isOpen": true
-		}
-	},
-	"command": {
-		"bot": {
-			"reboot": "#重启机器人",
-			"selfInfo": "#机器人信息"
-		},
-		"contact": {
-			"findall": "#联系人列表"
-		},
-		"room": {
-			"findall": "#群列表"
-		}
-	},
-	"welcomeList": [],
-	"roomWhiteList": [],
-	"contactWhiteList": [],
-	"contactConfig": {
-		"tyutluyc": {
-			"app": "waiting",
-			"apps": {
-				"qa": {
-					"config": {},
-					"isOpen": true
-				},
-				"riding": {
-					"config": {},
-					"isOpen": true
-				}
-			}
-		},
-		"tyutluyc2": {
-			"app": "waiting",
-			"apps": {
-				"qa": {
-					"config": {},
-					"isOpen": true
-				},
-				"riding": {
-					"config": {},
-					"isOpen": true
-				}
-			}
-		}
-	},
-	"roomConfig": {
-		"21341182572@chatroom": {
-			"app": "waiting",
-			"apps": {
-				"qa": {
-					"config": {},
-					"isOpen": true
-				},
-				"riding": {
-					"config": {},
-					"isOpen": true
-				},
-				"welcomeMessage": {
-					"config": {
-						"welcomeMessageForJoinRoom": "欢迎加入，请阅读群公告~"
-					},
-					"isOpen": true
-				}
-			}
-		}
-	}
-}
+# Wechaty配置
+WECHATY_PUPPET="wechaty-puppet-wechat" # 可选值：wechaty-puppet-wechat4u、wechaty-puppet-wechat、wechaty-puppet-xp、wechaty-puppet-engine、wechaty-puppet-padlocal、wechaty-puppet-service
+WECHATY_TOKEN="" # 使用wechaty-puppet-padlocal、wechaty-puppet-service时需配置此token
+
+# 基础配置
+ADMINROOM_ADMINROOMID=""  # 管理群ID，与管理员群名称任选其一，群ID优先级高于群名称
+ADMINROOM_ADMINROOMTOPIC="瓦力是群主" # 管理群名称，需尽量保持名称复杂，避免重名群干扰
+BASE_WELCOM_EMESSAGE_FOR_JOIN_ROOM="" # 默认进群欢迎语
+BASE_WELCOME_MESSAGE_FOR_ADD_FRIEND="" # 默认添加好友自动回复
+
+# 智能问答配置
+AUTOQA_TYPE="wxOpenai" # TBD-可选值：WxOpenai、ChatGPT
+WXOPENAI_TOKEN="" # 微信对话开放平台中获取
+WXOPENAI_ENCODINGAESKEY="" # 微信对话开放平台中获取
+CHATGPT_KEY="" # openai key
+CHATGPT_ENDPOINT="https://www.openai.com" # openai api请求地址，国内使用官方api可以替换为https://www.openai-proxy.com
+
+# MQTT配置
+MQTT_USERNAME="" # MQTT连接配置信息，推荐使用百度云的物联网核心套件
+MQTT_PASSWORD="" # MQTT连接配置信息，推荐使用百度云的物联网核心套件
+MQTT_ENDPOINT="" # MQTT连接配置信息，推荐使用百度云的物联网核心套件
+MQTT_PORT=1883 # MQTT连接配置信息，推荐使用百度云的物联网核心套件
+
+# 消息推送目的地配置
+WEBHOOK_URL=""
+WEBHOOK_TOKEN=""
+WEBHOOK_USERNAME=""
+WEBHOOK_PASSWORD=""
+
+# 语雀配置
+YUQUE_TOKEN=""
+YUQUE_NAMESPACE=""
 ```
 
 > 只有加入到roomWhiteList里的群才会开启只能问答机器人
@@ -234,7 +126,7 @@ Mac、Linux操作系统下运行(仅支持使用wechaty-puppet-wechat和wechaty-
 
 ```Shell
 export VIKA_TOKEN="替换成自己的维格表token"
-export VIKA_SPACENAME="替换成你的维格表空间名称"
+export VIKA_SPACE_NAME="替换成你的维格表空间名称"
 npm run sys-init
 npm start
 ```
@@ -245,7 +137,7 @@ Windows操作系统下运行(支持使用wechaty-puppet-xp、wechaty-puppet-wech
 
 ```Shell
 set VIKA_TOKEN="替换成自己的维格表token"
-set VIKA_SPACENAME="替换成你的维格表空间名称"
+set VIKA_SPACE_NAME="替换成你的维格表空间名称"
 npm run sys-init
 npm run start
 ```
@@ -275,7 +167,7 @@ npm run start
 docker run -d 
 --restart=always 
 --env VIKA_TOKEN="维格表token" 
---env VIKA_SPACENAME="维格表空间名称" 
+--env VIKA_SPACE_NAME="维格表空间名称" 
 atorber/wechat-openai-qa-bot:v1.8.2
 ```
 
@@ -285,7 +177,7 @@ atorber/wechat-openai-qa-bot:v1.8.2
 docker run -d 
 --restart=always 
 --env VIKA_TOKEN="维格表token" 
---env VIKA_SPACENAME="维格表空间名称" 
+--env VIKA_SPACE_NAME="维格表空间名称" 
 atorber/wechat-openai-qa-bot:latest
 ```
 
@@ -349,6 +241,6 @@ atorber/wechat-openai-qa-bot:latest
 
   由@polk6开源的客服web项目，实现客服后台回复咨询消息
 
-  ## Star History
+## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=choogoo/chatflow&type=Date)](https://star-history.com/#choogoo/chatflow&Date)

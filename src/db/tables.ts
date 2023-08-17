@@ -4,22 +4,22 @@ const db:any = {}
 
 db.message = Datastore.create({
   autoload: true,
-  filename: './db/messages.db',
+  filename: 'data/db/messages.db',
 })
 
 db.bot = Datastore.create({
   autoload: true,
-  filename: './db/bot.db',
+  filename: 'data/db/bot.db',
 })
 
 db.room = Datastore.create({
   autoload: true,
-  filename: './db/room.db',
+  filename: 'data/db/room.db',
 })
 
 db.contact = Datastore.create({
   autoload: true,
-  filename: './db/contact.db',
+  filename: 'data/db/contact.db',
 })
 
 export {

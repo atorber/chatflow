@@ -80,14 +80,14 @@ npm install
 
 4. 修改./config.js配置文件
 
-快速开始仅需要修改VIKA_TOKEN、VIKA_SPACENAME配置项,其他配置项暂时无需修改
+快速开始仅需要修改VIKA_TOKEN、VIKA_SPACE_NAME配置项,其他配置项暂时无需修改
 
 ```
 /* eslint-disable sort-keys */
 // 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
 const configs = {
   VIKA_TOKEN: '替换成自己的维格表token', // VIKA维格表token
-  VIKA_SPACENAME: '替换成你的维格表空间名称', // VIKA维格表空间名称，修改为自己的空间名称
+  VIKA_SPACE_NAME: '替换成你的维格表空间名称', // VIKA维格表空间名称，修改为自己的空间名称
 }
 
 export default configs
@@ -155,7 +155,7 @@ Mac、Linux操作系统下运行(仅支持使用wechaty-puppet-wechat和wechaty-
 
 ```
 export VIKA_TOKEN="替换成自己的维格表token"
-export VIKA_SPACENAME="替换成你的维格表空间名称"
+export VIKA_SPACE_NAME="替换成你的维格表空间名称"
 npm run sys-init
 npm start
 ```
@@ -166,7 +166,7 @@ Windows操作系统下运行(支持使用wechaty-puppet-xp、wechaty-puppet-wech
 
 ```
 set VIKA_TOKEN="替换成自己的维格表token"
-set VIKA_SPACENAME="替换成你的维格表空间名称"
+set VIKA_SPACE_NAME="替换成你的维格表空间名称"
 npm run sys-init
 npm run start
 ```
@@ -280,7 +280,7 @@ npm install
 // 配置文件，所有配置必须齐全，补充空白配置项，其他配置项可按需要修改
 const configs = {
   VIKA_TOKEN: '替换成自己的维格表token', // VIKA维格表token
-  VIKA_SPACENAME: '替换成你的维格表空间名称', // VIKA维格表空间名称，修改为自己的空间名称
+  VIKA_SPACE_NAME: '替换成你的维格表空间名称', // VIKA维格表空间名称，修改为自己的空间名称
 }
 
 export default configs

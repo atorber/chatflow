@@ -1,5 +1,3 @@
-/* eslint-disable no-empty */
-/* eslint-disable sort-keys */
 import mqtt from 'mqtt'
 import { v4 } from 'uuid'
 import { FileBox } from 'file-box'
@@ -18,7 +16,7 @@ import { wechaty2chatdev, propertyMessage, eventMessage } from './msg-format.js'
 import {
   // waitForMs as wait,
   formatSentMessage,
-} from '../util/tool.js'
+} from '../utils/utils.js'
 
 class ChatDevice {
 
@@ -33,9 +31,9 @@ class ChatDevice {
   constructor (username:string, password:string, endpoint:string, port:string|number, botId:string) {
 
     this.mqttclient = mqtt.connect(`mqtt://${endpoint}:${port || 1883}`, {
-      username,
-      password,
       clientId: v4(),
+      password,
+      username,
     })
     this.isConnected = false
     this.propertyApi = `thing/chatbot/${botId}/property/post`
@@ -53,7 +51,7 @@ class ChatDevice {
       log.info('================================================\n\nMQTT连接成功~\n\n================================================\n')
     })
     this.mqttclient.on('reconnect', function (e:any) {
-      log.info('subscriber on reconnect')
+      log.info('subscriber on reconnect', e)
     })
     this.mqttclient.on('disconnect', function (e:any) {
       log.info('disconnect--------', e)
@@ -104,21 +102,25 @@ class ChatDevice {
     const params = message.params
 
     if (name === 'start') {
-
+      log.info('cmd name:', name)
     }
     if (name === 'stop') {
-
+      log.info('cmd name:', name)
     }
     if (name === 'logout') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'logonoff') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'userSelf') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'say') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'send') {
@@ -129,33 +131,42 @@ class ChatDevice {
     }
 
     if (name === 'aliasGet') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'aliasSet') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'roomCreate') {
       await createRoom(params, this.chatbot)
     }
     if (name === 'roomAdd') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'roomDel') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'roomAnnounceGet') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'roomAnnounceSet') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'roomQuit') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'roomTopicGet') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'roomTopicSet') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'roomQrcodeGet') {
@@ -163,27 +174,33 @@ class ChatDevice {
 
     }
     if (name === 'memberAllGet') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'contactAdd') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'contactAliasSet') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'contactFindAll') {
       await getAllContact(this.chatdevice, this.chatbot)
     }
     if (name === 'contactFind') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'roomFindAll') {
       await getAllRoom(this.chatdevice, this.chatbot)
     }
     if (name === 'roomFind') {
+      log.info('cmd name:', name)
 
     }
     if (name === 'config') {
+      log.info('cmd name:', name)
 
     }
 
@@ -203,11 +220,11 @@ async function getAllContact (chatdevice:any, bot:Wechaty) {
 
     }
     const contactInfo = {
-      id: contact?.id,
-      gender: contact?.gender() || '',
-      name: contact?.name() || '',
       alias: await contact?.alias() || '',
       avatar,
+      gender: contact?.gender() || '',
+      id: contact?.id,
+      name: contact?.name() || '',
     }
     friends.push(contactInfo)
 
@@ -244,7 +261,7 @@ async function getAllRoom (chatdevice:any, bot:Wechaty) {
   chatdevice.pub_property(msg)
 }
 
-async function send (params:any, bot:Wechaty) {
+async function send (params:any, bot:Wechaty): Promise<any> {
   log.info('params:', params)
 
   let msg:any = ''
