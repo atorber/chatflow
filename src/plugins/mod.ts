@@ -1,4 +1,4 @@
-import { VikaBot } from './vika.js'
+import { VikaBot, TaskConfig } from './vika.js'
 import { wxai } from './wxai.js'
 import { sendNotice } from './group-notice.js'
 
@@ -11,6 +11,17 @@ import {
   exportContactsAndRoomsToXLSX,
 } from './contact-room.js'
 
+import {
+  getContact,
+  getRoom,
+  isThisContact,
+  isThisRoom,
+} from './finder.js'
+
+export type {
+  TaskConfig,
+}
+
 export {
   exportContactsAndRoomsToCSV,
   exportContactsAndRoomsToXLSX,
@@ -21,4 +32,8 @@ export {
   ChatDevice,
   propertyMessage,
   eventMessage,
+  getContact,
+  getRoom,
+  isThisContact,
+  isThisRoom,
 }

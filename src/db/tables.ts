@@ -1,27 +1,15 @@
-import Datastore from 'nedb-promises'
+import DB from './nedb.js'
 
-const db:any = {}
+export interface Database {
+  message: any;
+  bot: any;
+  room: any;
+  contact: any;
+}
 
-db.message = Datastore.create({
-  autoload: true,
-  filename: 'data/db/messages.db',
-})
-
-db.bot = Datastore.create({
-  autoload: true,
-  filename: 'data/db/bot.db',
-})
-
-db.room = Datastore.create({
-  autoload: true,
-  filename: 'data/db/room.db',
-})
-
-db.contact = Datastore.create({
-  autoload: true,
-  filename: 'data/db/contact.db',
-})
-
-export {
-  db,
+export const db: Database = {
+  bot: DB('data/db/bots.db'),
+  contact: DB('data/db/contacts.db'),
+  message: DB('data/db/messages.db'),
+  room: DB('data/db/rooms.db'),
 }

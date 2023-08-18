@@ -86,6 +86,15 @@ const vikaRes = {
         },
         editable: true,
       },
+      {
+        id: 'fldiRwFyYEIYX',
+        name: 'messageId',
+        type: 'SingleText',
+        property: {
+          defaultValue: '',
+        },
+        editable: true,
+      },
     ],
   },
   message: 'SUCCESS',

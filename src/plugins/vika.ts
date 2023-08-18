@@ -34,6 +34,17 @@ type VikaBotConfigTypes = {
   token: string,
 }
 
+export interface TaskConfig {
+  id: string;
+  msg: string;
+  time: string;
+  cycle: string;
+  targetType: 'contact' | 'room';
+  targetId: string;
+  targetName: string;
+  active: boolean;
+}
+
 class VikaBot {
 
   token!: string
@@ -142,8 +153,8 @@ class VikaBot {
 
       this[key as keyof VikaBot] = res.data.id
       this[name as keyof VikaBot] = res.data.id
-      const delres = await this.clearBlankLines(res.data.id)
-      log.info('删除空白行：', delres)
+      // 删除空白行
+      await this.clearBlankLines(res.data.id)
       return res.data
     } catch (error) {
       log.error(name, error)
@@ -206,6 +217,7 @@ class VikaBot {
           roomid: room && room.id ? room.id : '--',
           messageType: msgType,
           file: files,
+          messageId:msg.id,
         },
       }
       // log.info('addChatRecord:', JSON.stringify(record))
@@ -219,7 +231,7 @@ class VikaBot {
   }
 
   addRecord (record:any) {
-    log.info('addRecord:', JSON.stringify(record))
+    log.info('消息入列:', JSON.stringify(record))
     if (record.fields) {
       this.msgStore.push(record)
       log.info('最新消息池长度：', this.msgStore.length)
@@ -251,13 +263,13 @@ class VikaBot {
       },
     ]
 
-    log.info('addScanRecord:', records)
+    log.info('登录二维码消息:', records)
     const datasheet = this.vika.datasheet(this.messageSheet)
     datasheet.records.create(records).then((response) => {
       if (response.success) {
         log.info('写入vika成功：', response.code)
       } else {
-        log.error('调用vika写入接口成功，写入vika失败：', response)
+        log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
       }
       return response
     }).catch(err => { log.error('调用vika写入接口失败：', err) })
@@ -281,7 +293,7 @@ class VikaBot {
         file: files,
       },
     }
-    log.info('addHeartbeatRecord:', JSON.stringify(record))
+    log.info('心跳消息:', JSON.stringify(record))
     this.msgStore.push(record)
   }
 
@@ -291,7 +303,7 @@ class VikaBot {
       const resp = await datasheet.upload(file)
       if (resp.success) {
         const uploadedAttachments = resp.data
-        log.info('上传成功', uploadedAttachments)
+        log.info('文件上传成功', uploadedAttachments)
         return uploadedAttachments
       }
     } catch (error: any) {
@@ -360,9 +372,8 @@ class VikaBot {
   async updateConfigToVika (config:any) {
     const functionOnStatus = config.functionOnStatus
     const botConfig = config.botConfig
-    log.info('functionOnStatus', functionOnStatus)
-    log.info('botConfig', botConfig)
-
+    log.info('维格表内功能开关状态', functionOnStatus)
+    log.info('维格表内基础配置信息', botConfig)
   }
 
   async downConfigFromVika () {
@@ -376,8 +387,8 @@ class VikaBot {
     const botConfigIdMap: any = {}
     const functionOnStatus:any = {}
     const functionOnStatusIdMap:any = {}
-    const AUTOQA_ROOMWHITELIST:any = []
-    const AUTOQA_CONTACTWHITELIST:any = []
+    const roomWhiteList:any = []
+    const contactWhiteList:any = []
     const welcomeList:any = []
 
     for (let i = 0; i < configRecords.length; i++) {
@@ -410,14 +421,14 @@ class VikaBot {
     const roomWhiteListRecords: any[] = await this.getRecords(this.roomWhiteListSheet, {})
     for (let i = 0; i < roomWhiteListRecords.length; i++) {
       if (roomWhiteListRecords[i].fields['群ID']) {
-        AUTOQA_ROOMWHITELIST.push(roomWhiteListRecords[i].fields['群ID'])
+        roomWhiteList.push(roomWhiteListRecords[i].fields['群ID'])
       }
     }
 
     const contactWhiteListRecords = await this.getRecords(this.contactWhiteListSheet, {})
     for (let i = 0; i < contactWhiteListRecords.length; i++) {
       if (contactWhiteListRecords[i].fields['好友ID']) {
-        AUTOQA_CONTACTWHITELIST.push(contactWhiteListRecords[i].fields['好友ID'])
+        contactWhiteList.push(contactWhiteListRecords[i].fields['好友ID'])
       }
     }
     log.info('sysConfig:', JSON.stringify(sysConfig, null, '\t'))
@@ -426,8 +437,8 @@ class VikaBot {
 
     sysConfig.functionOnStatus = functionOnStatus
     sysConfig.botConfig = botConfig
-    sysConfig.AUTOQA_CONTACTWHITELIST = AUTOQA_CONTACTWHITELIST
-    sysConfig.AUTOQA_ROOMWHITELIST = AUTOQA_ROOMWHITELIST
+    sysConfig.contactWhiteList = contactWhiteList
+    sysConfig.roomWhiteList = roomWhiteList
     sysConfig.welcomeList = welcomeList
 
     return sysConfig
@@ -479,15 +490,21 @@ class VikaBot {
     const roomWhiteListRecords: any[] = await this.getRecords(this.roomWhiteListSheet, {})
     await wait(1000)
     for (let i = 0; i < roomWhiteListRecords.length; i++) {
-      if (roomWhiteListRecords[i].fields['群ID']) {
-        sysConfig.roomWhiteList.push(roomWhiteListRecords[i].fields['群ID'])
+      if (roomWhiteListRecords[i].fields['群名称']) {
+        sysConfig.roomWhiteList.push(roomWhiteListRecords[i].fields['群名称'])
+      } else {
+        sysConfig.roomWhiteList.push(roomWhiteListRecords[i].fields['群名ID'])
       }
     }
 
     const contactWhiteListRecords = await this.getRecords(this.contactWhiteListSheet, {})
     await wait(1000)
     for (let i = 0; i < contactWhiteListRecords.length; i++) {
-      if (contactWhiteListRecords[i].fields['好友ID']) {
+      if (contactWhiteListRecords[i].fields['备注']) {
+        sysConfig.contactWhiteList.push(contactWhiteListRecords[i].fields['备注'])
+      } else if (contactWhiteListRecords[i].fields['昵称']) {
+        sysConfig.contactWhiteList.push(contactWhiteListRecords[i].fields['昵称'])
+      } else {
         sysConfig.contactWhiteList.push(contactWhiteListRecords[i].fields['好友ID'])
       }
     }
@@ -724,9 +741,9 @@ class VikaBot {
       for (let i = 0; i < contacts.length; i++) {
         const item = contacts[i]
         const isFriend = item?.friend()
-        log.info('好友详情：', item?.name(), isFriend)
+        log.info('好友详情：', item?.name(), JSON.stringify(isFriend))
         if (item && isFriend && item.type() === types.Contact.Individual && !wxids.includes(item.id)) {
-          log.info('云端不存在：', item.name())
+          // log.info('云端不存在：', item.name())
           let avatar = ''
           try {
             avatar = String(await item.avatar())
@@ -795,11 +812,11 @@ class VikaBot {
           }
           const members = await item.memberAll()
           const ownerId = members.length ? members[0]?.name() : ''
-          log.info('第一群成员：', ownerId)
+          log.info('第一个群成员：', ownerId)
           const fields = {
             avatar,
             id: item.id,
-            ownerId: item.owner()?.id || ownerId,
+            ownerId: ownerId || '',
             topic: await item.topic() || '',
             updated: new Date().toLocaleString(),
           }
@@ -828,9 +845,9 @@ class VikaBot {
 
   async getTimedTask () {
     const taskRecords = await this.getRecords(this.noticeSheet, {})
-    // log.info(taskRecords)
+    log.info('定时提醒任务列表：', JSON.stringify(taskRecords))
 
-    const timedTasks: any = []
+    let timedTasks: any = []
 
     const taskFields: Field[] = sheets['noticeSheet']?.fields || []
     const taskFieldDic: any = {}
@@ -843,38 +860,32 @@ class VikaBot {
       }
     }
 
-    for (let i = 0; i < taskRecords.length; i++) {
-      const task = taskRecords[i]
-      const taskConfig: any = {
+    interface TaskRecord {
+      recordId: string;
+      fields: {
+        [key: string]: any;
+      };
+    }
+
+    // 优化后的代码
+    timedTasks = taskRecords.map((task: TaskRecord) => {
+      const taskConfig: TaskConfig = {
         id: task.recordId,
         msg: task.fields['内容'],
         time: task.fields['时间'],
-        cycle: task.fields['周期'],
-        contacts: [],
-        rooms: [],
+        cycle: task.fields['周期'] || '无重复',
+        targetType: task.fields['通知目标类型'] === '好友' ? 'contact' : 'room',
+        targetId: task.fields['好友ID/群ID'],
+        targetName: task.fields['好友备注/昵称或群名称'],
         active: task.fields['启用状态'] === '开启',
       }
 
-      if (taskConfig.msg && taskConfig.time && (task.fields['接收好友'] || task.fields['接收群'])) {
-
-        if (task.fields['接收群'] && task.fields['接收群'].length) {
-          const roomRecords = await this.getRecords(this.roomListSheet, { recordIds: task.fields['接收群'] })
-          // log.info(roomRecords)
-          roomRecords.forEach(async (item: any) => {
-            taskConfig.rooms.push(item.fields.id)
-          })
-        }
-        if (task.fields['接收好友'] && task.fields['接收好友'].length) {
-          const contactRecords = await this.getRecords(this.contactSheet, { recordIds: task.fields['接收好友'] })
-          // log.info(contactRecords)
-          contactRecords.forEach(async (item: any) => {
-            taskConfig.contacts.push(item.fields.id)
-          })
-        }
-        timedTasks.push(taskConfig)
+      if (taskConfig.active && taskConfig.msg && taskConfig.time && taskConfig.cycle && (taskConfig.targetId || taskConfig.targetName)) {
+        return taskConfig
       }
-    }
 
+      return null
+    }).filter(Boolean)
     // log.info(2, timedTasks)
 
     return timedTasks
@@ -930,7 +941,7 @@ class VikaBot {
             if (response.success) {
               log.info('写入vika成功：', end, JSON.stringify(response.code))
             } else {
-              log.error('调用vika写入接口成功，写入vika失败：', response)
+              log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
             }
           }).catch(err => { log.error('调用vika写入接口失败：', err) })
         } catch (err) {
@@ -950,14 +961,14 @@ class VikaBot {
     if (this.spaceId) {
 
       const tables = await this.getNodesList()
-      log.info('维格表文件列表：', JSON.stringify(tables, undefined, 2))
+      log.info('维格表文件列表：', JSON.stringify(tables))
 
       await wait(1000)
 
       for (const k in sheets) {
         // log.info(this)
         const sheet = sheets[k as keyof Sheets]
-        log.info(k, sheet)
+        // log.info(k, sheet)
         if (sheet && !tables[sheet.name]) {
           const fields = sheet.fields
           const newFields: Field[] = []
@@ -968,7 +979,7 @@ class VikaBot {
               name: field?.name || '',
               desc: field?.desc || '',
             }
-            log.info('字段定义', field)
+            log.info('字段定义：', field)
             let options
             switch (field?.type) {
               case 'SingleText':
@@ -1040,9 +1051,9 @@ class VikaBot {
               await this.createRecord(this[k as keyof VikaBot], records)
               await wait(1000)
             }
-            log.info(sheet.name + '初始化数据写入完成...')
+            log.info(sheet.name, '初始化数据写入完成...')
           }
-          log.info(sheet.name + '数据表配置完成...')
+          log.info(sheet.name, '数据表配置完成...')
         } else if (sheet) {
           this[k as keyof VikaBot] = tables[sheet.name]
           this[sheet.name as keyof VikaBot] = tables[sheet.name]
@@ -1054,7 +1065,7 @@ class VikaBot {
       // const tasks = await this.getTimedTask()
       return true
     } else {
-      log.error('指定空间不存在，请先创建空间，并在config.json中配置vika信息')
+      log.error('指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息')
       return false
     }
   }

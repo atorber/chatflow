@@ -18,37 +18,51 @@ const vikaRes = {
         isPrimary: true,
       },
       {
-        id: 'fldfqyrfkWBBy',
-        name: '接收好友',
-        type: 'MagicLink',
+        id: 'fld3qG3X0ZlFs',
+        name: '通知目标类型',
+        type: 'SingleSelect',
         property: {
-          foreignDatasheetId: 'dstbutP3T8WorWLlbq',
-          brotherFieldId: 'fld0reGOMyTGV',
+          options: [
+            {
+              id: 'optWMNg5xJJZS',
+              name: '好友',
+              color: {
+                name: 'deepPurple_0',
+                value: '#E5E1FC',
+              },
+            },
+            {
+              id: 'optNtIR7ecTja',
+              name: '群',
+              color: {
+                name: 'indigo_0',
+                value: '#DDE7FF',
+              },
+            },
+          ],
+          defaultValue: '好友',
         },
         editable: true,
-        desc: '好友列表',
       },
-      // {
-      //     "id": "fldXq00SDGvS9",
-      //     "name": "接收分组",
-      //     "type": "MagicLink",
-      //     "property": {
-      //         "foreignDatasheetId": "dsttzJxMEqxZ0m5UHZ",
-      //         "brotherFieldId": "fldNqvOAzEkxC"
-      //     },
-      //     "editable": true,
-      //     "desc": "好友分组"
-      // },
       {
-        id: 'fldJ1TvTV1T8c',
-        name: '接收群',
-        type: 'MagicLink',
+        id: 'fldiRwFyYEIYX',
+        name: '好友备注/昵称或群名称',
+        type: 'SingleText',
+        desc: '类型为好友时优先匹配好友ID、备注、昵称，类型为群时优先匹配群ID、群名称',
         property: {
-          foreignDatasheetId: 'dstRVUymHGd1e4mrWU',
-          brotherFieldId: 'flduYxMKg3ERW',
+          defaultValue: '',
         },
         editable: true,
-        desc: '群列表',
+      },
+      {
+        id: 'fldiRwFyYEIYX0',
+        name: '好友ID/群ID',
+        type: 'SingleText',
+        desc:'选填，使用wehcaty-puppet-wechat时因id会变化，不要填写',
+        property: {
+          defaultValue: '',
+        },
+        editable: true,
       },
       {
         id: 'fldoCm0thVXmq',
@@ -194,7 +208,7 @@ const fields: Field[] = vikaRes.data.fields
 
 const noticeSheet: Sheet = {
   fields,
-  name: '通知提醒',
+  name: '定时提醒',
   defaultRecords,
 }
 

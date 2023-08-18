@@ -34,113 +34,53 @@
 1.下载源码并安装依赖
 
 ```Shell
-git clone <https://github.com/choogoo/wechat-openai-qa-bot.git>
-cd ./wechat-openai-qa-bot
+git clone <https://github.com/choogoo/chatflow.git>
+cd ./chatflow
 npm install
 ```
 
 2.分别登陆[微信对话开放平台](https://openai.weixin.qq.com/)和[vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973)官网注册账号并获取token
 
-3.重命名src/config.json.example文件为config.json修改./config.js配置文件
+3.重命名.env.example文件为.env并修改配置文件
 
-快速开始仅需要修改VIKA_TOKEN、VIKA_SPACE_NAME配置项,其他配置项暂时无需修改
+> 快速开始仅需要修改VIKA_TOKEN、VIKA_SPACE_NAME、ADMINROOM_ADMINROOMTOPIC配置项,其他配置项暂时无需修改，使用微信对话开放平台时配置WXOPENAI_TOKEN、WXOPENAI_ENCODINGAESKEY
 
 ```.env
 # 维格表配置
 VIKA_SPACE_NAME="" # 维格表空间名称，注意是名称而不是ID
 VIKA_TOKEN="" #维格表token
 
-# Wechaty配置
-WECHATY_PUPPET="wechaty-puppet-wechat" # 可选值：wechaty-puppet-wechat4u、wechaty-puppet-wechat、wechaty-puppet-xp、wechaty-puppet-engine、wechaty-puppet-padlocal、wechaty-puppet-service
-WECHATY_TOKEN="" # 使用wechaty-puppet-padlocal、wechaty-puppet-service时需配置此token
-
 # 基础配置
-ADMINROOM_ADMINROOMID=""  # 管理群ID，与管理员群名称任选其一，群ID优先级高于群名称
 ADMINROOM_ADMINROOMTOPIC="瓦力是群主" # 管理群名称，需尽量保持名称复杂，避免重名群干扰
-BASE_WELCOM_EMESSAGE_FOR_JOIN_ROOM="" # 默认进群欢迎语
-BASE_WELCOME_MESSAGE_FOR_ADD_FRIEND="" # 默认添加好友自动回复
 
 # 智能问答配置
-AUTOQA_TYPE="wxOpenai" # TBD-可选值：WxOpenai、ChatGPT
 WXOPENAI_TOKEN="" # 微信对话开放平台中获取
 WXOPENAI_ENCODINGAESKEY="" # 微信对话开放平台中获取
-CHATGPT_KEY="" # openai key
-CHATGPT_ENDPOINT="https://www.openai.com" # openai api请求地址，国内使用官方api可以替换为https://www.openai-proxy.com
-
-# MQTT配置
-MQTT_USERNAME="" # MQTT连接配置信息，推荐使用百度云的物联网核心套件
-MQTT_PASSWORD="" # MQTT连接配置信息，推荐使用百度云的物联网核心套件
-MQTT_ENDPOINT="" # MQTT连接配置信息，推荐使用百度云的物联网核心套件
-MQTT_PORT=1883 # MQTT连接配置信息，推荐使用百度云的物联网核心套件
-
-# 消息推送目的地配置
-WEBHOOK_URL=""
-WEBHOOK_TOKEN=""
-WEBHOOK_USERNAME=""
-WEBHOOK_PASSWORD=""
-
-# 语雀配置
-YUQUE_TOKEN=""
-YUQUE_NAMESPACE=""
 ```
 
 > 只有加入到roomWhiteList里的群才会开启只能问答机器人
 
-5.初始化系统表，先运行，系统会自动在维格表中创建好初始化表格
+4.启动程序
 
 ```Shell
-npm run sys-init
-```
-
-在维格表查看系统表是否创建成功
-
-6.程序默认使用wechaty-puppet-wechat，三大系统均可使用
-
-7.启动程序
-
-```Shell
-npm start
+npm run start
 ```
 
 出现二维码之后，扫码二维码登陆微信
 
-8.开启智能问答功能
+5.开启智能问答功能
 
-8.1 设置微信对话平台token，填写"环境变量"表中的 【对话平台token】、【对话平台EncodingAESKey】并在"功能开关"表中开启智能问答
+5.1 设置微信对话平台token，填写"环境变量"表中的 【对话平台token】、【对话平台EncodingAESKey】并在"功能开关"表中开启智能问答
 
 添加一个简单问题到微信对话开放平台，测试对应群内智能问答内容
 
-8.2 如果不希望每个群都开启智能问答，需设置群白名单,首先需要将上图中的群白名单开关设置为开启
+5.2 如果不希望每个群都开启智能问答，需设置群白名单,首先需要将上图中的群白名单开关设置为开启
 
 然后将群加入到问答白名单，在“群白名单”表中，加入需要开启的群ID（roomid），群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
 
 详细操作参考 [手把手教程](https://www.yuque.com/atorber/oegota/zm4ulnwnqp9whmd6)
 
-8.4 重启程序，在指定群测试问答
-
-## 使用环境变量启动
-
-> 也可以不使用配置文件，通过配置环境变量启动
-
-Mac、Linux操作系统下运行(仅支持使用wechaty-puppet-wechat和wechaty-puppet-padlocal)
-
-```Shell
-export VIKA_TOKEN="替换成自己的维格表token"
-export VIKA_SPACE_NAME="替换成你的维格表空间名称"
-npm run sys-init
-npm start
-```
-
-Windows操作系统下运行(支持使用wechaty-puppet-xp、wechaty-puppet-wechat、wechaty-puppet-padlocal)
-
-推荐使用 wechaty-puppet-xp（在电脑上登陆微信，微信版本必须为[WeChatSetup-v3.6.0.18.exe](https://github.com/tom-snow/wechat-windows-versions/releases/download/v3.6.0.18/WeChatSetup-3.6.0.18.exe)）
-
-```Shell
-set VIKA_TOKEN="替换成自己的维格表token"
-set VIKA_SPACE_NAME="替换成你的维格表空间名称"
-npm run sys-init
-npm run start
-```
+5.3 重启程序，在指定群测试问答
 
 ## 在Docker中部署运行
 
@@ -160,16 +100,6 @@ npm run start
 > 特别注意，Wechaty-Puppet是wechaty的概念，本项目不涉及机器人开发，只是使用wechaty项目进行业务功能实现，什么是[Wechaty](https://wechaty.js.org/)请点击链接进行了解学习
 
 ### 拉取和运行
-
-- 稳定版本
-
-```Shell
-docker run -d 
---restart=always 
---env VIKA_TOKEN="维格表token" 
---env VIKA_SPACE_NAME="维格表空间名称" 
-atorber/wechat-openai-qa-bot:v1.8.2
-```
 
 - 最新版本
 

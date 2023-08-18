@@ -82,17 +82,17 @@ interface FunctionOnStatus {
 
 interface WechatyConfig {
   puppet: string;
-  token?: string;
+  token: string | '';
 }
 
 interface VikaConfig {
   spaceName?: string;
-  token?: string;
+  token: string;
 }
 
 interface AdminRoomConfig {
-  adminRoomId?: string;
-  adminRoomTopic?: string;
+  adminRoomId: string;
+  adminRoomTopic: string;
 }
 
 interface AutoQaConfig {
