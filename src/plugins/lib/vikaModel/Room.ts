@@ -37,6 +37,15 @@ const vikaRes = {
         editable: true,
       },
       {
+        id: 'fldCbZKiBXklM0',
+        name: 'updated',
+        type: 'SingleText',
+        property: {
+          defaultValue: '',
+        },
+        editable: true,
+      },
+      {
         id: 'fld96Wo2Jn0tW',
         name: 'avatar',
         type: 'Text',

@@ -1,5 +1,5 @@
 import fs from 'fs'
-import type { Plugin, PluginConfig } from '../mods/interface'
+import type { Plugin, PluginConfig } from '../types/interface'
 
 function loadPlugins (app: any) {
   const config: PluginConfig[] = JSON.parse(fs.readFileSync('./config.json', 'utf8'))
@@ -12,6 +12,6 @@ function loadPlugins (app: any) {
 
 const app = {}
 // 监听文件
-fs.watchFile('./config.json', (curr, prev) => {
+fs.watchFile('./config.json', (_curr, _prev) => {
   loadPlugins(app)
 })

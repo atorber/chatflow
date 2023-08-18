@@ -7,7 +7,7 @@ import {
   // nlp,
   // QueryData,
   genToken,
-} from '../sdk/openai/index.js'
+} from '../../sdk/openai/index.js'
 
 import { FileBox } from 'file-box'
 // import excel2order from '../excel.js'
@@ -29,7 +29,7 @@ import path from 'path'
 import {
   waitForMs as wait,
   formatSentMessage,
-} from '../util/tool.js'
+} from '../../utils/utils.js'
 
 import { ChatGPTAPI } from 'chatgpt'
 
@@ -91,12 +91,12 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
           answer = answer.text + '\n'
           // console.debug(answer)
           await room.say(answer, ...[ talker ])
-          formatSentMessage(bot.currentUser, answer, undefined, room)
+          await formatSentMessage(bot.currentUser, answer, undefined, room)
 
         } else {
           answer = answer.text + '\n'
           await message.say(answer)
-          formatSentMessage(bot.currentUser, answer, message.talker(), undefined)
+          await formatSentMessage(bot.currentUser, answer, message.talker(), undefined)
         }
 
         break
@@ -106,10 +106,10 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
 
         if (room) {
           await room.say(fileBox)
-          formatSentMessage(bot.currentUser, fileBox.toString(), undefined, room)
+          await formatSentMessage(bot.currentUser, fileBox.toString(), undefined, room)
         } else {
           await message.say(fileBox)
-          formatSentMessage(bot.currentUser, fileBox.toString(), message.talker(), undefined)
+          await formatSentMessage(bot.currentUser, fileBox.toString(), message.talker(), undefined)
         }
 
         break
@@ -127,11 +127,11 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
 
         if (room) {
           await room.say(miniProgram)
-          formatSentMessage(bot.currentUser, miniProgram.toString(), undefined, message.room())
+          await formatSentMessage(bot.currentUser, miniProgram.toString(), undefined, message.room())
 
         } else {
           await message.say(miniProgram)
-          formatSentMessage(bot.currentUser, miniProgram.toString(), message.talker(), undefined)
+          await formatSentMessage(bot.currentUser, miniProgram.toString(), message.talker(), undefined)
         }
 
         break
@@ -152,7 +152,7 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
       // answer = await aibot(talker, room, text)
       if (fileName.split('.')[1] === 'xlsx') {
         // log.info('file=============', file)
-        const filePath = __dirname + `\\cache\\${new Date().getTime() + fileName}`
+        const filePath = __dirname + `\\data\\media\\image\\${new Date().getTime() + fileName}`
         // let filePath = `C:\\Users\\wechaty\\Documents\\WeChat Files\\wxid_0o1t51l3f57221\\FileStorage\\File\\2022-05\\${file.name}`
         await file.toFile(filePath)
         await wait(1000)
@@ -194,8 +194,8 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
     case 'WxOpenai':
       // log.info('开始请求微信对话平台...')
       init({
-        EncodingAESKey: sysConfig.EncodingAESKey,
-        TOKEN: sysConfig.WX_TOKEN,
+        EncodingAESKey: sysConfig.WXOPENAI_ENCODINGAESKEY,
+        TOKEN: sysConfig.WXOPENAI_TOKEN,
       })
 
       try {

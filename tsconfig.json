@@ -1,24 +1,20 @@
 {
   "extends": "@chatie/tsconfig",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "dist/esm"
   },
   "exclude": [
     "node_modules/",
-    "dist/",
-    "tests/fixtures/",
+    "dist/"
   ],
   "include": [
     "./*.ts",
-    "app/**/*.ts",
-    "bin/*.ts",
-    "bot/**/*.ts",
-    "examples/**/*.ts",
-    "scripts/**/*.ts",
     "src/**/*.ts",
-    "tests/**/*.spec.ts",
-    "src/wx-open-ai.js",
-    "src/plugins/msg-format.js",
-    "src/db/*.js"
+    "src/*.ts",
+    "src/plugins/*.ts",
+    "src/plugins/*.cjs",
+    "example/*.ts",
+    ".eslintrc.cjs", 
+    "tests/*.ts"  
   ]
 }

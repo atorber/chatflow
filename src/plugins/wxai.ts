@@ -26,7 +26,7 @@ import {
 import {
   // waitForMs as wait,
   formatSentMessage,
-} from '../util/tool.js'
+} from '../utils/utils.js'
 
 // import { ChatGPTAPI } from 'chatgpt'
 import Api2d from 'api2d'
@@ -162,8 +162,8 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
     case 'wxOpenai':
       // log.info('开始请求微信对话平台...')
       init({
-        EncodingAESKey: sysConfig.EncodingAESKey,
-        TOKEN: sysConfig.WX_TOKEN,
+        EncodingAESKey: sysConfig.WXOPENAI_ENCODINGAESKEY,
+        TOKEN: sysConfig.WXOPENAI_TOKEN,
       })
 
       try {

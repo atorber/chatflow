@@ -30,6 +30,15 @@ const vikaRes = {
         editable: true,
       },
       {
+        id: 'fldIDa0zPtgYo0',
+        name: 'alias',
+        type: 'SingleText',
+        property: {
+          defaultValue: '',
+        },
+        editable: true,
+      },
+      {
         id: 'fldCbOzc2qfVn',
         name: 'topic',
         type: 'SingleText',
@@ -42,6 +51,21 @@ const vikaRes = {
         id: 'fldQYW3U9dvKm',
         name: 'messagePayload',
         type: 'Text',
+        editable: true,
+      },
+      {
+        id: 'fldh1g0q0rx9M',
+        name: 'file',
+        type: 'Attachment',
+        editable: true,
+      },
+      {
+        id: 'fldiRwFyYEIYX',
+        name: 'messageType',
+        type: 'SingleText',
+        property: {
+          defaultValue: '',
+        },
         editable: true,
       },
       {
@@ -64,17 +88,11 @@ const vikaRes = {
       },
       {
         id: 'fldiRwFyYEIYX',
-        name: 'messageType',
+        name: 'messageId',
         type: 'SingleText',
         property: {
           defaultValue: '',
         },
-        editable: true,
-      },
-      {
-        id: 'fldh1g0q0rx9M',
-        name: 'file',
-        type: 'Attachment',
         editable: true,
       },
     ],

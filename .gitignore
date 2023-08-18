@@ -124,3 +124,6 @@ db/*.db
 db/*.csv
 db/*.xlsx
 *.memory-card.json
+data/db/*.db
+data/table/*.xlsx
+data/table/*.csv

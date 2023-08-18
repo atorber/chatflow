@@ -7,7 +7,6 @@ import {
 import * as PUPPET from 'wechaty-puppet'
 
 // 导入wechaty-puppet-wechat模块，用于连接网页版微信
-import { PuppetWeChat } from 'wechaty-puppet-wechat'
 // 导入qrcode-terminal模块，用于在终端显示二维码
 import qrcodeTerminal from 'qrcode-terminal'
 // 引入fs模块，用于文件操作
