@@ -46,6 +46,15 @@ const vikaRes = {
         editable: true,
       },
       {
+        id: 'fldCbZKiBXklM0',
+        name: 'updated',
+        type: 'SingleText',
+        property: {
+          defaultValue: '',
+        },
+        editable: true,
+      },
+      {
         id: 'fldK2fgxvTDcs',
         name: 'friend',
         type: 'Checkbox',

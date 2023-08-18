@@ -23,25 +23,15 @@ import {
   Wechaty,
 } from 'wechaty'
 
-// import path from 'path'
-// import os from 'os'
-
 import {
   // waitForMs as wait,
   formatSentMessage,
-} from '../util/tool.js'
+} from '../utils/utils.js'
 
-import { ChatGPTAPI } from 'chatgpt'
+// import { ChatGPTAPI } from 'chatgpt'
+import Api2d from 'api2d'
+// import axios from 'axios'
 
-const botTpyes = [ 'WxOpenai', 'ChatGPT' ]
-const useBot = 0
-const callBot = botTpyes[useBot]
-
-const config = {
-  AutoReply: true,
-  MakeFriend: true,
-  ChatGPTSessionToken: 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..IMz6n01YT2ZrlL-c.ZRM6h_EhsvDTKBsfJv2l8pkCiQKaZ_-QdrvyJFUVsydnfs8QvgtxScpCfCzSNtPbo4SG9am5miwWQmseRyTjNoN3pNhGnWWWSc3FMNb1w9Ok_fbUokUf_H2YjcuAMqYpsb0YPieykFznAEiWwqdnpOHkvrxIVr2J71NTGzgBQ805oJXey92r-_btktR-uSaI5vhLQxoOBabSAcRCuEPG0k7_ChsaXd8p932UOzFeyAeh26xDock6-baLLYNbJ6nrQmnfx0nc-MjBEWU1wYXgfVqReeM_W_zRKM9rL0KsVg7GpuL5k_oiNUYpm1iEvbEfEFOhhK6zzR_j8awZ_qKEbVQRkuo9gH-OaLAEPib0kwTrwirbF2rOiiaLA9AE-nEQoQZ5CKkrRMGploFjx0sGXwmqrjNh1IzuVgf11NmHUCNYW-TweOdWo_3Wge1jjRUkamShFGYL478zK6Ve5BgyQZ3MZD5aAof6hWL8ELFu0THDio8cQUMQNP7RoBpQAFSLud1nyB4L5VB9BRafAClstO5Tn50o3obGtVY_mMl5WwFOTsofHutEiXhbP2JeuGAruwKdE5Ks8l5VEuv-36r7-5utIcvoBnJhXuyZaNq4xdyOf4rdXQDUNcI6wS9YR4AKOyCJKHiZ91RuxTR5Tx9Tz8JWCZAYzP3HJNh9ql6wjFSytqdDj2QbD1yDctlY4juzcp_4SiE0yJDrBkRgZ6u734FM_zJJeqGjpbn88rZ_ItXfJjGjXXP8ifSjZfSd4W1UuVxE8XH67BiRbd9d2m8nOPfnELhepIK14ICMnDhyZ-_m7j25I54yyj5ISKojC6noZMvh4KKjlqH7ASAKUBcGoMsk66L9D_6zymE7NrPTy9gRMsbVF5G6-YDAQ0FfWdA8b6jVFDLVvILprPoQzdWCUuY2XDLJ8-MBEEC_sGryLAR01DX3xuMPDBzA6cC8zUAqK-tZvJefL0s7Nv40ABdDhsUIa3EsNe1qJigw-53GeTSqkdO4QihyW3LTXX6QK7BDBA6IJJ5Ry5jYAvS-RvnjXE7hCqYygNuwXbmWZJZ4xLwYmc6iDDgrg8nxfwdq8i3WKFI4EA45afKLuzJTyUQzZAEoQonqVKReqAA1rCRLyuhbgzTi01TuOI6ncCVsOJR_mSdT3QDsZODhRDVjbDpBigyAMVpOEuIiSEwew4B3iP1dsudNoPpqGJKo3-8zwVHN9NZrlm0mnuFvcX5nRN4APl6n6TJAyQ-_dJS0ibi-bTuwlOGvXXxXaguSzgrNSyqVHetuOEp7k7bkOfTrkqEP0TH4xL5Hl5dqsv-KmbBHrj1bkfTd-2NKnBaSZyajflW2Kyx8MBnu9cEVeGNt6RpuITB9CE83ZEL-W99oEpURkCdc64x546PSNUnRuyDTphpfIHCFCqt5yoXg13i82x9EfF88ERdj1FDV-gSsOJoGB_hqI5gJkM3ch6qVDwye4pQAGMDaViTOesPLghlbjoCskQ-cTHHUPdiHfxZ3fW8bdhG1KanR5oJ6E00t7b9eKlfzzScmmr4fDqErV1FZX-F6EnaoqeoX5Caai7AE9TmPNu8XNNDR5k7pzHzpCErryQWHrSo6KSK_1cirncKNcGl0AeX2CwtgDolmPnvHcUmZT_aLW6dbiqmtX5ZWeVNoB6qpbR6d5zwMcSL-NNCqwj6q1CLakHpUgepka5n1Si64jb-9ZGZFmBDxlcYcK1qqMX_gA62ak3IEakGT_Rrp14-e4d4NrnlVNZsPVUVCLLF924hirlhO5vOXRdVlovZpJSpf9QG5kAEI7ZlxuLFHydODAE9c8XXywUNmJAf8BqMjrSujpjeM6hDpGcuO6rLEBURuYGslfQk_z1A6f94r3gel6LYH1iGS-_GJTyXhD3oVHm-PbGAiwHmBN9_IIQc-IKiDh3-cyrPy0UexXmJI79UHrBjuz2q9kwGDkT2X7zcpPSMEwa2BaAZvwOW_zCz54LRMOS-OXz4UsZXCb_vgZkrp6LQ3_eAHRzHro_eXuTtIQJRxmNRdqLSMICWRQZJFx7fk0eFPu9Zw4APT_HtWrcEioA1l_nEZfveebn6VSVQyb6nIUOJghyWvECK5agwCeHoJ4ma6nYThGDD06qszvkRJkVg1pob_GscwDbE15OhpjeYfP8lGVBIo6MVuqbMZSGZlZ8dbYG29gaxN0NC11MUkpCAwam7a18usjg0lL_sAr0WXo517LovIgzBT3KhqMZxL8RG3UaQP_vwWt4TkBvN7wWuudEd__70rgAk1gEbJ1fTuDsYeUJq93CKoN5Wc4o05jK2LfcBzIaNopxq5je38rWaECCLYHOlPlVy9eA.uVxf9FJ31LUx0p8hAp2wyA',
-}
 // const __dirname = path.resolve()
 // const userInfo = os.userInfo()
 // const rootPath = `${userInfo.homedir}\\Documents\\WeChat Files\\`
@@ -163,16 +153,17 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
   const wxid = talker.id
   const nickName = talker.name()
   const topic = await room?.topic()
-  // log.info(opt)
+  log.info('query:', query)
   const content = query
+  const callBot = sysConfig.botConfig.autoQa.type
 
   let answerJson
   switch (callBot) {
-    case 'WxOpenai':
+    case 'wxOpenai':
       // log.info('开始请求微信对话平台...')
       init({
-        EncodingAESKey: sysConfig.EncodingAESKey,
-        TOKEN: sysConfig.WX_TOKEN,
+        EncodingAESKey: sysConfig.WXOPENAI_ENCODINGAESKEY,
+        TOKEN: sysConfig.WXOPENAI_TOKEN,
       })
 
       try {
@@ -258,23 +249,25 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
         log.error(JSON.stringify(err))
       }
       break
-    case 'ChatGPT':
+    case 'chatGpt':
       try {
-        const api = new ChatGPTAPI({ sessionToken: config.ChatGPTSessionToken })
-        // ensure the API is properly authenticated (optional)
-        await api.ensureAuth()
-        const t0 = new Date().getTime()
-        console.log('content: ', content)
-        // send a message and wait for the response
-        const response = await api.sendMessage(content)
-        // TODO: format response to compatible with wechat messages
-        const t1 = new Date().getTime()
-        console.log('response: ', response)
-        console.log('耗时: ', (t1 - t0) / 1000, 's')
-        // response is a markdown-formatted string
+        const timeout = 1000 * 60
+        const api = new Api2d(sysConfig.botConfig.chatGpt.key, sysConfig.botConfig.chatGpt.endpoint, timeout)
+        const body = {
+          model: 'gpt-3.5-turbo',
+          messages: [ { role: 'user', content } ],
+          temperature: 1,
+          n: 1,
+          stream: false,
+        }
+        log.info('body:', JSON.stringify(body))
+        const completion: any = await api.completion(body)
+        const responseMessage = completion
+
+        log.info('responseMessage', responseMessage)
         answer = {
           messageType: types.Message.Text,
-          text: response,
+          text: responseMessage.choices[0].message.content,
         }
       } catch (err) {
         console.error(err)

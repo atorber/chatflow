@@ -12,6 +12,26 @@ const recordRes = {
     total: 7,
     records: [
       {
+        recordId: 'receuIOdNUz8T',
+        createdAt: 1671682513000,
+        updatedAt: 1671682529000,
+        fields: {
+          指令名称: '帮助',
+          类型: '系统指令',
+          说明: '获得操作指令集',
+        },
+      },
+      {
+        recordId: 'receuIOdNUz8T',
+        createdAt: 1671682513000,
+        updatedAt: 1671682529000,
+        fields: {
+          指令名称: '更新定时提醒',
+          类型: '系统指令',
+          说明: '更新定时提醒任务',
+        },
+      },
+      {
         recordId: 'recUqpQPkMrQO',
         createdAt: 1670218148000,
         updatedAt: 1670218148000,
@@ -71,16 +91,6 @@ const recordRes = {
           说明: 'TBD当前群关闭智能问答',
         },
       },
-      {
-        recordId: 'receuIOdNUz8T',
-        createdAt: 1671682513000,
-        updatedAt: 1671682529000,
-        fields: {
-          指令名称: '更新提醒',
-          类型: '系统指令',
-          说明: '更新通知提醒任务',
-        },
-      },
     ],
     pageNum: 1,
     pageSize: 7,
@@ -109,13 +119,6 @@ const vikaRes = {
         id: 'fldplyGKKgxME',
         name: '说明',
         type: 'Text',
-        editable: true,
-      },
-      {
-        id: 'fldE1R4eb6E8S',
-        name: '管理员微信号',
-        type: 'SingleText',
-        property: {},
         editable: true,
       },
       {

@@ -118,9 +118,12 @@ package-lock.json
 .gitpod.yml
 openai-qa-bot.memory-card.json
 quick.bat
-src/config.js
 src/config.ts
 tester.js
 db/*.db
 db/*.csv
 db/*.xlsx
+*.memory-card.json
+data/db/*.db
+data/table/*.xlsx
+data/table/*.csv

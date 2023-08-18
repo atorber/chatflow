@@ -54,13 +54,13 @@ const commandSheet: Sheet = {
     name: '说明',
     type: FieldType.Text,
   },
-  {
-    name: '管理员微信号',
-    type: FieldType.SingleText,
-    property: {
+  // {
+  //   name: '管理员微信号',
+  //   type: FieldType.SingleText,
+  //   property: {
 
-    },
-  },
+  //   },
+  // },
   {
     name: '类型',
     type: FieldType.SingleSelect,
