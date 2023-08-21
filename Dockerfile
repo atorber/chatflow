@@ -14,4 +14,4 @@ RUN npm install
 COPY . .
 
 # 设置默认启动命令
-CMD ["sh", "-c", "npm run init && npm run start"]
+CMD ["sh", "-c", "npm run start"]
