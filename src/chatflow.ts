@@ -135,7 +135,7 @@ export function checkConfig (config: configTypes.Config) {
   }
 
   if (missingConfiguration.length > 0) {
-    // log.error('\n======================================\n\n', `错误提示:\n缺少${missingConfiguration.join()}配置参数,请在.env文件中设置或设置环境变量\n\n======================================`)
+    // log.error('\n', `错误提示:\n缺少${missingConfiguration.join()}配置参数,请在.env文件中设置或设置环境变量\n\n======================================`)
     log.info('机器人配置信息:', config)
     return false
   }
@@ -221,7 +221,7 @@ export const onReadyOrLogin = async (bot:Wechaty) => {
       log.info('初始化vika失败:', err)
     }
   } else {
-    log.error('\n================================================\n\n维格表配置不全，.env文件或环境变量中中设置的token和spaceName之后重启\n\n================================================\n')
+    log.error('\n维格表配置不全，.env文件或环境变量中中设置的token和spaceName之后重启\n\n================================================\n')
   }
   if (isVikaOk) {
     const curDate = new Date().toLocaleString()
@@ -258,9 +258,9 @@ export const onReadyOrLogin = async (bot:Wechaty) => {
 
     // 启动用户定时定时提醒任务
     await updateJobs(bot, vika)
-    log.info('================================================\n\n登录启动成功，程序准备就绪\n\n================================================\n')
+    log.info('\n登录启动成功，程序准备就绪\n================================================\n')
   } else {
-    log.info('================================================\n\n登录启动成功，但没有配置维格表\n\n================================================\n')
+    log.info('\n登录启动成功，但没有配置维格表\n================================================\n')
   }
 
   if (config.botConfig.adminRoom.adminRoomId || config.botConfig.adminRoom.adminRoomTopic) {
@@ -371,6 +371,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
 
         // 管理员群接收到管理指令时执行相关操作
         if (isAdminRoom) {
+          log.info('管理员群消息：', topic, talker.name())
           await sendNotice(bot, message)
           let replyText: string = ''
           if (text === '指令列表' || text === '帮助') {

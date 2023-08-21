@@ -741,7 +741,7 @@ class VikaBot {
       for (let i = 0; i < contacts.length; i++) {
         const item = contacts[i]
         const isFriend = item?.friend()
-        log.info('好友详情：', item?.name(), JSON.stringify(isFriend))
+        // log.info('好友详情：', item?.name(), JSON.stringify(isFriend))
         if (item && isFriend && item.type() === types.Contact.Individual && !wxids.includes(item.id)) {
           // log.info('云端不存在：', item.name())
           let avatar = ''
@@ -810,8 +810,7 @@ class VikaBot {
           } catch (err) {
             log.error('获取群头像失败：', err)
           }
-          const members = await item.memberAll()
-          const ownerId = members.length ? members[0]?.name() : ''
+          const ownerId = await item.owner()?.id
           log.info('第一个群成员：', ownerId)
           const fields = {
             avatar,
@@ -914,7 +913,7 @@ class VikaBot {
       }
 
       if (sheetCount === 0) {
-        log.info(`\n================================================\n\n${msg}\n\n================================================\n`)
+        log.info(`\n${msg}\n\n================================================\n`)
       } else {
         return false
       }
@@ -979,7 +978,7 @@ class VikaBot {
               name: field?.name || '',
               desc: field?.desc || '',
             }
-            log.info('字段定义：', field)
+            log.info('字段定义：', JSON.stringify(field))
             let options
             switch (field?.type) {
               case 'SingleText':
@@ -1060,7 +1059,7 @@ class VikaBot {
         } else { /* empty */ }
       }
 
-      log.info('\n================================================\n\n初始化系统表完成,运行 npm start 启动系统\n\n================================================\n')
+      log.info('\n初始化系统表完成,运行 npm start 启动系统\n\n================================================\n')
 
       // const tasks = await this.getTimedTask()
       return true
