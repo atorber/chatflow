@@ -1,5 +1,5 @@
 # 使用Alpine Linux作为基础镜像
-FROM node:16-alpine
+FROM node:16
 
 # 设置工作目录
 WORKDIR /usr/src/app
@@ -14,4 +14,4 @@ RUN npm install
 COPY . .
 
 # 设置默认启动命令
-CMD ["sh", "-c", "npm run init && npm run start"]
+CMD ["sh", "-c", "npm run start"]
