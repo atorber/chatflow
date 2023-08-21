@@ -48,7 +48,7 @@ class ChatDevice {
     const that = this
     this.mqttclient.on('connect', function () {
       that.isConnected = true
-      log.info('================================================\n\nMQTT连接成功~\n\n================================================\n')
+      log.info('\nMQTT连接成功~\n\n================================================\n')
     })
     this.mqttclient.on('reconnect', function (e:any) {
       log.info('subscriber on reconnect', e)
