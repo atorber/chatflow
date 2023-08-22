@@ -7,7 +7,7 @@ import {
   // nlp,
   // QueryData,
   genToken,
-} from '../../sdk/openai/index.js'
+} from '../../api/sdk/openai/index.js'
 
 import { FileBox } from 'file-box'
 // import excel2order from '../excel.js'

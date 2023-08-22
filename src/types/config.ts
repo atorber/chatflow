@@ -1,3 +1,5 @@
+import type { BusinessRoom, BusinessUser } from '../plugins/finder'
+
 type AIType = 'WxOpenai' | string;
 
 interface SysConfig {
@@ -100,8 +102,8 @@ interface AutoQaConfig {
 }
 
 interface WxOpenAiConfig {
-  token?: string;
-  encodingAesKey?: string;
+  token: string;
+  encodingAesKey: string;
 }
 
 interface ChatGptConfig {
@@ -203,8 +205,8 @@ interface Config {
   functionOnStatus: FunctionOnStatus;
   botConfig: BotConfig;
   welcomeList?: string[];
-  roomWhiteList: string[];
-  contactWhiteList: string[];
+  roomWhiteList: BusinessRoom[];
+  contactWhiteList: BusinessUser[];
   contactConfig: ContactConfig;
   roomConfig: RoomConfig;
   apps?: AppsConfig;

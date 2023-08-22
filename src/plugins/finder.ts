@@ -34,7 +34,7 @@ export const isThisContact = async (businessUser:BusinessUser, contact:Contact) 
   const alias = await contact.alias()
   if (businessUser.id && contact.id === businessUser.id) {
     return true
-  } else if (businessUser.alias && alias === businessUser.alias) {
+  } else if (businessUser.alias && (alias === businessUser.alias || contact.name() === businessUser.alias)) {
     return true
   } else {
     if (businessUser.name && contact.name() === businessUser.name) {

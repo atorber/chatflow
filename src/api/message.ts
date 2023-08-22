@@ -25,8 +25,8 @@ export const addMessage = async (message: Message) => {
   }
   // log.info('addMessage messageNew:', JSON.stringify(messageNew))
   try {
-    const res:any = await messageData.insert(messageNew)
-    log.info('消息写入数据库成功:', res._id)
+    await messageData.insert(messageNew)
+    // log.info('消息写入数据库成功:', res._id)
     return true
   } catch (e) {
     log.error('消息写入数据库失败:', e)
