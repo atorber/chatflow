@@ -46,18 +46,9 @@ import schedule from 'node-schedule'
 import { addMessage } from './api/message.js'
 import { containsContact, containsRoom } from './services/userService.js'
 
-log.info('配置文件信息:', JSON.stringify(config))
+log.info('配置文件信息:\n', JSON.stringify(config))
 
 // log.info('process.env', JSON.stringify(process.env))
-
-enum KeyWords {
-  HelpText = '帮助',
-  SetAdminText = '设置为管理群',
-  UpdateConfig = '更新配置',
-  UpdateNotice = '更新定时提醒',
-  UpdateContactList = '更新通讯录'
-  // ExportDoc = '导出文档'
-}
 
 let chatdev: any = {}
 let jobs: any
@@ -87,10 +78,14 @@ export const sendMsg = async (publisher:Message|Room|Contact, sayable: Sayable, 
 export async function getCloudConfig () {
   const newConfig = await vika.downConfigFromVika()
   config.botConfig = newConfig.botConfig
-  config.functionOnStatus = newConfig.functionOnStatus
-  config.contactWhiteList = newConfig.contactWhiteList
-  config.roomWhiteList = newConfig.roomWhiteList
   config.welcomeList = newConfig.welcomeList
+}
+
+// 从维格表下载白名单
+export async function getWhiteList () {
+  const whiteList = await vika.getWhiteList()
+  config.contactWhiteList = whiteList.contactWhiteList
+  config.roomWhiteList = whiteList.roomWhiteList
 }
 
 // 保存配置文件到data/config.json
@@ -107,12 +102,6 @@ export async function createVika () {
     })
     // 初始化系统表
     await vika.init()
-
-    // 初始化获取配置信息
-    const initReady = await vika.checkInit('主程序载入系统配置成功，等待插件初始化...')
-    if (!initReady) {
-      return
-    }
 
     const configReady = checkConfig(config)
     // 配置齐全，启动机器人
@@ -149,21 +138,21 @@ export function checkConfig (config: configTypes.Config) {
 export async function updateJobs (bot: Wechaty, vika: any) {
   try {
   // 结束所有任务
-    const res =  await schedule.gracefulShutdown()
-    log.info('结束所有任务成功：', res)
+    await schedule.gracefulShutdown()
+    log.info('结束所有任务成功...')
   } catch (e) {
     log.error('结束所有任务失败：', e)
   }
   try {
     const tasks = await vika.getTimedTask()
-    log.info('格式化的定时提醒任务tasks：', JSON.stringify(tasks))
+    log.info('格式化的定时提醒任务tasks：\n', JSON.stringify(tasks))
     jobs = {}
     for (let i = 0; i < tasks.length; i++) {
       const task: TaskConfig = tasks[i]
       if (task.active) {
         // 格式化任务
         const curRule = getRule(task)
-        log.info('当前任务原始信息', curRule, JSON.stringify(task))
+        log.info('当前任务原始信息:\n', curRule, JSON.stringify(task))
 
         try {
           await schedule.scheduleJob(task.id, curRule, async () => {
@@ -205,10 +194,10 @@ export async function updateJobs (bot: Wechaty, vika: any) {
         }
       }
     }
-    log.info('定时提醒任务初始化完成，创建任务数量:', Object.keys(jobs).length)
+    log.info('定时提醒任务初始化完成，创建任务数量:\n', Object.keys(jobs).length)
 
   } catch (err: any) {
-    log.error('更新定时提醒列表任务失败:', err)
+    log.error('更新定时提醒列表任务失败:\n', err)
   }
 }
 
@@ -219,18 +208,16 @@ export const onReadyOrLogin = async (bot:Wechaty) => {
     try {
       const res = await createVika()
       isVikaOk = true
-      log.info('初始化vika成功:', JSON.stringify(res))
+      log.info('初始化vika成功:\n', JSON.stringify(res))
       dataBases = await vika.getDataBases()
-      log.info('系统表字典:', JSON.stringify(dataBases, undefined, 2))
+      // log.info('系统表字典:', JSON.stringify(dataBases, undefined, 2))
     } catch (err) {
-      log.info('初始化vika失败:', err)
+      log.info('初始化vika失败:\n', err)
     }
   } else {
     log.error('\n维格表配置不全，.env文件或环境变量中中设置的token和spaceName之后重启\n\n================================================\n')
   }
   if (isVikaOk) {
-    const curDate = new Date().toLocaleString()
-
     // 启动MQTT通道
     if (config.botConfig.mqtt.password && config.botConfig.mqtt.username && config.botConfig.mqtt.endpoint && (config.functionOnStatus.mqtt.mqttControl || config.functionOnStatus.mqtt.mqttMessagePush)) {
       chatdev = new ChatDevice(config.botConfig.mqtt.username, config.botConfig.mqtt.password, config.botConfig.mqtt.endpoint, config.botConfig.mqtt.port, user.id)
@@ -239,19 +226,19 @@ export const onReadyOrLogin = async (bot:Wechaty) => {
       }
     }
 
-    const sysConfig = await vika.getConfig()
-    log.info('维格表中的配置信息：', JSON.stringify(sysConfig))
+    const envConfig = await vika.getConfig()
+    log.info('维格表中的环境变量配置信息：\n', JSON.stringify(envConfig))
 
-    config.contactWhiteList = sysConfig.contactWhiteList
-    config.roomWhiteList = sysConfig.roomWhiteList
+    await getWhiteList()
 
     // 启动时更新云端好友和群
     // await vika.updateRooms(bot)
     // await vika.updateContacts(bot)
 
-    // 如果开启了MQTT推送，心跳同步到MQTT,每30s一次
+    // 如果开启了MQTT推送，心跳同步到MQTT,每30000s一次
     setInterval(() => {
       try {
+        const curDate = new Date().toLocaleString()
         log.info('当前时间:', curDate)
         if (chatdev && config.functionOnStatus.mqtt.mqttMessagePush) {
           chatdev.pub_property(propertyMessage('lastActive', curDate))
@@ -316,7 +303,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
       }
     })
     bot.on('login', async  (user: Contact) => {
-      log.info('onLogin,当前登录的账号信息:', JSON.stringify(user))
+      log.info('onLogin,当前登录的账号信息:\n', user.name())
 
       // 更新机器人基本信息
       config.botInfo = user.payload as configTypes.BotInfo
@@ -328,7 +315,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
     })
     bot.on('ready', async () => {
       const user: Contact = bot.currentUser
-      log.info('onReady,当前登录的账号信息:', JSON.stringify(user))
+      log.info('onReady,当前登录的账号信息:\n', user.name())
       config.botInfo = user.payload as configTypes.BotInfo
       await updateConfig(config)
 
@@ -342,7 +329,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
       // job.cancel()
     })
     bot.on('message', async message => {
-      log.info('onMessage,接收到消息:', JSON.stringify(message.payload))
+      log.info('onMessage,接收到消息:\n', JSON.stringify(message.payload))
 
       // 存储消息到db
       const addRes = await addMessage(message)
@@ -362,7 +349,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
         if (room && room.id) {
 
           // 机器人发送 设置为管理群 到群，设置管理员群
-          if (message.self() && text === KeyWords.SetAdminText) {
+          if (message.self() && text === '设置为管理群') {
             config.botConfig['adminRoom'] = {
               adminRoomId: room.id,
               adminRoomTopic:await room.topic(),
@@ -376,17 +363,21 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
 
         // 管理员群接收到管理指令时执行相关操作
         if (isAdminRoom) {
-          log.info('管理员群消息：', topic, talker.name())
-          await sendNotice(bot, message)
+          log.info('管理员/群消息：', talker.name(), topic)
+
+          if (message.type() === bot.Message.Type.Attachment) {
+            await sendNotice(bot, message)
+          }
+
           let replyText: string = ''
           if (text === '指令列表' || text === '帮助') {
-            replyText = '操作指令说明:\n【更新配置】 更新全部配置\n【更新定时提醒】 更新定时提醒任务\n【更新通讯录】 更新维格表通信录\n【下载通讯录】 下载通讯录xlsx表\n【下载通知模板】 下载通知模板'
+            replyText = '操作指令说明:\n【更新配置】 更新全部配置\n【更新定时提醒】 更新定时提醒任务\n【更新白名单】 更新智能问答白名单\n【更新通讯录】 更新维格表通信录\n【下载通讯录】 下载通讯录xlsx表\n【下载通知模板】 下载通知模板'
             await sendMsg(message, replyText)
           }
 
-          if (isVikaOk && [ '更新配置', '更新定时提醒', '更新通讯录', '上传配置', '下载配置' ].includes(text)) {
+          if (isVikaOk && [ '更新配置', '更新定时提醒', '更新通讯录', '上传配置', '下载配置', '更新白名单', '更新活动', '报名活动' ].includes(text)) {
             switch (text) {
-              case KeyWords.UpdateConfig:
+              case '更新配置':
                 log.info('热更新系统配置~')
                 try {
                   await getCloudConfig()
@@ -395,7 +386,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
                   replyText = '配置更新成功~'
                 }
                 break
-              case KeyWords.UpdateNotice:
+              case '更新定时提醒':
                 log.info('热更新通知任务~')
                 try {
                   await updateJobs(bot, vika)
@@ -404,7 +395,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
                   replyText = '提醒任务更新失败~'
                 }
                 break
-              case KeyWords.UpdateContactList:
+              case '更新通讯录':
                 log.info('热更新通讯录到维格表~')
                 try {
                   await vika.updateContacts(bot)
@@ -412,6 +403,33 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
                   replyText = '通讯录更新成功~'
                 } catch (e) {
                   replyText = '通讯录更新失败~'
+                }
+                break
+              case '更新白名单':
+                log.info('热更新白名单~')
+                try {
+                  await getWhiteList()
+                  replyText = '白名单更新成功~'
+                } catch (e) {
+                  replyText = '白名单更新成功~'
+                }
+                break
+              case '更新活动':
+                log.info('热更新活动~')
+                try {
+                  await vika.getStatistics()
+                  replyText = '活动更新成功~'
+                } catch (e) {
+                  replyText = '活动更新成功~'
+                }
+                break
+              case '报名活动':
+                log.info('报名活动~')
+                try {
+                  await vika.createOrder(message)
+                  replyText = '报名成功~'
+                } catch (e) {
+                  replyText = '报名成功~'
                 }
                 break
               case '上传配置':
@@ -609,7 +627,7 @@ export function getBotOps (puppet:string, token:string) {
     ops.puppetOptions.uos = true
   }
 
-  log.info('Wchaty配置信息:', JSON.stringify(ops))
+  log.info('Wchaty配置信息:\n', JSON.stringify(ops))
   return ops
 }
 
