@@ -5,27 +5,33 @@ import type {
 import messageSheet from './Message.js'
 import commandSheet from './CommandList.js'
 import configSheet from './EnvConfig.js'
-import switchSheet from './Switch.js'
+import statisticsSheet from './Statistics.js'
 import contactSheet from './Contact.js'
 // import qaSheet from './QaList.js'
 import roomListSheet from './Room.js'
-import roomWhiteListSheet from './RoomWhiteList.js'
-import contactWhiteListSheet from './ContactWhiteList.js'
+import orderSheet from './Order.js'
+// import contactWhiteListSheet from './ContactWhiteList.js'
 import noticeSheet from './Notice.js'
 // import groupSheet from './ContactGroup.js'
+import { whiteListSheet } from './WhiteList.js'
+import { stockSheet } from './Stock.js'
 
 const sheets: Sheets = {
   configSheet,
-  switchSheet,
+  // switchSheet,
   commandSheet,
   contactSheet,
   roomListSheet,
   // qaSheet,
-  roomWhiteListSheet,
-  contactWhiteListSheet,
+  // roomWhiteListSheet,
+  // contactWhiteListSheet,
+  statisticsSheet,
+  orderSheet,
+  whiteListSheet,
   // groupSheet,
   noticeSheet,
   messageSheet,
+  stockSheet,
 }
 
 export {

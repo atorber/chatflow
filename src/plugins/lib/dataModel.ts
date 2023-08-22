@@ -578,7 +578,7 @@ const contactSheet: Sheet = {
   defaultRecords: [],
 }
 
-const qaSheet = {
+export const qaSheet = {
   fields: [
     {
       name: '分类(必填)',
@@ -840,13 +840,13 @@ type Sheets = {
 
 const sheets: Sheets = {
   configSheet,
+  switchSheet,
   contactSheet,
   roomListSheet,
   commandSheet,
   messageSheet,
-  qaSheet,
+  // qaSheet,
   roomWhiteListSheet,
-  switchSheet,
   contactWhiteListSheet,
 }
 

@@ -30,10 +30,11 @@ import {
   getContact,
   getRoom,
   TaskConfig,
+  DateBase,
 } from './plugins/mod.js'
 import type { configTypes } from './types/mod.js'
 
-import { config } from './services/config.js'
+import { config } from './services/configService.js'
 
 import {
   waitForMs as wait,
@@ -43,6 +44,7 @@ import {
 import schedule from 'node-schedule'
 
 import { addMessage } from './api/message.js'
+import { containsContact, containsRoom } from './services/userService.js'
 
 log.info('配置文件信息:', JSON.stringify(config))
 
@@ -61,6 +63,7 @@ let chatdev: any = {}
 let jobs: any
 let vika: any
 let isVikaOk: boolean = false
+let dataBases: DateBase
 
 // 消息发布器
 export const sendMsg = async (publisher:Message|Room|Contact, sayable: Sayable, inviteeList?: Contact[]) => {
@@ -216,7 +219,9 @@ export const onReadyOrLogin = async (bot:Wechaty) => {
     try {
       const res = await createVika()
       isVikaOk = true
-      log.info('初始化vika成功:', res)
+      log.info('初始化vika成功:', JSON.stringify(res))
+      dataBases = await vika.getDataBases()
+      log.info('系统表字典:', JSON.stringify(dataBases, undefined, 2))
     } catch (err) {
       log.info('初始化vika失败:', err)
     }
@@ -240,9 +245,9 @@ export const onReadyOrLogin = async (bot:Wechaty) => {
     config.contactWhiteList = sysConfig.contactWhiteList
     config.roomWhiteList = sysConfig.roomWhiteList
 
-    // 更新云端好友和群
-    await vika.updateRooms(bot)
-    await vika.updateContacts(bot)
+    // 启动时更新云端好友和群
+    // await vika.updateRooms(bot)
+    // await vika.updateContacts(bot)
 
     // 如果开启了MQTT推送，心跳同步到MQTT,每30s一次
     setInterval(() => {
@@ -463,7 +468,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
             case '下载通知模板':
               log.info('下载通知模板~')
               try {
-                const fileBox = FileBox.fromFile('./src/templates/群发通知模板.xlsx')
+                const fileBox = FileBox.fromFile('./src/public/templates/群发通知模板.xlsx')
                 await sendMsg(message, fileBox)
               } catch (err) {
                 log.error('下载模板失败', err)
@@ -507,7 +512,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
             // 智能问答开启时执行
             if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
               if (config.functionOnStatus.autoQa.roomWhitelist) {
-                const isInRoomWhiteList = config.roomWhiteList.includes(roomId) || (topic && config.roomWhiteList.includes(topic))
+                const isInRoomWhiteList = await containsRoom(config.roomWhiteList, room)
                 if (isInRoomWhiteList) {
                   log.info('当前群在白名单内，请求问答...')
                   await wxai(config, bot, talker, room, message)
@@ -525,7 +530,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
             // 智能问答开启时执行
             if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
               if (config.functionOnStatus.autoQa.contactWhitelist) {
-                const isInContactWhiteList = config.contactWhiteList.includes(talker.id) || (alias && config.contactWhiteList.includes(alias)) || config.contactWhiteList.includes(name)
+                const isInContactWhiteList = await containsContact(config.contactWhiteList, talker)
                 if (isInContactWhiteList) {
                   log.info('当前好友在白名单内，请求问答...')
                   await wxai(config, bot, talker, undefined, message)
@@ -556,8 +561,6 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
           // chatdev.pub_message(message)
           chatdev.pub_event(eventMessage('onMessage', { curDate }))
         }
-      } else {
-        log.info('重复消费消息：', message.id)
       }
     })
 

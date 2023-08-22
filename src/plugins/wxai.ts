@@ -7,7 +7,7 @@ import {
   // nlp,
   // QueryData,
   genToken,
-} from '../sdk/openai/index.js'
+} from '../api/sdk/openai/index.js'
 
 import { FileBox } from 'file-box'
 // import excel2order from '../excel.js'
@@ -28,6 +28,8 @@ import {
   formatSentMessage,
 } from '../utils/utils.js'
 
+import type { configTypes } from '../types/mod.js'
+
 // import { ChatGPTAPI } from 'chatgpt'
 import Api2d from 'api2d'
 // import axios from 'axios'
@@ -36,7 +38,7 @@ import Api2d from 'api2d'
 // const userInfo = os.userInfo()
 // const rootPath = `${userInfo.homedir}\\Documents\\WeChat Files\\`
 
-async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room | undefined, message: Message) {
+async function wxai (sysConfig: configTypes.Config, bot: Wechaty, talker: Contact, room: Room | undefined, message: Message) {
   // const talker = message.talker()
   //   const roomid = room ? room.id : ''
   let text = message.text()
@@ -56,17 +58,17 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
     answer = await aibot(sysConfig, talker, undefined, text)
   }
 
-  if (room && message.type() === types.Message.MiniProgram && !sysConfig.linkWhiteList.includes(talker.id)) {
-    const miniProgram = await message.toMiniProgram()
-    text = `${miniProgram.title()?.slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
-    answer = await aibot(sysConfig, talker, room, text)
-  }
+  // if (room && message.type() === types.Message.MiniProgram && !sysConfig.linkWhiteList.includes(talker.id)) {
+  //   const miniProgram = await message.toMiniProgram()
+  //   text = `${miniProgram.title()?.slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
+  //   answer = await aibot(sysConfig, talker, room, text)
+  // }
 
-  if (room && message.type() === types.Message.Url && !sysConfig.linkWhiteList.includes(talker.id)) {
-    const urllink = await message.toUrlLink()
-    text = `${urllink.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
-    answer = await aibot(sysConfig, talker, room, text)
-  }
+  // if (room && message.type() === types.Message.Url && !sysConfig.linkWhiteList.includes(talker.id)) {
+  //   const urllink = await message.toUrlLink()
+  //   text = `${urllink.title().slice(0, 5)}是由群主或管理员所发布的小程序卡片消息吗？`
+  //   answer = await aibot(sysConfig, talker, room, text)
+  // }
 
   //   log.info(JSON.stringify(answer))
   console.debug('回复消息：', JSON.stringify(answer))
@@ -147,24 +149,27 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
 
 };
 
-async function aibot (sysConfig: any, talker: any, room: any, query: any) {
+async function aibot (sysConfig: configTypes.Config, talker: any, room: any, query: any) {
   let answer = {}
   const roomid = room?.id
   const wxid = talker.id
   const nickName = talker.name()
   const topic = await room?.topic()
-  log.info('query:', query)
+  log.info('查询内容，query:', query)
   const content = query
   const callBot = sysConfig.botConfig.autoQa.type
+  const ops = {
+    EncodingAESKey: sysConfig.botConfig.wxOpenAi.encodingAesKey,
+    TOKEN: sysConfig.botConfig.wxOpenAi.token,
+  }
+
+  log.info('微信对话平台配置信息：', JSON.stringify(ops))
 
   let answerJson
   switch (callBot) {
     case 'wxOpenai':
-      // log.info('开始请求微信对话平台...')
-      init({
-        EncodingAESKey: sysConfig.WXOPENAI_ENCODINGAESKEY,
-        TOKEN: sysConfig.WXOPENAI_TOKEN,
-      })
+      log.info('开始请求微信对话平台...')
+      init(ops)
 
       try {
         const username = room ? (nickName + '/' + topic) : nickName
@@ -175,7 +180,7 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
         })
 
         let queryData
-        if (sysConfig.DIFF_REPLY_ONOFF && room) {
+        if (sysConfig.functionOnStatus.autoQa.customReply && room) {
           queryData = {
             first_priority_skills: [ topic || '' ],
             query,
@@ -192,7 +197,7 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
 
         const resMsg = await chatAibot(queryData)
         // console.debug(resMsg)
-        log.info('对话返回原始：', resMsg)
+        log.info('对话返回原始：', JSON.stringify(resMsg))
         // log.info('对话返回：', JSON.stringify(resMsg).replace(/[\r\n]/g, "").replace(/\ +/g, ""))
         log.info('回答内容：', resMsg.msgtype, resMsg.query, resMsg.answer)
         // console.debug(resMsg.query)
@@ -239,14 +244,14 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
               break
           }
 
-          if (sysConfig.DIFF_REPLY_ONOFF) {
+          if (sysConfig.functionOnStatus.autoQa.customReply) {
             if (room && (resMsg.skill_name !== topic && resMsg.skill_name !== '通用问题')) {
               answer = {}
             }
           }
         }
       } catch (err) {
-        log.error(JSON.stringify(err))
+        log.error('请求微信对话平台错误：', err)
       }
       break
     case 'chatGpt':

@@ -6,7 +6,7 @@ import {
   // Room,
   WechatyBuilder,
 } from 'wechaty'
-import { config } from '../src/services/config.js'
+import { config } from '../src/services/configService.js'
 
 // import { StoreByVika } from './plugins/basic-data-storage-for-vika.js'
 import { ChatFlow } from '../src/chatflow.js'

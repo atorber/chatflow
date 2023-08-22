@@ -1,4 +1,4 @@
-import { VikaBot, TaskConfig } from './vika.js'
+import { VikaBot, TaskConfig, DateBase } from './vika.js'
 import { wxai } from './wxai.js'
 import { sendNotice } from './group-notice.js'
 
@@ -36,4 +36,5 @@ export {
   getRoom,
   isThisContact,
   isThisRoom,
+  type DateBase,
 }
