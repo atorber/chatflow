@@ -1018,6 +1018,31 @@ class VikaBot {
       }
       log.info('\n\n初始化系统表完成...\n\n================================================\n')
       // const tasks = await this.getTimedTask()
+      const that = this
+      setInterval(() => {
+        // log.info('待处理消息池长度：', that.msgStore.length||0);
+        // that.msgStore = that.msgStore.concat(global.sentMessage)
+        // global.sentMessage = []
+
+        if (that.msgStore.length && that.dataBaseIds.messageSheet) {
+          const end = that.msgStore.length < 10 ? that.msgStore.length : 10
+          const records = that.msgStore.splice(0, end)
+          const messageSheet = that.dataBaseIds.messageSheet
+          const datasheet = that.vika.datasheet(messageSheet)
+          // log.info('写入vika的消息：', JSON.stringify(records))
+          try {
+            datasheet.records.create(records).then((response) => {
+              if (response.success) {
+                log.info('写入vika成功：', end, JSON.stringify(response.code))
+              } else {
+                log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
+              }
+            }).catch(err => { log.error('调用vika写入接口失败：', err) })
+          } catch (err) {
+            log.error('调用datasheet.records.create失败：', err)
+          }
+        }
+      }, 1000)
       return true
     } else {
       log.error('\n\n指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息\n\n================================================\n')
