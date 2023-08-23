@@ -210,7 +210,6 @@ interface Config {
   contactConfig: ContactConfig;
   roomConfig: RoomConfig;
   apps?: AppsConfig;
-  command?: CommandConfig;
 }
 
 export type {

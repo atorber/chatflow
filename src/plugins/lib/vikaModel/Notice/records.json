@@ -1,0 +1,1 @@
+{"code":200,"success":true,"data":{"total":1,"records":[{"recordId":"recLWwrspKK9H","createdAt":1692783390000,"updatedAt":1692783390000,"fields":{"通知目标类型":"好友","时间":1692597600000,"内容":"测试5分钟提醒","启用状态":"开启","周期":"每5分钟","昵称/群名称":"luyuchao"}}],"pageNum":1,"pageSize":1},"message":"SUCCESS"}

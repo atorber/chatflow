@@ -30,7 +30,9 @@ import {
   getContact,
   getRoom,
   TaskConfig,
-  DateBase,
+  // DateBase,
+  type BusinessRoom,
+  type BusinessUser,
 } from './plugins/mod.js'
 import type { configTypes } from './types/mod.js'
 
@@ -54,7 +56,6 @@ let chatdev: any = {}
 let jobs: any
 let vika: any
 let isVikaOk: boolean = false
-let dataBases: DateBase
 
 // 消息发布器
 export const sendMsg = async (publisher:Message|Room|Contact, sayable: Sayable, inviteeList?: Contact[]) => {
@@ -86,6 +87,7 @@ export async function getWhiteList () {
   const whiteList = await vika.getWhiteList()
   config.contactWhiteList = whiteList.contactWhiteList
   config.roomWhiteList = whiteList.roomWhiteList
+  log.info('获取到配置文件：', JSON.stringify(config))
 }
 
 // 保存配置文件到data/config.json
@@ -145,7 +147,7 @@ export async function updateJobs (bot: Wechaty, vika: any) {
   }
   try {
     const tasks = await vika.getTimedTask()
-    log.info('格式化的定时提醒任务tasks：\n', JSON.stringify(tasks))
+    log.info('获取到的定时提醒任务：\n', JSON.stringify(tasks))
     jobs = {}
     for (let i = 0; i < tasks.length; i++) {
       const task: TaskConfig = tasks[i]
@@ -159,12 +161,12 @@ export async function updateJobs (bot: Wechaty, vika: any) {
             try {
               if (task.targetType === 'contact') {
                 try {
-                  const contact = await getContact(bot, { name:task.targetName, id:task.targetId })
+                  const contact = await getContact(bot, task.target as BusinessUser)
                   if (contact) {
                     await sendMsg(contact, task.msg)
                     await wait(200)
                   } else {
-                    log.info('当前好友不存在:', task.targetName)
+                    log.info('当前好友不存在:', JSON.stringify(task.target))
                   }
                 } catch (e) {
                   log.error('发送好友定时任务失败:', e)
@@ -173,12 +175,12 @@ export async function updateJobs (bot: Wechaty, vika: any) {
 
               if (task.targetType === 'room') {
                 try {
-                  const room =  await getRoom(bot, { topic: task.targetName, id: task.targetId })
+                  const room =  await getRoom(bot, task.target as BusinessRoom)
                   if (room) {
                     await sendMsg(room, task.msg)
                     await wait(200)
                   } else {
-                    log.info('当前群不存在:', task.targetName)
+                    log.info('当前群不存在:', JSON.stringify(task.target))
                   }
                 } catch (e) {
                   log.error('发送群定时任务失败:', e)
@@ -209,7 +211,7 @@ export const onReadyOrLogin = async (bot:Wechaty) => {
       const res = await createVika()
       isVikaOk = true
       log.info('初始化vika成功:\n', JSON.stringify(res))
-      dataBases = await vika.getDataBases()
+      await vika.getDataBases()
       // log.info('系统表字典:', JSON.stringify(dataBases, undefined, 2))
     } catch (err) {
       log.info('初始化vika失败:\n', err)
@@ -336,8 +338,8 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
       if (addRes) {
         const curDate = new Date().toLocaleString()
         const talker = message.talker()
-        const name = talker.name()
-        const alias = await talker.alias()
+        // const name = talker.name()
+        // const alias = await talker.alias()
         const text = message.text()
         const room = message.room()
         const roomId = room?.id
@@ -363,19 +365,19 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
 
         // 管理员群接收到管理指令时执行相关操作
         if (isAdminRoom) {
-          log.info('管理员/群消息：', talker.name(), topic)
+          // log.info('管理员/群消息：', talker.name(), topic)
 
           if (message.type() === bot.Message.Type.Attachment) {
             await sendNotice(bot, message)
           }
 
           let replyText: string = ''
-          if (text === '指令列表' || text === '帮助') {
+          if (text === '帮助') {
             replyText = '操作指令说明:\n【更新配置】 更新全部配置\n【更新定时提醒】 更新定时提醒任务\n【更新白名单】 更新智能问答白名单\n【更新通讯录】 更新维格表通信录\n【下载通讯录】 下载通讯录xlsx表\n【下载通知模板】 下载通知模板'
             await sendMsg(message, replyText)
           }
 
-          if (isVikaOk && [ '更新配置', '更新定时提醒', '更新通讯录', '上传配置', '下载配置', '更新白名单', '更新活动', '报名活动' ].includes(text)) {
+          if ([ '更新配置', '更新定时提醒', '更新通讯录', '上传配置', '下载配置', '更新白名单', '更新活动', '报名活动' ].includes(text)) {
             switch (text) {
               case '更新配置':
                 log.info('热更新系统配置~')
@@ -514,7 +516,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
             // 检测顺风车信息并格式化
             // const KEYWORD_LIST = [ '人找车', '车找人' ]
             // try {
-            //   // 判断消息中是否包含关键字
+            //   // 判断消息中是否包含关键词
             //   if (KEYWORD_LIST.some(keyword => message.text().includes(keyword))) {
             //     const replyMsg = await getFormattedRideInfo(message)
             //     if (replyMsg) {

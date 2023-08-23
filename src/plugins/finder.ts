@@ -6,7 +6,7 @@ export type BusinessUser = {
     name: string;
   };
 
-// 优先级：好友ID、备注名称、昵称
+// 优先级：好友ID、好友备注、昵称
 export const getContact = async (bot:Wechaty, businessUser:BusinessUser) => {
 
   // 查找联系人
@@ -120,3 +120,27 @@ export const isThisRoom = async (bot:Wechaty, businessRoom:BusinessRoom, room:Ro
     }
   }
 }
+
+// 判断文本中是否包含关键词
+export function containsText (text: string, keywords: string[]): boolean {
+  return keywords.some(keyword => text.includes(keyword))
+}
+
+// 判断文本是否等于关键词
+export function equalText (text: string, keywords: string[]): boolean {
+  return keywords.some(keyword => text === keyword)
+}
+
+// 示例用法
+/*
+const text = "今天你吃饭了吗？";
+const keywords = ["今天", "明天"];
+
+const containsKeywords = containsText(text, keywords);
+
+if (containsKeywords) {
+  console.log("文本包含关键词中的至少一个。");
+} else {
+  console.log("文本不包含关键词中的任何一个。");
+}
+*/

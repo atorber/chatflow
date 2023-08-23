@@ -127,3 +127,4 @@ db/*.xlsx
 data/db/*.db
 data/table/*.xlsx
 data/table/*.csv
+data/media/image/*.jpg

@@ -30,7 +30,7 @@ export type Sheet = {
 }
 
 // export type CommandSchema = {
-//     '指令名称': FieldSingleText,
+//     '关键词': FieldSingleText,
 //     '说明': FieldText,
 //     '管理员微信号': FieldSingleText,
 //     '类型': FieldSingleSelect,
@@ -38,13 +38,13 @@ export type Sheet = {
 
 // export type Command = Sheet & {
 //     fields: CommandSchema,
-//     name: '指令列表',
+//     name: '关键词',
 //     defaultRecords: Record[]
 // }
 
-const commandSheet: Sheet = {
+const keywordsSheet: Sheet = {
   fields: [ {
-    name: '指令名称',
+    name: '关键词',
     type: FieldType.SingleText,
     property: {
       defaultValue: '',
@@ -79,46 +79,46 @@ const commandSheet: Sheet = {
     },
   },
   ],
-  name: '指令列表',
+  name: '关键词',
   defaultRecords: [
     {
       fields: {
-        指令名称: '更新配置',
+        关键词: '更新配置',
         说明: '更新系统配置，更改配置后需主动更新一次配置配置才会生效',
         类型: '系统指令',
       },
     },
     {
       fields: {
-        指令名称: '更新白名单',
+        关键词: '更新白名单',
         说明: '更新群白名单，白名单变动时需主动更新白名单',
         类型: '系统指令',
       },
     },
     {
       fields: {
-        指令名称: '更新问答',
+        关键词: '更新问答',
         说明: '更新微信对话平台中的问答列表',
         类型: '系统指令',
       },
     },
     {
       fields: {
-        指令名称: '更新机器人',
+        关键词: '更新机器人',
         说明: '更新机器人的群列表和好友列表',
         类型: '系统指令',
       },
     },
     {
       fields: {
-        指令名称: '启用问答',
+        关键词: '启用问答',
         说明: '当前群启用智能问答',
         类型: '群指令',
       },
     },
     {
       fields: {
-        指令名称: '关闭问答',
+        关键词: '关闭问答',
         说明: '当前群关闭智能问答',
         类型: '群指令',
       },
@@ -843,7 +843,7 @@ const sheets: Sheets = {
   switchSheet,
   contactSheet,
   roomListSheet,
-  commandSheet,
+  keywordsSheet,
   messageSheet,
   // qaSheet,
   roomWhiteListSheet,

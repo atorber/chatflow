@@ -16,7 +16,10 @@ import {
   getRoom,
   isThisContact,
   isThisRoom,
+  BusinessRoom,
+  BusinessUser,
 } from './finder.js'
+import { type } from 'os'
 
 export type {
   TaskConfig,
@@ -36,5 +39,10 @@ export {
   getRoom,
   isThisContact,
   isThisRoom,
-  type DateBase,
+}
+
+export type {
+  DateBase,
+  BusinessRoom,
+  BusinessUser,
 }

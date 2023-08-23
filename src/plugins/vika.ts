@@ -42,21 +42,21 @@ export interface TaskConfig {
   time: string;
   cycle: string;
   targetType: 'contact' | 'room';
-  targetId: string;
-  targetName: string;
+  target: BusinessRoom | BusinessUser;
   active: boolean;
 }
 
-export type DateBase = {
-    messageSheet: any
-    commandSheet: any
-    contactSheet: any
-    roomListSheet: any
+export interface DateBase {
+    messageSheet: string
+    keywordsSheet: string
+    contactSheet: string
+    roomListSheet: string
     configSheet: string
     whiteListSheet: string
     noticeSheet: string
     statisticsSheet: string
     orderSheet: string
+    stockSheet:string
 }
 
 class VikaBot {
@@ -87,7 +87,7 @@ class VikaBot {
       this.msgStore = []
       this.dataBaseIds = {
         messageSheet: '',
-        commandSheet: '',
+        keywordsSheet: '',
         contactSheet: '',
         roomListSheet: '',
         configSheet: '',
@@ -95,19 +95,9 @@ class VikaBot {
         noticeSheet: '',
         statisticsSheet: '',
         orderSheet: '',
-
+        stockSheet:'',
       }
-      this.dataBaseNames = {
-        messageSheet: '',
-        commandSheet: '',
-        contactSheet: '',
-        roomListSheet: '',
-        configSheet: '',
-        whiteListSheet: '',
-        noticeSheet: '',
-        statisticsSheet: '',
-        orderSheet: '',
-      }
+      this.dataBaseNames = { ...this.dataBaseIds }
 
       this.contactWhiteList = []
       this.roomWhiteList = []
@@ -191,7 +181,7 @@ class VikaBot {
 
       this.dataBaseIds[key as keyof DateBase] = res.data.id
       this.dataBaseNames[name as keyof DateBase] = res.data.id
-      log.info('创建表成功：', JSON.stringify(this.dataBaseIds, undefined, 2))
+      // log.info('创建表成功：', JSON.stringify(this.dataBaseIds))
       // 删除空白行
       await this.clearBlankLines(res.data.id)
       return res.data
@@ -463,17 +453,17 @@ class VikaBot {
     await wait(1000)
     for (let i = 0; i < whiteListRecords.length; i++) {
       const record = whiteListRecords[i]
-      if (record.fields['好友备注/昵称或群名称'] || record.fields['好友ID/群ID']) {
+      if (record.fields['昵称/群名称'] || record.fields['好友ID/群ID'] || record.fields['好友备注']) {
         if (record.fields['类型'] === '群') {
           const room : BusinessRoom = {
-            topic:record.fields['好友备注/昵称或群名称'],
+            topic:record.fields['昵称/群名称'],
             id:record.fields['好友ID/群ID'],
           }
           this.roomWhiteList.push(room)
         } else {
           const contact:BusinessUser = {
-            name:record.fields['好友备注/昵称或群名称'],
-            alias:record.fields['好友备注/昵称或群名称'],
+            name:record.fields['昵称/群名称'],
+            alias:record.fields['好友备注'],
             id:record.fields['好友ID/群ID'],
           }
           this.contactWhiteList.push(contact)
@@ -492,17 +482,6 @@ class VikaBot {
 
     let timedTasks: TaskConfig[] = []
 
-    const taskFields: Field[] = sheets['noticeSheet']?.fields || []
-    const taskFieldDic: any = {}
-
-    for (let i = 0; i < taskFields.length; i++) {
-      const taskField: Field | undefined = taskFields[i]
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (taskFields && taskField !== undefined && taskFields[i]?.desc) {
-        taskFieldDic[taskField.name] = taskField.desc
-      }
-    }
-
     interface TaskRecord {
       recordId: string;
       fields: {
@@ -518,24 +497,28 @@ class VikaBot {
         time: task.fields['时间'],
         cycle: task.fields['周期'] || '无重复',
         targetType: task.fields['通知目标类型'] === '好友' ? 'contact' : 'room',
-        targetId: task.fields['好友ID/群ID'],
-        targetName: task.fields['好友备注/昵称或群名称'],
+        target: task.fields['通知目标类型'] === '好友' ? { name:task.fields['昵称/群名称'], id:task.fields['好友ID/群ID'], alias:task.fields['好友备注'] } : { topic:task.fields['昵称/群名称'], id:task.fields['好友ID/群ID'] },
         active: task.fields['启用状态'] === '开启',
       }
 
-      if (taskConfig.active && taskConfig.msg && taskConfig.time && taskConfig.cycle && (taskConfig.targetId || taskConfig.targetName)) {
+      if (taskConfig.active && taskConfig.msg && taskConfig.time && taskConfig.cycle && (task.fields['昵称/群名称'] || task.fields['好友ID/群ID'] || task.fields['好友备注'])) {
         return taskConfig
       }
 
       return null
     }).filter(Boolean)
-    // log.info(2, timedTasks)
+    log.info('任务列表：', timedTasks)
     this.reminderList = timedTasks
     return this.reminderList
-
   }
 
-  // 获取定时提醒
+  // 获取统计打卡
+  async getKeywords () {
+    const keywordsRecords = await this.getRecords(this.dataBaseIds.keywordsSheet, {})
+    log.info('关键词：\n', JSON.stringify(keywordsRecords))
+  }
+
+  // 获取统计打卡
   async getStatistics () {
     const statisticsRecords = await this.getRecords(this.dataBaseIds.statisticsSheet, {})
     log.info('统计打卡：\n', JSON.stringify(statisticsRecords))
@@ -554,7 +537,7 @@ class VikaBot {
           流水号:String(curTime),
           所属活动: 'system',
           昵称: talker.name(),
-          备注名称: await talker.alias() || '',
+          好友备注: await talker.alias() || '',
           群: await room?.topic() || '',
           创建时间: timeHms,
         },
@@ -916,7 +899,7 @@ class VikaBot {
               name: field?.name || '',
               desc: field?.desc || '',
             }
-            log.info('字段定义：', JSON.stringify(field))
+            // log.info('字段定义：', JSON.stringify(field))
             let options
             switch (field?.type) {
               case 'SingleText':
@@ -1032,9 +1015,7 @@ class VikaBot {
           // log.info('写入vika的消息：', JSON.stringify(records))
           try {
             datasheet.records.create(records).then((response) => {
-              if (response.success) {
-                log.info('写入vika成功：', end, JSON.stringify(response.code))
-              } else {
+              if (!response.success) {
                 log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
               }
             }).catch(err => { log.error('调用vika写入接口失败：', err) })

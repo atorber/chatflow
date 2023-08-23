@@ -2,40 +2,41 @@
 import type {
   Sheets,
 } from './Model'
-import messageSheet from './Message.js'
-import commandSheet from './CommandList.js'
-import configSheet from './EnvConfig.js'
-import statisticsSheet from './Statistics.js'
-import contactSheet from './Contact.js'
+import { messageSheet } from './Message/mod.js'
+import { keywordsSheet } from './Keywords/mod.js'
+import { configSheet } from './EnvConfig/mod.js'
+import { statisticsSheet } from './Statistics/mod.js'
+import { contactSheet } from './Contact/mod.js'
 // import qaSheet from './QaList.js'
-import roomListSheet from './Room.js'
-import orderSheet from './Order.js'
+import { roomListSheet } from './Room/mod.js'
+import { orderSheet } from './Order/mod.js'
 // import contactWhiteListSheet from './ContactWhiteList.js'
-import noticeSheet from './Notice.js'
+import { noticeSheet } from './Notice/mod.js'
 // import groupSheet from './ContactGroup.js'
-import { whiteListSheet } from './WhiteList.js'
-import { stockSheet } from './Stock.js'
+import { whiteListSheet } from './WhiteList/mod.js'
+import { stockSheet } from './Stock/mod.js'
 
 const sheets: Sheets = {
   configSheet,
-  // switchSheet,
-  commandSheet,
   contactSheet,
   roomListSheet,
+  whiteListSheet,
+  keywordsSheet,
+  noticeSheet,
+  statisticsSheet,
+  orderSheet,
+  messageSheet,
+  // stockSheet,
+  // groupSheet,
+  // switchSheet,
   // qaSheet,
   // roomWhiteListSheet,
   // contactWhiteListSheet,
-  statisticsSheet,
-  orderSheet,
-  whiteListSheet,
-  // groupSheet,
-  noticeSheet,
-  messageSheet,
-  stockSheet,
 }
 
 export {
   sheets,
+  stockSheet,
 }
 
 export default sheets

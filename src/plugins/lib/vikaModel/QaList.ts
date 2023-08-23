@@ -46,7 +46,7 @@ const recordRes = {
 
 const defaultRecords: any[] = recordRes.data.records
 
-const vikaRes = {
+const vikaFields = {
   code: 200,
   success: true,
   data: {
@@ -93,7 +93,7 @@ const vikaRes = {
   message: 'SUCCESS',
 }
 
-const fields: Field[] = vikaRes.data.fields
+const fields: Field[] = vikaFields.data.fields
 
 const qaSheet: Sheet = {
   fields,

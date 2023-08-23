@@ -1,7 +1,7 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 import 'dotenv/config.js'
 
-import { Contact, Message, types, log, Wechaty } from 'wechaty'
+import { Contact, Message, log, Wechaty } from 'wechaty'
 import { FileBox } from 'file-box'
 import XLSX from 'xlsx'
 
