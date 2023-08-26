@@ -273,7 +273,7 @@ class VikaBot {
     // const ID = msg.id
     // let msgType = msg.type()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
-    const files = []
+    const files:any = []
 
     try {
       if (uploadedAttachments) {
@@ -317,7 +317,7 @@ class VikaBot {
 
     const curTime = this.getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
-    const files = []
+    const files:any = []
     if (uploadedAttachments) {
       files.push(uploadedAttachments)
     }
@@ -414,7 +414,7 @@ class VikaBot {
   }
 
   async getAllRecords (datasheetId: string) {
-    let records = []
+    let records:any = []
     const datasheet = await this.vika.datasheet(datasheetId)
     const response: any = await datasheet.records.queryAll()
     // log.info('原始返回：',response)
@@ -434,7 +434,7 @@ class VikaBot {
   async clearBlankLines (datasheetId: any) {
     const records = await this.getRecords(datasheetId, {})
     // log.info(records)
-    const recordsIds = []
+    const recordsIds:any = []
     for (const i in records) {
       recordsIds.push(records[i].recordId)
     }

@@ -115,7 +115,7 @@ export class ActivityService {
   // 增加名额替补转正
   async assignSubstituteParticipants (activity: Activity, additionalParticipants: number, createTime: number, bot: Wechaty) {
     const canceledParticipants = additionalParticipants
-    const newlyAssignedParticipants = []
+    const newlyAssignedParticipants:any[] = []
 
     const substituteOrders = await orderData.find({
       isBench: true,
@@ -345,7 +345,7 @@ export class ActivityService {
     let cancelNumTotal = 0
     let newAddNumAll = addNum
     let cancelNum: number = 0
-    const newAdder = []
+    const newAdder:any = []
 
     if (curOrders.length) {
       for (const order of curOrders) {
@@ -505,7 +505,7 @@ export class ActivityService {
 
   // 活动报名信息拼接
   generateOrderText (activity: Activity, orders: Order[], message: string) {
-    const newOrders = []
+    const newOrders:any = []
     activity.maximum = activity.maximum || 999
     for (const order of orders) {
       if (order.totalNum === 0 || order.totalNum === 1) {
