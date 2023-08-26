@@ -65,7 +65,7 @@ export interface DateBase {
 function transformKeys (obj: Record<string, any>): Record<string, any> {
   const transformedObj: Record<string, any> = {}
   for (const key in obj) {
-    const newKey = key.split('/')[1] as string // Extract the part after the slash
+    const newKey = key.split('|')[1] as string // Extract the part after the slash
     transformedObj[newKey] = obj[key]
 
   }
@@ -500,7 +500,7 @@ class VikaBot {
     for (let i = 0; i < whiteListRecords.length; i++) {
       const record = whiteListRecords[i]
       const fields = record.fields
-      const app:'qa'|'msg'|'act' = fields['所属应用']?.split('/')[1]
+      const app:'qa'|'msg'|'act' = fields['所属应用']?.split('|')[1]
       // log.info('当前app:', app)
       if (fields['昵称/群名称'] || fields['好友ID/群ID'] || fields['好友备注']) {
         if (record.fields['类型'] === '群') {

@@ -15,6 +15,7 @@ import { noticeSheet } from './Notice/mod.js'
 // import groupSheet from './ContactGroup.js'
 import { whiteListSheet } from './WhiteList/mod.js'
 import { stockSheet } from './Stock/mod.js'
+import { groupNotificationsSheet } from './GroupNotifications/mod.js'
 
 const sheets: Sheets = {
   configSheet,
@@ -25,6 +26,7 @@ const sheets: Sheets = {
   noticeSheet,
   statisticsSheet,
   orderSheet,
+  groupNotificationsSheet,
   messageSheet,
   // stockSheet,
   // groupSheet,
