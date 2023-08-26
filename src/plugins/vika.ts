@@ -558,7 +558,7 @@ class VikaBot {
 
       return null
     }).filter(Boolean)
-    log.info('任务列表：', timedTasks)
+    // log.info('任务列表：', timedTasks)
     this.reminderList = timedTasks
     return this.reminderList
   }
