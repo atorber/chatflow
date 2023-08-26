@@ -28,8 +28,11 @@ import { sheets } from './lib/vikaModel/index.js'
 import { waitForMs as wait } from '../utils/utils.js'
 
 // import { sheets } from './lib/dataModel.js'
+// import { sheets } from './lib/dataModel.js'
+import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
 
 import type { BusinessRoom, BusinessUser } from './finder.js'
+import { ActivityService, Order, Activity } from '../services/activityService.js'
 
 type VikaBotConfigTypes = {
   spaceName: string,
@@ -59,9 +62,41 @@ export interface DateBase {
     stockSheet:string
 }
 
-class VikaBot {
+function transformKeys(obj: Record<string, any>): Record<string, any> {
+  const transformedObj: Record<string, any> = {};
 
-  token!: string
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      const newKey = key.split('/')[1] as string; // Extract the part after the slash
+      transformedObj[newKey] = obj[key];
+    }
+  }
+  return transformedObj;
+}
+
+// 比较两个数组差异
+function findArrayDifferences(vika: Activity[], db: Activity[]): {addArray:Activity[],removeArray:Activity[]} {
+  const removeArray: Activity[] = [];
+  const addArray: Activity[] = [];
+
+  // Find elements in vika that are not in db
+  for (const obj1 of vika) {
+    if (!db.some(obj2 => obj2._id === obj1._id)) {
+      addArray.push(obj1);
+    }
+  }
+
+  // Find elements in db that are not in vika
+  for (const obj2 of db) {
+    if (!vika.some(obj1 => obj1._id === obj2._id)) {
+      removeArray.push(obj2);
+    }
+  }
+
+  return {addArray, removeArray};
+}
+
+class VikaBot {
   spaceName!: string
   vika!: Vika
   spaceId!: string
@@ -70,9 +105,10 @@ class VikaBot {
   msgStore!: any[]
   envsOnVika!:any[]
   switchsOnVika!:any[]
-  contactWhiteList!:BusinessUser[]
-  roomWhiteList!:BusinessRoom[]
+  contactWhiteList!:ContactWhiteList
+  roomWhiteList!:RoomWhiteList
   reminderList!:any[]
+  statisticsRecords:any
 
   constructor (config: VikaBotConfigTypes) {
     if (!config.token) {
@@ -80,9 +116,8 @@ class VikaBot {
     } else if (!config.spaceName) {
       log.error('未配置空间名称，请在config.ts中配置')
     } else {
-      this.token = config.token
       this.spaceName = config.spaceName
-      this.vika = new Vika({ token: this.token })
+      this.vika = new Vika({ token: config.token })
       this.spaceId = ''
       this.msgStore = []
       this.dataBaseIds = {
@@ -99,9 +134,21 @@ class VikaBot {
       }
       this.dataBaseNames = { ...this.dataBaseIds }
 
-      this.contactWhiteList = []
-      this.roomWhiteList = []
+      this.contactWhiteList = {
+        qa:[],
+        msg:[],
+        act:[]
+      }
+      this.roomWhiteList = {
+        qa:[],
+        msg:[],
+        act:[]
+      }
     }
+  }
+
+  getActivityController(){
+    return new ActivityService()
   }
 
   async getAllSpaces () {
@@ -447,31 +494,36 @@ class VikaBot {
 
   // 获取白名单
   async getWhiteList () {
-    const whiteList: any = {}
+    let whiteList: {contactWhiteList:ContactWhiteList;roomWhiteList:RoomWhiteList} = {contactWhiteList:this.contactWhiteList,roomWhiteList:this.roomWhiteList}
 
     const whiteListRecords: any[] = await this.getRecords(this.dataBaseIds.whiteListSheet, {})
     await wait(1000)
     for (let i = 0; i < whiteListRecords.length; i++) {
       const record = whiteListRecords[i]
-      if (record.fields['昵称/群名称'] || record.fields['好友ID/群ID'] || record.fields['好友备注']) {
+      const fields = record.fields
+      const app:'qa'|'msg'|'act' = fields['所属应用']?.split('/')[1]
+      // log.info('当前app:', app)
+      if (fields['昵称/群名称'] || fields['好友ID/群ID'] || fields['好友备注']) {
         if (record.fields['类型'] === '群') {
           const room : BusinessRoom = {
             topic:record.fields['昵称/群名称'],
             id:record.fields['好友ID/群ID'],
           }
-          this.roomWhiteList.push(room)
+          this.roomWhiteList[app].push(room)
+
         } else {
           const contact:BusinessUser = {
-            name:record.fields['昵称/群名称'],
-            alias:record.fields['好友备注'],
-            id:record.fields['好友ID/群ID'],
+            name:fields['昵称/群名称'],
+            alias:fields['好友备注'],
+            id:fields['好友ID/群ID'],
           }
-          this.contactWhiteList.push(contact)
+          this.contactWhiteList[app].push(contact)
         }
       }
     }
-    whiteList['contactWhiteList'] = this.contactWhiteList
-    whiteList['roomWhiteList'] = this.roomWhiteList
+
+    whiteList.contactWhiteList = this.contactWhiteList
+    whiteList.roomWhiteList = this.roomWhiteList
     return whiteList
   }
 
@@ -512,7 +564,7 @@ class VikaBot {
     return this.reminderList
   }
 
-  // 获取统计打卡
+  // 获取关键字
   async getKeywords () {
     const keywordsRecords = await this.getRecords(this.dataBaseIds.keywordsSheet, {})
     log.info('关键词：\n', JSON.stringify(keywordsRecords))
@@ -522,6 +574,57 @@ class VikaBot {
   async getStatistics () {
     const statisticsRecords = await this.getRecords(this.dataBaseIds.statisticsSheet, {})
     log.info('统计打卡：\n', JSON.stringify(statisticsRecords))
+    this.statisticsRecords = statisticsRecords
+
+    const activitiesVika:Activity[] = []
+
+    for(const statistics of statisticsRecords) {
+      const fields = statistics.fields
+      const activity:Activity = transformKeys(fields) as Activity;
+      activity.active = activity.active === '开启'
+      activity._id = String(activity._id)
+      activity.short_code = String(activity._id)
+      activitiesVika.push(activity)
+    }
+
+    log.info('维格表中的活动：', JSON.stringify(activitiesVika))
+
+    const activityService = new ActivityService()
+    const activitiesDb = await activityService.getActivityList()
+    log.info('DB中的活动：', JSON.stringify(activitiesDb))
+
+    const { addArray, removeArray} = findArrayDifferences(activitiesVika, activitiesDb)
+    log.info('新增：', JSON.stringify(addArray))
+    log.info('移除：', JSON.stringify(removeArray))
+
+    for(const statistics of addArray) {
+      try{
+        await activityService.addActivity(statistics) 
+      }catch(e){
+        log.error('写入活动失败：', e)
+      }
+    }
+    
+    for(const statistics of removeArray) {
+      try{
+        await activityService.removeAtivity(statistics._id) 
+      }catch(e){
+        log.error('删除活动失败：', e)
+      }
+    }
+
+    for(const statistics of activitiesVika){
+      try{
+        await activityService.updateAtivity(statistics._id,statistics)
+
+      }catch(e){
+        log.error('更新活动失败：', e)
+      }
+    }
+
+    log.info('更新活动：',activitiesVika.length )
+
+    return statisticsRecords
   }
 
   // 创建订单
@@ -576,13 +679,19 @@ class VikaBot {
         if (item && isFriend && item.type() === types.Contact.Individual && !wxids.includes(item.id)) {
           // log.info('云端不存在：', item.name())
           let avatar = ''
+          let alias = ''
           try {
             avatar = String(await item.avatar())
           } catch (err) {
             log.error('获取好友头像失败：', err)
           }
+          try {
+            alias = await item.alias() || ''
+          } catch (err) {
+            log.error('获取好友备注失败：', err)
+          }
           const fields = {
-            alias: String(await item.alias() || ''),
+            alias,
             avatar,
             friend: item.friend(),
             gender: String(item.gender() || ''),
@@ -1001,6 +1110,7 @@ class VikaBot {
       }
       log.info('\n\n初始化系统表完成...\n\n================================================\n')
       // const tasks = await this.getTimedTask()
+      await this.getStatistics()
       const that = this
       setInterval(() => {
         // log.info('待处理消息池长度：', that.msgStore.length||0);

@@ -47,8 +47,9 @@ import schedule from 'node-schedule'
 
 import { addMessage } from './api/message.js'
 import { containsContact, containsRoom } from './services/userService.js'
+import { activityController } from './services/activityService.js'
 
-log.info('配置文件信息:\n', JSON.stringify(config))
+log.info('初始化配置文件信息:\n', JSON.stringify(config), '================')
 
 // log.info('process.env', JSON.stringify(process.env))
 
@@ -259,7 +260,7 @@ export const onReadyOrLogin = async (bot:Wechaty) => {
 
   if (config.botConfig.adminRoom.adminRoomId || config.botConfig.adminRoom.adminRoomTopic) {
     const adminRoom = await getRoom(bot, { topic:config.botConfig.adminRoom.adminRoomTopic, id:config.botConfig.adminRoom.adminRoomId })
-    await adminRoom?.say('chatflow启动成功，可输入【帮助】获取操作指令')
+    await adminRoom?.say(`${new Date().toLocaleString()}\nchatflow启动成功!\n当前登录用户${bot.currentUser.name()}\n可输入【帮助】获取操作指令`)
   }
 }
 
@@ -511,61 +512,86 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
         }
 
         // 微信对话开放平台智能问答
-        try {
-          if (room && roomId && !isSelf) {
-            // 检测顺风车信息并格式化
-            // const KEYWORD_LIST = [ '人找车', '车找人' ]
-            // try {
-            //   // 判断消息中是否包含关键词
-            //   if (KEYWORD_LIST.some(keyword => message.text().includes(keyword))) {
-            //     const replyMsg = await getFormattedRideInfo(message)
-            //     if (replyMsg) {
-            //       const replyText = replyMsg.choices[0].message.content.replace(/\r/g, '')
-            //       log.info('回复内容:', replyText)
-            // await sendMsg(room, replyText)
-            //     }
-            //   }
-            // } catch (err) {
+        if (room && roomId && !isSelf) {
+          // 检测顺风车信息并格式化
+          // const KEYWORD_LIST = [ '人找车', '车找人' ]
+          // try {
+          //   // 判断消息中是否包含关键词
+          //   if (KEYWORD_LIST.some(keyword => message.text().includes(keyword))) {
+          //     const replyMsg = await getFormattedRideInfo(message)
+          //     if (replyMsg) {
+          //       const replyText = replyMsg.choices[0].message.content.replace(/\r/g, '')
+          //       log.info('回复内容:', replyText)
+          // await sendMsg(room, replyText)
+          //     }
+          //   }
+          // } catch (err) {
 
-            // }
+          // }
 
-            // 智能问答开启时执行
-            if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
-              if (config.functionOnStatus.autoQa.roomWhitelist) {
-                const isInRoomWhiteList = await containsRoom(config.roomWhiteList, room)
+          // 智能问答开启时执行
+          if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
+            if (config.functionOnStatus.autoQa.roomWhitelist) {
+              const isInRoomWhiteList = await containsRoom(config.roomWhiteList.qa, room)
+              try {
                 if (isInRoomWhiteList) {
-                  log.info('当前群在白名单内，请求问答...')
+                  log.info('当前群在qa白名单内，请求问答...')
                   await wxai(config, bot, talker, room, message)
                 } else {
-                  log.info('当前群不在白名单内，流程结束')
+                  log.info('当前群不在qa白名单内，流程结束')
                 }
-              } else {
-                log.info('系统未开启白名单，请求问答...')
+
+              } catch (e) {
+                log.error('发起请求wxai失败', topic, e)
+              }
+
+            } else {
+              log.info('系统未开启qa群白名单，请求问答...')
+              try {
                 await wxai(config, bot, talker, room, message)
+              } catch (e) {
+                log.error('发起请求wxai失败', topic, e)
               }
             }
           }
 
-          if ((!room || !room.id) && !isSelf) {
-            // 智能问答开启时执行
-            if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
-              if (config.functionOnStatus.autoQa.contactWhitelist) {
-                const isInContactWhiteList = await containsContact(config.contactWhiteList, talker)
+          // 活动管理
+          const isActInRoomWhiteList = await containsRoom(config.roomWhiteList.act, room)
+          try {
+            if (isActInRoomWhiteList) {
+              log.info('当前群在act白名单内，开始请求活动管理...')
+              await activityController(message, room)
+            }
+          } catch (e) {
+            log.error('活动管理失败', topic, e)
+          }
+        }
+
+        if ((!room || !room.id) && !isSelf) {
+          // 智能问答开启时执行
+          if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
+            if (config.functionOnStatus.autoQa.contactWhitelist) {
+
+              try {
+                const isInContactWhiteList = await containsContact(config.contactWhiteList.qa, talker)
                 if (isInContactWhiteList) {
-                  log.info('当前好友在白名单内，请求问答...')
+                  log.info('当前好友在qa白名单内，请求问答...')
                   await wxai(config, bot, talker, undefined, message)
                 } else {
-                  log.info('当前好友不在白名单内，流程结束')
+                  log.info('当前好友不在qa白名单内，流程结束')
                 }
-              } else {
-                log.info('系统未开启好友白名单,对所有好友有效，请求问答...')
+              } catch (e) {
+                log.error('发起请求wxai失败', talker.name(), e)
+              }
+            } else {
+              log.info('系统未开启qa好友白名单,对所有好友有效，请求问答...')
+              try {
                 await wxai(config, bot, talker, undefined, message)
+              } catch (e) {
+                log.error('发起请求wxai失败', talker.name(), e)
               }
             }
           }
-
-        } catch (e) {
-          log.error('发起请求wxai失败', e)
         }
 
         // 消息存储到维格表

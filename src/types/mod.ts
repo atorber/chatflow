@@ -6,6 +6,8 @@ import type {
   Config,
   SysConfig,
   VikaConfig,
+  ContactWhiteList,
+  RoomWhiteList,
 } from './config.js'
 
 export { EnvironmentVariables } from './env.js'
@@ -20,4 +22,6 @@ export {
   type RoomConfig,
   type Config,
   type SysConfig,
+  ContactWhiteList,
+  RoomWhiteList,
 }

@@ -28,6 +28,29 @@ async function formatSentMessage (userSelf: Contact, text: string, talker: Conta
   return record
 }
 
+// 时间格式化
+function formatTimestamp(timestamp: string | number | Date) {
+  const currentDate = new Date(timestamp);
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+  const day = currentDate.getDate();
+  const hour = currentDate.getHours();
+  const minute = currentDate.getMinutes();
+  const second = currentDate.getSeconds();
+  const dayOfWeek = currentDate.getDay();
+
+  const startOfDayTimestamp:number = currentDate.setHours(0, 0, 0, 0);
+  const endOfDayTimestamp:number = startOfDayTimestamp + 60 * 60 * 24 * 1000;
+  const daysOfWeek:string[] = ['日', '一', '二', '三', '四', '五', '六'];
+  const dayText:string = '周' + daysOfWeek[dayOfWeek];
+  const timeText:string = `${hour < 10 ? '0' + hour : hour}:${minute < 10 ? '0' + minute : minute}:${second < 10 ? '0' + second : second}`;
+  const dateText:string = `${month}月${day}日`;
+  const dateTimeText:string = `${year}-${month}-${day} ${dayText} ${timeText}`;
+
+  const res:[string,number,number,string,string,string]= [dateText, startOfDayTimestamp, endOfDayTimestamp, dayText, timeText, dateTimeText]
+  return res;
+}
+
 // 定义一个延时方法
 const waitForMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -100,11 +123,33 @@ const getRule = (task:TaskConfig) => {
   return curRule
 }
 
+// 半角转全角
+function toDBC (txtstring: any) {
+  let tmp = ''
+  let h = 0
+  let c = 0
+  for (let i = 0; i < txtstring.length; i++) {
+    if (txtstring.charCodeAt(i) === 32) {
+      tmp = tmp + String.fromCharCode(12288)
+      h += 1
+    } else if (txtstring.charCodeAt(i) < 127) {
+      tmp = tmp + String.fromCharCode(txtstring.charCodeAt(i) + 65248)
+      h += 1
+    } else {
+      tmp = tmp + txtstring[i]
+      c += 1
+    }
+  }
+  return [ tmp, h, c ]
+}
+
 export {
+  toDBC,
   getNow,
   waitForMs,
   formatSentMessage,
   getRule,
+  formatTimestamp,
 }
 
 export default waitForMs
