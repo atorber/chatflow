@@ -5,13 +5,13 @@ type AIType = 'WxOpenai' | string;
 interface RoomWhiteList{
   qa:BusinessRoom[]
   msg:BusinessRoom[]
-  act:BusinessRoom[] 
+  act:BusinessRoom[]
 }
 
 interface ContactWhiteList{
 qa:BusinessUser[]
 msg:BusinessUser[]
-act:BusinessUser[] 
+act:BusinessUser[]
 }
 
 interface SysConfig {
@@ -214,5 +214,5 @@ export type {
   SysConfig,
   Config,
   RoomWhiteList,
-  ContactWhiteList
+  ContactWhiteList,
 }

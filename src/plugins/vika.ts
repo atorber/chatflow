@@ -62,41 +62,40 @@ export interface DateBase {
     stockSheet:string
 }
 
-function transformKeys(obj: Record<string, any>): Record<string, any> {
-  const transformedObj: Record<string, any> = {};
-
+function transformKeys (obj: Record<string, any>): Record<string, any> {
+  const transformedObj: Record<string, any> = {}
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      const newKey = key.split('/')[1] as string; // Extract the part after the slash
-      transformedObj[newKey] = obj[key];
-    }
+    const newKey = key.split('/')[1] as string // Extract the part after the slash
+    transformedObj[newKey] = obj[key]
+
   }
-  return transformedObj;
+  return transformedObj
 }
 
 // 比较两个数组差异
-function findArrayDifferences(vika: Activity[], db: Activity[]): {addArray:Activity[],removeArray:Activity[]} {
-  const removeArray: Activity[] = [];
-  const addArray: Activity[] = [];
+function findArrayDifferences (vika: Activity[], db: Activity[]): {addArray:Activity[], removeArray:Activity[]} {
+  const removeArray: Activity[] = []
+  const addArray: Activity[] = []
 
   // Find elements in vika that are not in db
   for (const obj1 of vika) {
     if (!db.some(obj2 => obj2._id === obj1._id)) {
-      addArray.push(obj1);
+      addArray.push(obj1)
     }
   }
 
   // Find elements in db that are not in vika
   for (const obj2 of db) {
     if (!vika.some(obj1 => obj1._id === obj2._id)) {
-      removeArray.push(obj2);
+      removeArray.push(obj2)
     }
   }
 
-  return {addArray, removeArray};
+  return { addArray, removeArray }
 }
 
 class VikaBot {
+
   spaceName!: string
   vika!: Vika
   spaceId!: string
@@ -137,17 +136,17 @@ class VikaBot {
       this.contactWhiteList = {
         qa:[],
         msg:[],
-        act:[]
+        act:[],
       }
       this.roomWhiteList = {
         qa:[],
         msg:[],
-        act:[]
+        act:[],
       }
     }
   }
 
-  getActivityController(){
+  getActivityController () {
     return new ActivityService()
   }
 
@@ -494,7 +493,7 @@ class VikaBot {
 
   // 获取白名单
   async getWhiteList () {
-    let whiteList: {contactWhiteList:ContactWhiteList;roomWhiteList:RoomWhiteList} = {contactWhiteList:this.contactWhiteList,roomWhiteList:this.roomWhiteList}
+    const whiteList: {contactWhiteList:ContactWhiteList;roomWhiteList:RoomWhiteList} = { contactWhiteList:this.contactWhiteList, roomWhiteList:this.roomWhiteList }
 
     const whiteListRecords: any[] = await this.getRecords(this.dataBaseIds.whiteListSheet, {})
     await wait(1000)
@@ -578,13 +577,17 @@ class VikaBot {
 
     const activitiesVika:Activity[] = []
 
-    for(const statistics of statisticsRecords) {
+    for (const statistics of statisticsRecords) {
       const fields = statistics.fields
-      const activity:Activity = transformKeys(fields) as Activity;
-      activity.active = activity.active === '开启'
-      activity._id = String(activity._id)
-      activity.short_code = String(activity._id)
-      activitiesVika.push(activity)
+      const fieldsNew:any = transformKeys(fields)
+      if (fieldsNew._id && fieldsNew.type && fieldsNew.desc && (fieldsNew.topic || fieldsNew.roomid)) {
+        const activity:Activity = fieldsNew as Activity
+        activity.active = activity.active === '开启'
+        activity._id = String(activity._id)
+        activity.shortCode = String(activity._id)
+        activitiesVika.push(activity)
+
+      }
     }
 
     log.info('维格表中的活动：', JSON.stringify(activitiesVika))
@@ -593,36 +596,36 @@ class VikaBot {
     const activitiesDb = await activityService.getActivityList()
     log.info('DB中的活动：', JSON.stringify(activitiesDb))
 
-    const { addArray, removeArray} = findArrayDifferences(activitiesVika, activitiesDb)
+    const { addArray, removeArray } = findArrayDifferences(activitiesVika, activitiesDb)
     log.info('新增：', JSON.stringify(addArray))
     log.info('移除：', JSON.stringify(removeArray))
 
-    for(const statistics of addArray) {
-      try{
-        await activityService.addActivity(statistics) 
-      }catch(e){
+    for (const statistics of addArray) {
+      try {
+        await activityService.addActivity(statistics)
+      } catch (e) {
         log.error('写入活动失败：', e)
       }
     }
-    
-    for(const statistics of removeArray) {
-      try{
-        await activityService.removeAtivity(statistics._id) 
-      }catch(e){
+
+    for (const statistics of removeArray) {
+      try {
+        await activityService.removeAtivity(statistics._id)
+      } catch (e) {
         log.error('删除活动失败：', e)
       }
     }
 
-    for(const statistics of activitiesVika){
-      try{
-        await activityService.updateAtivity(statistics._id,statistics)
+    for (const statistics of activitiesVika) {
+      try {
+        await activityService.updateAtivity(statistics._id, statistics)
 
-      }catch(e){
+      } catch (e) {
         log.error('更新活动失败：', e)
       }
     }
 
-    log.info('更新活动：',activitiesVika.length )
+    log.info('更新活动：', activitiesVika.length)
 
     return statisticsRecords
   }

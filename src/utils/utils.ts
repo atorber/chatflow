@@ -29,26 +29,26 @@ async function formatSentMessage (userSelf: Contact, text: string, talker: Conta
 }
 
 // 时间格式化
-function formatTimestamp(timestamp: string | number | Date) {
-  const currentDate = new Date(timestamp);
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth() + 1;
-  const day = currentDate.getDate();
-  const hour = currentDate.getHours();
-  const minute = currentDate.getMinutes();
-  const second = currentDate.getSeconds();
-  const dayOfWeek = currentDate.getDay();
+function formatTimestamp (timestamp: string | number | Date) {
+  const currentDate = new Date(timestamp)
+  const year = currentDate.getFullYear()
+  const month = currentDate.getMonth() + 1
+  const day = currentDate.getDate()
+  const hour = currentDate.getHours()
+  const minute = currentDate.getMinutes()
+  const second = currentDate.getSeconds()
+  const dayOfWeek = currentDate.getDay()
 
-  const startOfDayTimestamp:number = currentDate.setHours(0, 0, 0, 0);
-  const endOfDayTimestamp:number = startOfDayTimestamp + 60 * 60 * 24 * 1000;
-  const daysOfWeek:string[] = ['日', '一', '二', '三', '四', '五', '六'];
-  const dayText:string = '周' + daysOfWeek[dayOfWeek];
-  const timeText:string = `${hour < 10 ? '0' + hour : hour}:${minute < 10 ? '0' + minute : minute}:${second < 10 ? '0' + second : second}`;
-  const dateText:string = `${month}月${day}日`;
-  const dateTimeText:string = `${year}-${month}-${day} ${dayText} ${timeText}`;
+  const startOfDayTimestamp:number = currentDate.setHours(0, 0, 0, 0)
+  const endOfDayTimestamp:number = startOfDayTimestamp + 60 * 60 * 24 * 1000
+  const daysOfWeek:string[] = [ '日', '一', '二', '三', '四', '五', '六' ]
+  const dayText:string = '周' + daysOfWeek[dayOfWeek]
+  const timeText:string = `${hour < 10 ? '0' + hour : hour}:${minute < 10 ? '0' + minute : minute}:${second < 10 ? '0' + second : second}`
+  const dateText:string = `${month}月${day}日`
+  const dateTimeText:string = `${year}-${month}-${day} ${dayText} ${timeText}`
 
-  const res:[string,number,number,string,string,string]= [dateText, startOfDayTimestamp, endOfDayTimestamp, dayText, timeText, dateTimeText]
-  return res;
+  const res:[string, number, number, string, string, string] = [ dateText, startOfDayTimestamp, endOfDayTimestamp, dayText, timeText, dateTimeText ]
+  return res
 }
 
 // 定义一个延时方法

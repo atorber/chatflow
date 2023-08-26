@@ -1,3 +1,4 @@
+/* eslint-disable sort-keys */
 import { db } from '../db/tables.js'
 import { Room, Contact, Message, Wechaty, log } from 'wechaty'
 import { v4 } from 'uuid'
@@ -19,7 +20,7 @@ export interface Activity {
   cycle?: string;
   topic?: string;
   roomid?: string;
-  short_code?: string;
+  shortCode?: string;
   title: string;
 }
 
@@ -31,11 +32,11 @@ export interface Order {
   nick: string;
   alias?: string;
   status: number;
-  total_num: number;
+  totalNum: number;
   update_time: number;
   create_time: number;
   utc_time: string;
-  is_bench: boolean;
+  isBench: boolean;
   member: Contact;
   act_decs: string;
 }
@@ -46,12 +47,12 @@ export class ActivityService {
   private activities: Activity[] = []
   private activitiesStore: any = {}
 
-  constructor() {
+  constructor () {
 
   }
 
-  getHelpText() {
-    const keywords_base: Record<string, string> = {
+  getHelpText () {
+    const keywordsBase: Record<string, string> = {
       '【报名】': '报名活动1人',
       '【取消】': '取消报名1人',
       '【报名51】': '报名编号51的活动',
@@ -67,13 +68,13 @@ export class ActivityService {
       // '#活动模板': '获取发布活动模板',
     }
 
-    const keywordList = Object.entries(keywords_base).map(([key, value]) => `${key}${value}`).join('\n')
+    const keywordList = Object.entries(keywordsBase).map(([ key, value ]) => `${key}${value}`).join('\n')
 
     return `回复括号内指令即可完成操作：\n--------------------------------\n${keywordList}\n--------------------------------\n`
   }
 
   // 创建活动
-  async addActivity(activity: Activity): Promise<Activity | any> {
+  async addActivity (activity: Activity): Promise<Activity | any> {
     try {
       await activityData.insert(activity)
       this.activities.push(activity)
@@ -84,7 +85,7 @@ export class ActivityService {
   }
 
   // 删除活动
-  async removeAtivity(activityId: string): Promise<any> {
+  async removeAtivity (activityId: string): Promise<any> {
     try {
       await activityData.remove({ _id: activityId })
       const indexToRemove = this.activities.findIndex(activity => activity._id === activityId)
@@ -98,7 +99,7 @@ export class ActivityService {
   }
 
   // 更新活动
-  async updateAtivity(activityId: string, data: Activity): Promise<any> {
+  async updateAtivity (activityId: string, data: Activity): Promise<any> {
     try {
       await activityData.update({ _id: activityId }, data)
       const indexToUpdate = this.activities.findIndex(activity => activity._id === activityId)
@@ -112,12 +113,12 @@ export class ActivityService {
   }
 
   // 增加名额替补转正
-  async assignSubstituteParticipants(activity: Activity, additionalParticipants: number, createTime: number, bot: Wechaty) {
+  async assignSubstituteParticipants (activity: Activity, additionalParticipants: number, createTime: number, bot: Wechaty) {
     const canceledParticipants = additionalParticipants
     const newlyAssignedParticipants = []
 
     const substituteOrders = await orderData.find({
-      is_bench: true,
+      isBench: true,
       act_id: activity._id,
     })
 
@@ -128,7 +129,7 @@ export class ActivityService {
         const member = await bot.Contact.find({ id: substituteOrder.wxid })
 
         if (member) {
-          const participantsToAssign = Math.min(substituteOrder.total_num, remainingAdditionalParticipants)
+          const participantsToAssign = Math.min(substituteOrder.totalNum, remainingAdditionalParticipants)
 
           await this.registerActivity(activity, member, participantsToAssign, false, substituteOrder.create_time)
           newlyAssignedParticipants.push(member.id)
@@ -142,15 +143,15 @@ export class ActivityService {
       }
     }
 
-    return [canceledParticipants, newlyAssignedParticipants]
+    return [ canceledParticipants, newlyAssignedParticipants ]
   }
 
   // 获取活动列表
-  async getActivityList(room?: Room) {
+  async getActivityList (room?: Room) {
     let query: any = {}
     let activityList = []
     if (room) {
-      query = [{
+      query = [ {
         roomid: room.id,
         type: '活动报名',
         active: true,
@@ -159,7 +160,7 @@ export class ActivityService {
         topic: await room.topic(),
         type: '活动报名',
         active: true,
-      }]
+      } ]
       activityList = await activityData.find({ $or: query })
     } else {
       query = {
@@ -173,12 +174,12 @@ export class ActivityService {
     return activityList
   };
 
-  async getActivityListText(room: Room) {
+  async getActivityListText (room: Room) {
     const acts = await this.getActivityList(room)
     let msg: string = ''
     if (acts.length > 1) {
-      const acts_text = acts.map((act: Activity, index: number) => `【报名${index === 0 ? '' : act._id}】\n${act.desc}\n\n`).join('')
-      msg = `有${acts.length}个报名中的活动，回复指令报名\n------------------------------\n${acts_text}`
+      const actsText = acts.map((act: Activity, index: number) => `【报名${index === 0 ? '' : act._id}】\n${act.desc}\n\n`).join('')
+      msg = `有${acts.length}个报名中的活动，回复指令报名\n------------------------------\n${actsText}`
     } else if (acts.length === 1) {
       const act = acts[0]
       const orders = await this.getAllOrdersForActivity(act)
@@ -190,8 +191,8 @@ export class ActivityService {
   }
 
   // 获取群组最新或指定活动信息
-  async getLatestActivity(room: Room, short_code?: string) {
-    const query: any = [{
+  async getLatestActivity (room: Room, shortCode?: string) {
+    const query: any = [ {
       roomid: room.id,
       type: '活动报名',
       active: true,
@@ -200,34 +201,34 @@ export class ActivityService {
       topic: await room.topic(),
       type: '活动报名',
       active: true,
-    }]
+    } ]
 
-    if (short_code) {
-      query.short_code = short_code
+    if (shortCode) {
+      query.shortCode = shortCode
     }
 
-    const latestActivity = await activityData.findOne({$or:query})
+    const latestActivity = await activityData.findOne({ $or:query })
 
     // log.info('获取最新活动：======================\n', JSON.stringify(latestActivity));
 
     return latestActivity || {}
   };
 
-  async getLatestActivityText(room: Room, short_code?: string) {
+  async getLatestActivityText (room: Room, shortCode?: string) {
     let msg: string = ''
-    const act = await this.getLatestActivity(room, short_code)
+    const act = await this.getLatestActivity(room, shortCode)
     if (act._id) {
       const orders = await this.getAllOrdersForActivity(act)
       msg = this.generateOrderText(act, orders, msg)
     } else {
-      msg = `没有编号${short_code}的活动或活动已截止`
+      msg = `没有编号${shortCode}的活动或活动已截止`
     }
 
     return msg
   }
 
   // 获取指定活动全部订单
-  async getAllOrdersForActivity(activity: Activity) {
+  async getAllOrdersForActivity (activity: Activity) {
     const query = {
       act_id: activity._id,
     }
@@ -236,16 +237,16 @@ export class ActivityService {
   };
 
   // 获取活动报名人数
-  getActivityTotalParticipants(orders: Order[]) {
+  getActivityTotalParticipants (orders: Order[]) {
     let totalParticipants = 0
     for (const order of orders) {
-      totalParticipants += order.total_num
+      totalParticipants += order.totalNum
     }
     return totalParticipants
   };
 
   // 报名活动
-  async registerActivity(activity: Activity, member: Contact, additionalNumber: number, isBench: boolean, createTime: number) {
+  async registerActivity (activity: Activity, member: Contact, additionalNumber: number, isBench: boolean, createTime: number) {
     const timestamp = new Date().getTime()
     const orderId = v4()
 
@@ -257,12 +258,12 @@ export class ActivityService {
       nick: member.name(),
       alias: await member.alias(),
       status: 0,
-      total_num: isBench ? 1 : additionalNumber,
+      totalNum: isBench ? 1 : additionalNumber,
       update_time: timestamp,
       create_time: createTime,
       act_decs: activity.desc,
       utc_time: formatTimestamp(timestamp)[5],
-      is_bench: isBench,
+      isBench,
       member,
     }
 
@@ -279,7 +280,7 @@ export class ActivityService {
   };
 
   // 报名活动或替补
-  async signUpForActivity(activity: Activity, member: Contact, additionalNumber: any, createTime: number) {
+  async signUpForActivity (activity: Activity, member: Contact, additionalNumber: any, createTime: number) {
     activity.maximum = activity.maximum || 999
     const currentUserOrders: Order[] = await this.getCurrentUserOrdersForActivity(activity, member)
     let currentTotalNumber: any = 0
@@ -287,7 +288,7 @@ export class ActivityService {
 
     if (currentUserOrders.length) {
       for (const order of currentUserOrders) {
-        currentTotalNumber += order.total_num
+        currentTotalNumber += order.totalNum
       }
     }
 
@@ -324,10 +325,10 @@ export class ActivityService {
     return message
   };
 
-  async signUpForActivityText(room: Room, member: Contact, additionalNumber: any, createTime: number, short_code?: string) {
+  async signUpForActivityText (room: Room, member: Contact, additionalNumber: any, createTime: number, shortCode?: string) {
     let msg = ''
     if (additionalNumber < 3) {
-      const act = await this.getLatestActivity(room, short_code)
+      const act = await this.getLatestActivity(room, shortCode)
       if (!act._id) {
         msg = `@${member.name()} 没有可报名的活动`
       } else {
@@ -340,109 +341,106 @@ export class ActivityService {
   }
 
   // 取消报名或替补，替补转正
-  async cancelForActivity(act: Activity, cur_orders: Order[], add_num: number, member: Contact) {
-    let cancel_num_total = 0
-    let new_add_num_all = add_num
-    let cancel_num: number = 0
-    const new_adder = []
+  async cancelForActivity (act: Activity, curOrders: Order[], addNum: number, member: Contact) {
+    let cancelNumTotal = 0
+    let newAddNumAll = addNum
+    let cancelNum: number = 0
+    const newAdder = []
 
-    if (cur_orders.length) {
-      for (const order of cur_orders) {
-        const cur_order = order
-        const { _id, total_num, is_bench } = cur_order
+    if (curOrders.length) {
+      for (const order of curOrders) {
+        const curOrder = order
+        const { _id, totalNum, isBench } = curOrder
 
-        if (is_bench) {
-          if (total_num <= new_add_num_all) {
+        if (isBench) {
+          if (totalNum <= newAddNumAll) {
             await orderData.remove({ _id })
 
-            new_add_num_all -= total_num
-            cancel_num_total += total_num
+            newAddNumAll -= totalNum
+            cancelNumTotal += totalNum
 
-            if (new_add_num_all === 0) break
+            if (newAddNumAll === 0) break
           } else {
-            await orderData.update({ _id }, { $set: { total_num: total_num - add_num } }, { multi: true })
-            cancel_num_total += add_num
-            new_add_num_all = 0
+            await orderData.update({ _id }, { $set: { totalNum: totalNum - addNum } }, { multi: true })
+            cancelNumTotal += addNum
+            newAddNumAll = 0
             break
           }
         } else {
-          if (total_num > new_add_num_all) {
-            await orderData.update({ _id }, { $set: { total_num: total_num - new_add_num_all } }, { multi: true })
-            cancel_num_total += new_add_num_all
-            cancel_num = new_add_num_all
+          if (totalNum > newAddNumAll) {
+            await orderData.update({ _id }, { $set: { totalNum: totalNum - newAddNumAll } }, { multi: true })
+            cancelNumTotal += newAddNumAll
+            cancelNum = newAddNumAll
           } else {
             await orderData.remove({ _id })
-            cancel_num_total += total_num
-            cancel_num = total_num
+            cancelNumTotal += totalNum
+            cancelNum = totalNum
           }
         }
       }
     }
 
-    if (cancel_num) {
-      const benchs = await orderData.find({ is_bench: true, act_id: act._id })
+    if (cancelNum) {
+      const benchs = await orderData.find({ isBench: true, act_id: act._id })
       // Do something with benchs
 
       if (benchs.length > 0) {
-        let new_add_num = cancel_num
+        let newAddNum = cancelNum
 
         for (const key in benchs) {
+          if (benchs[key].totalNum <= newAddNum) {
 
-          if (member) {
-            if (benchs[key].total_num <= new_add_num) {
+            await this.registerActivity(act, member, benchs[key].totalNum, false, benchs[key].create_time)
+            newAdder.push(member.id)
+            await orderData.remove({ _id: benchs[key]._id })
 
-              await this.registerActivity(act, member, benchs[key].total_num, false, benchs[key].create_time)
-              new_adder.push(member.id)
-              await orderData.remove({ _id: benchs[key]._id })
+            newAddNum = newAddNum - benchs[key].totalNum
 
-              new_add_num = new_add_num - benchs[key].total_num
-
-              if (new_add_num === 0) {
-                break
-              }
-
-            } else {
-
-              await this.registerActivity(act, member, new_add_num, false, benchs[key].create_time)
-              new_adder.push(member.id)
-
+            if (newAddNum === 0) {
               break
             }
+
+          } else {
+
+            await this.registerActivity(act, member, newAddNum, false, benchs[key].create_time)
+            newAdder.push(member.id)
+
+            break
           }
 
         }
       }
     }
     // Do something with the result
-    return [cancel_num, new_adder, cancel_num_total]
+    return [ cancelNum, newAdder, cancelNumTotal ]
   }
 
-  async cancelForActivityText(room: Room, add_num: number, member: Contact, short_code?: string) {
+  async cancelForActivityText (room: Room, addNum: number, member: Contact, shortCode?: string) {
     let msg = ''
 
-    const act: Activity = await this.getLatestActivity(room, short_code)
+    const act: Activity = await this.getLatestActivity(room, shortCode)
 
     if (!act._id) {
       msg = `@${member.name()} 没有可取消报名的活动或活动已截止`
     } else {
-      const cur_orders = await this.getCurrentUserOrdersForActivity(act, member)
+      const curOrders = await this.getCurrentUserOrdersForActivity(act, member)
 
-      if (cur_orders.length > 0 && add_num === 1) {
+      if (curOrders.length > 0 && addNum === 1) {
 
-        const cancel_num: any = await this.cancelForActivity(act, cur_orders, add_num, member)
+        const cancelNum: any = await this.cancelForActivity(act, curOrders, addNum, member)
 
         // 获取全部订单
         const orders = await this.getAllOrdersForActivity(act)
 
-        if (cancel_num[1].length) {
-          msg = `@${member.name()} 取消${cancel_num[2]}人成功,替补转正!\n------------------------------\n`
+        if (cancelNum[1].length) {
+          msg = `@${member.name()} 取消${cancelNum[2]}人成功,替补转正!\n------------------------------\n`
           msg = this.generateOrderText(act, orders, msg)
         } else {
-          msg = `@${member.name()} 取消${cancel_num[2]}人成功!\n------------------------------\n`
+          msg = `@${member.name()} 取消${cancelNum[2]}人成功!\n------------------------------\n`
           msg = this.generateOrderText(act, orders, msg)
         }
 
-      } else if (cur_orders.length > 0 && add_num != 1) {
+      } else if (curOrders.length > 0 && addNum !== 1) {
         msg = `@${member.name()} 一次只能取消一个已报名额`
       } else {
         msg = `@${member.name()} 未报名活动`
@@ -453,48 +451,48 @@ export class ActivityService {
   }
 
   // 更新报名信息
-  async updateSignInOrder(currentOrder: Order, additionalParticipants: any) {
+  async updateSignInOrder (currentOrder: Order, additionalParticipants: any) {
     return await orderData.update({ _id: currentOrder._id }, {
       $set: {
-        total_num: currentOrder.total_num + additionalParticipants,
+        totalNum: currentOrder.totalNum + additionalParticipants,
       },
     }, { multi: true })
   }
 
   // 获取当前用户订单
-  async getCurrentOrderForMember(activity: Activity, member: Contact) {
-    const query: any = [{
+  async getCurrentOrderForMember (activity: Activity, member: Contact) {
+    const query: any = [ {
       act_id: activity._id,
       wxid: member.id,
     }, {
       act_id: activity._id,
       nick: member.name(),
-    }]
+    } ]
     const alias = await member.alias()
     if (alias) {
       query.push({
         act_id: activity._id,
-        alias
+        alias,
       })
     }
-    const order = await orderData.findOne({$or:query})
+    const order = await orderData.findOne({ $or:query })
     return order || {}
   }
 
   // 获取活动订单
-  async getCurrentUserOrdersForActivity(activity: Activity, member: Contact) {
-    const query: any = [{
+  async getCurrentUserOrdersForActivity (activity: Activity, member: Contact) {
+    const query: any = [ {
       act_id: activity._id,
       wxid: member.id,
     }, {
       act_id: activity._id,
       nick: member.name(),
-    }]
+    } ]
     const alias = await member.alias()
     if (alias) {
       query.push({
         act_id: activity._id,
-        alias
+        alias,
       })
     }
 
@@ -506,17 +504,17 @@ export class ActivityService {
   };
 
   // 活动报名信息拼接
-  generateOrderText(activity: Activity, orders: Order[], message: string) {
+  generateOrderText (activity: Activity, orders: Order[], message: string) {
     const newOrders = []
     activity.maximum = activity.maximum || 999
     for (const order of orders) {
-      if (order.total_num === 0 || order.total_num === 1) {
+      if (order.totalNum === 0 || order.totalNum === 1) {
         newOrders.push(order)
       } else {
-        for (let j = 0; j < order.total_num; j++) {
+        for (let j = 0; j < order.totalNum; j++) {
           const newOrder = JSON.parse(JSON.stringify(order))
 
-          if (newOrder.is_bench) {
+          if (newOrder.isBench) {
             newOrder.alias = newOrder.alias || newOrder.nick
           } else {
             newOrder.alias = j === 0 ? (newOrder.alias || newOrder.nick) : `${newOrder.alias || newOrder.nick}+${j}`
@@ -528,8 +526,8 @@ export class ActivityService {
 
     orders = newOrders
 
-    if (activity.short_code) {
-      activity.desc = `编号：${activity.short_code}\n${activity.desc}\n`
+    if (activity.shortCode) {
+      activity.desc = `编号：${activity.shortCode}\n${activity.desc}\n`
     }
 
     message = message + activity.desc + '\n已报' + (orders.length <= (activity.maximum || 999) ? orders.length : activity.maximum) + '/' + activity.maximum + '人\n'
@@ -624,37 +622,37 @@ export const activityController = async (message: Message, room: Room) => {
   }
 
   if (matchActivityCode) { // 查询指定编号的活动
-    const short_code = matchActivityCode[0].substring(2)
-    msg = await activityService.getLatestActivityText(room, short_code)
+    const shortCode = matchActivityCode[0].substring(2)
+    msg = await activityService.getLatestActivityText(room, shortCode)
   }
 
-  if (['报名', '报名活动'].includes(text.replace(/\s*/g, '')) || /^报名\d人/g.test(text.replace(/\s*/g, ''))) { // 报名活动
+  if ([ '报名', '报名活动' ].includes(text.replace(/\s*/g, '')) || /^报名\d人/g.test(text.replace(/\s*/g, ''))) { // 报名活动
     const trimmedContent = text.replace(/\s*/g, '')
-    const add_num = trimmedContent === '报名' || trimmedContent === '报名活动' ? 1 : Number(trimmedContent.slice(2, 3))
-    msg = await activityService.signUpForActivityText(room, member, add_num, createdTime)
+    const addNum = trimmedContent === '报名' || trimmedContent === '报名活动' ? 1 : Number(trimmedContent.slice(2, 3))
+    msg = await activityService.signUpForActivityText(room, member, addNum, createdTime)
   }
 
   if (/^报名\d/g.test(text.replace(/\s*/g, ''))) { // 报名指定编号的活动
-    const add_num = 1
-    const short_code = text.replace(/\s*/g, '').slice(2, 1000000)
-    msg = await activityService.signUpForActivityText(room, member, add_num, createdTime, short_code)
+    const addNum = 1
+    const shortCode = text.replace(/\s*/g, '').slice(2, 1000000)
+    msg = await activityService.signUpForActivityText(room, member, addNum, createdTime, shortCode)
   }
 
-  if (['取消', '取消报名'].includes(text.replace(/\s*/g, '')) || /^取消\d人/g.test(text.replace(/\s*/g, ''))) { // 取消活动报名
+  if ([ '取消', '取消报名' ].includes(text.replace(/\s*/g, '')) || /^取消\d人/g.test(text.replace(/\s*/g, ''))) { // 取消活动报名
     // 取消报名
-    let add_num = 0
-    if (['取消', '取消报名'].includes(text.replace(/\s*/g, ''))) {
-      add_num = 1
+    let addNum = 0
+    if ([ '取消', '取消报名' ].includes(text.replace(/\s*/g, ''))) {
+      addNum = 1
     } else {
-      add_num = Number(text.replace(/\s*/g, '').slice(2, 3))
+      addNum = Number(text.replace(/\s*/g, '').slice(2, 3))
     }
-    msg = await activityService.cancelForActivityText(room, add_num, member)
+    msg = await activityService.cancelForActivityText(room, addNum, member)
   }
 
   if (/^取消\d/g.test(text.replace(/\s*/g, ''))) { // 取消指定活动报名
-    const add_num = 1
-    const short_code = text.replace(/\s*/g, '').slice(2, 1000000)
-    msg = await activityService.cancelForActivityText(room, add_num, member, short_code)
+    const addNum = 1
+    const shortCode = text.replace(/\s*/g, '').slice(2, 1000000)
+    msg = await activityService.cancelForActivityText(room, addNum, member, shortCode)
   }
 
   // req = generateResponseMessage('Text', msg, roomid, wxid)

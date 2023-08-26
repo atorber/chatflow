@@ -14,6 +14,6 @@ export const db: Database = {
   bot: DB('data/db/bots.db'),
   contact: DB('data/db/contacts.db'),
   message: DB('data/db/messages.db'),
-  room: DB('data/db/rooms.db'),
   order: DB('data/db/orders.db'),
+  room: DB('data/db/rooms.db'),
 }
