@@ -198,8 +198,8 @@ interface Config {
   functionOnStatus: FunctionOnStatus;
   botConfig: BotConfig;
   welcomeList?: string[];
-  roomWhiteList: RoomWhiteList;
-  contactWhiteList: ContactWhiteList;
+  roomWhiteList?: RoomWhiteList;
+  contactWhiteList?: ContactWhiteList;
   contactConfig: ContactConfig;
   roomConfig: RoomConfig;
   apps?: AppsConfig;

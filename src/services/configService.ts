@@ -80,8 +80,6 @@ const config: configTypes.Config = {
     },
   },
   welcomeList: [],
-  roomWhiteList: [],
-  contactWhiteList: [],
   contactConfig: {
     tyutluyc: {
       app: 'waiting',
