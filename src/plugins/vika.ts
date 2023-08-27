@@ -49,17 +49,32 @@ export interface TaskConfig {
   active: boolean;
 }
 
+export interface Notifications {
+  recordId: string
+  text: string
+  type: string
+  name: string
+  id?: string
+  alias?: string
+  state: string
+  pubTime?: string
+  info?: string
+  room?: BusinessRoom
+  contact?: BusinessUser
+}
+
 export interface DateBase {
-    messageSheet: string
-    keywordsSheet: string
-    contactSheet: string
-    roomListSheet: string
-    configSheet: string
-    whiteListSheet: string
-    noticeSheet: string
-    statisticsSheet: string
-    orderSheet: string
-    stockSheet:string
+  messageSheet: string
+  keywordsSheet: string
+  contactSheet: string
+  roomListSheet: string
+  configSheet: string
+  whiteListSheet: string
+  noticeSheet: string
+  statisticsSheet: string
+  orderSheet: string
+  stockSheet: string
+  groupNotificationsSheet: string
 }
 
 function transformKeys (obj: Record<string, any>): Record<string, any> {
@@ -73,7 +88,7 @@ function transformKeys (obj: Record<string, any>): Record<string, any> {
 }
 
 // 比较两个数组差异
-function findArrayDifferences (vika: Activity[], db: Activity[]): {addArray:Activity[], removeArray:Activity[]} {
+function findArrayDifferences (vika: Activity[], db: Activity[]): { addArray: Activity[], removeArray: Activity[] } {
   const removeArray: Activity[] = []
   const addArray: Activity[] = []
 
@@ -99,15 +114,15 @@ class VikaBot {
   spaceName!: string
   vika!: Vika
   spaceId!: string
-  dataBaseIds!:DateBase
-  dataBaseNames!:DateBase
+  dataBaseIds!: DateBase
+  dataBaseNames!: DateBase
   msgStore!: any[]
-  envsOnVika!:any[]
-  switchsOnVika!:any[]
-  contactWhiteList!:ContactWhiteList
-  roomWhiteList!:RoomWhiteList
-  reminderList!:any[]
-  statisticsRecords:any
+  envsOnVika!: any[]
+  switchsOnVika!: any[]
+  contactWhiteList!: ContactWhiteList
+  roomWhiteList!: RoomWhiteList
+  reminderList!: any[]
+  statisticsRecords: any
 
   constructor (config: VikaBotConfigTypes) {
     if (!config.token) {
@@ -129,19 +144,20 @@ class VikaBot {
         noticeSheet: '',
         statisticsSheet: '',
         orderSheet: '',
-        stockSheet:'',
+        stockSheet: '',
+        groupNotificationsSheet: '',
       }
       this.dataBaseNames = { ...this.dataBaseIds }
 
       this.contactWhiteList = {
-        qa:[],
-        msg:[],
-        act:[],
+        qa: [],
+        msg: [],
+        act: [],
       }
       this.roomWhiteList = {
-        qa:[],
-        msg:[],
-        act:[],
+        qa: [],
+        msg: [],
+        act: [],
       }
     }
   }
@@ -255,6 +271,24 @@ class VikaBot {
 
   }
 
+  async updateRecord (datasheetId: string, records: {
+    recordId: string
+    fields: {[key:string]:any}
+  }[]) {
+    log.info('更新维格表记录:', records.length)
+    const datasheet = await this.vika.datasheet(datasheetId)
+
+    try {
+      const res = await datasheet.records.update(records)
+      if (!res.success) {
+        log.error('记录更新维格表失败：', res)
+      }
+    } catch (err) {
+      log.error('请求维格表更新失败：', err)
+    }
+
+  }
+
   async addChatRecord (msg: Message, uploadedAttachments: any, msgType: any, text: string) {
     // log.info(msg)
     // log.info(JSON.stringify(msg))
@@ -273,7 +307,7 @@ class VikaBot {
     // const ID = msg.id
     // let msgType = msg.type()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
-    const files:any = []
+    const files: any = []
 
     try {
       if (uploadedAttachments) {
@@ -284,7 +318,7 @@ class VikaBot {
       const record = {
         fields: {
           timeHms,
-          name:  talker.name(),
+          name: talker.name(),
           alias: await talker.alias(),
           topic: topic || '--',
           messagePayload: text,
@@ -292,7 +326,7 @@ class VikaBot {
           roomid: room && room.id ? room.id : '--',
           messageType: msgType,
           file: files,
-          messageId:msg.id,
+          messageId: msg.id,
         },
       }
       // log.info('addChatRecord:', JSON.stringify(record))
@@ -305,7 +339,7 @@ class VikaBot {
 
   }
 
-  addRecord (record:any) {
+  addRecord (record: any) {
     log.info('消息入列:', JSON.stringify(record))
     if (record.fields) {
       this.msgStore.push(record)
@@ -317,7 +351,7 @@ class VikaBot {
 
     const curTime = this.getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
-    const files:any = []
+    const files: any = []
     if (uploadedAttachments) {
       files.push(uploadedAttachments)
     }
@@ -407,14 +441,14 @@ class VikaBot {
       records = response.data.records
       // log.info(records)
     } else {
-      log.error('获取数据记录失败：', response)
+      log.error('获取数据记录失败：', JSON.stringify(response))
       records = response
     }
     return records
   }
 
   async getAllRecords (datasheetId: string) {
-    let records:any = []
+    let records: any = []
     const datasheet = await this.vika.datasheet(datasheetId)
     const response: any = await datasheet.records.queryAll()
     // log.info('原始返回：',response)
@@ -434,7 +468,7 @@ class VikaBot {
   async clearBlankLines (datasheetId: any) {
     const records = await this.getRecords(datasheetId, {})
     // log.info(records)
-    const recordsIds:any = []
+    const recordsIds: any = []
     for (const i in records) {
       recordsIds.push(records[i].recordId)
     }
@@ -443,7 +477,7 @@ class VikaBot {
   }
 
   // 更新环境变量配置到云端
-  async updateConfigToVika (config:any) {
+  async updateConfigToVika (config: any) {
     const functionOnStatus = config.functionOnStatus
     const botConfig = config.botConfig
     log.info('维格表内功能开关状态', functionOnStatus)
@@ -471,9 +505,9 @@ class VikaBot {
 
       if (fields['标识']) {
         if ([ '开启', '关闭' ].includes(fields['值'])) {
-          botConfig[record.fields['标识']] =  fields['值'] === '开启'
+          botConfig[record.fields['标识']] = fields['值'] === '开启'
         } else {
-          botConfig[record.fields['标识']] =  fields['值'] || ''
+          botConfig[record.fields['标识']] = fields['值'] || ''
         }
         botConfigIdMap[record.fields['标识']] = recordId
       }
@@ -493,28 +527,28 @@ class VikaBot {
 
   // 获取白名单
   async getWhiteList () {
-    const whiteList: {contactWhiteList:ContactWhiteList;roomWhiteList:RoomWhiteList} = { contactWhiteList:this.contactWhiteList, roomWhiteList:this.roomWhiteList }
+    const whiteList: { contactWhiteList: ContactWhiteList; roomWhiteList: RoomWhiteList } = { contactWhiteList: this.contactWhiteList, roomWhiteList: this.roomWhiteList }
 
     const whiteListRecords: any[] = await this.getRecords(this.dataBaseIds.whiteListSheet, {})
     await wait(1000)
     for (let i = 0; i < whiteListRecords.length; i++) {
       const record = whiteListRecords[i]
       const fields = record.fields
-      const app:'qa'|'msg'|'act' = fields['所属应用']?.split('|')[1]
+      const app: 'qa' | 'msg' | 'act' = fields['所属应用']?.split('|')[1]
       // log.info('当前app:', app)
       if (fields['昵称/群名称'] || fields['好友ID/群ID'] || fields['好友备注']) {
         if (record.fields['类型'] === '群') {
-          const room : BusinessRoom = {
-            topic:record.fields['昵称/群名称'],
-            id:record.fields['好友ID/群ID'],
+          const room: BusinessRoom = {
+            topic: record.fields['昵称/群名称'],
+            id: record.fields['好友ID/群ID'],
           }
           this.roomWhiteList[app].push(room)
 
         } else {
-          const contact:BusinessUser = {
-            name:fields['昵称/群名称'],
-            alias:fields['好友备注'],
-            id:fields['好友ID/群ID'],
+          const contact: BusinessUser = {
+            name: fields['昵称/群名称'],
+            alias: fields['好友备注'],
+            id: fields['好友ID/群ID'],
           }
           this.contactWhiteList[app].push(contact)
         }
@@ -548,7 +582,7 @@ class VikaBot {
         time: task.fields['时间'],
         cycle: task.fields['周期'] || '无重复',
         targetType: task.fields['通知目标类型'] === '好友' ? 'contact' : 'room',
-        target: task.fields['通知目标类型'] === '好友' ? { name:task.fields['昵称/群名称'], id:task.fields['好友ID/群ID'], alias:task.fields['好友备注'] } : { topic:task.fields['昵称/群名称'], id:task.fields['好友ID/群ID'] },
+        target: task.fields['通知目标类型'] === '好友' ? { name: task.fields['昵称/群名称'], id: task.fields['好友ID/群ID'], alias: task.fields['好友备注'] } : { topic: task.fields['昵称/群名称'], id: task.fields['好友ID/群ID'] },
         active: task.fields['启用状态'] === '开启',
       }
 
@@ -563,6 +597,51 @@ class VikaBot {
     return this.reminderList
   }
 
+  // 获取群发通知
+  async getGroupNotifications () {
+    const query = {
+      filterByFormula: '{状态|state}="待发送|waiting"',
+    }
+    // log.info('query:', JSON.stringify(query))
+    const groupNotifications: Notifications[] = []
+    try {
+      const records = await this.getRecords(this.dataBaseIds.groupNotificationsSheet, query)
+      // log.info('群发通知列表（原始）：\n', JSON.stringify(records))
+
+      for (const record of records) {
+        const fields = record.fields
+        const recordId = record.recordId
+        const fieldsNew: Notifications = transformKeys(fields) as Notifications
+        // log.info('群发通知列表(格式化key)：\n', JSON.stringify(fieldsNew))
+
+        if (fieldsNew.text && fieldsNew.type && (fieldsNew.id || fieldsNew.alias || fieldsNew.name) && fieldsNew.state === '待发送|waiting') {
+          fieldsNew.recordId = recordId
+          fieldsNew.type = fieldsNew.type.split('|')[1] || 'contact'
+          if (fieldsNew.type === 'room') {
+            fieldsNew.room = {
+              id: fieldsNew.id,
+              topic: fieldsNew.name,
+            }
+          } else {
+            fieldsNew.contact = {
+              id: fieldsNew.id,
+              name: fieldsNew.name,
+              alias: fieldsNew.alias,
+            }
+          }
+          groupNotifications.push(fieldsNew)
+        }
+      }
+      log.info('待发送的群发通知列表（添加接收人）：\n', JSON.stringify(groupNotifications))
+
+      return groupNotifications
+    } catch (e) {
+      log.error('获取群发通知列表失败：\n', e)
+
+      return []
+    }
+  }
+
   // 获取关键字
   async getKeywords () {
     const keywordsRecords = await this.getRecords(this.dataBaseIds.keywordsSheet, {})
@@ -575,13 +654,13 @@ class VikaBot {
     log.info('统计打卡：\n', JSON.stringify(statisticsRecords))
     this.statisticsRecords = statisticsRecords
 
-    const activitiesVika:Activity[] = []
+    const activitiesVika: Activity[] = []
 
     for (const statistics of statisticsRecords) {
       const fields = statistics.fields
-      const fieldsNew:any = transformKeys(fields)
+      const fieldsNew: any = transformKeys(fields)
       if (fieldsNew._id && fieldsNew.type && fieldsNew.desc && (fieldsNew.topic || fieldsNew.roomid)) {
-        const activity:Activity = fieldsNew as Activity
+        const activity: Activity = fieldsNew as Activity
         activity.active = activity.active === '开启'
         activity._id = String(activity._id)
         activity.shortCode = String(activity._id)
@@ -631,7 +710,7 @@ class VikaBot {
   }
 
   // 创建订单
-  async createOrder (message:Message) {
+  async createOrder (message: Message) {
     const talker = message.talker()
     const room = message.room()
 
@@ -640,7 +719,7 @@ class VikaBot {
     const records = [
       {
         fields: {
-          流水号:String(curTime),
+          流水号: String(curTime),
           所属活动: 'system',
           昵称: talker.name(),
           好友备注: await talker.alias() || '',
@@ -661,7 +740,7 @@ class VikaBot {
   }
 
   // 上传联系人列表
-  async updateContacts (bot:Wechaty) {
+  async updateContacts (bot: Wechaty) {
     let updateCount = 0
     try {
       const contacts: Contact[] = await bot.Contact.findAll()
@@ -743,9 +822,9 @@ class VikaBot {
         })
       }
       for (let i = 0; i < rooms.length; i++) {
-        const item:Room|undefined = rooms[i]
+        const item: Room | undefined = rooms[i]
         if (item && !wxids.includes(item.id)) {
-          let avatar:any = 'null'
+          let avatar: any = 'null'
           try {
             avatar = await item.avatar()
             avatar = avatar.name
@@ -784,12 +863,12 @@ class VikaBot {
 
   }
 
-  async onMessage (message:Message) {
+  async onMessage (message: Message) {
     try {
 
       let uploadedAttachments = ''
       const msgType = types.Message[message.type()]
-      let file:any = ''
+      let file: any = ''
       let filePath = ''
       let text = ''
 
@@ -942,7 +1021,7 @@ class VikaBot {
     }
   }
 
-  async onScan (qrcode:string, status:ScanStatus) {
+  async onScan (qrcode: string, status: ScanStatus) {
     if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
       const qrcodeUrl = encodeURIComponent(qrcode)
       const qrcodeImageUrl = [
@@ -1117,7 +1196,7 @@ class VikaBot {
       const that = this
       setInterval(() => {
         // log.info('待处理消息池长度：', that.msgStore.length||0);
-        // that.msgStore = that.msgStore.concat(global.sentMessage)
+        // that.msgStore = that.msgStore.contact(global.sentMessage)
         // global.sentMessage = []
 
         if (that.msgStore.length && that.dataBaseIds.messageSheet) {

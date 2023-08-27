@@ -143,7 +143,12 @@ function toDBC (txtstring: any) {
   return [ tmp, h, c ]
 }
 
+function generateRandomNumber (base:number): number {
+  return Math.floor(Math.random() * 100) + base
+}
+
 export {
+  generateRandomNumber,
   toDBC,
   getNow,
   waitForMs,

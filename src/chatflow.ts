@@ -42,6 +42,7 @@ import {
   waitForMs as wait,
   getNow,
   getRule,
+  generateRandomNumber,
 } from './utils/utils.js'
 import schedule from 'node-schedule'
 
@@ -59,9 +60,9 @@ let vika: any
 let isVikaOk: boolean = false
 
 // 消息发布器
-export const sendMsg = async (publisher:Message|Room|Contact, sayable: Sayable, inviteeList?: Contact[]) => {
+export const sendMsg = async (publisher: Message | Room | Contact, sayable: Sayable, inviteeList?: Contact[]) => {
   try {
-    let replyMessage:Message| void
+    let replyMessage: Message | void
     if (inviteeList?.length) {
       const text = sayable as string
       replyMessage = await (publisher as Room).say(text, ...inviteeList)
@@ -91,8 +92,114 @@ export async function getWhiteList () {
   log.info('获取到配置文件：', JSON.stringify(config))
 }
 
+export async function pubGroupNotifications (bot: Wechaty) {
+  const groupNotifications = await vika.getGroupNotifications()
+  const resPub: any[] = []
+  const failRoom: any[] = []
+  const failContact: any[] = []
+  const successRoom: any[] = []
+  const successContact: any[] = []
+
+  for (const notice of groupNotifications) {
+    const timestamp = new Date().getTime()
+    // log.info('当前消息：', JSON.stringify(notice))
+    if (notice.type === 'room') {
+      const room = await getRoom(bot, notice.room)
+      if (room) {
+        try {
+          await sendMsg(room, notice.text)
+          await wait(generateRandomNumber(200))
+          resPub.push({
+            recordId: notice.recordId,
+            fields: {
+              // '昵称/群名称|name':await room.topic(),
+              // '好友ID/群ID|id':room.id,
+              '状态|state': '发送成功|success',
+              '发送时间|pubTime': timestamp,
+            },
+          })
+          successRoom.push(notice)
+          log.info('发送成功：群-', await room.topic())
+        } catch (e) {
+          resPub.push({
+            recordId: notice.recordId,
+            fields: {
+              '状态|state': '发送失败|fail',
+              '发送时间|pubTime': timestamp,
+              '信息|info':JSON.stringify(e),
+            },
+          })
+          failRoom.push(notice)
+          log.error('发送失败：', e)
+        }
+      } else {
+        resPub.push({
+          recordId: notice.recordId,
+          fields: {
+            '状态|state': '发送失败|fail',
+            '发送时间|pubTime': timestamp,
+            '信息|info':'群不存在',
+          },
+        })
+        failRoom.push(notice)
+        log.error('发送失败：群不存在', JSON.stringify(notice))
+      }
+    } else {
+      const contact = await getContact(bot, notice.contact)
+      if (contact) {
+        try {
+          await sendMsg(contact, notice.text)
+          await wait(generateRandomNumber(200))
+          resPub.push({
+            recordId: notice.recordId,
+            fields: {
+              // '昵称/群名称|name':contact.name,
+              // '好友ID/群ID|id':contact.id,
+              // '好友备注|alias':await contact.alias(),
+              '状态|state': '发送成功|success',
+              '发送时间|pubTime': timestamp,
+            },
+          })
+          successContact.push(notice)
+          log.info('发送成功：好友-', contact.name())
+        } catch (e) {
+          resPub.push({
+            recordId: notice.recordId,
+            fields: {
+              '状态|state': '发送失败|fail',
+              '发送时间|pubTime': timestamp,
+              '信息|info':JSON.stringify(e),
+            },
+          })
+          failContact.push(notice)
+          log.error('发送失败：', e)
+        }
+      } else {
+        resPub.push({
+          recordId: notice.recordId,
+          fields: {
+            '状态|state': '发送失败|fail',
+            '发送时间|pubTime': timestamp,
+            '信息|info':'好友不存在',
+          },
+        })
+        failContact.push(notice)
+        log.error('发送失败：好友不存在', JSON.stringify(notice))
+      }
+    }
+  }
+  for (let i = 0; i < resPub.length; i = i + 10) {
+    const records = resPub.slice(i, i + 10)
+    await vika.updateRecord(vika.dataBaseIds.groupNotificationsSheet, records)
+    log.info('群发消息同步中...', i + 10)
+    void await wait(1000)
+  }
+
+  return `发送成功:群${successRoom.length},好友${successContact.length}\n发送失败：群${failRoom.length},好友${failContact.length}`
+}
+
 // 保存配置文件到data/config.json
-export function updateConfig (config:any) {
+export function updateConfig (config: any) {
   fs.writeFileSync('data/config.json', JSON.stringify(config, null, '\t'))
 }
 
@@ -140,7 +247,7 @@ export function checkConfig (config: configTypes.Config) {
 // 更新任务
 export async function updateJobs (bot: Wechaty, vika: any) {
   try {
-  // 结束所有任务
+    // 结束所有任务
     await schedule.gracefulShutdown()
     log.info('结束所有任务成功...')
   } catch (e) {
@@ -176,7 +283,7 @@ export async function updateJobs (bot: Wechaty, vika: any) {
 
               if (task.targetType === 'room') {
                 try {
-                  const room =  await getRoom(bot, task.target as BusinessRoom)
+                  const room = await getRoom(bot, task.target as BusinessRoom)
                   if (room) {
                     await sendMsg(room, task.msg)
                     await wait(200)
@@ -204,7 +311,7 @@ export async function updateJobs (bot: Wechaty, vika: any) {
   }
 }
 
-export const onReadyOrLogin = async (bot:Wechaty) => {
+export const onReadyOrLogin = async (bot: Wechaty) => {
   const user: Contact = bot.currentUser
   // 检查维格表配置并启动
   if (config.botConfig.vika.spaceName && config.botConfig.vika.token) {
@@ -259,7 +366,7 @@ export const onReadyOrLogin = async (bot:Wechaty) => {
   }
 
   if (config.botConfig.adminRoom.adminRoomId || config.botConfig.adminRoom.adminRoomTopic) {
-    const adminRoom = await getRoom(bot, { topic:config.botConfig.adminRoom.adminRoomTopic, id:config.botConfig.adminRoom.adminRoomId })
+    const adminRoom = await getRoom(bot, { topic: config.botConfig.adminRoom.adminRoomTopic, id: config.botConfig.adminRoom.adminRoomId })
     await adminRoom?.say(`${new Date().toLocaleString()}\nchatflow启动成功!\n当前登录用户${bot.currentUser.name()}\n可输入【帮助】获取操作指令`)
   }
 }
@@ -285,7 +392,7 @@ export async function onScan (qrcode: string, status: ScanStatus) {
 export function ChatFlow (config: configTypes.Config): WechatyPlugin {
   log.verbose('ChatFlow', 'ChatFlow is used.')
 
-  return function ChatFlowPlugin (bot: Wechaty) :void {
+  return function ChatFlowPlugin (bot: Wechaty): void {
     log.verbose('StoreByVika', 'installing on %s ...', bot)
 
     bot.on('scan', async (qrcode: string, status: ScanStatus) => {
@@ -305,7 +412,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
         log.error('机器人启动，获取登录二维码失败', 'onScan: %s(%s)', ScanStatus[status], status)
       }
     })
-    bot.on('login', async  (user: Contact) => {
+    bot.on('login', async (user: Contact) => {
       log.info('onLogin,当前登录的账号信息:\n', user.name())
 
       // 更新机器人基本信息
@@ -355,7 +462,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
           if (message.self() && text === '设置为管理群') {
             config.botConfig['adminRoom'] = {
               adminRoomId: room.id,
-              adminRoomTopic:await room.topic(),
+              adminRoomTopic: await room.topic(),
             }
             await updateConfig(config)
             await sendMsg(message, '设置管理群成功')
@@ -378,7 +485,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
             await sendMsg(message, replyText)
           }
 
-          if ([ '更新配置', '更新定时提醒', '更新通讯录', '上传配置', '下载配置', '更新白名单', '更新活动', '报名活动' ].includes(text)) {
+          if ([ '更新配置', '更新定时提醒', '更新通讯录', '上传配置', '下载配置', '更新白名单', '更新活动', '报名活动', '群发通知' ].includes(text)) {
             switch (text) {
               case '更新配置':
                 log.info('热更新系统配置~')
@@ -386,7 +493,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
                   await getCloudConfig()
                   replyText = '配置更新成功~'
                 } catch (e) {
-                  replyText = '配置更新成功~'
+                  replyText = '配置更新失败~'
                 }
                 break
               case '更新定时提醒':
@@ -414,7 +521,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
                   await getWhiteList()
                   replyText = '白名单更新成功~'
                 } catch (e) {
-                  replyText = '白名单更新成功~'
+                  replyText = '白名单更新失败~'
                 }
                 break
               case '更新活动':
@@ -423,16 +530,27 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
                   await vika.getStatistics()
                   replyText = '活动更新成功~'
                 } catch (e) {
-                  replyText = '活动更新成功~'
+                  log.error('活动更新失败：', e)
+                  replyText = '活动更新失败~'
                 }
                 break
+              case '群发通知':
+                log.info('群发通知~')
+                try {
+                  replyText = await pubGroupNotifications(bot)
+                } catch (e) {
+                  log.error('获取群发通知失败：', e)
+                  replyText = '群发通知失败~'
+                }
+                break
+
               case '报名活动':
                 log.info('报名活动~')
                 try {
                   await vika.createOrder(message)
                   replyText = '报名成功~'
                 } catch (e) {
-                  replyText = '报名成功~'
+                  replyText = '报名失败~'
                 }
                 break
               case '上传配置':
@@ -531,7 +649,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
 
           // 智能问答开启时执行
           if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
-            if (config.functionOnStatus.autoQa.roomWhitelist) {
+            if (config.functionOnStatus.autoQa.roomWhitelist && config.roomWhiteList) {
               const isInRoomWhiteList = await containsRoom(config.roomWhiteList.qa, room)
               try {
                 if (isInRoomWhiteList) {
@@ -556,21 +674,23 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
           }
 
           // 活动管理
-          const isActInRoomWhiteList = await containsRoom(config.roomWhiteList.act, room)
-          try {
-            if (isActInRoomWhiteList) {
-              log.info('当前群在act白名单内，开始请求活动管理...')
-              await activityController(message, room)
+          if (config.roomWhiteList) {
+            const isActInRoomWhiteList = await containsRoom(config.roomWhiteList.act, room)
+            try {
+              if (isActInRoomWhiteList) {
+                log.info('当前群在act白名单内，开始请求活动管理...')
+                await activityController(message, room)
+              }
+            } catch (e) {
+              log.error('活动管理失败', topic, e)
             }
-          } catch (e) {
-            log.error('活动管理失败', topic, e)
           }
         }
 
         if ((!room || !room.id) && !isSelf) {
           // 智能问答开启时执行
           if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
-            if (config.functionOnStatus.autoQa.contactWhitelist) {
+            if (config.functionOnStatus.autoQa.contactWhitelist && config.contactWhiteList) {
 
               try {
                 const isInContactWhiteList = await containsContact(config.contactWhiteList.qa, talker)
@@ -610,7 +730,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
       }
     })
 
-    bot.on('room-join', async  (room: Room, inviteeList: Contact[], inviter: any) => {
+    bot.on('room-join', async (room: Room, inviteeList: Contact[], inviter: any) => {
       const nameList = inviteeList.map(c => c.name()).join(',')
       log.info(`roomJoin,接收到消息:群 ${await room.topic()} 有新成员 ${nameList}, 邀请人 ${inviter}`)
 
@@ -619,7 +739,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
         await sendMsg(room, `欢迎加入${await room.topic()},请阅读群公告~`, inviteeList)
       }
     })
-    bot.on('error', async  (err: any) => {
+    bot.on('error', async (err: any) => {
       log.error('onError，bot运行错误:', JSON.stringify(err))
       // try {
       //   // job.cancel()
@@ -633,8 +753,8 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
 }
 
 // 配置机器人
-export function getBotOps (puppet:string, token:string) {
-  const ops:any = {
+export function getBotOps (puppet: string, token: string) {
+  const ops: any = {
     name: 'chatflow',
     puppet,
     puppetOptions: {
