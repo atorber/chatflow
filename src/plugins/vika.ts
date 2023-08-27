@@ -432,8 +432,9 @@ class VikaBot {
     }
   }
 
-  async getRecords (datasheetId: string, query = {}) {
+  async getRecords (datasheetId: string, query:any = {}) {
     let records: any = []
+    query['pageSize'] = 100
     const datasheet = await this.vika.datasheet(datasheetId)
     // 分页获取记录，默认返回第一页
     const response = await datasheet.records.query(query)
