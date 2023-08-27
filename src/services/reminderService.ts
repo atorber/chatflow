@@ -80,11 +80,11 @@ class TaskManagerImpl implements TaskManager {
 const taskManager = new TaskManagerImpl()
 
 // 获取任务列表
-const tasks = taskManager.getTaskList()
+export const tasks = taskManager.getTaskList()
 
 // 获取任务详情
 const taskId = 1
-const taskDetails = taskManager.getTaskDetails(taskId)
+export const taskDetails = taskManager.getTaskDetails(taskId)
 
 // 发布提醒任务
 const newTask: Task = {
@@ -119,4 +119,7 @@ const updatedTask: Task = {
   type: '群',
   time: undefined,
 }
+
 taskManager.updateTask(taskIdToUpdate, updatedTask)
+
+export {}

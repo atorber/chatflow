@@ -1,4 +1,3 @@
-
 import { Message, log } from 'wechaty'
 import axios from 'axios'
 

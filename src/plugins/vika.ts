@@ -28,8 +28,11 @@ import { sheets } from './lib/vikaModel/index.js'
 import { waitForMs as wait } from '../utils/utils.js'
 
 // import { sheets } from './lib/dataModel.js'
+// import { sheets } from './lib/dataModel.js'
+import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
 
 import type { BusinessRoom, BusinessUser } from './finder.js'
+import { ActivityService, Order, Activity } from '../services/activityService.js'
 
 type VikaBotConfigTypes = {
   spaceName: string,
@@ -42,37 +45,84 @@ export interface TaskConfig {
   time: string;
   cycle: string;
   targetType: 'contact' | 'room';
-  targetId: string;
-  targetName: string;
+  target: BusinessRoom | BusinessUser;
   active: boolean;
 }
 
-export type DateBase = {
-    messageSheet: any
-    commandSheet: any
-    contactSheet: any
-    roomListSheet: any
-    configSheet: string
-    whiteListSheet: string
-    noticeSheet: string
-    statisticsSheet: string
-    orderSheet: string
+export interface Notifications {
+  recordId: string
+  text: string
+  type: string
+  name: string
+  id?: string
+  alias?: string
+  state: string
+  pubTime?: string
+  info?: string
+  room?: BusinessRoom
+  contact?: BusinessUser
+}
+
+export interface DateBase {
+  messageSheet: string
+  keywordsSheet: string
+  contactSheet: string
+  roomListSheet: string
+  configSheet: string
+  whiteListSheet: string
+  noticeSheet: string
+  statisticsSheet: string
+  orderSheet: string
+  stockSheet: string
+  groupNotificationsSheet: string
+}
+
+function transformKeys (obj: Record<string, any>): Record<string, any> {
+  const transformedObj: Record<string, any> = {}
+  for (const key in obj) {
+    const newKey = key.split('|')[1] as string // Extract the part after the slash
+    transformedObj[newKey] = obj[key]
+
+  }
+  return transformedObj
+}
+
+// 比较两个数组差异
+function findArrayDifferences (vika: Activity[], db: Activity[]): { addArray: Activity[], removeArray: Activity[] } {
+  const removeArray: Activity[] = []
+  const addArray: Activity[] = []
+
+  // Find elements in vika that are not in db
+  for (const obj1 of vika) {
+    if (!db.some(obj2 => obj2._id === obj1._id)) {
+      addArray.push(obj1)
+    }
+  }
+
+  // Find elements in db that are not in vika
+  for (const obj2 of db) {
+    if (!vika.some(obj1 => obj1._id === obj2._id)) {
+      removeArray.push(obj2)
+    }
+  }
+
+  return { addArray, removeArray }
 }
 
 class VikaBot {
 
-  token!: string
   spaceName!: string
   vika!: Vika
   spaceId!: string
-  dataBaseIds!:DateBase
-  dataBaseNames!:DateBase
+  dataBaseIds!: DateBase
+  dataBaseNames!: DateBase
   msgStore!: any[]
-  envsOnVika!:any[]
-  switchsOnVika!:any[]
-  contactWhiteList!:BusinessUser[]
-  roomWhiteList!:BusinessRoom[]
-  reminderList!:any[]
+  envsOnVika!: any[]
+  switchsOnVika!: any[]
+  contactWhiteList!: ContactWhiteList
+  roomWhiteList!: RoomWhiteList
+  reminderList!: any[]
+  statisticsRecords: any
 
   constructor (config: VikaBotConfigTypes) {
     if (!config.token) {
@@ -80,14 +130,13 @@ class VikaBot {
     } else if (!config.spaceName) {
       log.error('未配置空间名称，请在config.ts中配置')
     } else {
-      this.token = config.token
       this.spaceName = config.spaceName
-      this.vika = new Vika({ token: this.token })
+      this.vika = new Vika({ token: config.token })
       this.spaceId = ''
       this.msgStore = []
       this.dataBaseIds = {
         messageSheet: '',
-        commandSheet: '',
+        keywordsSheet: '',
         contactSheet: '',
         roomListSheet: '',
         configSheet: '',
@@ -95,24 +144,26 @@ class VikaBot {
         noticeSheet: '',
         statisticsSheet: '',
         orderSheet: '',
-
+        stockSheet: '',
+        groupNotificationsSheet: '',
       }
-      this.dataBaseNames = {
-        messageSheet: '',
-        commandSheet: '',
-        contactSheet: '',
-        roomListSheet: '',
-        configSheet: '',
-        whiteListSheet: '',
-        noticeSheet: '',
-        statisticsSheet: '',
-        orderSheet: '',
-      }
+      this.dataBaseNames = { ...this.dataBaseIds }
 
-      this.contactWhiteList = []
-      this.roomWhiteList = []
-      // this.checkInit()
+      this.contactWhiteList = {
+        qa: [],
+        msg: [],
+        act: [],
+      }
+      this.roomWhiteList = {
+        qa: [],
+        msg: [],
+        act: [],
+      }
     }
+  }
+
+  getActivityController () {
+    return new ActivityService()
   }
 
   async getAllSpaces () {
@@ -192,7 +243,7 @@ class VikaBot {
 
       this.dataBaseIds[key as keyof DateBase] = res.data.id
       this.dataBaseNames[name as keyof DateBase] = res.data.id
-      log.info('创建表成功：', JSON.stringify(this.dataBaseIds, undefined, 2))
+      // log.info('创建表成功：', JSON.stringify(this.dataBaseIds))
       // 删除空白行
       await this.clearBlankLines(res.data.id)
       return res.data
@@ -220,6 +271,24 @@ class VikaBot {
 
   }
 
+  async updateRecord (datasheetId: string, records: {
+    recordId: string
+    fields: {[key:string]:any}
+  }[]) {
+    log.info('更新维格表记录:', records.length)
+    const datasheet = await this.vika.datasheet(datasheetId)
+
+    try {
+      const res = await datasheet.records.update(records)
+      if (!res.success) {
+        log.error('记录更新维格表失败：', res)
+      }
+    } catch (err) {
+      log.error('请求维格表更新失败：', err)
+    }
+
+  }
+
   async addChatRecord (msg: Message, uploadedAttachments: any, msgType: any, text: string) {
     // log.info(msg)
     // log.info(JSON.stringify(msg))
@@ -238,7 +307,7 @@ class VikaBot {
     // const ID = msg.id
     // let msgType = msg.type()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
-    const files = []
+    const files: any = []
 
     try {
       if (uploadedAttachments) {
@@ -249,7 +318,7 @@ class VikaBot {
       const record = {
         fields: {
           timeHms,
-          name:  talker.name(),
+          name: talker.name(),
           alias: await talker.alias(),
           topic: topic || '--',
           messagePayload: text,
@@ -257,7 +326,7 @@ class VikaBot {
           roomid: room && room.id ? room.id : '--',
           messageType: msgType,
           file: files,
-          messageId:msg.id,
+          messageId: msg.id,
         },
       }
       // log.info('addChatRecord:', JSON.stringify(record))
@@ -270,20 +339,19 @@ class VikaBot {
 
   }
 
-  addRecord (record:any) {
+  addRecord (record: any) {
     log.info('消息入列:', JSON.stringify(record))
     if (record.fields) {
       this.msgStore.push(record)
       // log.info('最新消息池长度：', this.msgStore.length)
     }
-
   }
 
   async addScanRecord (uploadedAttachments: string, text: string) {
 
     const curTime = this.getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
-    const files = []
+    const files: any = []
     if (uploadedAttachments) {
       files.push(uploadedAttachments)
     }
@@ -339,6 +407,7 @@ class VikaBot {
     const datasheet = this.vika.datasheet(this.dataBaseIds.messageSheet)
     try {
       const resp = await datasheet.upload(file)
+      await wait(1000)
       if (resp.success) {
         const uploadedAttachments = resp.data
         // log.info('文件上传成功', uploadedAttachments)
@@ -372,14 +441,14 @@ class VikaBot {
       records = response.data.records
       // log.info(records)
     } else {
-      log.error('获取数据记录失败：', response)
+      log.error('获取数据记录失败：', JSON.stringify(response))
       records = response
     }
     return records
   }
 
   async getAllRecords (datasheetId: string) {
-    let records = []
+    let records: any = []
     const datasheet = await this.vika.datasheet(datasheetId)
     const response: any = await datasheet.records.queryAll()
     // log.info('原始返回：',response)
@@ -399,7 +468,7 @@ class VikaBot {
   async clearBlankLines (datasheetId: any) {
     const records = await this.getRecords(datasheetId, {})
     // log.info(records)
-    const recordsIds = []
+    const recordsIds: any = []
     for (const i in records) {
       recordsIds.push(records[i].recordId)
     }
@@ -407,25 +476,27 @@ class VikaBot {
     await this.deleteRecords(datasheetId, recordsIds)
   }
 
-  async updateConfigToVika (config:any) {
+  // 更新环境变量配置到云端
+  async updateConfigToVika (config: any) {
     const functionOnStatus = config.functionOnStatus
     const botConfig = config.botConfig
     log.info('维格表内功能开关状态', functionOnStatus)
     log.info('维格表内基础配置信息', botConfig)
   }
 
+  // 下载环境变量配置
   async downConfigFromVika () {
     return await this.getConfig()
   }
 
+  // 获取环境变量配置
   async getConfig () {
-    const configRecords = await this.getRecords(this.dataBaseIds.configSheet, {})
-    await wait(1000)
-    // log.info(configRecords)
-
     const sysConfig: any = {}
     const botConfig: any = {}
     const botConfigIdMap: any = {}
+    const configRecords = await this.getRecords(this.dataBaseIds.configSheet, {})
+    await wait(1000)
+    // log.info(configRecords)
 
     for (let i = 0; i < configRecords.length; i++) {
       const record = configRecords[i]
@@ -434,9 +505,9 @@ class VikaBot {
 
       if (fields['标识']) {
         if ([ '开启', '关闭' ].includes(fields['值'])) {
-          botConfig[record.fields['标识']] =  fields['值'] === '开启'
+          botConfig[record.fields['标识']] = fields['值'] === '开启'
         } else {
-          botConfig[record.fields['标识']] =  fields['值'] || ''
+          botConfig[record.fields['标识']] = fields['值'] || ''
         }
         botConfigIdMap[record.fields['标识']] = recordId
       }
@@ -444,45 +515,360 @@ class VikaBot {
 
     this.envsOnVika = botConfigIdMap
 
-    const whiteListRecords: any[] = await this.getRecords(this.dataBaseIds.whiteListSheet, {})
-    await wait(1000)
-    for (let i = 0; i < whiteListRecords.length; i++) {
-      const record = whiteListRecords[i]
-      if (record.fields['好友备注/昵称或群名称'] || record.fields['好友ID/群ID']) {
-        if (record.fields['类型'] === '群') {
-          const room : BusinessRoom = {
-            topic:record.fields['好友备注/昵称或群名称'],
-            id:record.fields['好友ID/群ID'],
-          }
-          this.roomWhiteList.push(room)
-        } else {
-          const contact:BusinessUser = {
-            name:record.fields['好友备注/昵称或群名称'],
-            alias:record.fields['好友备注/昵称或群名称'],
-            id:record.fields['好友ID/群ID'],
-          }
-          this.contactWhiteList.push(contact)
-        }
-      }
-    }
     sysConfig['welcomeList'] = []
     sysConfig['botConfig'] = botConfig
     sysConfig['botConfigIdMap'] = botConfigIdMap
-    sysConfig['contactWhiteList'] = this.contactWhiteList
-    sysConfig['roomWhiteList'] = this.roomWhiteList
 
-    log.info('sysConfig:', JSON.stringify(sysConfig, null, '\t'))
+    // log.info('sysConfig:', JSON.stringify(sysConfig, null, '\t'))
 
     return sysConfig
 
   }
 
-  async onMessage (message:Message) {
+  // 获取白名单
+  async getWhiteList () {
+    const whiteList: { contactWhiteList: ContactWhiteList; roomWhiteList: RoomWhiteList } = { contactWhiteList: this.contactWhiteList, roomWhiteList: this.roomWhiteList }
+
+    const whiteListRecords: any[] = await this.getRecords(this.dataBaseIds.whiteListSheet, {})
+    await wait(1000)
+    for (let i = 0; i < whiteListRecords.length; i++) {
+      const record = whiteListRecords[i]
+      const fields = record.fields
+      const app: 'qa' | 'msg' | 'act' = fields['所属应用']?.split('|')[1]
+      // log.info('当前app:', app)
+      if (fields['昵称/群名称'] || fields['好友ID/群ID'] || fields['好友备注']) {
+        if (record.fields['类型'] === '群') {
+          const room: BusinessRoom = {
+            topic: record.fields['昵称/群名称'],
+            id: record.fields['好友ID/群ID'],
+          }
+          this.roomWhiteList[app].push(room)
+
+        } else {
+          const contact: BusinessUser = {
+            name: fields['昵称/群名称'],
+            alias: fields['好友备注'],
+            id: fields['好友ID/群ID'],
+          }
+          this.contactWhiteList[app].push(contact)
+        }
+      }
+    }
+
+    whiteList.contactWhiteList = this.contactWhiteList
+    whiteList.roomWhiteList = this.roomWhiteList
+    return whiteList
+  }
+
+  // 获取定时提醒
+  async getTimedTask () {
+    const taskRecords = await this.getRecords(this.dataBaseIds.noticeSheet, {})
+    // log.info('定时提醒任务列表：\n', JSON.stringify(taskRecords))
+
+    let timedTasks: TaskConfig[] = []
+
+    interface TaskRecord {
+      recordId: string;
+      fields: {
+        [key: string]: any;
+      };
+    }
+
+    // 优化后的代码
+    timedTasks = taskRecords.map((task: TaskRecord) => {
+      const taskConfig: TaskConfig = {
+        id: task.recordId,
+        msg: task.fields['内容'],
+        time: task.fields['时间'],
+        cycle: task.fields['周期'] || '无重复',
+        targetType: task.fields['通知目标类型'] === '好友' ? 'contact' : 'room',
+        target: task.fields['通知目标类型'] === '好友' ? { name: task.fields['昵称/群名称'], id: task.fields['好友ID/群ID'], alias: task.fields['好友备注'] } : { topic: task.fields['昵称/群名称'], id: task.fields['好友ID/群ID'] },
+        active: task.fields['启用状态'] === '开启',
+      }
+
+      if (taskConfig.active && taskConfig.msg && taskConfig.time && taskConfig.cycle && (task.fields['昵称/群名称'] || task.fields['好友ID/群ID'] || task.fields['好友备注'])) {
+        return taskConfig
+      }
+
+      return null
+    }).filter(Boolean)
+    // log.info('任务列表：', timedTasks)
+    this.reminderList = timedTasks
+    return this.reminderList
+  }
+
+  // 获取群发通知
+  async getGroupNotifications () {
+    const query = {
+      filterByFormula: '{状态|state}="待发送|waiting"',
+    }
+    // log.info('query:', JSON.stringify(query))
+    const groupNotifications: Notifications[] = []
+    try {
+      const records = await this.getRecords(this.dataBaseIds.groupNotificationsSheet, query)
+      // log.info('群发通知列表（原始）：\n', JSON.stringify(records))
+
+      for (const record of records) {
+        const fields = record.fields
+        const recordId = record.recordId
+        const fieldsNew: Notifications = transformKeys(fields) as Notifications
+        // log.info('群发通知列表(格式化key)：\n', JSON.stringify(fieldsNew))
+
+        if (fieldsNew.text && fieldsNew.type && (fieldsNew.id || fieldsNew.alias || fieldsNew.name) && fieldsNew.state === '待发送|waiting') {
+          fieldsNew.recordId = recordId
+          fieldsNew.type = fieldsNew.type.split('|')[1] || 'contact'
+          if (fieldsNew.type === 'room') {
+            fieldsNew.room = {
+              id: fieldsNew.id,
+              topic: fieldsNew.name,
+            }
+          } else {
+            fieldsNew.contact = {
+              id: fieldsNew.id,
+              name: fieldsNew.name,
+              alias: fieldsNew.alias,
+            }
+          }
+          groupNotifications.push(fieldsNew)
+        }
+      }
+      log.info('待发送的群发通知列表（添加接收人）：\n', JSON.stringify(groupNotifications))
+
+      return groupNotifications
+    } catch (e) {
+      log.error('获取群发通知列表失败：\n', e)
+
+      return []
+    }
+  }
+
+  // 获取关键字
+  async getKeywords () {
+    const keywordsRecords = await this.getRecords(this.dataBaseIds.keywordsSheet, {})
+    log.info('关键词：\n', JSON.stringify(keywordsRecords))
+  }
+
+  // 获取统计打卡
+  async getStatistics () {
+    const statisticsRecords = await this.getRecords(this.dataBaseIds.statisticsSheet, {})
+    log.info('统计打卡：\n', JSON.stringify(statisticsRecords))
+    this.statisticsRecords = statisticsRecords
+
+    const activitiesVika: Activity[] = []
+
+    for (const statistics of statisticsRecords) {
+      const fields = statistics.fields
+      const fieldsNew: any = transformKeys(fields)
+      if (fieldsNew._id && fieldsNew.type && fieldsNew.desc && (fieldsNew.topic || fieldsNew.roomid)) {
+        const activity: Activity = fieldsNew as Activity
+        activity.active = activity.active === '开启'
+        activity._id = String(activity._id)
+        activity.shortCode = String(activity._id)
+        activitiesVika.push(activity)
+
+      }
+    }
+
+    log.info('维格表中的活动：', JSON.stringify(activitiesVika))
+
+    const activityService = new ActivityService()
+    const activitiesDb = await activityService.getActivityList()
+    log.info('DB中的活动：', JSON.stringify(activitiesDb))
+
+    const { addArray, removeArray } = findArrayDifferences(activitiesVika, activitiesDb)
+    log.info('新增：', JSON.stringify(addArray))
+    log.info('移除：', JSON.stringify(removeArray))
+
+    for (const statistics of addArray) {
+      try {
+        await activityService.addActivity(statistics)
+      } catch (e) {
+        log.error('写入活动失败：', e)
+      }
+    }
+
+    for (const statistics of removeArray) {
+      try {
+        await activityService.removeAtivity(statistics._id)
+      } catch (e) {
+        log.error('删除活动失败：', e)
+      }
+    }
+
+    for (const statistics of activitiesVika) {
+      try {
+        await activityService.updateAtivity(statistics._id, statistics)
+
+      } catch (e) {
+        log.error('更新活动失败：', e)
+      }
+    }
+
+    log.info('更新活动：', activitiesVika.length)
+
+    return statisticsRecords
+  }
+
+  // 创建订单
+  async createOrder (message: Message) {
+    const talker = message.talker()
+    const room = message.room()
+
+    const curTime = this.getCurTime()
+    const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
+    const records = [
+      {
+        fields: {
+          流水号: String(curTime),
+          所属活动: 'system',
+          昵称: talker.name(),
+          好友备注: await talker.alias() || '',
+          群: await room?.topic() || '',
+          创建时间: timeHms,
+        },
+      },
+    ]
+
+    log.info('订单消息:', records)
+    const datasheet = this.vika.datasheet(this.dataBaseIds.orderSheet)
+    datasheet.records.create(records).then((response) => {
+      if (!response.success) {
+        log.error('创建订单，写入vika失败：', JSON.stringify(response))
+      }
+      return response
+    }).catch(err => { log.error('创建订单，vika写入接口失败：', err) })
+  }
+
+  // 上传联系人列表
+  async updateContacts (bot: Wechaty) {
+    let updateCount = 0
+    try {
+      const contacts: Contact[] = await bot.Contact.findAll()
+      log.info('当前微信最新联系人数量：', contacts.length)
+      const recordsAll: any = []
+      const recordExisting = await this.getAllRecords(this.dataBaseIds.contactSheet)
+      // log.info('云端好友数量：', recordExisting.length || '0')
+      const wxids: string[] = []
+      if (recordExisting.length) {
+        recordExisting.forEach((record: { fields: any, id: any }) => {
+          wxids.push(record.fields.id)
+        })
+      }
+      for (let i = 0; i < contacts.length; i++) {
+        const item = contacts[i]
+        const isFriend = item?.friend()
+        // log.info('好友详情：', item?.name(), JSON.stringify(isFriend))
+        if (item && isFriend && item.type() === types.Contact.Individual && !wxids.includes(item.id)) {
+          // log.info('云端不存在：', item.name())
+          let avatar = ''
+          let alias = ''
+          try {
+            avatar = String(await item.avatar())
+          } catch (err) {
+            log.error('获取好友头像失败：', err)
+          }
+          try {
+            alias = await item.alias() || ''
+          } catch (err) {
+            log.error('获取好友备注失败：', err)
+          }
+          const fields = {
+            alias,
+            avatar,
+            friend: item.friend(),
+            gender: String(item.gender() || ''),
+            updated: new Date().toLocaleString(),
+            id: item.id,
+            name: item.name(),
+            phone: String(await item.phone()),
+            type: String(item.type()),
+          }
+          const record = {
+            fields,
+          }
+          recordsAll.push(record)
+        }
+      }
+
+      for (let i = 0; i < recordsAll.length; i = i + 10) {
+        const records = recordsAll.slice(i, i + 10)
+        await this.createRecord(this.dataBaseIds.contactSheet, records)
+        log.info('好友列表同步中...', i + 10)
+        updateCount = updateCount + 10
+        void await wait(1000)
+      }
+
+      log.info('同步好友列表完成，更新好友数量：', updateCount || '0')
+    } catch (err) {
+      log.error('更新好友列表失败：', err)
+
+    }
+
+  }
+
+  // 上传群列表
+  async updateRooms (bot: Wechaty) {
+    let updateCount = 0
+    try {
+      const rooms: Room[] = await bot.Room.findAll()
+      log.info('当前最新微信群数量：', rooms.length)
+      const recordsAll: any = []
+      const recordExisting = await this.getAllRecords(this.dataBaseIds.roomListSheet)
+      log.info('云端群数量：', recordExisting.length)
+      const wxids: string[] = []
+      if (recordExisting.length) {
+        recordExisting.forEach((record: { fields: any, id: any }) => {
+          wxids.push(record.fields.id)
+        })
+      }
+      for (let i = 0; i < rooms.length; i++) {
+        const item: Room | undefined = rooms[i]
+        if (item && !wxids.includes(item.id)) {
+          let avatar: any = 'null'
+          try {
+            avatar = await item.avatar()
+            avatar = avatar.name
+          } catch (err) {
+            log.error('获取群头像失败：', err)
+          }
+          const ownerId = await item.owner()?.id
+          log.info('第一个群成员：', ownerId)
+          const fields = {
+            avatar,
+            id: item.id,
+            ownerId: ownerId || '',
+            topic: await item.topic() || '',
+            updated: new Date().toLocaleString(),
+          }
+          const record = {
+            fields,
+          }
+          recordsAll.push(record)
+        }
+      }
+
+      for (let i = 0; i < recordsAll.length; i = i + 10) {
+        const records = recordsAll.slice(i, i + 10)
+        await this.createRecord(this.dataBaseIds.roomListSheet, records)
+        log.info('群列表同步中...', i + 10)
+        updateCount = updateCount + 10
+        void await wait(1000)
+      }
+
+      log.info('同步群列表完成，更新群数量：', updateCount || '0')
+    } catch (err) {
+      log.error('更新群列表失败：', err)
+
+    }
+
+  }
+
+  async onMessage (message: Message) {
     try {
 
       let uploadedAttachments = ''
       const msgType = types.Message[message.type()]
-      let file:any = ''
+      let file: any = ''
       let filePath = ''
       let text = ''
 
@@ -616,14 +1002,12 @@ class VikaBot {
           await wait(1000)
           const readerStream = fs.createReadStream(filePath)
           uploadedAttachments = await this.upload(readerStream)
-          fs.unlink(filePath, (err) => {
-            log.info('上传vika完成删除文件：', filePath, err)
-          })
+          await wait(1000)
+          // fs.unlink(filePath, (err) => {
+          //   log.info('上传vika成功，删除文件：', filePath, err)
+          // })
         } catch {
-          log.info('上传失败：', filePath)
-          fs.unlink(filePath, (err) => {
-            log.info('上传vika失败删除文件', filePath, err)
-          })
+          log.info('上传vika失败：', filePath)
         }
 
       }
@@ -637,7 +1021,7 @@ class VikaBot {
     }
   }
 
-  async onScan (qrcode:string, status:ScanStatus) {
+  async onScan (qrcode: string, status: ScanStatus) {
     if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
       const qrcodeUrl = encodeURIComponent(qrcode)
       const qrcodeImageUrl = [
@@ -679,234 +1063,6 @@ class VikaBot {
     }
   }
 
-  async updateContacts (bot:Wechaty) {
-    let updateCount = 0
-    try {
-      const contacts: Contact[] = await bot.Contact.findAll()
-      log.info('当前微信最新联系人数量：', contacts.length)
-      const recordsAll: any = []
-      const recordExisting = await this.getAllRecords(this.dataBaseIds.contactSheet)
-      log.info('云端好友数量：', recordExisting.length || '0')
-      const wxids: string[] = []
-      if (recordExisting.length) {
-        recordExisting.forEach((record: { fields: any, id: any }) => {
-          wxids.push(record.fields.id)
-        })
-      }
-      for (let i = 0; i < contacts.length; i++) {
-        const item = contacts[i]
-        const isFriend = item?.friend()
-        // log.info('好友详情：', item?.name(), JSON.stringify(isFriend))
-        if (item && isFriend && item.type() === types.Contact.Individual && !wxids.includes(item.id)) {
-          // log.info('云端不存在：', item.name())
-          let avatar = ''
-          try {
-            avatar = String(await item.avatar())
-          } catch (err) {
-            log.error('获取好友头像失败：', err)
-          }
-          const fields = {
-            alias: String(await item.alias() || ''),
-            avatar,
-            friend: item.friend(),
-            gender: String(item.gender() || ''),
-            updated: new Date().toLocaleString(),
-            id: item.id,
-            name: item.name(),
-            phone: String(await item.phone()),
-            type: String(item.type()),
-          }
-          const record = {
-            fields,
-          }
-          recordsAll.push(record)
-        } else {
-          log.info('云端已存在：', item?.name())
-        }
-      }
-
-      for (let i = 0; i < recordsAll.length; i = i + 10) {
-        const records = recordsAll.slice(i, i + 10)
-        await this.createRecord(this.dataBaseIds.contactSheet, records)
-        log.info('好友列表同步中...', i + 10)
-        updateCount = updateCount + 10
-        void await wait(1000)
-      }
-
-      log.info('同步好友列表完成，更新好友数量：', updateCount || '0')
-    } catch (err) {
-      log.error('更新好友列表失败：', err)
-
-    }
-
-  }
-
-  async updateRooms (bot: Wechaty) {
-    let updateCount = 0
-    try {
-      const rooms: Room[] = await bot.Room.findAll()
-      log.info('当前最新微信群数量：', rooms.length)
-      const recordsAll: any = []
-      const recordExisting = await this.getAllRecords(this.dataBaseIds.roomListSheet)
-      log.info('云端群数量：', recordExisting.length)
-      const wxids: string[] = []
-      if (recordExisting.length) {
-        recordExisting.forEach((record: { fields: any, id: any }) => {
-          wxids.push(record.fields.id)
-        })
-      }
-      for (let i = 0; i < rooms.length; i++) {
-        const item:Room|undefined = rooms[i]
-        if (item && !wxids.includes(item.id)) {
-          let avatar:any = 'null'
-          try {
-            avatar = await item.avatar()
-            avatar = avatar.name
-          } catch (err) {
-            log.error('获取群头像失败：', err)
-          }
-          const ownerId = await item.owner()?.id
-          log.info('第一个群成员：', ownerId)
-          const fields = {
-            avatar,
-            id: item.id,
-            ownerId: ownerId || '',
-            topic: await item.topic() || '',
-            updated: new Date().toLocaleString(),
-          }
-          const record = {
-            fields,
-          }
-          recordsAll.push(record)
-        }
-      }
-
-      for (let i = 0; i < recordsAll.length; i = i + 10) {
-        const records = recordsAll.slice(i, i + 10)
-        await this.createRecord(this.dataBaseIds.roomListSheet, records)
-        log.info('群列表同步中...', i + 10)
-        updateCount = updateCount + 10
-        void await wait(1000)
-      }
-
-      log.info('同步群列表完成，更新群数量：', updateCount || '0')
-    } catch (err) {
-      log.error('更新群列表失败：', err)
-
-    }
-
-  }
-
-  async getTimedTask () {
-    const taskRecords = await this.getRecords(this.dataBaseIds.noticeSheet, {})
-    log.info('定时提醒任务列表：', JSON.stringify(taskRecords))
-
-    let timedTasks: TaskConfig[] = []
-
-    const taskFields: Field[] = sheets['noticeSheet']?.fields || []
-    const taskFieldDic: any = {}
-
-    for (let i = 0; i < taskFields.length; i++) {
-      const taskField: Field | undefined = taskFields[i]
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (taskFields && taskField !== undefined && taskFields[i]?.desc) {
-        taskFieldDic[taskField.name] = taskField.desc
-      }
-    }
-
-    interface TaskRecord {
-      recordId: string;
-      fields: {
-        [key: string]: any;
-      };
-    }
-
-    // 优化后的代码
-    timedTasks = taskRecords.map((task: TaskRecord) => {
-      const taskConfig: TaskConfig = {
-        id: task.recordId,
-        msg: task.fields['内容'],
-        time: task.fields['时间'],
-        cycle: task.fields['周期'] || '无重复',
-        targetType: task.fields['通知目标类型'] === '好友' ? 'contact' : 'room',
-        targetId: task.fields['好友ID/群ID'],
-        targetName: task.fields['好友备注/昵称或群名称'],
-        active: task.fields['启用状态'] === '开启',
-      }
-
-      if (taskConfig.active && taskConfig.msg && taskConfig.time && taskConfig.cycle && (taskConfig.targetId || taskConfig.targetName)) {
-        return taskConfig
-      }
-
-      return null
-    }).filter(Boolean)
-    // log.info(2, timedTasks)
-    this.reminderList = timedTasks
-    return this.reminderList
-
-  }
-
-  async checkInit (msg: string) {
-    this.spaceId = await this.getSpaceId()
-    // log.info('空间ID:', this.spaceId)
-    let sheetCount = 0
-    if (this.spaceId) {
-      const tables = await this.getNodesList()
-      // log.info(tables)
-
-      for (const k in sheets) {
-        const sheet = sheets[k as keyof Sheets]
-        // log.info(k, sheet)
-        if (sheet) {
-          if (!tables[sheet.name]) {
-            sheetCount = sheetCount + 1
-            log.error(`缺少【${sheet.name}】表，请重新运行 npm run start自动创建系统表`)
-          } else {
-            this.dataBaseIds[k as keyof DateBase] = tables[sheet.name]
-          }
-        }
-      }
-
-      if (sheetCount === 0) {
-        log.info(`\n${msg}\n\n================================================\n`)
-      } else {
-        return false
-      }
-
-    } else {
-      log.error('指定空间不存在，请先创建空间，并在config.json中配置vika信息')
-      return false
-    }
-
-    const that = this
-    setInterval(() => {
-      // log.info('待处理消息池长度：', that.msgStore.length||0);
-      // that.msgStore = that.msgStore.concat(global.sentMessage)
-      // global.sentMessage = []
-
-      if (that.msgStore.length && that.dataBaseIds.messageSheet) {
-        const end = that.msgStore.length < 10 ? that.msgStore.length : 10
-        const records = that.msgStore.splice(0, end)
-        const messageSheet = that.dataBaseIds.messageSheet
-        const datasheet = that.vika.datasheet(messageSheet)
-        // log.info('写入vika的消息：', JSON.stringify(records))
-        try {
-          datasheet.records.create(records).then((response) => {
-            if (response.success) {
-              log.info('写入vika成功：', end, JSON.stringify(response.code))
-            } else {
-              log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
-            }
-          }).catch(err => { log.error('调用vika写入接口失败：', err) })
-        } catch (err) {
-          log.error('调用datasheet.records.create失败：', err)
-        }
-      }
-    }, 1000)
-
-    return true
-  }
-
   async init () {
 
     this.spaceId = await this.getSpaceId()
@@ -915,14 +1071,14 @@ class VikaBot {
     if (this.spaceId) {
 
       const tables = await this.getNodesList()
-      log.info('维格表文件列表：', JSON.stringify(tables))
+      log.info('维格表文件列表：\n', JSON.stringify(tables))
 
       await wait(1000)
 
       for (const k in sheets) {
         // log.info(this)
         const sheet = sheets[k as keyof Sheets]
-        log.info('数据模型：', k, sheet)
+        // log.info('数据模型：', k, sheet)
         if (sheet && !tables[sheet.name]) {
           log.info('表不存在开始创建...', k, sheet.name)
           const fields = sheet.fields
@@ -934,7 +1090,7 @@ class VikaBot {
               name: field?.name || '',
               desc: field?.desc || '',
             }
-            log.info('字段定义：', JSON.stringify(field))
+            // log.info('字段定义：', JSON.stringify(field))
             let options
             switch (field?.type) {
               case 'SingleText':
@@ -1034,11 +1190,35 @@ class VikaBot {
           this.dataBaseNames[sheet.name as keyof DateBase] = tables[sheet.name]
         } else { /* empty */ }
       }
-      log.info('\n初始化系统表完成,运行 npm start 启动系统\n\n================================================\n')
+      log.info('\n\n初始化系统表完成...\n\n================================================\n')
       // const tasks = await this.getTimedTask()
+      await this.getStatistics()
+      const that = this
+      setInterval(() => {
+        // log.info('待处理消息池长度：', that.msgStore.length||0);
+        // that.msgStore = that.msgStore.contact(global.sentMessage)
+        // global.sentMessage = []
+
+        if (that.msgStore.length && that.dataBaseIds.messageSheet) {
+          const end = that.msgStore.length < 10 ? that.msgStore.length : 10
+          const records = that.msgStore.splice(0, end)
+          const messageSheet = that.dataBaseIds.messageSheet
+          const datasheet = that.vika.datasheet(messageSheet)
+          // log.info('写入vika的消息：', JSON.stringify(records))
+          try {
+            datasheet.records.create(records).then((response) => {
+              if (!response.success) {
+                log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
+              }
+            }).catch(err => { log.error('调用vika写入接口失败：', err) })
+          } catch (err) {
+            log.error('调用datasheet.records.create失败：', err)
+          }
+        }
+      }, 1000)
       return true
     } else {
-      log.error('指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息')
+      log.error('\n\n指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息\n\n================================================\n')
       return false
     }
   }

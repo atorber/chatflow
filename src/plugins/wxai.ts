@@ -163,7 +163,7 @@ async function aibot (sysConfig: configTypes.Config, talker: any, room: any, que
     TOKEN: sysConfig.botConfig.wxOpenAi.token,
   }
 
-  log.info('微信对话平台配置信息：', JSON.stringify(ops))
+  // log.info('微信对话平台配置信息：', JSON.stringify(ops))
 
   let answerJson
   switch (callBot) {
@@ -197,7 +197,7 @@ async function aibot (sysConfig: configTypes.Config, talker: any, room: any, que
 
         const resMsg = await chatAibot(queryData)
         // console.debug(resMsg)
-        log.info('对话返回原始：', JSON.stringify(resMsg))
+        // log.info('对话返回原始：', JSON.stringify(resMsg))
         // log.info('对话返回：', JSON.stringify(resMsg).replace(/[\r\n]/g, "").replace(/\ +/g, ""))
         log.info('回答内容：', resMsg.msgtype, resMsg.query, resMsg.answer)
         // console.debug(resMsg.query)

@@ -79,21 +79,7 @@ const config: configTypes.Config = {
       isOpen: true,
     },
   },
-  command: {
-    bot: {
-      reboot: '#重启机器人',
-      selfInfo: '#机器人信息',
-    },
-    contact: {
-      findall: '#联系人列表',
-    },
-    room: {
-      findall: '#群列表',
-    },
-  },
   welcomeList: [],
-  roomWhiteList: [],
-  contactWhiteList: [],
   contactConfig: {
     tyutluyc: {
       app: 'waiting',
