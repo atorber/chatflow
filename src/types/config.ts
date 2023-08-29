@@ -1,4 +1,18 @@
+import type { BusinessRoom, BusinessUser } from '../plugins/finder'
+
 type AIType = 'WxOpenai' | string;
+
+interface RoomWhiteList{
+  qa:BusinessRoom[]
+  msg:BusinessRoom[]
+  act:BusinessRoom[]
+}
+
+interface ContactWhiteList{
+qa:BusinessUser[]
+msg:BusinessUser[]
+act:BusinessUser[]
+}
 
 interface SysConfig {
   adminRoomTopic: string;
@@ -100,8 +114,8 @@ interface AutoQaConfig {
 }
 
 interface WxOpenAiConfig {
-  token?: string;
-  encodingAesKey?: string;
+  token: string;
+  encodingAesKey: string;
 }
 
 interface ChatGptConfig {
@@ -135,25 +149,6 @@ interface RidingAppConfig {
 
 interface AppsConfig {
   riding: RidingAppConfig;
-}
-
-interface BotCommandConfig {
-  reboot: string;
-  selfInfo: string;
-}
-
-interface ContactCommandConfig {
-  findall: string;
-}
-
-interface RoomCommandConfig {
-  findall: string;
-}
-
-interface CommandConfig {
-  bot: BotCommandConfig;
-  contact: ContactCommandConfig;
-  room: RoomCommandConfig;
 }
 
 interface BaseConfig {
@@ -203,12 +198,11 @@ interface Config {
   functionOnStatus: FunctionOnStatus;
   botConfig: BotConfig;
   welcomeList?: string[];
-  roomWhiteList: string[];
-  contactWhiteList: string[];
+  roomWhiteList?: RoomWhiteList;
+  contactWhiteList?: ContactWhiteList;
   contactConfig: ContactConfig;
   roomConfig: RoomConfig;
   apps?: AppsConfig;
-  command?: CommandConfig;
 }
 
 export type {
@@ -219,4 +213,6 @@ export type {
   RoomConfig,
   SysConfig,
   Config,
+  RoomWhiteList,
+  ContactWhiteList,
 }

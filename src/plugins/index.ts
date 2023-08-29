@@ -1,4 +1,4 @@
-import { VikaBot } from './vika.js'
+import { VikaBot, DateBase } from './vika.js'
 import { wxai } from './wxai.js'
 import { sendNotice } from './group-notice.js'
 
@@ -14,4 +14,5 @@ export {
   ChatDevice,
   propertyMessage,
   eventMessage,
+  type DateBase,
 }
