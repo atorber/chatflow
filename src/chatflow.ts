@@ -342,8 +342,8 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
     await getWhiteList()
 
     // 启动时更新云端好友和群
-    // await vika.updateRooms(bot)
-    // await vika.updateContacts(bot)
+    await vika.updateRooms(bot)
+    await vika.updateContacts(bot)
 
     // 如果开启了MQTT推送，心跳同步到MQTT,每30000s一次
     setInterval(() => {
