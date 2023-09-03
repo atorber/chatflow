@@ -312,7 +312,6 @@ export async function updateJobs (bot: Wechaty, vika: any) {
 }
 
 export const onReadyOrLogin = async (bot: Wechaty) => {
-  const user: Contact = bot.currentUser
   // 检查维格表配置并启动
   if (config.botConfig.vika.spaceName && config.botConfig.vika.token) {
     try {
@@ -327,15 +326,13 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
   } else {
     log.error('\n维格表配置不全，.env文件或环境变量中中设置的token和spaceName之后重启\n\n================================================\n')
   }
-  if (isVikaOk) {
-    // 启动MQTT通道
-    if (config.botConfig.mqtt.password && config.botConfig.mqtt.username && config.botConfig.mqtt.endpoint && (config.functionOnStatus.mqtt.mqttControl || config.functionOnStatus.mqtt.mqttMessagePush)) {
-      chatdev = new ChatDevice(config.botConfig.mqtt.username, config.botConfig.mqtt.password, config.botConfig.mqtt.endpoint, config.botConfig.mqtt.port, user.id)
-      if (config.functionOnStatus.mqtt.mqttControl) {
-        chatdev.init(bot)
-      }
-    }
+  // 启动MQTT通道
+  if (config.botConfig.mqtt.endpoint && (config.functionOnStatus.mqtt.mqttControl || config.functionOnStatus.mqtt.mqttMessagePush)) {
+    chatdev = new ChatDevice(config.botConfig.mqtt.username, config.botConfig.mqtt.password, config.botConfig.mqtt.endpoint, config.botConfig.mqtt.port, config.botConfig.base.botid)
+    chatdev.init(bot)
+  }
 
+  if (isVikaOk) {
     const envConfig = await vika.getConfig()
     log.info('维格表中的环境变量配置信息：\n', JSON.stringify(envConfig))
 
@@ -350,7 +347,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
       try {
         const curDate = new Date().toLocaleString()
         log.info('当前时间:', curDate)
-        if (chatdev && config.functionOnStatus.mqtt.mqttMessagePush) {
+        if (chatdev && chatdev.isOk && config.functionOnStatus.mqtt.mqttMessagePush) {
           chatdev.pub_property(propertyMessage('lastActive', curDate))
         }
       } catch (err) {
@@ -720,7 +717,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
         }
 
         // 消息通过MQTT上报
-        if (chatdev && config.functionOnStatus.mqtt.mqttMessagePush) {
+        if (chatdev && chatdev.isOk && config.functionOnStatus.mqtt.mqttMessagePush) {
           /*
           将消息通过mqtt通道上报到云端
           */

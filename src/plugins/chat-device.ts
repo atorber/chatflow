@@ -28,6 +28,7 @@ class ChatDevice {
   propertyApi:string
   eventApi:string
   commandApi:string
+  isOk:boolean
   constructor (username:string, password:string, endpoint:string, port:string|number, botId:string) {
 
     this.mqttclient = mqtt.connect(`mqtt://${endpoint}:${port || 1883}`, {
@@ -39,11 +40,11 @@ class ChatDevice {
     this.propertyApi = `thing/chatbot/${botId}/property/post`
     this.eventApi = `thing/chatbot/${botId}/event/post`
     this.commandApi = `thing/chatbot/${botId}/command/invoke`
+    this.isOk = false
   }
 
   init (bot:Wechaty) {
     this.chatbot = bot
-    this.chatdevice = this
     this.bot = bot
     const that = this
     this.mqttclient.on('connect', function () {
@@ -62,6 +63,7 @@ class ChatDevice {
     })
     this.mqttclient.on('message', this.onMessage)
     this.sub_command()
+    this.isOk = true
   }
 
   sub_command () {
@@ -74,16 +76,19 @@ class ChatDevice {
 
   pub_property (msg:any) {
     this.mqttclient.publish(this.propertyApi, msg)
+    log.info('mqtt pub_message:', this.eventApi, msg)
   }
 
   pub_event (msg:any) {
     this.mqttclient.publish(this.eventApi, msg)
+    log.info('mqtt pub_message:', this.eventApi, msg)
   }
 
   async pub_message (msg:any) {
     try {
       const payload = await wechaty2chatdev(msg)
       this.mqttclient.publish(this.eventApi, payload)
+      log.info('mqtt pub_message:', this.eventApi, payload)
     } catch (err) {
       console.error(err)
     }
@@ -95,113 +100,118 @@ class ChatDevice {
   }
 
   async onMessage (topic:string, message:any) {
-    log.info('mqtt onMessage:', topic, message.toString())
+    log.info('mqtt onMessage:', topic)
+    log.info('mqtt onMessage:', message.toString())
+    try {
     // const content = JSON.parse(message.toString())
-    message = JSON.parse(message)
-    const name = message.name
-    const params = message.params
+      message = JSON.parse(message)
+      const name = message.name
+      const params = message.params
 
-    if (name === 'start') {
-      log.info('cmd name:', name)
-    }
-    if (name === 'stop') {
-      log.info('cmd name:', name)
-    }
-    if (name === 'logout') {
-      log.info('cmd name:', name)
+      if (name === 'start') {
+        log.info('cmd name:', name)
+      }
+      if (name === 'stop') {
+        log.info('cmd name:', name)
+      }
+      if (name === 'logout') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'logonoff') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'logonoff') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'userSelf') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'userSelf') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'say') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'say') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'send') {
-      await send(params, this.chatbot)
-    }
-    if (name === 'sendAt') {
-      await sendAt(params, this.chatbot)
-    }
+      }
+      if (name === 'send') {
+        await send(params, this.chatbot)
+      }
+      if (name === 'sendAt') {
+        await sendAt(params, this.chatbot)
+      }
 
-    if (name === 'aliasGet') {
-      log.info('cmd name:', name)
+      if (name === 'aliasGet') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'aliasSet') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'aliasSet') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'roomCreate') {
-      await createRoom(params, this.chatbot)
-    }
-    if (name === 'roomAdd') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'roomCreate') {
+        await createRoom(params, this.chatbot)
+      }
+      if (name === 'roomAdd') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'roomDel') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'roomDel') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'roomAnnounceGet') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'roomAnnounceGet') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'roomAnnounceSet') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'roomAnnounceSet') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'roomQuit') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'roomQuit') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'roomTopicGet') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'roomTopicGet') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'roomTopicSet') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'roomTopicSet') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'roomQrcodeGet') {
-      await getQrcod(params, this.chatbot, this.chatdevice)
+      }
+      if (name === 'roomQrcodeGet') {
+        await getQrcod(params, this.chatbot, this.chatdevice)
 
-    }
-    if (name === 'memberAllGet') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'memberAllGet') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'contactAdd') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'contactAdd') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'contactAliasSet') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'contactAliasSet') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'contactFindAll') {
-      await getAllContact(this.chatdevice, this.chatbot)
-    }
-    if (name === 'contactFind') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'contactFindAll') {
+        await getAllContact(this.chatdevice, this.chatbot)
+      }
+      if (name === 'contactFind') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'roomFindAll') {
-      await getAllRoom(this.chatdevice, this.chatbot)
-    }
-    if (name === 'roomFind') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'roomFindAll') {
+        await getAllRoom(this.chatdevice, this.chatbot)
+      }
+      if (name === 'roomFind') {
+        log.info('cmd name:', name)
 
-    }
-    if (name === 'config') {
-      log.info('cmd name:', name)
+      }
+      if (name === 'config') {
+        log.info('cmd name:', name)
 
+      }
+    } catch (err) {
+      log.error('MQTT接收到消息错误：', err)
     }
 
   }
