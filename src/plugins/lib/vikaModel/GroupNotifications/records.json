@@ -1,1 +1,1 @@
-{"code":200,"success":true,"data":{"total":0,"records":[],"pageNum":1,"pageSize":0},"message":"SUCCESS"}
+{"code":200,"success":true,"data":{"total":1,"records":[{"recordId":"reco3vObm3FBJ","createdAt":1693085672000,"updatedAt":1693562537000,"fields":{"类型|type":"好友|contact","最后操作时间":1693561860000,"状态|state":"待发送|waiting","操作":"选择操作","同步状态":"未同步"}}],"pageNum":1,"pageSize":1},"message":"SUCCESS"}

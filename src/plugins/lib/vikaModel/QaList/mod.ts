@@ -10,8 +10,8 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 import { replaceSyncStatus, actionState } from '../actionBar.js'
 
-const name = '白名单'
-const code = 'whiteListSheet'
+const name = '问答列表'
+const code = 'qaSheet'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

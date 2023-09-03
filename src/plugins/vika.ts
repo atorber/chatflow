@@ -1083,6 +1083,7 @@ class VikaBot {
         if (sheet && !tables[sheet.name]) {
           log.info('表不存在开始创建...', k, sheet.name)
           const fields = sheet.fields
+          log.info('fields:', JSON.stringify(fields))
           const newFields: Field[] = []
           for (let j = 0; j < fields.length; j++) {
             const field = fields[j]
