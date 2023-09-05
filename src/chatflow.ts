@@ -722,7 +722,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
           将消息通过mqtt通道上报到云端
           */
           // chatdev.pub_message(message)
-          chatdev.pub_event(eventMessage('onMessage', { curDate }))
+          chatdev.pub_event(eventMessage('onMessage', message))
         }
       }
     })

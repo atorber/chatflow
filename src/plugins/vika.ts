@@ -32,7 +32,11 @@ import { waitForMs as wait } from '../utils/utils.js'
 import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
 
 import type { BusinessRoom, BusinessUser } from './finder.js'
-import { ActivityService, Order, Activity } from '../services/activityService.js'
+import {
+  ActivityService,
+  // Order,
+  Activity,
+} from '../services/activityService.js'
 
 type VikaBotConfigTypes = {
   spaceName: string,
@@ -109,7 +113,7 @@ function findArrayDifferences (vika: Activity[], db: Activity[]): { addArray: Ac
   return { addArray, removeArray }
 }
 
-class VikaBot {
+export class VikaBot {
 
   spaceName!: string
   vika!: Vika
@@ -1235,7 +1239,3 @@ class VikaBot {
   }
 
 }
-
-export { VikaBot }
-
-export default VikaBot
