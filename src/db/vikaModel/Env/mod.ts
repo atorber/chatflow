@@ -15,7 +15,7 @@ import path from 'path'
 import { replaceSyncStatus, actionState } from '../actionBar.js'
 
 const name = '环境变量|Env'
-const code = 'configSheet'
+const code = 'envSheet'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

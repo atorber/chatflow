@@ -222,7 +222,8 @@ export async function pubGroupNotifications (bot: Wechaty) {
 
 // 保存配置文件到data/config.json
 export function updateConfig (config: any) {
-  fs.writeFileSync('data/config.json', JSON.stringify(config, null, '\t'))
+  // fs.writeFileSync('data/config.json', JSON.stringify(config, null, '\t'))
+  log.info('配置有变更, updateConfig:', JSON.stringify(config))
 }
 
 // 启动vika客户端
