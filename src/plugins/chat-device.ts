@@ -2,19 +2,13 @@ import mqtt from 'mqtt'
 import { v4 } from 'uuid'
 import { FileBox } from 'file-box'
 import {
-  // Contact,
   log,
   Contact,
-  //   Message,
-  //   ScanStatus,
   Wechaty,
-//   UrlLink,
-//   MiniProgram,
 } from 'wechaty'
 import { wechaty2chatdev, propertyMessage, eventMessage } from './msg-format.js'
 
 import {
-  // waitForMs as wait,
   formatSentMessage,
 } from '../utils/utils.js'
 
@@ -246,7 +240,6 @@ async function getAllContact (chatdevice:any, bot:Wechaty) {
   }
   const msg = propertyMessage('contactList', friends)
   chatdevice.pub_property(msg)
-
 }
 
 async function getAllRoom (chatdevice:any, bot:Wechaty) {

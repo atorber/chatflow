@@ -11,7 +11,7 @@ type User = {
     id:number
 }
 
-export class UserService {
+export class UserChat {
 
   private users: User[]
 

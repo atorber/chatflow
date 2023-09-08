@@ -104,12 +104,12 @@ async function sendMiniProgram (answer: any, bot: Wechaty, talker: Contact, room
   }
 }
 
-interface  QueryData {
-  first_priority_skills: string[];
-  query:string;
-  signature:string;
-  second_priority_skills?:string [];
-}
+  interface  QueryData {
+    first_priority_skills: string[];
+    query:string;
+    signature:string;
+    second_priority_skills?:string [];
+  }
 
 // aibot 函数基本保持不变
 async function aibot (sysConfig: configTypes.Config, talker: any, room: any, query: any) {
@@ -255,6 +255,28 @@ function prepareChatGptBody (content: string) {
     n: 1,
     stream: false,
   }
+}
+
+export class ChatBot {
+
+  spaceName!: string
+  msgStore!: any[]
+  envsOnVika!: any[]
+  switchsOnVika!: any[]
+  reminderList!: any[]
+  statisticsRecords: any
+
+  constructor (config: any) {
+    if (!config.token) {
+      log.error('未配置token，请在config.ts中配置')
+    } else if (!config.spaceName) {
+      log.error('未配置空间名称，请在config.ts中配置')
+    } else {
+      this.spaceName = config.spaceName
+      this.msgStore = []
+    }
+  }
+
 }
 
 export {

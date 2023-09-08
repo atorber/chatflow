@@ -1,4 +1,3 @@
-import { VikaBot, TaskConfig, DateBase } from './vika.js'
 import { wxai } from './wxai.js'
 import { sendNotice } from './group-notice.js'
 
@@ -19,16 +18,10 @@ import {
   BusinessRoom,
   BusinessUser,
 } from './finder.js'
-import { type } from 'os'
-
-export type {
-  TaskConfig,
-}
 
 export {
   exportContactsAndRoomsToCSV,
   exportContactsAndRoomsToXLSX,
-  VikaBot,
   getFormattedRideInfo,
   sendNotice,
   wxai,
@@ -42,7 +35,6 @@ export {
 }
 
 export type {
-  DateBase,
   BusinessRoom,
   BusinessUser,
 }
