@@ -8,7 +8,7 @@ import type {
   // WechatyBuilder,
 } from 'wechaty'
 
-import type { TaskConfig } from '../plugins/mod.js'
+import type { TaskConfig } from '../db/vika-bot.js'
 
 async function formatSentMessage (userSelf: Contact, text: string, talker: Contact|undefined, room: Room|undefined) {
   // console.debug('发送的消息：', text)
@@ -56,6 +56,15 @@ const waitForMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms)
 
 function getNow () {
   return new Date().toLocaleString()
+}
+
+function getCurTime () {
+  // timestamp是整数，否则要parseInt转换
+  const timestamp = new Date().getTime()
+  const timezone = 8 // 目标时区时间，东八区
+  const offsetGMT = new Date().getTimezoneOffset() // 本地时间和格林威治的时间差，单位为分钟
+  const time = timestamp + offsetGMT * 60 * 1000 + timezone * 60 * 60 * 1000
+  return time
 }
 
 const getRule = (task:TaskConfig) => {
@@ -147,14 +156,18 @@ function generateRandomNumber (base:number): number {
   return Math.floor(Math.random() * 100) + base
 }
 
+const wait = waitForMs
+
 export {
   generateRandomNumber,
   toDBC,
   getNow,
+  wait,
   waitForMs,
   formatSentMessage,
   getRule,
   formatTimestamp,
+  getCurTime,
 }
 
 export default waitForMs

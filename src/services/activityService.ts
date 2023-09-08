@@ -2,7 +2,10 @@
 import { db } from '../db/tables.js'
 import { Room, Contact, Message, Wechaty, log } from 'wechaty'
 import { v4 } from 'uuid'
-import { formatTimestamp } from '../utils/utils.js'
+import { formatTimestamp, getCurTime } from '../utils/utils.js'
+import moment from 'moment'
+import type { VikaBot } from '../db/vika-bot.js'
+import { VikaSheet } from '../db/vika.js'
 
 const activityData = db.activity
 const orderData = db.order
@@ -41,14 +44,147 @@ export interface Order {
   act_decs: string;
 }
 
+export function transformKeys (obj: Record<string, any>): Record<string, any> {
+  const transformedObj: Record<string, any> = {}
+  for (const key in obj) {
+    const newKey = key.split('|')[1] as string // Extract the part after the slash
+    transformedObj[newKey] = obj[key]
+
+  }
+  return transformedObj
+}
+
+// 比较两个数组差异
+function findArrayDifferences (vika: Activity[], db: Activity[]): { addArray: Activity[], removeArray: Activity[] } {
+  const removeArray: Activity[] = []
+  const addArray: Activity[] = []
+
+  // Find elements in vika that are not in db
+  for (const obj1 of vika) {
+    if (!db.some(obj2 => obj2._id === obj1._id)) {
+      addArray.push(obj1)
+    }
+  }
+
+  // Find elements in db that are not in vika
+  for (const obj2 of db) {
+    if (!vika.some(obj1 => obj1._id === obj2._id)) {
+      removeArray.push(obj2)
+    }
+  }
+
+  return { addArray, removeArray }
+}
+
 // 服务类
-export class ActivityService {
+export class ActivityChat {
 
   private activities: Activity[] = []
-  private activitiesStore: any = {}
+  private db:VikaSheet
+  vikaBot: VikaBot
 
-  constructor () {
+  constructor (vikaBot:VikaBot) {
+    this.vikaBot = vikaBot
+    this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.statisticSheet)
+  }
 
+  // 初始化
+  async init () {
+    await this.getStatistics()
+  }
+
+  // 获取维格表中的活动
+  async getAct () {
+    const records = await this.db.findAll()
+    // log.info(JSON.stringify(this.vikaBot.dataBaseIds, undefined, 2))
+    // log.info('维格表中的活动记录：', JSON.stringify(records))
+    return records
+  }
+
+  // 获取统计打卡
+  async getStatistics () {
+    const statisticsRecords = await this.getAct()
+    const activitiesVika: Activity[] = []
+
+    for (const statistics of statisticsRecords) {
+      const fields = statistics.fields
+      const fieldsNew: any = transformKeys(fields)
+      if (fieldsNew._id && fieldsNew.type && fieldsNew.desc && (fieldsNew.topic || fieldsNew.roomid)) {
+        const activity: Activity = fieldsNew as Activity
+        activity.active = activity.active === '开启'
+        activity._id = String(activity._id)
+        activity.shortCode = String(activity._id)
+        activitiesVika.push(activity)
+      }
+    }
+
+    log.info('维格表中的有效活动：', JSON.stringify(activitiesVika))
+
+    const activitiesDb = await this.getActivityList()
+    log.info('DB中的活动：', JSON.stringify(activitiesDb))
+
+    const { addArray, removeArray } = findArrayDifferences(activitiesVika, activitiesDb)
+    log.info('新增：', JSON.stringify(addArray))
+    log.info('移除：', JSON.stringify(removeArray))
+
+    for (const statistics of addArray) {
+      try {
+        await this.addActivity(statistics)
+      } catch (e) {
+        log.error('写入活动失败：', e)
+      }
+    }
+
+    for (const statistics of removeArray) {
+      try {
+        await this.removeAtivity(statistics._id)
+      } catch (e) {
+        log.error('删除活动失败：', e)
+      }
+    }
+
+    for (const statistics of activitiesVika) {
+      try {
+        await this.updateAtivity(statistics._id, statistics)
+
+      } catch (e) {
+        log.error('更新活动失败：', e)
+      }
+    }
+
+    log.info('更新活动：', activitiesVika.length)
+
+    return statisticsRecords
+  }
+
+  // 创建订单
+  async createOrder (message: Message) {
+    const talker = message.talker()
+    const room = message.room()
+
+    const curTime = getCurTime()
+    const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
+    const records = [
+      {
+        fields: {
+          编号: String(curTime),
+          所属活动: 'system',
+          昵称: talker.name(),
+          好友备注: await talker.alias() || '',
+          群: await room?.topic() || '',
+          创建时间: timeHms,
+        },
+      },
+    ]
+
+    log.info('订单消息:', records)
+    const datasheet = new VikaSheet(this.vikaBot.vika, this.vikaBot.dataBaseIds.orderSheet)
+    datasheet.records.create(records).then((response: { success: any }) => {
+      if (!response.success) {
+        log.error('创建订单，写入vika失败：', JSON.stringify(response))
+      }
+      return response
+    }).catch((err: any) => { log.error('创建订单，vika写入接口失败：', err) })
   }
 
   getHelpText () {
@@ -113,7 +249,7 @@ export class ActivityService {
   }
 
   // 增加名额替补转正
-  async assignSubstituteParticipants (activity: Activity, additionalParticipants: number, createTime: number, bot: Wechaty) {
+  async assignSubstituteParticipants (activity: Activity, additionalParticipants: number, bot: Wechaty) {
     const canceledParticipants = additionalParticipants
     const newlyAssignedParticipants:any[] = []
 
@@ -594,9 +730,9 @@ export const generateResponseMessage = (msgType: string, msg: string, roomid: st
   }
 }
 
-// 云函数入口函数
-export const activityController = async (message: Message, room: Room) => {
-  const activityService = new ActivityService()
+// 控制器
+export const activityController = async (vikaBot:VikaBot, message: Message, room: Room) => {
+  const activityService = new ActivityChat(vikaBot)
 
   const text = message.text()
   const createdTime = new Date().getTime()
