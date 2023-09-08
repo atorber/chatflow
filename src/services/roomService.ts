@@ -1,7 +1,7 @@
 /* eslint-disable sort-keys */
 import { db } from '../db/tables.js'
 import type { VikaBot } from '../db/vika-bot.js'
-import { VikaSheet } from '../db/vika.js'
+import { VikaSheet, IRecord } from '../db/vika.js'
 import { Room, Wechaty, log } from 'wechaty'
 import { wait } from '../utils/utils.js'
 
@@ -43,8 +43,8 @@ export class RoomChat {
       log.info('维格表云端群数量：', recordExisting.length)
       const wxids: string[] = []
       if (recordExisting.length) {
-        recordExisting.forEach((record: { fields: any, id: any }) => {
-          wxids.push(record.fields.id)
+        recordExisting.forEach((record: IRecord) => {
+          if (record.fields['id']) wxids.push(record.fields['群ID|id'] as string)
         })
       }
       for (let i = 0; i < rooms.length; i++) {

@@ -96,15 +96,14 @@ export class ActivityChat {
   // 获取维格表中的活动
   async getAct () {
     const records = await this.db.findAll()
-    log.info('维格表中的活动记录：', JSON.stringify(records))
+    // log.info(JSON.stringify(this.vikaBot.dataBaseIds, undefined, 2))
+    // log.info('维格表中的活动记录：', JSON.stringify(records))
     return records
   }
 
   // 获取统计打卡
   async getStatistics () {
     const statisticsRecords = await this.getAct()
-    log.info('统计打卡|Statistics：\n', JSON.stringify(statisticsRecords))
-
     const activitiesVika: Activity[] = []
 
     for (const statistics of statisticsRecords) {
@@ -119,7 +118,7 @@ export class ActivityChat {
       }
     }
 
-    log.info('维格表中的活动：', JSON.stringify(activitiesVika))
+    log.info('维格表中的有效活动：', JSON.stringify(activitiesVika))
 
     const activitiesDb = await this.getActivityList()
     log.info('DB中的活动：', JSON.stringify(activitiesDb))

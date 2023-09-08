@@ -1,10 +1,22 @@
 /* eslint-disable sort-keys */
 import { db } from '../db/tables.js'
 import type { VikaBot, TaskConfig } from '../db/vika-bot.js'
-import { VikaSheet } from '../db/vika.js'
+import { VikaSheet, IRecord } from '../db/vika.js'
+
 import { log } from 'wechaty'
 
 const noticeData = db.notice
+
+type TaskFields = {
+  '内容|desc'?: string;
+  '时间|time'?: string;
+  '周期|cycle'?: string;
+  '通知目标类型|type'?: string;
+  '昵称/群名称|name'?: string;
+  '好友ID/群ID(选填)|id'?: string;
+  '好友备注(选填)|alias'?: string;
+  '启用状态|state'?: string;
+};
 
 // 服务类
 export class NoticeChat {
@@ -34,38 +46,42 @@ export class NoticeChat {
   }
 
   // 获取定时提醒
-  async getTimedTask () {
-    const taskRecords = await this.db.findAll()
-    // log.info('定时提醒任务列表：\n', JSON.stringify(taskRecords))
+  async getTimedTask (): Promise<TaskConfig[]> {
+    const taskRecords: IRecord[] = await this.db.findAll()
 
-    let timedTasks: TaskConfig[] = []
+    const timedTasks: TaskConfig[] = taskRecords
+      .map((task: IRecord) => {
+        const {
+          '内容|desc': desc,
+          '时间|time': time,
+          '周期|cycle': cycle,
+          '通知目标类型|type': type,
+          '昵称/群名称|name': name,
+          '好友ID/群ID(选填)|id': id,
+          '好友备注(选填)|alias': alias,
+          '启用状态|state': state,
+        } = task.fields as TaskFields
 
-    interface TaskRecord {
-      recordId: string;
-      fields: {
-        [key: string]: any;
-      };
-    }
+        const isActive = state === '开启'
+        const isContact = type === '好友'
+        const target = isContact
+          ? { name: name || '', id: id || '', alias: alias || '' }
+          : { topic: name || '', id: id || '' }
 
-    // 优化后的代码
-    timedTasks = taskRecords.map((task: TaskRecord) => {
-      const taskConfig: TaskConfig = {
-        id: task.recordId,
-        msg: task.fields['内容|desc'],
-        time: task.fields['时间|time'],
-        cycle: task.fields['周期|cycle'] || '无重复',
-        targetType: task.fields['通知目标类型|type'] === '好友' ? 'contact' : 'room',
-        target: task.fields['通知目标类型|type'] === '好友' ? { name: task.fields['昵称/群名称|name'], id: task.fields['好友ID/群ID(选填)|id'], alias: task.fields['好友备注(选填)|alias'] } : { topic: task.fields['昵称/群名称|name'], id: task.fields['好友ID/群ID(选填)|id'] },
-        active: task.fields['启用状态|state'] === '开启',
-      }
+        const taskConfig: TaskConfig = {
+          id: task.recordId,
+          msg: desc || '',
+          time: time || '',
+          cycle: cycle || '无重复',
+          targetType: isContact ? 'contact' : 'room',
+          target,
+          active: isActive,
+        }
 
-      if (taskConfig.active && taskConfig.msg && taskConfig.time && taskConfig.cycle && (task.fields['昵称/群名称|name'] || task.fields['好友ID/群ID(选填)|id'] || task.fields['好友备注(选填)|alias'])) {
-        return taskConfig
-      }
+        return isActive && desc && time && cycle && (name || id || alias) ? taskConfig : null
+      })
+      .filter(Boolean) as TaskConfig[]
 
-      return null
-    }).filter(Boolean)
-    // log.info('任务列表：', timedTasks)
     this.reminderList = timedTasks
     return this.reminderList
   }

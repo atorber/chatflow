@@ -34,13 +34,13 @@ export class MessageChat {
       if (that.msgStore.length) {
         const end = that.msgStore.length < 10 ? that.msgStore.length : 10
         const records = that.msgStore.splice(0, end)
-        log.info('写入vika的消息：', JSON.stringify(records))
+        // log.info('写入vika的消息：', JSON.stringify(records))
         try {
           this.db.insert(records).then((response: { success: any }) => {
             if (!response.success) {
               log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
             } else {
-              log.info('调用vika写入接口成功，写入vika成功：', JSON.stringify(response))
+              log.info('调用vika写入接口成功，写入vika成功~')
             }
             return response
           }).catch((err: any) => { log.error('调用vika写入接口失败：', err) })

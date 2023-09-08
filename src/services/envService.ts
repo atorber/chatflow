@@ -2,9 +2,10 @@
 import { db } from '../db/tables.js'
 import type { VikaBot } from '../db/vika-bot.js'
 
-import { VikaSheet } from '../db/vika.js'
+import { VikaSheet, IRecord } from '../db/vika.js'
 import { log } from 'wechaty'
 import { wait } from '../utils/utils.js'
+import type { BotConfig } from '../types/config.js'
 
 const envData = db.env
 
@@ -55,17 +56,17 @@ export class EnvChat {
     // log.info(configRecords)
 
     for (let i = 0; i < configRecords.length; i++) {
-      const record = configRecords[i]
+      const record: IRecord = configRecords[i] as IRecord
       const fields = record.fields
       const recordId = record.recordId
 
       if (fields['标识|key']) {
-        if ([ '开启', '关闭' ].includes(fields['值|value'])) {
-          botConfig[record.fields['标识|key']] = fields['值|value'] === '开启'
+        if (fields['值|value'] && [ '开启', '关闭' ].includes(fields['值|value'])) {
+          botConfig[record.fields['标识|key'] as keyof(BotConfig)] = fields['值|value'] === '开启'
         } else {
-          botConfig[record.fields['标识|key']] = fields['值|value'] || ''
+          botConfig[record.fields['标识|key'] as keyof(BotConfig)] = fields['值|value'] || ''
         }
-        botConfigIdMap[record.fields['标识|key']] = recordId
+        botConfigIdMap[record.fields['标识|key'] as keyof(BotConfig)] = recordId
       }
     }
 

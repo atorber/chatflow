@@ -55,6 +55,7 @@ import {
   ActivityChat,
   NoticeChat,
   QaChat,
+  KeywordChat,
 } from './services/mod.js'
 import { WxOpenaiBot, type AIBotConfig, type SkillInfoArray } from './services/wxopenaiService.js'
 
@@ -74,6 +75,7 @@ let contactService:ContactChat
 let activityService:ActivityChat
 let noticeService:NoticeChat
 let qaService:QaChat
+let keywordService:KeywordChat
 
 let isVikaOk: boolean = false
 
@@ -365,6 +367,9 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
 
         qaService = new QaChat(vikaBot)
         await wait(1000)
+
+        keywordService = new KeywordChat(vikaBot)
+        await wait(1000)
       } else {
         log.info('初始化vika失败\n\n')
       }
@@ -527,11 +532,23 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
 
           let replyText: string = ''
           if (text === '帮助') {
-            replyText = '操作指令说明:\n【更新配置】 更新全部配置\n【更新定时提醒】 更新定时提醒任务\n【更新白名单】 更新智能问答白名单\n【更新通讯录】 更新维格表通信录\n【下载通讯录】 下载通讯录xlsx表\n【下载通知模板】 下载通知模板'
+            // replyText = '操作指令说明:\n【更新配置】 更新全部配置\n【更新定时提醒】 更新定时提醒任务\n【更新白名单】 更新智能问答白名单\n【更新通讯录】 更新维格表通信录\n【下载通讯录】 下载通讯录xlsx表\n【下载通知模板】 下载通知模板'
+            replyText = await keywordService.getSystemKeywordsText()
             await sendMsg(message, replyText)
           }
 
-          if ([ '更新问答', '更新配置', '更新定时提醒', '更新通讯录', '上传配置', '下载配置', '更新白名单', '更新活动', '报名活动', '群发通知' ].includes(text)) {
+          if ([
+            '更新配置',
+            '更新定时提醒',
+            '更新通讯录',
+            '更新白名单',
+            '更新活动',
+            '报名活动',
+            '群发通知',
+            '更新问答',
+            '上传配置',
+            '下载配置',
+          ].includes(text)) {
             switch (text) {
               case '更新配置':
                 log.info('热更新系统配置~')

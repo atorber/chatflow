@@ -2,7 +2,7 @@
 import { db } from '../db/tables.js'
 import type { VikaBot } from '../db/vika-bot.js'
 
-import { VikaSheet } from '../db/vika.js'
+import { VikaSheet, IRecord } from '../db/vika.js'
 import { Contact, Wechaty, log, types } from 'wechaty'
 import { wait } from '../utils/utils.js'
 
@@ -26,7 +26,7 @@ export class ContactChat {
   }
 
   async getContact () {
-    const records = await this.db.findAll()
+    const records:IRecord[] = await this.db.findAll()
     // log.info('维格表中的记录：', JSON.stringify(records))
     return records
   }
@@ -42,9 +42,7 @@ export class ContactChat {
       // log.info('云端好友数量：', recordExisting.length || '0')
       const wxids: string[] = []
       if (recordExisting.length) {
-        recordExisting.forEach((record: { fields: any, id: any }) => {
-          wxids.push(record.fields.id)
-        })
+        recordExisting.forEach((record: IRecord) => wxids.push(record.fields['好友ID|id'] as string))
       }
       for (let i = 0; i < contacts.length; i++) {
         const item = contacts[i]

@@ -5,12 +5,10 @@ import fs from 'fs'
 import 'dotenv/config.js'
 
 interface IField {
-  name: string;
-  key: string;
-  desc: string;
+  [key:string]: string | '';
 }
 
-interface IRecord {
+export interface IRecord {
   recordId: string;
   fields: IField;
 }
@@ -153,7 +151,7 @@ export class VikaSheet {
 
   async find (query:any = {}) {
     let records: IRecord[] = []
-    query['pageSize'] = 100
+    query['pageSize'] = 1000
     // 分页获取记录，默认返回第一页
     const response = await this.datasheet.records.query(query)
     if (response.success) {
@@ -182,20 +180,24 @@ export class VikaSheet {
     }
   }
 
-  async findAll () {
+  async findAll (): Promise<IRecord[]> {
     const records: IRecord[] = []
-    const response: any = await this.datasheet.records.queryAll()
-    // log.info('原始返回：',response)
-    if (response.next) {
-      for await (const eachPageRecords of response) {
-        // log.info('eachPageRecords:',eachPageRecords.length)
+
+    try {
+      // Automatically handle pagination and iterate through all records.
+      const recordsIter = this.datasheet.records.queryAll()
+
+      // The for-await loop requires an async function and has specific version requirements for Node.js/browser.
+      for await (const eachPageRecords of recordsIter) {
+        // log.info('findAll ():', JSON.stringify(eachPageRecords))
         records.push(...eachPageRecords)
       }
-      // log.info('records:',records.length)
+
+      // log.info('findAll() records:', records.length)
       return records
-    } else {
-      log.error(response)
-      return response
+    } catch (error) {
+      log.error('Error in findAll():', error)
+      throw error
     }
   }
 
