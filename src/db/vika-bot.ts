@@ -51,6 +51,7 @@ export interface DateBase {
   orderSheet: string
   stockSheet: string
   groupNoticeSheet: string
+  qaSheet:string
 }
 
 export class BiDirectionalMap {
@@ -115,6 +116,7 @@ export class VikaBot {
         orderSheet: '',
         stockSheet: '',
         groupNoticeSheet: '',
+        qaSheet:'',
       }
       this.dataBaseNames = { ...this.dataBaseIds }
     }

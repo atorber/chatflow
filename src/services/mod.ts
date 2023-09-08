@@ -7,6 +7,7 @@ import { ContactChat } from './contactService.js'
 import { ActivityChat } from './activityService.js'
 import { KeywordChat } from './keywordService.js'
 import { NoticeChat } from './noticeService.js'
+import { QaChat } from './qaService.js'
 
 export type MessageChatType = MessageChat
 export type EnvChatType = EnvChat
@@ -17,6 +18,7 @@ export type ContactChatType = ContactChat
 export type ActivityChatType = ActivityChat
 export type KeywordChatType = KeywordChat
 export type NoticeChatType = NoticeChat
+export type QaChatType = QaChat
 
 export {
   MessageChat,
@@ -28,4 +30,5 @@ export {
   ActivityChat,
   KeywordChat,
   NoticeChat,
+  QaChat,
 }

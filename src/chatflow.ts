@@ -29,7 +29,7 @@ import {
   type BusinessUser,
 } from './plugins/mod.js'
 import { VikaBot, TaskConfig } from './db/vika-bot.js'
-import type { configTypes } from './types/mod.js'
+import { configTypes, EnvironmentVariables } from './types/mod.js'
 
 import { config } from './services/configService.js'
 
@@ -45,17 +45,6 @@ import { addMessage } from './api/message.js'
 import { containsContact, containsRoom } from './services/userService.js'
 import { activityController } from './services/activityService.js'
 
-import type {
-  MessageChatType,
-  EnvChatType,
-  WhiteListChatType,
-  GroupNoticeChatType,
-  RoomChatType,
-  ContactChatType,
-  ActivityChatType,
-  NoticeChatType,
-} from './services/mod.js'
-
 import {
   MessageChat,
   EnvChat,
@@ -65,7 +54,9 @@ import {
   ContactChat,
   ActivityChat,
   NoticeChat,
+  QaChat,
 } from './services/mod.js'
+import { WxOpenaiBot, type AIBotConfig, type SkillInfoArray } from './services/wxopenaiService.js'
 
 log.info('初始化配置文件信息:\n', JSON.stringify(config, undefined, 2), '================')
 
@@ -74,14 +65,15 @@ log.info('初始化配置文件信息:\n', JSON.stringify(config, undefined, 2),
 let chatdev: any = {}
 let jobs: any
 let vikaBot: VikaBot
-let messageService:MessageChatType
-let envService:EnvChatType
-let whiteListService:WhiteListChatType
-let groupNoticeServicet:GroupNoticeChatType
-let roomService:RoomChatType
-let contactService:ContactChatType
-let activityService:ActivityChatType
+let messageService:MessageChat
+let envService:EnvChat
+let whiteListService:WhiteListChat
+let groupNoticeServicet:GroupNoticeChat
+let roomService:RoomChat
+let contactService:ContactChat
+let activityService:ActivityChat
 let noticeService:NoticeChat
+let qaService:QaChat
 
 let isVikaOk: boolean = false
 
@@ -189,7 +181,7 @@ export async function pubGroupNotifications (bot: Wechaty) {
             },
           })
           successContact.push(notice)
-          log.info('发送成功：好友-', contact.name())
+          log.info('发送成功：\n好友-', contact.name())
         } catch (e) {
           resPub.push({
             recordId: notice.recordId,
@@ -223,7 +215,7 @@ export async function pubGroupNotifications (bot: Wechaty) {
     void await wait(1000)
   }
 
-  return `发送成功:群${successRoom.length},好友${successContact.length}\n发送失败：群${failRoom.length},好友${failContact.length}`
+  return `\n发送成功:群${successRoom.length},好友${successContact.length}\n发送失败：群${failRoom.length},好友${failContact.length}`
 }
 
 // 保存配置文件到data/config.json
@@ -369,6 +361,9 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
         await wait(1000)
 
         noticeService = new NoticeChat(vikaBot)
+        await wait(1000)
+
+        qaService = new QaChat(vikaBot)
         await wait(1000)
       } else {
         log.info('初始化vika失败\n\n')
@@ -536,7 +531,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
             await sendMsg(message, replyText)
           }
 
-          if ([ '更新配置', '更新定时提醒', '更新通讯录', '上传配置', '下载配置', '更新白名单', '更新活动', '报名活动', '群发通知' ].includes(text)) {
+          if ([ '更新问答', '更新配置', '更新定时提醒', '更新通讯录', '上传配置', '下载配置', '更新白名单', '更新活动', '报名活动', '群发通知' ].includes(text)) {
             switch (text) {
               case '更新配置':
                 log.info('热更新系统配置~')
@@ -594,7 +589,38 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
                   replyText = '群发通知失败~'
                 }
                 break
+              case '更新问答':{
+                // Usage
+                // 假设这是你的 event 对象
+                const skills:SkillInfoArray  = await qaService.getQa()
 
+                const config: AIBotConfig = {
+                  encodingAESKey: process.env[EnvironmentVariables.WXOPENAI_ENCODINGAESKEY] || '',
+                  token: process.env[EnvironmentVariables.WXOPENAI_TOKEN] || '',
+                  nonce: 'ABSBSDSD',
+                  appid: process.env[EnvironmentVariables.WXOPENAI_APPID] || '',
+                  managerid: process.env[EnvironmentVariables.WXOPENAI_MANAGERID] || '',
+                }
+
+                const aiBotInstance = new WxOpenaiBot(config)
+                aiBotInstance.updateSkill(skills, 1)
+                // eslint-disable-next-line no-console
+                  .then(async result => {
+                    // eslint-disable-next-line no-console
+                    console.log('更新问答成功:', result)
+                    if (result.data && result.data.task_id) {
+                      const res = await aiBotInstance.publishSkill()
+                      console.info('发布技能成功:', res)
+                      return res
+                    }
+                    return result
+                  })
+                  .catch(error => {
+                    // eslint-disable-next-line no-console
+                    console.error('更新问答失败Error:', error)
+                  })
+                break
+              }
               case '报名活动':
                 log.info('报名活动~')
                 try {
