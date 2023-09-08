@@ -29,7 +29,7 @@ export class MessageChat {
   async init () {
     const that = this
     setInterval(() => {
-      log.info('待处理消息池长度：', that.msgStore.length || '0')
+      // log.info('待处理消息池长度：', that.msgStore.length || '0')
 
       if (that.msgStore.length) {
         const end = that.msgStore.length < 10 ? that.msgStore.length : 10

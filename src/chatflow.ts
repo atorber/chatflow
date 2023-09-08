@@ -593,32 +593,31 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
                 // Usage
                 // 假设这是你的 event 对象
                 const skills:SkillInfoArray  = await qaService.getQa()
+                if (skills.length) {
+                  const config: AIBotConfig = {
+                    encodingAESKey: process.env[EnvironmentVariables.WXOPENAI_ENCODINGAESKEY] || '',
+                    token: process.env[EnvironmentVariables.WXOPENAI_TOKEN] || '',
+                    nonce: 'ABSBSDSD',
+                    appid: process.env[EnvironmentVariables.WXOPENAI_APPID] || '',
+                    managerid: process.env[EnvironmentVariables.WXOPENAI_MANAGERID] || '',
+                  }
 
-                const config: AIBotConfig = {
-                  encodingAESKey: process.env[EnvironmentVariables.WXOPENAI_ENCODINGAESKEY] || '',
-                  token: process.env[EnvironmentVariables.WXOPENAI_TOKEN] || '',
-                  nonce: 'ABSBSDSD',
-                  appid: process.env[EnvironmentVariables.WXOPENAI_APPID] || '',
-                  managerid: process.env[EnvironmentVariables.WXOPENAI_MANAGERID] || '',
+                  const aiBotInstance = new WxOpenaiBot(config)
+                  const result:any = await aiBotInstance.updateSkill(skills, 1)
+                  if (result.data && result.data.task_id) {
+                    const res = await aiBotInstance.publishSkill()
+                    console.info('发布技能成功:', res)
+                    replyText = '更新问答列表成功~'
+
+                  } else {
+                    // eslint-disable-next-line no-console
+                    console.error('更新问答失败Error:', result)
+                    replyText = '更新问答列表失败~'
+                  }
+                } else {
+                  replyText = '问答列表为空，未更新任何内容~'
+
                 }
-
-                const aiBotInstance = new WxOpenaiBot(config)
-                aiBotInstance.updateSkill(skills, 1)
-                // eslint-disable-next-line no-console
-                  .then(async result => {
-                    // eslint-disable-next-line no-console
-                    console.log('更新问答成功:', result)
-                    if (result.data && result.data.task_id) {
-                      const res = await aiBotInstance.publishSkill()
-                      console.info('发布技能成功:', res)
-                      return res
-                    }
-                    return result
-                  })
-                  .catch(error => {
-                    // eslint-disable-next-line no-console
-                    console.error('更新问答失败Error:', error)
-                  })
                 break
               }
               case '报名活动':

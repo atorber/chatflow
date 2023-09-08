@@ -21,7 +21,7 @@ export class QaChat {
   constructor (vikaBot: VikaBot) {
     this.vikaBot = vikaBot
     this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.qaSheet)
-    void this.init()
+    // void this.init()
   }
 
   // 初始化
@@ -32,35 +32,37 @@ export class QaChat {
 
   async getRecords () {
     const records = await this.db.findAll()
-    // log.info('维格表中的记录：', JSON.stringify(records))
+    log.info('维格表中的记录：', JSON.stringify(records))
     return records
   }
 
   // 获取定时提醒
-  async getQa () {
-    const records = this.records()
-    const skills:SkillInfoArray  = records.map((record: { [x: string]: any }) => {
-      record['分类|skillname'] = record['分类|skillname'] || '通用问题'
-      if (record['启用状态|state'] === '启用' && record['标准问题|title'] && record['机器人回答|answer']) {
-        const question = []
-        if (record['相似问题1(选填)|question1']) question.push(record['相似问题1(选填)|question1'])
-        if (record['相似问题2(选填)|question2']) question.push(record['相似问题1(选填)|question2'])
-        if (record['相似问题3(选填)|question2']) question.push(record['相似问题1(选填)|question3'])
+  async getQa (): Promise<SkillInfoArray> {
+    await this.init()
+    if (!this.records) {
+      // Handle error
+      return []
+    }
 
-        const skill = {
-          skillname:record['分类|skillname'],
-          title:record['标准问题|title'],
-          question,
-          answer:[
-            record['机器人回答|answer'],
-          ],
+    const skills: SkillInfoArray = this.records
+      .filter((record: {recordId:string; fields:{[x: string]: any }}) => record.fields['启用状态|state'] === '启用' && record.fields['标准问题|title'] && record.fields['机器人回答|answer'])
+      .map((record: {recordId:string; fields:{[x: string]: any }}) => {
+        const question: string[] = []
+        for (let i = 1; i <= 3; i++) {
+          const similarQuestion = record.fields[`相似问题${i}(选填)|question${i}`]
+          if (similarQuestion) {
+            question.push(similarQuestion)
+          }
         }
-        return skill
-      } else {
-        return undefined
-      }
 
-    })
+        return {
+          skillname: record.fields['分类|skillname'] || '通用问题',
+          title: record.fields['标准问题|title'],
+          question,
+          answer: [ record.fields['机器人回答|answer'] ],
+        }
+      })
+    log.info('skills:', JSON.stringify(skills))
     return skills
   }
 
