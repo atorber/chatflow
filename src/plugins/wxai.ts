@@ -105,7 +105,7 @@ async function sendMiniProgram (answer: any, bot: Wechaty, talker: Contact, room
 }
 
 interface  QueryData {
-  first_priority_skills: string[];
+  first_priority_skills?: string[];
   query:string;
   signature:string;
   second_priority_skills?:string [];
@@ -132,6 +132,7 @@ async function aibot (sysConfig: configTypes.Config, talker: any, room: any, que
     try {
       const { username, userid, queryData } = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query, sysConfig)
       const resMsg = await chatAibot(queryData)
+      log.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
       log.info(`回答内容： ${resMsg.msgtype}, ${resMsg.query}, ${resMsg.answer}`)
       return handleWxOpenAiResponse(resMsg, sysConfig, topic, room)
     } catch (err) {
@@ -178,22 +179,22 @@ function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:stri
   const userid = room ? `${wxid}/${roomid}` : wxid
   const signature = genToken({ userid, username })
   let queryData:QueryData = {
-    first_priority_skills: [],
+    // first_priority_skills: [],
     query: '',
     signature: '',
-    second_priority_skills:[],
+    // second_priority_skills:[],
   }
 
   if (sysConfig.functionOnStatus.autoQa.customReply && room) {
     queryData = {
-      first_priority_skills: [ topic || '' ],
+      // first_priority_skills: [ topic || '' ],
       query,
-      second_priority_skills: [ '通用问题' ],
+      // second_priority_skills: [ '通用问题' ],
       signature,
     }
   } else {
     queryData = {
-      first_priority_skills: [ '通用问题' ],
+      // first_priority_skills: [ '通用问题' ],
       query,
       signature,
     }
