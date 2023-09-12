@@ -1,14 +1,14 @@
 // controllers/userController.ts
 
 import type { Context } from 'koa'
-import { UserService } from '../services/userService.js'
+import { UserChat } from '../services/userService.js'
 
 export class UserController {
 
-  private userService: UserService
+  private userService: UserChat
 
   constructor () {
-    this.userService = new UserService()
+    this.userService = new UserChat()
   }
 
   public addUser = async (ctx: Context): Promise<void> => {
