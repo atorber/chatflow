@@ -11,6 +11,7 @@ import type {
 } from './config.js'
 
 export { EnvironmentVariables } from './env.js'
+export type { ProcessEnv } from './env.js'
 
 export * as configTypes    from './config.js'
 

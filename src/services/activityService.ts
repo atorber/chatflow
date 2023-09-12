@@ -1,5 +1,4 @@
 /* eslint-disable sort-keys */
-import { db } from '../db/tables.js'
 import { Room, Contact, Message, Wechaty, log } from 'wechaty'
 import { v4 } from 'uuid'
 import { formatTimestamp, getCurTime } from '../utils/utils.js'
@@ -7,6 +6,7 @@ import moment from 'moment'
 import type { VikaBot } from '../db/vika-bot.js'
 import { VikaSheet } from '../db/vika.js'
 
+import { db } from '../db/tables.js'
 const activityData = db.activity
 const orderData = db.order
 

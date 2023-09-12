@@ -1,5 +1,4 @@
 /* eslint-disable sort-keys */
-import { db } from '../db/tables.js'
 import type { VikaBot } from '../db/vika-bot.js'
 
 import { VikaSheet } from '../db/vika.js'
@@ -9,7 +8,8 @@ import moment from 'moment'
 import fs from 'fs'
 import { FileBox } from 'file-box'
 
-const messageData = db.message
+// import { db } from '../db/tables.js'
+// const messageData = db.message
 
 // 服务类
 export class MessageChat {

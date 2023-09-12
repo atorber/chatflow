@@ -14,7 +14,6 @@ import {
 
 import qrcodeTerminal from 'qrcode-terminal'
 import { FileBox } from 'file-box'
-import fs from 'fs'
 import {
   sendNotice,
   wxai,
@@ -45,6 +44,8 @@ import { addMessage } from './api/message.js'
 import { containsContact, containsRoom } from './services/userService.js'
 import { activityController } from './services/activityService.js'
 
+import fs from 'fs'
+
 import {
   MessageChat,
   EnvChat,
@@ -58,6 +59,7 @@ import {
   KeywordChat,
 } from './services/mod.js'
 import { WxOpenaiBot, type AIBotConfig, type SkillInfoArray } from './services/wxopenaiService.js'
+import type { ProcessEnv } from './types/mod.js'
 
 log.info('初始化配置文件信息:\n', JSON.stringify(config, undefined, 2), '================')
 
@@ -67,7 +69,8 @@ let chatdev: any = {}
 let jobs: any
 let vikaBot: VikaBot
 let messageService:MessageChat
-let envService:EnvChat
+const envService:EnvChat = new EnvChat()
+let configEnv:ProcessEnv = envService.getConfigFromEnv()
 let whiteListService:WhiteListChat
 let groupNoticeServicet:GroupNoticeChat
 let roomService:RoomChat
@@ -222,7 +225,7 @@ export async function pubGroupNotifications (bot: Wechaty) {
 
 // 保存配置文件到data/config.json
 export function updateConfig (config: any) {
-  // fs.writeFileSync('data/config.json', JSON.stringify(config, null, '\t'))
+  fs.writeFileSync('data/config.json', JSON.stringify(config, null, '\t'))
   log.info('配置有变更, updateConfig:', JSON.stringify(config))
 }
 
@@ -230,8 +233,8 @@ export function updateConfig (config: any) {
 export async function createVika () {
   try {
     vikaBot = new VikaBot({
-      spaceName: config.botConfig.vika.spaceName || '',
-      token: config.botConfig.vika.token || '',
+      spaceName: configEnv.VIKA_SPACE_NAME || '',
+      token: configEnv.VIKA_TOKEN || '',
     })
     // 初始化系统表
     await vikaBot.init()
@@ -251,11 +254,11 @@ export async function createVika () {
 export function checkConfig (config: configTypes.Config) {
   const missingConfiguration = []
 
-  if (!config.botConfig.vika.token) {
+  if (!configEnv.VIKA_TOKEN) {
     missingConfiguration.push('VIKA_TOKEN')
   }
 
-  if (!config.botConfig.vika.spaceName) {
+  if (!configEnv.VIKA_SPACE_NAME) {
     missingConfiguration.push('VIKA_SPACE_NAME')
   }
 
@@ -336,7 +339,7 @@ export async function updateJobs (bot: Wechaty, noticeService: NoticeChat) {
 
 export const onReadyOrLogin = async (bot: Wechaty) => {
   // 检查维格表配置并启动
-  if (config.botConfig.vika.spaceName && config.botConfig.vika.token) {
+  if (process.env.VIKA_SPACE_NAME && process.env.VIKA_TOKEN) {
     try {
       isVikaOk = await createVika()
 
@@ -345,7 +348,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
         messageService = new MessageChat(vikaBot)
         await wait(1000)
 
-        envService = new EnvChat(vikaBot)
+        await envService.init(vikaBot)
         await wait(1000)
 
         whiteListService = new WhiteListChat(vikaBot)
@@ -382,14 +385,16 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
     log.error('\n维格表配置不全，.env文件或环境变量中中设置的token和spaceName之后重启\n\n================================================\n')
   }
   // 启动MQTT通道
-  if (config.botConfig.mqtt.endpoint && (config.functionOnStatus.mqtt.mqttControl || config.functionOnStatus.mqtt.mqttMessagePush)) {
-    chatdev = new ChatDevice(config.botConfig.mqtt.username, config.botConfig.mqtt.password, config.botConfig.mqtt.endpoint, config.botConfig.mqtt.port, config.botConfig.base.botid)
+  if (process.env.MQTT_ENDPOINT && (configEnv.MQTT_MQTTCONTROL || configEnv.MQTT_MQTTMESSAGEPUSH)) {
+    chatdev = new ChatDevice(configEnv.MQTT_USERNAME, configEnv.MQTT_PASSWORD, configEnv.MQTT_ENDPOINT, configEnv.MQTT_PORT, configEnv.BASE_BOT_ID)
     chatdev.init(bot)
   }
 
   if (isVikaOk) {
-    const envConfig = await envService.getConfig()
-    log.info('维格表中的环境变量配置信息：\n', JSON.stringify(envConfig))
+    const vikaConfig = await envService.getConfigFromVika()
+    log.info('维格表中的环境变量配置信息：\n', JSON.stringify(vikaConfig))
+
+    configEnv = { ...configEnv, ...vikaConfig }
 
     await getWhiteList()
 
@@ -402,7 +407,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
       try {
         const curDate = new Date().toLocaleString()
         log.info('当前时间:', curDate)
-        if (chatdev && chatdev.isOk && config.functionOnStatus.mqtt.mqttMessagePush) {
+        if (chatdev && chatdev.isOk && configEnv.MQTT_MQTTMESSAGEPUSH) {
           chatdev.pub_property(propertyMessage('lastActive', curDate))
         }
       } catch (err) {
@@ -417,8 +422,8 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
     log.info('\n登录启动成功，但没有配置维格表\n================================================\n')
   }
 
-  if (config.botConfig.adminRoom.adminRoomId || config.botConfig.adminRoom.adminRoomTopic) {
-    const adminRoom = await getRoom(bot, { topic: config.botConfig.adminRoom.adminRoomTopic, id: config.botConfig.adminRoom.adminRoomId })
+  if (configEnv.ADMINROOM_ADMINROOMID || configEnv.ADMINROOM_ADMINROOMTOPIC) {
+    const adminRoom = await getRoom(bot, { topic: configEnv.ADMINROOM_ADMINROOMTOPIC, id: configEnv.ADMINROOM_ADMINROOMID })
     await adminRoom?.say(`${new Date().toLocaleString()}\nchatflow启动成功!\n当前登录用户${bot.currentUser.name()}\n可输入【帮助】获取操作指令`)
   }
 }
@@ -469,22 +474,22 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
 
       // 更新机器人基本信息
       config.botInfo = user.payload as configTypes.BotInfo
-      await updateConfig(config)
+      await updateConfig(configEnv)
 
       // 登录成功向机器人自己发送上线通知（不是所有的puppet都支持想自己发消息）
       // await sendMsg(user, '上线:' + curDate)
-      if ([ 'wechaty-puppet-xp' ].includes(config.botConfig.wechaty.puppet)) await onReadyOrLogin(bot)
+      if ([ 'wechaty-puppet-xp' ].includes(configEnv.WECHATY_PUPPET)) await onReadyOrLogin(bot)
     })
     bot.on('ready', async () => {
       const user: Contact = bot.currentUser
       log.info('onReady,当前登录的账号信息:\n', user.name())
       config.botInfo = user.payload as configTypes.BotInfo
-      await updateConfig(config)
+      await updateConfig(configEnv)
 
       // 登录成功向机器人自己发送上线通知（不是所有的puppet都支持想自己发消息）
       // await sendMsg(user, '上线:' + curDate)
 
-      if (![ 'wechaty-puppet-xp' ].includes(config.botConfig.wechaty.puppet)) await onReadyOrLogin(bot)
+      if (![ 'wechaty-puppet-xp' ].includes(configEnv.WECHATY_PUPPET)) await onReadyOrLogin(bot)
     })
     bot.on('logout', (user: Contact) => {
       log.info('logout，退出登录:', '%s logout', user)
@@ -496,7 +501,6 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
       // 存储消息到db
       const addRes = await addMessage(message)
       if (addRes) {
-        const curDate = new Date().toLocaleString()
         const talker = message.talker()
         // const name = talker.name()
         // const alias = await talker.alias()
@@ -516,12 +520,12 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
               adminRoomId: room.id,
               adminRoomTopic: await room.topic(),
             }
-            await updateConfig(config)
+            await updateConfig(configEnv)
             await sendMsg(message, '设置管理群成功')
           }
         }
 
-        isAdminRoom = (roomId && (roomId === config.botConfig.adminRoom.adminRoomId || topic === config.botConfig.adminRoom.adminRoomTopic)) || isSelf
+        isAdminRoom = (roomId && (roomId === configEnv.ADMINROOM_ADMINROOMID || topic === configEnv.ADMINROOM_ADMINROOMTOPIC)) || isSelf
 
         // 管理员群接收到管理指令时执行相关操作
         if (isAdminRoom) {
@@ -742,8 +746,8 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
           // }
 
           // 智能问答开启时执行
-          if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
-            if (config.functionOnStatus.autoQa.roomWhitelist && config.roomWhiteList) {
+          if (configEnv.AUTOQA_AUTOREPLY && ((text.indexOf(keyWord) !== -1 && configEnv.AUTOQA_ATREPLY) || !configEnv.AUTOQA_ATREPLY)) {
+            if (configEnv.AUTOQA_ROOMWHITELIST && config.roomWhiteList) {
               const isInRoomWhiteList = await containsRoom(config.roomWhiteList.qa, room)
               try {
                 if (isInRoomWhiteList) {
@@ -782,8 +786,8 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
         }
         if ((!room || !room.id) && !isSelf) {
           // 智能问答开启时执行
-          if (config.functionOnStatus.autoQa.autoReply && ((text.indexOf(keyWord) !== -1 && config.functionOnStatus.autoQa.atReply) || !config.functionOnStatus.autoQa.atReply)) {
-            if (config.functionOnStatus.autoQa.contactWhitelist && config.contactWhiteList) {
+          if (configEnv.AUTOQA_AUTOREPLY && ((text.indexOf(keyWord) !== -1 && configEnv.AUTOQA_ATREPLY) || !configEnv.AUTOQA_ATREPLY)) {
+            if (configEnv.AUTOQA_CONTACTWHITELIST && config.contactWhiteList) {
 
               try {
                 const isInContactWhiteList = await containsContact(config.contactWhiteList.qa, talker)
@@ -813,7 +817,7 @@ export function ChatFlow (config: configTypes.Config): WechatyPlugin {
         }
 
         // 消息通过MQTT上报
-        if (chatdev && chatdev.isOk && config.functionOnStatus.mqtt.mqttMessagePush) {
+        if (chatdev && chatdev.isOk && configEnv.MQTT_MQTTMESSAGEPUSH) {
           /*
           将消息通过mqtt通道上报到云端
           */

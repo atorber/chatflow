@@ -1,11 +1,9 @@
 /* eslint-disable sort-keys */
-import { db } from '../db/tables.js'
 import type { VikaBot, TaskConfig } from '../db/vika-bot.js'
 import { VikaSheet, IRecord } from '../db/vika.js'
 
-import { log } from 'wechaty'
-
-const noticeData = db.notice
+// import { db } from '../db/tables.js'
+// const noticeData = db.notice
 
 type TaskFields = {
   '内容|desc'?: string;

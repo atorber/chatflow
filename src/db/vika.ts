@@ -34,9 +34,9 @@ interface IFieldMappingResponse {
 export class VikaSheet {
 
   private datasheet: any
-  private offsetValue: number
-  private limitValue: number
-  private orderby: any
+  offsetValue!: number
+  limitValue!: number
+  orderby!: any
   private fields: any[] = []
   records: any
 

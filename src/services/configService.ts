@@ -8,7 +8,6 @@ const config: configTypes.Config = {
     autoQa: {
       autoReply: process.env[EnvironmentVariables.AUTOQA_AUTOREPLY] === 'true',
       atReply: process.env[EnvironmentVariables.AUTOQA_ATREPLY] === 'true',
-      customReply: process.env[EnvironmentVariables.AUTOQA_CUSTOMREPLY] === 'true',
       roomWhitelist: process.env[EnvironmentVariables.AUTOQA_ROOMWHITELIST] === 'true' || true,
       contactWhitelist: process.env[EnvironmentVariables.AUTOQA_CONTACTWHITELIST] === 'true' || true,
     },

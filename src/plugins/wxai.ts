@@ -53,10 +53,10 @@ async function handleAnswer (answer: any, bot: Wechaty, talker: Contact, room: R
       await sendMessage(answer.text, bot, talker, room, message)
       break
     case types.Message.Image:
-      await sendImage(answer, bot, talker, room, message)
+      await sendImage(answer, bot, room, message)
       break
     case types.Message.MiniProgram:
-      await sendMiniProgram(answer, bot, talker, room, message)
+      await sendMiniProgram(answer, bot, room, message)
       break
   }
 }
@@ -72,7 +72,7 @@ async function sendMessage (text: string, bot: Wechaty, talker: Contact, room: R
   }
 }
 
-async function sendImage (answer: any, bot: Wechaty, talker: Contact, room: Room | undefined, message: Message) {
+async function sendImage (answer: any, bot: Wechaty, room: Room | undefined, message: Message) {
   const fileBox = FileBox.fromUrl(answer.text.url)
   if (room) {
     await room.say(fileBox)
@@ -83,7 +83,7 @@ async function sendImage (answer: any, bot: Wechaty, talker: Contact, room: Room
   }
 }
 
-async function sendMiniProgram (answer: any, bot: Wechaty, talker: Contact, room: Room | undefined, message: Message) {
+async function sendMiniProgram (answer: any, bot: Wechaty, room: Room | undefined, message: Message) {
   // ... (构建并发送MiniProgram的逻辑)
   const miniProgram = new bot.MiniProgram({
     appid: answer.text.appid,
@@ -130,11 +130,15 @@ async function aibot (sysConfig: configTypes.Config, talker: any, room: any, que
     log.info('开始请求微信对话平台...')
     init(ops)
     try {
-      const { username, userid, queryData } = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query, sysConfig)
+      const {
+        // username,
+        // userid,
+        queryData,
+      } = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query, sysConfig)
       const resMsg = await chatAibot(queryData)
       log.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
       log.info(`回答内容： ${resMsg.msgtype}, ${resMsg.query}, ${resMsg.answer}`)
-      return handleWxOpenAiResponse(resMsg, sysConfig, topic, room)
+      return handleWxOpenAiResponse(resMsg)
     } catch (err) {
       log.error(`请求微信对话平台错误： ${err}`)
       return {}
@@ -185,33 +189,20 @@ function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:stri
     // second_priority_skills:[],
   }
 
-  if (sysConfig.functionOnStatus.autoQa.customReply && room) {
-    queryData = {
-      // first_priority_skills: [ topic || '' ],
-      query,
-      // second_priority_skills: [ '通用问题' ],
-      signature,
-    }
-  } else {
-    queryData = {
-      // first_priority_skills: [ '通用问题' ],
-      query,
-      signature,
-    }
+  queryData = {
+    // first_priority_skills: [ '通用问题' ],
+    query,
+    signature,
   }
 
   return { username, userid, queryData }
 }
 
-function handleWxOpenAiResponse (resMsg: ResponseCHAT, sysConfig: configTypes.Config, topic: string, room: Room|undefined) {
+function handleWxOpenAiResponse (resMsg: ResponseCHAT) {
   let answer = {}
+  // 置信度大于0.8时回复，低于0.8时不回复
   if (resMsg.msgtype && resMsg.confidence > 0.8) {
     answer = prepareAnswerBasedOnMsgType(resMsg)
-    if (sysConfig.functionOnStatus.autoQa.customReply) {
-      if (room && (resMsg.skill_name !== topic && resMsg.skill_name !== '通用问题')) {
-        answer = {}
-      }
-    }
   }
   return answer
 }

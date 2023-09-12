@@ -1,12 +1,13 @@
 /* eslint-disable sort-keys */
-import { db } from '../db/tables.js'
 import type { VikaBot } from '../db/vika-bot.js'
 
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { Contact, Wechaty, log, types } from 'wechaty'
 import { wait } from '../utils/utils.js'
 
-const contactData = db.contact
+// import { db } from '../db/tables.js'
+// const contactData = db.contact
+// log.info(JSON.stringify(contactData))
 
 // 服务类
 export class ContactChat {

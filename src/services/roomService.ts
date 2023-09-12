@@ -1,11 +1,11 @@
 /* eslint-disable sort-keys */
-import { db } from '../db/tables.js'
 import type { VikaBot } from '../db/vika-bot.js'
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { Room, Wechaty, log } from 'wechaty'
 import { wait } from '../utils/utils.js'
 
-const roomData = db.room
+// import { db } from '../db/tables.js'
+// const roomData = db.room
 
 // 服务类
 export class RoomChat {

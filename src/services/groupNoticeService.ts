@@ -1,12 +1,13 @@
 /* eslint-disable sort-keys */
-import { db } from '../db/tables.js'
 import type { VikaBot, TaskConfig, Notifications } from '../db/vika-bot.js'
 
 import { VikaSheet } from '../db/vika.js'
 import { log } from 'wechaty'
 import { transformKeys } from './activityService.js'
 
-const groupNoticeData = db.groupNotice
+// import { db } from '../db/tables.js'
+// const groupNoticeData = db.groupNotice
+// log.info(JSON.stringify(groupNoticeData))
 
 // 服务类
 export class GroupNoticeChat {
@@ -37,9 +38,9 @@ export class GroupNoticeChat {
 
   // 获取群发通知
   async getGroupNotifications () {
-    const query = {
-      filterByFormula: '{状态|state}="待发送|waiting"',
-    }
+    // const query = {
+    //   filterByFormula: '{状态|state}="待发送|waiting"',
+    // }
     // log.info('query:', JSON.stringify(query))
     const groupNotifications: Notifications[] = []
     try {

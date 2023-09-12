@@ -62,7 +62,6 @@ interface BotInfo {
 interface AutoQa {
   autoReply: boolean;
   atReply: boolean;
-  customReply: boolean;
   roomWhitelist: boolean;
   contactWhitelist: boolean;
 }
