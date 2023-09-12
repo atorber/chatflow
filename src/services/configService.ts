@@ -32,6 +32,7 @@ const config: configTypes.Config = {
     base: {
       welcomeMessageForJoinRoom: process.env[EnvironmentVariables.BASE_WELCOMEMESSAGEFORJOINROOM] || '',
       welcomeMessageForAddFriend: process.env[EnvironmentVariables.BASE_WELCOMEMESSAGEFORADDFRIEND] || '',
+      botid:process.env[EnvironmentVariables.BASE_BOT_ID] || '',
     },
     wechaty: {
       puppet: process.env[EnvironmentVariables.WECHATY_PUPPET] || 'wechaty-puppet-wechat',

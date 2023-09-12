@@ -1,6 +1,6 @@
-import {
+import type {
   Message,
-  log,
+  // log,
 } from 'wechaty'
 
 import { db } from '../db/tables.js'
@@ -29,7 +29,7 @@ export const addMessage = async (message: Message) => {
     // log.info('消息写入数据库成功:', res._id)
     return true
   } catch (e) {
-    log.error('消息写入数据库失败:\n', e)
+    // log.error('消息写入数据库失败:\n', e)
     return false
   }
 

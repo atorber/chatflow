@@ -1,4 +1,4 @@
-import { VikaBot, DateBase } from './vika.js'
+import { VikaBot, DateBase } from '../db/vika-bot.js'
 import { wxai } from './wxai.js'
 import { sendNotice } from './group-notice.js'
 

@@ -119,27 +119,27 @@ interface WxOpenAiConfig {
 }
 
 interface ChatGptConfig {
-  key?: string;
-  endpoint?: string;
+  key: string;
+  endpoint: string;
 }
 
 interface MqttConfig {
-  username?: string;
-  password?: string;
-  endpoint?: string;
+  username: string;
+  password: string;
+  endpoint: string;
   port: number;
 }
 
 interface WebHookConfig {
-  url?: string;
+  url: string;
   token?: string;
   username?: string;
   password?: string;
 }
 
 interface YuQueConfig {
-  token?: string;
-  nameSpace?: string;
+  token: string;
+  nameSpace: string;
 }
 
 interface RidingAppConfig {
@@ -152,11 +152,13 @@ interface AppsConfig {
 }
 
 interface BaseConfig {
-  [key: string]: string | undefined;
+  welcomeMessageForJoinRoom?: string;
+  welcomeMessageForAddFriend?: string;
+  botid:string;
 }
 
 interface BotConfig {
-  base?: BaseConfig;
+  base: BaseConfig;
   wechaty: WechatyConfig;
   vika: VikaConfig;
   adminRoom: AdminRoomConfig;
