@@ -101,7 +101,7 @@
     "typescript": "^4.9.3"
   },
   "peerDependencies": {
-    "@swc/core": "^1.3.78"
+    "@swc/core": "1.3.78"
   },
   "files": [
     "bin/",
