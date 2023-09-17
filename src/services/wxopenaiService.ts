@@ -19,7 +19,7 @@ type VikaRecord = {
 
 export type SkillInfoArray = SkillInfo[];
 
-export interface AIBotConfig {
+export interface WxOpenaiBotConfig {
   encodingAESKey: string;
   token: string;
   nonce: string;
@@ -39,7 +39,7 @@ export class WxOpenaiBot {
   parser: any
   WXBizMsgCryptnew: any
 
-  constructor (config: AIBotConfig) {
+  constructor (config: WxOpenaiBotConfig) {
     this.encodingAESKey = config.encodingAESKey
     this.token = config.token
     this.nonce = config.nonce

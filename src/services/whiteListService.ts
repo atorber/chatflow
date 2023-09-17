@@ -42,7 +42,7 @@ export class WhiteListChat {
 
   async getRecords () {
     const records = await this.db.findAll()
-    log.info('维格表中的记录：', JSON.stringify(records))
+    // log.info('维格表中的记录：', JSON.stringify(records))
     return records
   }
 

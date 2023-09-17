@@ -5,7 +5,6 @@ import { VikaSheet } from '../db/vika.js'
 import { Message, ScanStatus, log, types } from 'wechaty'
 import { getCurTime, waitForMs as wait } from '../utils/utils.js'
 import moment from 'moment'
-import fs from 'fs'
 import { FileBox } from 'file-box'
 
 // import { db } from '../db/tables.js'
@@ -39,8 +38,6 @@ export class MessageChat {
           this.db.insert(records).then((response: { success: any }) => {
             if (!response.success) {
               log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
-            } else {
-              log.info('调用vika写入接口成功，写入vika成功~')
             }
             return response
           }).catch((err: any) => { log.error('调用vika写入接口失败：', err) })
@@ -74,8 +71,8 @@ export class MessageChat {
 
     try {
       if (uploadedAttachments) {
-        files.push(uploadedAttachments)
-        text = JSON.stringify(uploadedAttachments)
+        files.push(uploadedAttachments.data)
+        text = JSON.stringify(uploadedAttachments.data)
       }
 
       const record = {
@@ -104,13 +101,13 @@ export class MessageChat {
 
   }
 
-  async addScanRecord (uploadedAttachments: string, text: string) {
+  async addScanRecord (uploadedAttachments: any, text: string) {
 
     const curTime = getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
     const files: any = []
-    if (uploadedAttachments) {
-      files.push(uploadedAttachments)
+    if (uploadedAttachments.data) {
+      files.push(uploadedAttachments.data)
     }
 
     const records = [
@@ -128,13 +125,12 @@ export class MessageChat {
       },
     ]
 
-    log.info('登录二维码消息:', records)
-    this.db.records.create(records).then((response: { success: any }) => {
-      if (!response.success) {
-        log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
-      }
-      return response
-    }).catch((err: any) => { log.error('调用vika写入接口失败：', err) })
+    // log.info('待写入登录二维码消息:', JSON.stringify(records))
+    const response = await this.db.insert(records)
+    if (!response.success) {
+      log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
+    }
+    return response
   }
 
   async addHeartbeatRecord (text: string) {
@@ -162,9 +158,9 @@ export class MessageChat {
   async onMessage (message: Message) {
     try {
 
-      let uploadedAttachments = ''
+      let uploadedAttachments:any = ''
       const msgType = types.Message[message.type()]
-      let file: any = ''
+      let file: any
       let filePath = ''
       let text = ''
 
@@ -189,7 +185,6 @@ export class MessageChat {
 
           } catch (e) {
             log.error('Image解析失败：', e)
-            file = ''
           }
 
           break
@@ -279,7 +274,7 @@ export class MessageChat {
         case types.Message.Location:
 
           // const location = await message.toLocation()
-          // text = JSON.stringify(JSON.parse(JSON.stringify(location)).payload)
+          text = message.text()
           break
         case types.Message.Unknown:
           // const location = await message.toLocation()
@@ -291,12 +286,15 @@ export class MessageChat {
       }
 
       if (file) {
-        filePath = 'data/media/image/' + file.name
+        const fileName = file.name
+        filePath = 'data/media/image/' + fileName
+        log.info('文件路径filePath:', filePath)
         try {
-          const writeStream = fs.createWriteStream(filePath)
-          await file.pipe(writeStream)
+          // const writeStream = fs.createWriteStream(filePath)
+          // await file.pipe(writeStream)
+          await file.toFile(filePath, true)
           await wait(1000)
-          uploadedAttachments = await this.db.upload(filePath)
+          uploadedAttachments = await this.db.upload(filePath, '')
           await wait(1000)
           // fs.unlink(filePath, (err) => {
           //   log.info('上传vika成功，删除文件：', filePath, err)
@@ -325,31 +323,38 @@ export class MessageChat {
       ].join('')
       // log.info('StarterBot', 'vika onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
 
-      let uploadedAttachments = ''
+      let uploadedAttachments:any = ''
       let file: FileBox
-      let filePath = 'qrcode.png'
+      let filePath = ''
       try {
         file = FileBox.fromQRCode(qrcode)
-        filePath = './' + file.name
+        filePath = 'data/media/image/' + file.name
         try {
-          const writeStream = fs.createWriteStream(filePath)
-          await file.pipe(writeStream)
+          // const writeStream = fs.createWriteStream(filePath)
+          // await file.pipe(writeStream)
+          await file.toFile(filePath, true)
           await wait(1000)
-          uploadedAttachments = await this.db.upload(filePath)
+          uploadedAttachments = await this.db.upload(filePath, '')
           const text = qrcodeImageUrl
-          await this.addScanRecord(uploadedAttachments, text)
-          fs.unlink(filePath, (err) => {
-            log.info('二维码上传vika完成删除文件：', filePath, err)
-          })
+          if (uploadedAttachments.data) {
+            try {
+              await this.addScanRecord(uploadedAttachments, text)
+              // fs.unlink(filePath, (err) => {
+              //   log.info('二维码上传vika完成删除文件：', filePath, err)
+              // })
+            } catch (err) {
+              log.error('二维码vika 写入失败：', err)
+            }
+          }
         } catch {
           log.info('二维码上传失败：', filePath)
-          fs.unlink(filePath, (err) => {
-            log.info('二维码上传vika失败删除文件', filePath, err)
-          })
+          // fs.unlink(filePath, (err) => {
+          //   log.info('二维码上传vika失败删除文件', filePath, err)
+          // })
         }
 
       } catch (e) {
-        log.info('二维码vika 写入失败：', e)
+        log.error('onScan,二维码vika 写入失败：', e)
       }
 
     } else {

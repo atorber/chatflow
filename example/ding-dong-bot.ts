@@ -1,4 +1,5 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
+/* eslint-disable sort-keys */
 import 'dotenv/config.js'
 import {
   log,
@@ -8,15 +9,35 @@ import {
 // import Koa from 'koa'
 // import bodyParser from 'koa-bodyparser'
 
-import { ChatFlow, config, getBotOps } from '../src/chatflow.js'
+import { ChatFlow, configEnv, getBotOps } from '../src/chatflow.js'
+import { logForm } from '../src/utils/utils.js'
+import {
+  VikaBot,
+} from '../src/db/vika-bot.js'
 
 // 构建机器人
-const ops = getBotOps(config.botConfig.wechaty.puppet, config.botConfig.wechaty.token)
+const ops = getBotOps(configEnv.WECHATY_PUPPET, configEnv.WECHATY_TOKEN)
 const bot = WechatyBuilder.build(ops)
 
-bot.use(ChatFlow(config))
+const initializeVika = async () => {
+  const vikaBot = new VikaBot({
+    spaceName: configEnv.VIKA_SPACE_NAME || '',
+    token: configEnv.VIKA_TOKEN || '',
+  })
+  try {
+    await vikaBot.init()
+    return vikaBot
+  } catch {
+    return undefined
+  }
+}
+
+const vikaBot: VikaBot|undefined = await initializeVika()
+// log.info('vikaBot配置信息：', JSON.stringify(vikaBot, undefined, 2))
+
+bot.use(ChatFlow(vikaBot))
 bot.start()
-  .then(() => log.info('\n\n1. 机器人启动，如出现二维码，请使用微信扫码登录\n\n2. 如果已经登录成功，则不会显示二维码\n\n3. 如未能成功登录访问 https://www.yuque.com/atorber/chatflow/ibnui5v8mob11d70 查看常见问题解决方法\n\n================================'))
+  .then(() => logForm('1. 机器人启动，如出现二维码，请使用微信扫码登录\n\n2. 如果已经登录成功，则不会显示二维码\n\n3. 如未能成功登录访问 https://www.yuque.com/atorber/chatflow/ibnui5v8mob11d70 查看常见问题解决方法'))
   .catch((e: any) => log.error('机器人运行异常：', JSON.stringify(e)))
 
 // http服务

@@ -191,7 +191,7 @@ export class VikaBot {
   }
 
   async createDataSheet (key: string, name: string, fields: { name: string; type: string }[]) {
-    log.info('创建表...')
+    // log.info('创建表...')
     const datasheetRo = {
       fields,
       name,
@@ -216,7 +216,7 @@ export class VikaBot {
   }
 
   async createRecord (datasheetId: string, records: ICreateRecordsReqParams) {
-    log.info('写入维格表:', records.length)
+    // log.info('写入维格表:', records.length)
     const datasheet = await this.vika.datasheet(datasheetId)
 
     try {
@@ -315,7 +315,7 @@ export class VikaBot {
     if (this.spaceId) {
 
       const tables = await this.getNodesList()
-      log.info('维格表文件列表：\n', JSON.stringify(tables, undefined, 2))
+      // log.info('维格表文件列表：\n', JSON.stringify(tables, undefined, 2))
 
       await wait(1000)
 
@@ -324,9 +324,9 @@ export class VikaBot {
         const sheet = sheets[k as keyof Sheets]
         // log.info('数据模型：', k, sheet)
         if (sheet && !tables[sheet.name]) {
-          log.info('表不存在开始创建...', k, sheet.name)
+          log.info('表不存在开始创建...', k + ':' + sheet.name)
           const fields = sheet.fields
-          log.info('fields:', JSON.stringify(fields))
+          // log.info('fields:', JSON.stringify(fields))
           const newFields: Field[] = []
           for (let j = 0; j < fields.length; j++) {
             const field = fields[j]
@@ -432,7 +432,7 @@ export class VikaBot {
           this.dataBaseNames[sheet.name as keyof DateBase] = tables[sheet.name]
         } else { /* empty */ }
       }
-      log.info('\n\n初始化系统表完成...\n\n================================================\n')
+      log.info('初始化系统表完成')
       // const tasks = await this.getTimedTask()
       return true
     } else {

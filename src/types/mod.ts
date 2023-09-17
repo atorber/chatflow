@@ -9,6 +9,7 @@ import type {
   ContactWhiteList,
   RoomWhiteList,
 } from './config.js'
+import type { ChatMessage } from './interface.js'
 
 export { EnvironmentVariables } from './env.js'
 export type { ProcessEnv } from './env.js'
@@ -25,4 +26,5 @@ export {
   type SysConfig,
   ContactWhiteList,
   RoomWhiteList,
+  type ChatMessage,
 }

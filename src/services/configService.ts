@@ -1,6 +1,8 @@
 /* eslint-disable sort-keys */
-import type { configTypes } from '../types/mod.js'
+import { Contact, Message, Room, Sayable, log } from 'wechaty'
+import type { ProcessEnv, configTypes } from '../types/mod.js'
 import { EnvironmentVariables } from '../types/mod.js'
+import fs from 'fs'
 
 const config: configTypes.Config = {
   botInfo: {},
@@ -111,4 +113,53 @@ const config: configTypes.Config = {
   roomConfig: {},
 }
 
-export { config }
+// 配置机器人
+function getBotOps (puppet: string, token: string) {
+  const ops: any = {
+    name: 'chatflow',
+    puppet,
+    puppetOptions: {
+      token,
+    },
+  }
+
+  if (puppet === 'wechaty-puppet-service') {
+    process.env['WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT'] = 'true'
+  }
+
+  if ([ 'wechaty-puppet-wechat4u', 'wechaty-puppet-xp', 'wechaty-puppet-engine' ].includes(puppet)) {
+    delete ops.puppetOptions.token
+  }
+
+  if (puppet === 'wechaty-puppet-wechat') {
+    delete ops.puppetOptions.token
+    ops.puppetOptions.uos = true
+  }
+  return ops
+}
+
+// 消息发布器
+export const sendMsg = async (publisher: Message | Room | Contact, sayable: Sayable, isVikaOk: any, messageService: { onMessage: (arg0: Message) => any }, inviteeList?: Contact[]) => {
+  try {
+    let replyMessage: Message | void
+    if (inviteeList?.length) {
+      const text = sayable as string
+      replyMessage = await (publisher as Room).say(text, ...inviteeList)
+    } else {
+      replyMessage = await publisher.say(sayable)
+    }
+    if (isVikaOk && replyMessage) {
+      await messageService.onMessage(replyMessage)
+    }
+  } catch (e) {
+    log.error('消息发送失败:', publisher, sayable, e)
+  }
+}
+
+// 保存配置文件到data/config.json
+export function updateConfig (config: any) {
+  fs.writeFileSync('data/config.json', JSON.stringify(config, null, '\t'))
+  // log.info('配置有变更, updateConfig:', JSON.stringify(config))
+}
+
+export { config, getBotOps }

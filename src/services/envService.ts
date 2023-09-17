@@ -41,10 +41,7 @@ export class EnvChat {
 
   // 更新环境变量配置到云端
   async updateConfigToVika (config: any) {
-    const functionOnStatus = config.functionOnStatus
-    const botConfig = config.botConfig
-    log.info('维格表内功能开关状态', functionOnStatus)
-    log.info('维格表内基础配置信息', botConfig)
+    log.info('当前环境变量：', config)
   }
 
   // 下载环境变量配置
@@ -146,6 +143,34 @@ export class EnvChat {
       process.env[key] = String(value)
     }
 
+  }
+
+  getBotOps () {
+    const puppet = this.envData?.WECHATY_PUPPET || 'wechaty-puppet-wechat'
+    const token = this.envData?.WECHATY_TOKEN
+    const ops: any = {
+      name: 'chatflow',
+      puppet,
+      puppetOptions: {
+        token,
+      },
+    }
+
+    if (puppet === 'wechaty-puppet-service') {
+      process.env['WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT'] = 'true'
+    }
+
+    if ([ 'wechaty-puppet-wechat4u', 'wechaty-puppet-xp', 'wechaty-puppet-engine' ].includes(puppet)) {
+      delete ops.puppetOptions.token
+    }
+
+    if (puppet === 'wechaty-puppet-wechat') {
+      delete ops.puppetOptions.token
+      ops.puppetOptions.uos = true
+    }
+
+    log.info('Wchaty配置信息:\n', JSON.stringify(ops))
+    return ops
   }
 
 }

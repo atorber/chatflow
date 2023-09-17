@@ -37,16 +37,32 @@ export class RoomChat {
     let updateCount = 0
     try {
       const rooms: Room[] = await bot.Room.findAll()
-      log.info('当前最新微信群数量：', rooms.length)
+      log.info('最新微信群数量：', rooms.length)
       const recordsAll: any = []
       const recordExisting = await this.db.findAll()
-      log.info('维格表云端群数量：', recordExisting.length)
-      const wxids: string[] = []
+      log.info('云端群数量：', recordExisting.length || '0')
+      let wxids: string[] = []
+      const recordIds: string[] = []
       if (recordExisting.length) {
         recordExisting.forEach((record: IRecord) => {
-          if (record.fields['id']) wxids.push(record.fields['群ID|id'] as string)
+          if (record.fields['群ID|id']) {
+            wxids.push(record.fields['群ID|id'] as string)
+            recordIds.push(record.recordId)
+          }
         })
       }
+
+      if (bot.puppet.name() === 'wechaty-puppet' || bot.puppet.name() === 'wechaty-puppet-wechat4u<wechaty-puppet>') {
+        const count = Math.ceil(recordIds.length / 10)
+        for (let i = 0; i < count; i++) {
+          const records = recordIds.splice(0, 10)
+          log.info('删除：', records.length)
+          await this.db.remove(records)
+          await wait(1000)
+        }
+        wxids = []
+      }
+
       for (let i = 0; i < rooms.length; i++) {
         const item: Room | undefined = rooms[i]
         if (item && !wxids.includes(item.id)) {
@@ -55,7 +71,7 @@ export class RoomChat {
             avatar = await item.avatar()
             avatar = avatar.name
           } catch (err) {
-            log.error('获取群头像失败：', err)
+            // log.error('获取群头像失败：', err)
           }
           const ownerId = await item.owner()?.id
           //   log.info('第一个群成员：', ownerId)
@@ -75,13 +91,18 @@ export class RoomChat {
 
       for (let i = 0; i < recordsAll.length; i = i + 10) {
         const records = recordsAll.slice(i, i + 10)
-        await this.db.insert(records)
-        log.info('群列表同步中...', i + 10)
-        updateCount = updateCount + 10
-        void await wait(1000)
+        try {
+          await this.db.insert(records)
+          log.info('群列表同步完成...', i + records.length)
+          updateCount = updateCount + records.length
+          void await wait(1000)
+        } catch (err) {
+          log.error('群列表同步失败,待系统就绪后再管理群发送【更新通讯录】可手动更新...', i + 10)
+          void await wait(1000)
+        }
       }
 
-      log.info('同步群列表完成，更新群数量：', updateCount || '0')
+      log.info('同步群列表完成，更新到云端群数量：', updateCount || '0')
     } catch (err) {
       log.error('更新群列表失败：', err)
 

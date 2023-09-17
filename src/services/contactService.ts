@@ -37,26 +37,46 @@ export class ContactChat {
     let updateCount = 0
     try {
       const contacts: Contact[] = await bot.Contact.findAll()
-      log.info('当前微信最新联系人数量：', contacts.length)
+      log.info('最新联系人数量(包含公众号)：', contacts.length)
       const recordsAll: any = []
       const recordExisting = await this.db.findAll()
-      // log.info('云端好友数量：', recordExisting.length || '0')
-      const wxids: string[] = []
+      log.info('云端好友数量（不包含公众号）：', recordExisting.length || '0')
+
+      let wxids: string[] = []
+      const recordIds: string[] = []
       if (recordExisting.length) {
-        recordExisting.forEach((record: IRecord) => wxids.push(record.fields['好友ID|id'] as string))
+        recordExisting.forEach((record: IRecord) => {
+          wxids.push(record.fields['好友ID|id'] as string)
+          recordIds.push(record.recordId)
+        })
+      }
+      log.info('当前bot使用的puppet:', bot.puppet.name())
+      if (bot.puppet.name() === 'wechaty-puppet' || bot.puppet.name() === 'wechaty-puppet-wechat4u<wechaty-puppet>') {
+        const count = Math.ceil(recordIds.length / 10)
+        for (let i = 0; i < count; i++) {
+          const records = recordIds.splice(0, 10)
+          log.info('删除：', records.length)
+          await this.db.remove(records)
+          await wait(1000)
+        }
+        wxids = []
       }
       for (let i = 0; i < contacts.length; i++) {
         const item = contacts[i]
-        const isFriend = item?.friend()
-        // log.info('好友详情：', item?.name(), JSON.stringify(isFriend))
-        if (item && isFriend && item.type() === types.Contact.Individual && !wxids.includes(item.id)) {
+        const isFriend = item?.friend() || false
+        // const isIndividual = item?.type() === types.Contact.Individual
+        // log.info('好友详情：', item?.name())
+        // log.info('是否好友：', isFriend)
+        // log.info('是否公众号：', isIndividual)
+
+        if (item && isFriend && !wxids.includes(item.id)) {
           // log.info('云端不存在：', item.name())
           let avatar = ''
           let alias = ''
           try {
             avatar = String(await item.avatar())
           } catch (err) {
-            log.error('获取好友头像失败：', err)
+            // log.error('获取好友头像失败：', err)
           }
           try {
             alias = await item.alias() || ''
@@ -80,16 +100,16 @@ export class ContactChat {
           recordsAll.push(record)
         }
       }
-
+      log.info('好友数量：', recordsAll.length || '0')
       for (let i = 0; i < recordsAll.length; i = i + 10) {
         const records = recordsAll.slice(i, i + 10)
         await this.db.insert(records)
-        log.info('好友列表同步中...', i + 10)
-        updateCount = updateCount + 10
+        log.info('好友列表同步中...', i + records.length)
+        updateCount = updateCount + records.length
         void await wait(1000)
       }
 
-      log.info('同步好友列表完成，更新好友数量：', updateCount || '0')
+      log.info('同步好友列表完成，更新到云端好友数量：', updateCount || '0')
     } catch (err) {
       log.error('更新好友列表失败：', err)
 
