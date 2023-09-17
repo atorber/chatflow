@@ -66,7 +66,7 @@ let chatdev: any = {}
 let vikaBot: VikaBot|undefined
 const envService:EnvChat = new EnvChat()
 let configEnv:ProcessEnv = envService.getConfigFromEnv()
-log.info('configEnv on env', JSON.stringify(configEnv))
+// log.info('configEnv on env', JSON.stringify(configEnv))
 
 let whiteList:{contactWhiteList: ContactWhiteList; roomWhiteList: RoomWhiteList;}
 
@@ -132,12 +132,12 @@ const postVikaInitialization = async (bot: Wechaty, services:Services) => {
   // log.info('维格表中的环境变量配置信息：', JSON.stringify(vikaConfig, undefined, 2))
 
   configEnv = { ...configEnv, ...vikaConfig }
-  log.info('configEnv on vika', JSON.stringify(configEnv))
+  // log.info('configEnv on vika', JSON.stringify(configEnv))
 
   whiteList = await services.whiteListService.getWhiteList()
 
-  await services.roomService.updateRooms(bot)
-  await services.contactService.updateContacts(bot)
+  await services.roomService.updateRooms(bot, configEnv.WECHATY_PUPPET)
+  await services.contactService.updateContacts(bot, configEnv.WECHATY_PUPPET)
 
   setInterval(() => {
     try {
@@ -248,8 +248,8 @@ const adminCommands:AdminCommands = {
   },
   更新通讯录: async (bot:Wechaty) => {
     try {
-      await (services as Services).contactService.updateContacts(bot)
-      await (services as Services).roomService.updateRooms(bot)
+      await (services as Services).contactService.updateContacts(bot, configEnv.WECHATY_PUPPET)
+      await (services as Services).roomService.updateRooms(bot, configEnv.WECHATY_PUPPET)
       return [ true, '通讯录更新成功~' ]
     } catch (e) {
       return [ false, '通讯录更新失败~' ]
