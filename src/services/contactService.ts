@@ -33,7 +33,7 @@ export class ContactChat {
   }
 
   // 上传联系人列表
-  async updateContacts (bot: Wechaty) {
+  async updateContacts (bot: Wechaty, puppet:string) {
     let updateCount = 0
     try {
       const contacts: Contact[] = await bot.Contact.findAll()
@@ -50,8 +50,8 @@ export class ContactChat {
           recordIds.push(record.recordId)
         })
       }
-      log.info('当前bot使用的puppet:', bot.puppet.name())
-      if (bot.puppet.name() === 'wechaty-puppet' || bot.puppet.name() === 'wechaty-puppet-wechat4u<wechaty-puppet>') {
+      log.info('当前bot使用的puppet:', puppet)
+      if (puppet === 'wechaty-puppet' || puppet === 'wechaty-puppet-wechat4u<wechaty-puppet>') {
         const count = Math.ceil(recordIds.length / 10)
         for (let i = 0; i < count; i++) {
           const records = recordIds.splice(0, 10)

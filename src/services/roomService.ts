@@ -33,7 +33,7 @@ export class RoomChat {
   }
 
   // 上传群列表
-  async updateRooms (bot: Wechaty) {
+  async updateRooms (bot: Wechaty, puppet:string) {
     let updateCount = 0
     try {
       const rooms: Room[] = await bot.Room.findAll()
@@ -52,7 +52,7 @@ export class RoomChat {
         })
       }
 
-      if (bot.puppet.name() === 'wechaty-puppet' || bot.puppet.name() === 'wechaty-puppet-wechat4u<wechaty-puppet>') {
+      if (puppet === 'wechaty-puppet-wechat' || puppet === 'wechaty-puppet-wechat4u') {
         const count = Math.ceil(recordIds.length / 10)
         for (let i = 0; i < count; i++) {
           const records = recordIds.splice(0, 10)
