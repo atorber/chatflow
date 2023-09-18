@@ -10,6 +10,25 @@ import { FileBox } from 'file-box'
 // import { db } from '../db/tables.js'
 // const messageData = db.message
 
+const MEDIA_PATH = 'data/media/image/'
+
+async function handleFileMessage (file:FileBox, db:VikaSheet) {
+  const fileName = file.name
+  const filePath = `${MEDIA_PATH}${fileName}`
+  log.info('文件路径filePath:', filePath)
+
+  try {
+    await file.toFile(filePath, true)
+    log.info('保存文件到本地成功')
+  } catch (err) {
+    log.error('保存文件到本地失败', err)
+    return ''
+  }
+
+  await wait(1000)
+  return await db.upload(filePath, '')
+}
+
 // 服务类
 export class MessageChat {
 
@@ -161,7 +180,6 @@ export class MessageChat {
       let uploadedAttachments:any = ''
       const msgType = types.Message[message.type()]
       let file: any
-      let filePath = ''
       let text = ''
 
       let urlLink
@@ -286,23 +304,8 @@ export class MessageChat {
       }
 
       if (file) {
-        const fileName = file.name
-        filePath = 'data/media/image/' + fileName
-        log.info('文件路径filePath:', filePath)
-        try {
-          // const writeStream = fs.createWriteStream(filePath)
-          // await file.pipe(writeStream)
-          await file.toFile(filePath, true)
-          await wait(1000)
-          uploadedAttachments = await this.db.upload(filePath, '')
-          await wait(1000)
-          // fs.unlink(filePath, (err) => {
-          //   log.info('上传vika成功，删除文件：', filePath, err)
-          // })
-        } catch {
-          log.info('上传vika失败：', filePath)
-        }
-
+        log.info('文件file:', file)
+        uploadedAttachments = await handleFileMessage(file, this.db)
       }
 
       if (message.type() !== types.Message.Unknown) {
@@ -310,7 +313,7 @@ export class MessageChat {
       }
 
     } catch (e) {
-      log.info('vika 写入失败：', e)
+      log.error('onMessage消息转换失败：', e)
     }
   }
 

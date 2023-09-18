@@ -95,7 +95,7 @@ export class NoticeChat {
   }
 
   // 更新任务
-  async updateJobs (bot: Wechaty, isVikaOk: any, messageService: { onMessage: (arg0: Message) => any }) {
+  async updateJobs (bot: Wechaty, messageService: { onMessage: (arg0: Message) => any }) {
     const that = this
     try {
     // 结束所有任务
@@ -124,7 +124,7 @@ export class NoticeChat {
                   try {
                     const contact = await getContact(bot, task.target as BusinessUser)
                     if (contact) {
-                      await sendMsg(contact, task.msg, isVikaOk, messageService)
+                      await sendMsg(contact, task.msg, messageService)
                       await wait(200)
                     } else {
                       log.info('当前好友不存在:', JSON.stringify(task.target))
@@ -138,7 +138,7 @@ export class NoticeChat {
                   try {
                     const room = await getRoom(bot, task.target as BusinessRoom)
                     if (room) {
-                      await sendMsg(room, task.msg, isVikaOk, messageService)
+                      await sendMsg(room, task.msg, messageService)
                       await wait(200)
                     } else {
                       log.info('当前群不存在:', JSON.stringify(task.target))

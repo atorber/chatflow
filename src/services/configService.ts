@@ -139,7 +139,7 @@ function getBotOps (puppet: string, token: string) {
 }
 
 // 消息发布器
-export const sendMsg = async (publisher: Message | Room | Contact, sayable: Sayable, isVikaOk: any, messageService: { onMessage: (arg0: Message) => any }, inviteeList?: Contact[]) => {
+export const sendMsg = async (publisher: Message | Room | Contact, sayable: Sayable, messageService: { onMessage: (arg0: Message) => any }, inviteeList?: Contact[]) => {
   try {
     let replyMessage: Message | void
     if (inviteeList?.length) {
@@ -148,7 +148,7 @@ export const sendMsg = async (publisher: Message | Room | Contact, sayable: Saya
     } else {
       replyMessage = await publisher.say(sayable)
     }
-    if (isVikaOk && replyMessage) {
+    if (replyMessage) {
       await messageService.onMessage(replyMessage)
     }
   } catch (e) {

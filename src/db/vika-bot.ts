@@ -9,6 +9,7 @@ import type { Sheets, Field } from './vikaModel/Model.js'
 import { sheets } from './vikaModel/index.js'
 import { waitForMs as wait } from '../utils/utils.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/finder.js'
+import type { Services } from '../services/mod.js'
 
 type VikaBotConfigTypes = {
   spaceName: string,
@@ -93,6 +94,7 @@ export class VikaBot {
   switchsOnVika!: any[]
   reminderList!: any[]
   statisticRecords: any
+  services!:Services | undefined
 
   constructor (config: VikaBotConfigTypes) {
     if (!config.token) {
@@ -104,6 +106,7 @@ export class VikaBot {
       this.vika = new Vika({ token: config.token })
       this.spaceId = ''
       this.msgStore = []
+      this.services = undefined
       this.dataBaseIds = {
         messageSheet: '',
         keywordSheet: '',
@@ -120,6 +123,10 @@ export class VikaBot {
       }
       this.dataBaseNames = { ...this.dataBaseIds }
     }
+  }
+
+  updateServices (services:Services) {
+    this.services = services
   }
 
   async getAllSpaces () {

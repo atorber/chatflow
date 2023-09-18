@@ -49,6 +49,7 @@ interface ChatListener {
 }
 
 export interface ChatMessage {
+  id:string;
   text: string;
   type: number;
   talker: ChatTalker;

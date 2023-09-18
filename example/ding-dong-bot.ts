@@ -35,10 +35,12 @@ const initializeVika = async () => {
 const vikaBot: VikaBot|undefined = await initializeVika()
 // log.info('vikaBot配置信息：', JSON.stringify(vikaBot, undefined, 2))
 
-bot.use(ChatFlow(vikaBot))
-bot.start()
-  .then(() => logForm('1. 机器人启动，如出现二维码，请使用微信扫码登录\n\n2. 如果已经登录成功，则不会显示二维码\n\n3. 如未能成功登录访问 https://www.yuque.com/atorber/chatflow/ibnui5v8mob11d70 查看常见问题解决方法'))
-  .catch((e: any) => log.error('机器人运行异常：', JSON.stringify(e)))
+if (vikaBot) {
+  bot.use(ChatFlow(vikaBot))
+  bot.start()
+    .then(() => logForm('1. 机器人启动，如出现二维码，请使用微信扫码登录\n\n2. 如果已经登录成功，则不会显示二维码\n\n3. 如未能成功登录访问 https://www.yuque.com/atorber/chatflow/ibnui5v8mob11d70 查看常见问题解决方法'))
+    .catch((e: any) => log.error('机器人运行异常：', JSON.stringify(e)))
+}
 
 // http服务
 // const app = new Koa()

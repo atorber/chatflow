@@ -32,3 +32,16 @@ export {
   NoticeChat,
   QaChat,
 }
+
+export interface Services {
+  [key: string]: any;  // 索引签名
+  messageService: MessageChat;
+  whiteListService: WhiteListChat;
+  groupNoticeService: GroupNoticeChat;
+  roomService: RoomChat;
+  contactService: ContactChat;
+  activityService: ActivityChat;
+  noticeService: NoticeChat;
+  qaService: QaChat;
+  keywordService: KeywordChat;
+}
