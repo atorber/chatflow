@@ -51,7 +51,7 @@ export class ContactChat {
         })
       }
       log.info('当前bot使用的puppet:', puppet)
-      if (puppet === 'wechaty-puppet' || puppet === 'wechaty-puppet-wechat4u<wechaty-puppet>') {
+      if (puppet === 'wechaty-puppet-wechat' || puppet === 'wechaty-puppet-wechat4u') {
         const count = Math.ceil(recordIds.length / 10)
         for (let i = 0; i < count; i++) {
           const records = recordIds.splice(0, 10)
