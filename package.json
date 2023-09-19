@@ -75,7 +75,7 @@
     "wechaty-puppet-padlocal": "^1.11.13",
     "wechaty-puppet-service": "^1.19.8",
     "wechaty-puppet-wechat": "^1.13.15",
-    "wechaty-puppet-wechat4u": "^1.14.1",
+    "wechaty-puppet-wechat4u": "^1.14.2",
     "wxcrypt": "^1.4.3",
     "xlsx": "^0.18.5",
     "xml2js": "^0.6.2"

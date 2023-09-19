@@ -15,7 +15,7 @@ const MEDIA_PATH = 'data/media/image/'
 async function handleFileMessage (file:FileBox, db:VikaSheet) {
   const fileName = file.name
   const filePath = `${MEDIA_PATH}${fileName}`
-  log.info('文件路径filePath:', filePath)
+  // log.info('文件路径filePath:', filePath)
 
   try {
     await file.toFile(filePath, true)
