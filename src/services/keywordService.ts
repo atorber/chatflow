@@ -26,7 +26,7 @@ export class KeywordChat {
     if (this.records) return this.records
     const keywordsRecords = await this.db.findAll()
     this.records = keywordsRecords
-    log.info('关键词：\n', JSON.stringify(keywordsRecords))
+    // log.info('关键词：\n', JSON.stringify(keywordsRecords))
     return this.records
   }
 

@@ -1,11 +1,12 @@
 /* eslint-disable sort-keys */
-import { db } from '../db/tables.js'
 import type { VikaBot, TaskConfig } from '../db/vika-bot.js'
 import { VikaSheet } from '../db/vika.js'
 import { log } from 'wechaty'
 import type { SkillInfoArray } from './wxopenaiService.js'
 
-const noticeData = db.notice
+// import { db } from '../db/tables.js'
+// const noticeData = db.notice
+// log.info(JSON.stringify(noticeData))
 
 // 服务类
 export class QaChat {

@@ -34,9 +34,9 @@ interface IFieldMappingResponse {
 export class VikaSheet {
 
   private datasheet: any
-  private offsetValue: number
-  private limitValue: number
-  private orderby: any
+  offsetValue!: number
+  limitValue!: number
+  orderby!: any
   private fields: any[] = []
   records: any
 
@@ -58,7 +58,7 @@ export class VikaSheet {
   }
 
   async insert (records: ICreateRecordsReqParams) {
-    log.info('写入维格表:', records.length)
+    // log.info('写入维格表:', records.length)
 
     try {
       const res = await this.datasheet.records.create(records)
@@ -75,17 +75,20 @@ export class VikaSheet {
 
   }
 
-  async upload (path:string) {
-    const file = fs.createReadStream(path)
+  async upload (path:string, file:any) {
+    if (path) {
+      log.info('文件本地路径：', path)
+      file = fs.createReadStream(path)
+    }
 
     try {
       const resp = await this.datasheet.upload(file)
-      if (resp.success) {
-        return resp.data
+      if (!resp.success) {
+        log.info('文件上传请求成功，上传失败', JSON.stringify(resp))
       }
       return resp
     } catch (error) {
-      log.error('upload error:', error)
+      log.error('文件上传请求失败:', error)
       return error
     }
 
@@ -125,13 +128,11 @@ export class VikaSheet {
 
   }
 
-  async remove (recordsIds: string | any[]) {
+  async remove (recordsIds: string[]) {
     // log.info('操作数据表ID：', datasheetId)
     // log.info('待删除记录IDs：', recordsIds)
     const response = await this.datasheet.records.delete(recordsIds)
-    if (response.success) {
-      log.info(`删除${recordsIds.length}条记录`)
-    } else {
+    if (!response.success) {
       log.error('删除记录失败：', response)
     }
     return response
@@ -141,9 +142,7 @@ export class VikaSheet {
     // log.info('操作数据表ID：', datasheetId)
     // log.info('待删除记录IDs：', recordsIds)
     const response = await this.datasheet.records.delete([ recordsId ])
-    if (response.success) {
-      log.info(`删除${recordsId}记录`)
-    } else {
+    if (!response.success) {
       log.error('删除记录失败：', response)
     }
     return response

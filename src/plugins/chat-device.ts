@@ -43,7 +43,7 @@ class ChatDevice {
     const that = this
     this.mqttclient.on('connect', function () {
       that.isConnected = true
-      log.info('\nMQTT连接成功~\n\n================================================\n')
+      log.info('MQTT连接成功')
     })
     this.mqttclient.on('reconnect', function (e:any) {
       log.info('subscriber on reconnect', e)
@@ -70,19 +70,19 @@ class ChatDevice {
 
   pub_property (msg:any) {
     this.mqttclient.publish(this.propertyApi, msg)
-    log.info('mqtt pub_message:', this.eventApi, msg)
+    log.info('mqtt消息发布:', this.eventApi, msg)
   }
 
   pub_event (msg:any) {
     this.mqttclient.publish(this.eventApi, msg)
-    log.info('mqtt pub_message:', this.eventApi, msg)
+    log.info('mqtt消息发布:', this.eventApi, msg)
   }
 
   async pub_message (msg:any) {
     try {
       const payload = await wechaty2chatdev(msg)
       this.mqttclient.publish(this.eventApi, payload)
-      log.info('mqtt pub_message:', this.eventApi, payload)
+      log.info('mqtt消息发布:', this.eventApi, payload)
     } catch (err) {
       console.error(err)
     }

@@ -1,5 +1,4 @@
 /* eslint-disable sort-keys */
-import { db } from '../db/tables.js'
 import type { VikaBot } from '../db/vika-bot.js'
 
 import { VikaSheet } from '../db/vika.js'
@@ -8,7 +7,8 @@ import { wait } from '../utils/utils.js'
 import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/finder.js'
 
-const whiteListData = db.whiteList
+// import { db } from '../db/tables.js'
+// const whiteListData = db.whiteList
 
 // 服务类
 export class WhiteListChat {
@@ -42,7 +42,7 @@ export class WhiteListChat {
 
   async getRecords () {
     const records = await this.db.findAll()
-    log.info('维格表中的记录：', JSON.stringify(records))
+    // log.info('维格表中的记录：', JSON.stringify(records))
     return records
   }
 

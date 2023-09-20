@@ -27,7 +27,6 @@ export enum EnvironmentVariables {
     YUQUE_NAMESPACE = 'YUQUE_NAMESPACE',
     AUTOQA_AUTOREPLY = 'AUTOQA_AUTOREPLY',
     AUTOQA_ATREPLY = 'AUTOQA_ATREPLY',
-    AUTOQA_CUSTOMREPLY = 'AUTOQA_CUSTOMREPLY',
     AUTOQA_ROOMWHITELIST = 'AUTOQA_ROOMWHITELIST',
     AUTOQA_CONTACTWHITELIST = 'AUTOQA_CONTACTWHITELIST',
     VIKA_USEVIKA = 'VIKA_USEVIKA',
@@ -37,4 +36,71 @@ export enum EnvironmentVariables {
     MQTT_MQTTMESSAGEPUSH = 'MQTT_MQTTMESSAGEPUSH',
     MQTT_MQTTCONTROL = 'MQTT_MQTTCONTROL',
     IM_IMCHAT = 'IM_IMCHAT',
+  }
+
+export interface ProcessEnv {
+    // 维格表配置
+    VIKA_SPACE_NAME: string;
+    VIKA_TOKEN: string;
+
+    // Wechaty配置
+    WECHATY_PUPPET: string;
+    WECHATY_TOKEN: string;
+
+    // 基础配置
+    ADMINROOM_ADMINROOMID: string;
+    ADMINROOM_ADMINROOMTOPIC: string;
+    BASE_BOT_ID: string;
+    BASE_WELCOM_EMESSAGE_FOR_JOIN_ROOM: string;
+    BASE_WELCOME_MESSAGE_FOR_ADD_FRIEND: string;
+
+    // 智能问答配置
+    AUTOQA_TYPE: string;
+    WXOPENAI_TOKEN: string;
+    WXOPENAI_ENCODINGAESKEY: string;
+    WXOPENAI_APPID: string;
+    WXOPENAI_MANAGERID: string;
+
+    // ChatGPT
+    CHATGPT_KEY: string;
+    CHATGPT_ENDPOINT: string;
+
+    // MQTT配置
+    MQTT_USERNAME: string;
+    MQTT_PASSWORD: string;
+    MQTT_ENDPOINT: string;
+    MQTT_PORT: string;
+
+    // 消息推送目的地配置
+    WEBHOOK_URL: string;
+    WEBHOOK_TOKEN: string;
+    WEBHOOK_USERNAME: string;
+    WEBHOOK_PASSWORD: string;
+
+    // 语雀配置
+    YUQUE_TOKEN: string;
+    YUQUE_NAMESPACE: string;
+
+    // 系统消息推送
+    MESSAGE_ENCRYPT: string | boolean;
+    MESSAGE_ENCODINGAESKEY: string;
+    MESSAGE_WEB_HOOK: string;
+
+    // 功能开关
+    AUTOQA_AUTOREPLY: string | boolean;
+    AUTOQA_ATREPLY: string | boolean;
+    AUTOQA_ROOMWHITELIST: string | boolean;
+    AUTOQA_CONTACTWHITELIST: string | boolean;
+
+    // 维格表配置
+    VIKA_USEVIKA: string | boolean;
+    VIKA_UPLOADMESSAGETOVIKA: string | boolean;
+    VIKA_AUTOMATICCLOUD: string | boolean;
+
+    WEBHOOK_WEBHOOKMESSAGEPUSH: string | boolean;
+
+    MQTT_MQTTMESSAGEPUSH: string | boolean;
+    MQTT_MQTTCONTROL: string | boolean;
+
+    IM_IMCHAT: string | boolean;
   }
