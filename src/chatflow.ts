@@ -17,6 +17,7 @@ import { FileBox } from 'file-box'
 import {
   sendNotice,
   wxai,
+  gpt,
   ChatDevice,
   propertyMessage,
   eventMessage,
@@ -149,7 +150,7 @@ const notifyAdminRoom = async (bot: Wechaty) => {
 
 const onReadyOrLogin = async (bot: Wechaty, vikaBot:VikaBot) => {
   if (!vikaBot.services) {
-    log.info('初始化services服务')
+    // log.info('初始化services服务')
     await initializeServicesAndEnv(vikaBot as VikaBot)
   }
 
@@ -343,18 +344,28 @@ const commandActions: CommandActions = {
 }
 
 async function handleAutoQA (bot:Wechaty, message:Message, keyWord:string) {
-  const talker = message.talker()
   const room = message.room() as Room
   const topic = await room.topic()
   const text = message.text()
-  if (configEnv.AUTOQA_AUTOREPLY && ((text.indexOf(keyWord) !== -1 && configEnv.AUTOQA_ATREPLY) || !configEnv.AUTOQA_ATREPLY)) {
-    const isInRoomWhiteList = configEnv.AUTOQA_ROOMWHITELIST ? await containsRoom(whiteList.roomWhiteList.qa, room) : true
+  log.info('群消息请求智能问答：', text === keyWord)
+  if (configEnv.AUTOQA_AUTOREPLY) {
+    const isInRoomWhiteList = await containsRoom(whiteList.roomWhiteList.qa, room)
     if (isInRoomWhiteList) {
       log.info('当前群在qa白名单内，请求问答...')
       try {
-        await wxai(configEnv, bot, talker, room, message)
+        await wxai(configEnv, bot, message)
       } catch (e) {
         log.error('发起请求wxai失败', topic, e)
+      }
+    }
+
+    const isInGptRoomWhiteList = await containsRoom(whiteList.roomWhiteList.gpt, room)
+    if (isInGptRoomWhiteList) {
+      log.info('当前群在qa白名单内，请求问答gpt...')
+      try {
+        await gpt(configEnv, bot, message)
+      } catch (e) {
+        log.error('发起请求gpt失败', topic, e)
       }
     }
   }
@@ -388,17 +399,29 @@ async function handleAdminRoomSetting (vikaBot:VikaBot, message:Message) {
 async function handleAutoQAForContact (bot:Wechaty, message:Message, keyWord:string) {
   const talker = message.talker()
   const text = message.text()
-  if (configEnv.AUTOQA_AUTOREPLY && ((text.indexOf(keyWord) !== -1 && configEnv.AUTOQA_ATREPLY) || !configEnv.AUTOQA_ATREPLY)) {
-    const isInContactWhiteList = configEnv.AUTOQA_CONTACTWHITELIST ? await containsContact(whiteList.contactWhiteList.qa, talker) : true
+  log.info('联系人请求智能问答：', text === keyWord)
+  if (configEnv.AUTOQA_AUTOREPLY) {
+    const isInContactWhiteList = await containsContact(whiteList.contactWhiteList.qa, talker)
     if (isInContactWhiteList) {
       log.info('当前好友在qa白名单内，请求问答...')
       try {
-        await wxai(configEnv, bot, talker, undefined, message)
+        await wxai(configEnv, bot, message)
       } catch (e) {
         log.error('发起请求wxai失败', talker.name(), e)
       }
     } else {
       log.info('当前好友不在qa白名单内，流程结束')
+    }
+    const isInGptContactWhiteList = await containsContact(whiteList.contactWhiteList.gpt, talker)
+    if (isInGptContactWhiteList) {
+      log.info('当前好友在qa白名单内，请求问答gpt...')
+      try {
+        await gpt(configEnv, bot, message)
+      } catch (e) {
+        log.error('发起请求wxai失败', talker.name(), e)
+      }
+    } else {
+      log.info('当前好友不在gpt白名单内，gpt流程结束')
     }
   }
 }
@@ -411,7 +434,7 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
 
     bot.on('scan', async (qrcode: string, status: ScanStatus) => {
       if (!vikaBot.services) {
-        log.info('初始化services服务')
+        // log.info('初始化services服务')
         await initializeServicesAndEnv(vikaBot)
         await wait(3000)
       }

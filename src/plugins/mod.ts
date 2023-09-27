@@ -1,4 +1,6 @@
+import { gpt } from './chatgpt.js'
 import { wxai } from './wxai.js'
+
 import { sendNotice } from './group-notice.js'
 
 import { ChatDevice } from './chat-device.js'
@@ -25,6 +27,7 @@ export {
   getFormattedRideInfo,
   sendNotice,
   wxai,
+  gpt,
   ChatDevice,
   propertyMessage,
   eventMessage,

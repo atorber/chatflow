@@ -6,12 +6,14 @@ interface RoomWhiteList{
   qa:BusinessRoom[]
   msg:BusinessRoom[]
   act:BusinessRoom[]
+  gpt:BusinessRoom[]
 }
 
 interface ContactWhiteList{
 qa:BusinessUser[]
 msg:BusinessUser[]
 act:BusinessUser[]
+gpt:BusinessUser[]
 }
 
 interface SysConfig {
@@ -62,8 +64,6 @@ interface BotInfo {
 interface AutoQa {
   autoReply: boolean;
   atReply: boolean;
-  roomWhitelist: boolean;
-  contactWhitelist: boolean;
 }
 
 interface Vika {

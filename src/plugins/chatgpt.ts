@@ -1,10 +1,5 @@
 /* eslint-disable no-console */
 /* eslint-disable sort-keys */
-import {
-  init,
-  chatAibot,
-  genToken,
-} from '../api/sdk/openai/index.js'
 import { FileBox } from 'file-box'
 import {
   Contact,
@@ -16,9 +11,9 @@ import {
 } from 'wechaty'
 import { formatSentMessage } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/mod.js'
-import type { ResponseCHAT } from '../api/sdk/openai/lib/response.js'
+import Api2d from 'api2d'
 
-async function wxai (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
+async function gpt (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
   const text = extractKeyword(message, bot.currentUser.name())
   const talker = message.talker()
   const room = message.room()
@@ -64,9 +59,9 @@ async function handleAnswer (answer: any, bot: Wechaty, message: Message) {
 }
 
 async function sendMessage (text: string, bot: Wechaty, message: Message) {
+  const formattedText = `${text}\n`
   const talker = message.talker()
   const room = message.room()
-  const formattedText = `${text}\n`
   if (room) {
     await room.say(formattedText, talker)
     await formatSentMessage(bot.currentUser, formattedText, undefined, room)
@@ -77,8 +72,8 @@ async function sendMessage (text: string, bot: Wechaty, message: Message) {
 }
 
 async function sendImage (answer: any, bot: Wechaty, message: Message) {
-  const room = message.room()
   const fileBox = FileBox.fromUrl(answer.text.url)
+  const room = message.room()
   if (room) {
     await room.say(fileBox)
     await formatSentMessage(bot.currentUser, fileBox.toString(), undefined, room)
@@ -110,115 +105,48 @@ async function sendMiniProgram (answer: any, bot: Wechaty, message: Message) {
   }
 }
 
-interface  QueryData {
-  first_priority_skills?: string[];
-  query:string;
-  signature:string;
-  second_priority_skills?:string [];
-}
-
 // aibot 函数基本保持不变
 async function aibot (sysConfig: ProcessEnv, talker: any, room: any, query: any) {
   let answer = {}
-  const roomid = room?.id
-  const wxid = talker.id
-  const nickName = talker.name()
-  const topic = await room?.topic()
   log.info(`查询内容，query: ${query}`)
 
-  const ops = {
-    EncodingAESKey: sysConfig.WXOPENAI_ENCODINGAESKEY,
-    TOKEN: sysConfig.WXOPENAI_TOKEN,
-  }
-
-  async function wxOpenAiRoutine () {
-    log.info('开始请求微信对话平台...')
-    init(ops)
+  async function chatGptRoutine (content: string) {
     try {
-      const {
-        // username,
-        // userid,
-        queryData,
-      } = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query, sysConfig)
-      const resMsg = await chatAibot(queryData)
-      log.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
-      log.info(`回答内容： ${resMsg.msgtype}, ${resMsg.query}, ${resMsg.answer}`)
-      return handleWxOpenAiResponse(resMsg)
+      const timeout = 1000 * 60
+      const api = new Api2d(sysConfig.CHATGPT_KEY, sysConfig.CHATGPT_ENDPOINT, timeout)
+      const body = prepareChatGptBody(content)
+      log.info(`body: ${JSON.stringify(body)}`)
+      const completion: any = await api.completion(body)
+      const responseMessage = completion
+      log.info(`responseMessage ${responseMessage}`)
+      return {
+        messageType: types.Message.Text,
+        text: responseMessage.choices[0].message.content,
+      }
     } catch (err) {
-      log.error(`请求微信对话平台错误： ${err}`)
+      console.error(err)
       return {}
     }
   }
 
-  answer = await wxOpenAiRoutine()
+  answer = await chatGptRoutine(query)
 
   return answer
 }
 
-function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:string, wxid:string, roomid:string, query: any, sysConfig:ProcessEnv) {
-  const username = room ? `${nickName}/${topic}` : nickName
-  const userid = room ? `${wxid}/${roomid}` : wxid
-  const signature = genToken({ userid, username })
-  let queryData:QueryData = {
-    // first_priority_skills: [],
-    query: '',
-    signature: '',
-    // second_priority_skills:[],
+function prepareChatGptBody (content: string) {
+  return {
+    model: 'gpt-3.5-turbo',
+    messages: [ { role: 'user', content } ],
+    temperature: 1,
+    n: 1,
+    stream: false,
   }
-
-  queryData = {
-    // first_priority_skills: [ '通用问题' ],
-    query,
-    signature,
-  }
-
-  return { username, userid, queryData }
-}
-
-function handleWxOpenAiResponse (resMsg: ResponseCHAT) {
-  let answer = {}
-  // 置信度大于0.8时回复，低于0.8时不回复
-  if (resMsg.msgtype && resMsg.confidence > 0.8) {
-    answer = prepareAnswerBasedOnMsgType(resMsg)
-  }
-  return answer
-}
-
-function prepareAnswerBasedOnMsgType (resMsg: any) {
-  let answer = {}
-  switch (resMsg.msgtype) {
-    case 'text':
-      answer = {
-        messageType: types.Message.Text,
-        text: resMsg.answer || resMsg.msg[0].content,
-      }
-      break
-    case 'miniprogrampage':{
-      const answerJsonMini = JSON.parse(resMsg.answer)
-      answer = {
-        messageType: types.Message.MiniProgram,
-        text: answerJsonMini.miniprogrampage,
-      }
-      break
-    }
-    case 'image':{
-      const answerJsonImage = JSON.parse(resMsg.answer)
-      answer = {
-        messageType: types.Message.Image,
-        text: answerJsonImage.image,
-      }
-      break
-    }
-    // Add other cases here as needed
-    default:
-      log.info(JSON.stringify({ msg: '没有命中关键字' }))
-  }
-  return answer
 }
 
 export {
-  wxai,
+  gpt,
   aibot,
 }
 
-export default wxai
+export default gpt
