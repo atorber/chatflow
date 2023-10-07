@@ -1,7 +1,6 @@
 /* eslint-disable sort-keys */
 import type { VikaBot } from '../db/vika-bot.js'
 import { VikaSheet, IRecord } from '../db/vika.js'
-import { log } from 'wechaty'
 
 // 服务类
 export class KeywordChat {

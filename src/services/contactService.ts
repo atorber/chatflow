@@ -2,7 +2,7 @@
 import type { VikaBot } from '../db/vika-bot.js'
 
 import { VikaSheet, IRecord } from '../db/vika.js'
-import { Contact, Wechaty, log, types } from 'wechaty'
+import { Contact, Wechaty, log } from 'wechaty'
 import { wait } from '../utils/utils.js'
 
 // import { db } from '../db/tables.js'

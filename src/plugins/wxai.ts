@@ -7,7 +7,6 @@ import {
 } from '../api/sdk/openai/index.js'
 import { FileBox } from 'file-box'
 import {
-  Contact,
   Room,
   Message,
   log,
@@ -48,8 +47,8 @@ function isValidAnswer (answer: any): boolean {
 }
 
 async function handleAnswer (answer: any, bot: Wechaty, message: Message) {
-  const talker = message.talker()
-  const room = message.room()
+  // const talker = message.talker()
+  // const room = message.room()
   switch (answer.messageType) {
     case types.Message.Text:
       await sendMessage(answer.text, bot, message)
@@ -139,7 +138,7 @@ async function aibot (sysConfig: ProcessEnv, talker: any, room: any, query: any)
         // username,
         // userid,
         queryData,
-      } = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query, sysConfig)
+      } = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query)
       const resMsg = await chatAibot(queryData)
       log.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
       log.info(`回答内容： ${resMsg.msgtype}, ${resMsg.query}, ${resMsg.answer}`)
@@ -155,7 +154,7 @@ async function aibot (sysConfig: ProcessEnv, talker: any, room: any, query: any)
   return answer
 }
 
-function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:string, wxid:string, roomid:string, query: any, sysConfig:ProcessEnv) {
+function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:string, wxid:string, roomid:string, query: any) {
   const username = room ? `${nickName}/${topic}` : nickName
   const userid = room ? `${wxid}/${roomid}` : wxid
   const signature = genToken({ userid, username })

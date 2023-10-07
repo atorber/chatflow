@@ -237,7 +237,7 @@ const adminCommands:AdminCommands = {
       return [ false, '通讯录更新失败~' ]
     }
   },
-  更新白名单: async (vikaBot:VikaBot, bot:Wechaty) => {
+  更新白名单: async (vikaBot:VikaBot, _bot:Wechaty) => {
     try {
       whiteList = await (vikaBot.services as Services).whiteListService.getWhiteList()
       return [ true, '热更新白名单~' ]
@@ -245,7 +245,7 @@ const adminCommands:AdminCommands = {
       return [ false, '白名单更新失败~' ]
     }
   },
-  更新活动: async (vikaBot:VikaBot, bot:Wechaty) => {
+  更新活动: async (vikaBot:VikaBot, _bot:Wechaty) => {
     try {
       await (vikaBot.services as Services).activityService.getStatistics()
       return [ true, '热更新活动~' ]
@@ -255,13 +255,13 @@ const adminCommands:AdminCommands = {
   },
   群发通知: async (vikaBot:VikaBot, bot:Wechaty) => {
     try {
-      const replyText = await (vikaBot.services as Services).groupNoticeService.pubGroupNotifications(bot, vikaBot, (vikaBot.services as Services).messageService)
+      const replyText = await (vikaBot.services as Services).groupNoticeService.pubGroupNotifications(bot, (vikaBot.services as Services).messageService)
       return [ true, replyText ]
     } catch (e) {
       return [ false, '群发通知失败~' ]
     }
   },
-  更新问答: async (vikaBot:VikaBot, bot:Wechaty) => {
+  更新问答: async (vikaBot:VikaBot, _bot:Wechaty) => {
     let replyText = ''
     try {
       const skills:SkillInfoArray  = await (vikaBot.services as Services).qaService.getQa()
@@ -294,7 +294,7 @@ const adminCommands:AdminCommands = {
       return [ false, '问答列表更新失败~' ]
     }
   },
-  报名活动: async (vikaBot:VikaBot, bot:Wechaty, message:Message) => {
+  报名活动: async (vikaBot:VikaBot, _bot:Wechaty, message:Message) => {
     try {
       await (vikaBot.services as Services).activityService.createOrder(message)
       return [ true, '报名成功~' ]
@@ -450,7 +450,7 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
       }
     })
 
-    bot.on('login', async (user: Contact) => {
+    bot.on('login', async (_user: Contact) => {
       // log.info('onLogin,当前登录的账号信息:\n', user.name())
 
       await updateConfig(configEnv)

@@ -1,6 +1,6 @@
 /* eslint-disable sort-keys */
 import { Contact, Message, Room, Sayable, log } from 'wechaty'
-import type { ProcessEnv, configTypes } from '../types/mod.js'
+import type { configTypes } from '../types/mod.js'
 import { EnvironmentVariables } from '../types/mod.js'
 import fs from 'fs'
 

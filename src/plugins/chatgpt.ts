@@ -2,8 +2,6 @@
 /* eslint-disable sort-keys */
 import { FileBox } from 'file-box'
 import {
-  Contact,
-  Room,
   Message,
   log,
   types,
@@ -15,11 +13,11 @@ import Api2d from 'api2d'
 
 async function gpt (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
   const text = extractKeyword(message, bot.currentUser.name())
-  const talker = message.talker()
-  const room = message.room()
+  // const talker = message.talker()
+  // const room = message.room()
   let answer: any = {}
   if (message.type() === types.Message.Text) {
-    answer = await aibot(sysConfig, talker, room, text)
+    answer = await aibot(sysConfig, text)
   }
 
   console.debug('回复消息：', JSON.stringify(answer))
@@ -43,8 +41,8 @@ function isValidAnswer (answer: any): boolean {
 }
 
 async function handleAnswer (answer: any, bot: Wechaty, message: Message) {
-  const talker = message.talker()
-  const room = message.room()
+  // const talker = message.talker()
+  // const room = message.room()
   switch (answer.messageType) {
     case types.Message.Text:
       await sendMessage(answer.text, bot, message)
@@ -106,7 +104,7 @@ async function sendMiniProgram (answer: any, bot: Wechaty, message: Message) {
 }
 
 // aibot 函数基本保持不变
-async function aibot (sysConfig: ProcessEnv, talker: any, room: any, query: any) {
+async function aibot (sysConfig: ProcessEnv, query: any) {
   let answer = {}
   log.info(`查询内容，query: ${query}`)
 
