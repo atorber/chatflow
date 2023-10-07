@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { Vika, ICreateRecordsReqParams } from '@vikadata/vika'
 import { log } from 'wechaty'
 import 'dotenv/config.js'
@@ -45,11 +44,6 @@ export abstract class BaseEntity {
    * 映射选项
    */
   protected static mappingOptions: MappingOptions
-
-  /**
-   * Axios 实例
-   */
-  protected static axios = axios
 
   recordId: string = ''
 
@@ -127,29 +121,6 @@ export abstract class BaseEntity {
   }
 
   /**
-   * 请求 Vika API
-   */
-  protected static async request (
-    method: 'get' | 'post' | 'put' | 'delete',
-    url: string,
-    data?: any,
-  ) {
-    try {
-      const response = await this.axios({
-        data,
-        headers: {
-          Authorization: `Bearer ${this.vikaOptions?.apiKey}`,
-        },
-        method,
-        url,
-      })
-      return response.data.data
-    } catch (error) {
-      throw new Error((error as Error).message)
-    }
-  }
-
-  /**
    * 创建记录
    */
   static async create<T extends BaseEntity> (entity: Partial<T>) {
@@ -163,6 +134,27 @@ export abstract class BaseEntity {
       return this.createFromRecord(record) as T
     } catch (err) {
       throw Error('create fail')
+    }
+  }
+
+  /**
+   * 批量创建记录
+   */
+  static async createBatch<T extends BaseEntity> (entity: Partial<T>[]) {
+    // log.info('写入维格表:', records.length)
+    const recordsNew:ICreateRecordsReqParams = entity.map((r: any) => { return { fields:this.formatData(r) } })
+    try {
+      const res = await this.datasheet.records.create(recordsNew)
+      if (res.success) {
+        // log.info(res.data.records)
+      } else {
+        log.error('记录写入维格表失败：', res)
+      }
+      const records = res.data.records.map((r: any) => this.createFromRecord(r))
+      return records
+    } catch (err) {
+      log.error('请求维格表写入失败：', err)
+      return err
     }
   }
 
@@ -193,6 +185,17 @@ export abstract class BaseEntity {
    */
   static async delete (id: string) {
     const response = await this.datasheet.records.delete([ id ])
+    if (!response.success) {
+      log.error('删除记录失败：', response)
+    }
+    return response
+  }
+
+  /**
+   * 批量删除记录
+   */
+  static async deleteBatch (ids: string[]) {
+    const response = await this.datasheet.records.delete(ids)
     if (!response.success) {
       log.error('删除记录失败：', response)
     }
