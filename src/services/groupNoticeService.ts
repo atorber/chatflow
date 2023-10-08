@@ -88,7 +88,7 @@ export class GroupNoticeChat {
     }
   }
 
-  async pubGroupNotifications (bot: Wechaty, isVikaOk: any, messageService: { onMessage: (arg0: Message) => any }) {
+  async pubGroupNotifications (bot: Wechaty, messageService: { onMessage: (arg0: Message) => any }) {
     const groupNotifications = await this.getGroupNotifications()
     const resPub: any[] = []
     const failRoom: any[] = []
@@ -103,7 +103,7 @@ export class GroupNoticeChat {
         const room = await getRoom(bot, notice.room as BusinessRoom)
         if (room) {
           try {
-            await sendMsg(room, notice.text, isVikaOk, messageService)
+            await sendMsg(room, notice.text, messageService)
             await wait(generateRandomNumber(200))
             resPub.push({
               recordId: notice.recordId,
@@ -144,7 +144,7 @@ export class GroupNoticeChat {
         const contact = await getContact(bot, notice.contact as BusinessUser)
         if (contact) {
           try {
-            await sendMsg(contact, notice.text, isVikaOk, messageService)
+            await sendMsg(contact, notice.text, messageService)
             await wait(generateRandomNumber(200))
             resPub.push({
               recordId: notice.recordId,

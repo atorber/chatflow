@@ -1,6 +1,6 @@
 /* eslint-disable sort-keys */
 import { Contact, Message, Room, Sayable, log } from 'wechaty'
-import type { ProcessEnv, configTypes } from '../types/mod.js'
+import type { configTypes } from '../types/mod.js'
 import { EnvironmentVariables } from '../types/mod.js'
 import fs from 'fs'
 
@@ -9,9 +9,7 @@ const config: configTypes.Config = {
   functionOnStatus: {
     autoQa: {
       autoReply: process.env[EnvironmentVariables.AUTOQA_AUTOREPLY] === 'true',
-      atReply: process.env[EnvironmentVariables.AUTOQA_ATREPLY] === 'true',
-      roomWhitelist: process.env[EnvironmentVariables.AUTOQA_ROOMWHITELIST] === 'true' || true,
-      contactWhitelist: process.env[EnvironmentVariables.AUTOQA_CONTACTWHITELIST] === 'true' || true,
+      atReply: false,
     },
     vika: {
       useVika: process.env[EnvironmentVariables.VIKA_USEVIKA] === 'true',
@@ -48,7 +46,7 @@ const config: configTypes.Config = {
       adminRoomTopic: process.env[EnvironmentVariables.ADMINROOM_ADMINROOMTOPIC] || '',
     },
     autoQa: {
-      type: process.env[EnvironmentVariables.AUTOQA_TYPE] || '',
+      type: '',
     },
     wxOpenAi: {
       token: process.env[EnvironmentVariables.WXOPENAI_TOKEN] || '',

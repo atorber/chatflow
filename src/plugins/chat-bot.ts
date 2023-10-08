@@ -130,11 +130,11 @@ async function aibot (sysConfig: configTypes.Config, talker: any, room: any, que
     log.info('开始请求微信对话平台...')
     init(ops)
     try {
-      const { username, userid, queryData } = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query, sysConfig)
+      const { username, userid, queryData } = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query)
       log.info('username, userid', { username, userid })
       const resMsg = await chatAibot(queryData)
       log.info(`回答内容： ${resMsg.msgtype}, ${resMsg.query}, ${resMsg.answer}`)
-      return handleWxOpenAiResponse(resMsg, sysConfig, topic, room)
+      return handleWxOpenAiResponse(resMsg)
     } catch (err) {
       log.error(`请求微信对话平台错误： ${err}`)
       return {}
@@ -174,7 +174,7 @@ async function aibot (sysConfig: configTypes.Config, talker: any, room: any, que
   return answer
 }
 
-function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:string, wxid:string, roomid:string, query: any, sysConfig:configTypes.Config) {
+function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:string, wxid:string, roomid:string, query: any) {
   const username = room ? `${nickName}/${topic}` : nickName
   const userid = room ? `${wxid}/${roomid}` : wxid
   const signature = genToken({ userid, username })
@@ -194,7 +194,7 @@ function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:stri
   return { username, userid, queryData }
 }
 
-function handleWxOpenAiResponse (resMsg: ResponseCHAT, sysConfig: configTypes.Config, topic: string, room: Room|undefined) {
+function handleWxOpenAiResponse (resMsg: ResponseCHAT) {
   let answer = {}
   if (resMsg.msgtype && resMsg.confidence > 0.8) {
     answer = prepareAnswerBasedOnMsgType(resMsg)

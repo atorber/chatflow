@@ -9,7 +9,7 @@ import {
 import { config } from '../src/services/configService.js'
 
 // import { StoreByVika } from './plugins/basic-data-storage-for-vika.js'
-import { ChatFlow } from '../src/chatflow.js'
+// import { ChatFlow } from '../src/chatflow.js'
 
 // 配置机器人
 function getBotOps (puppet:string, token:string) {
@@ -42,7 +42,7 @@ function getBotOps (puppet:string, token:string) {
 const ops = getBotOps(config.botConfig.wechaty.puppet, config.botConfig.wechaty.token)
 const bot = WechatyBuilder.build(ops)
 
-bot.use(ChatFlow(config))
+// bot.use(ChatFlow(config))
 
 bot.start()
   .then(() => log.info('Starter Bot Started.'))

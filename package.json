@@ -1,6 +1,6 @@
 {
   "name": "chatflow",
-  "version": "2.0.21",
+  "version": "2.0.23",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
@@ -22,6 +22,7 @@
     "clean": "shx rm -fr dist/*",
     "dist": "npm-run-all clean build dist:commonjs",
     "dist:commonjs": "jq -n \"{ type: \\\"commonjs\\\" }\" > dist/cjs/package.json",
+    "test-vika-orm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/vika-orm-test.ts",
     "test": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/test.ts",
     "start:index": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
     "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/bot.ts",
@@ -51,6 +52,7 @@
     "@yuque/sdk": "^1.1.1",
     "api2d": "^0.1.23",
     "axios": "^1.4.0",
+    "axios-retry": "^3.8.0",
     "boxen": "^7.1.1",
     "chatgpt": "^1.4.0",
     "dotenv": "^16.0.0",
