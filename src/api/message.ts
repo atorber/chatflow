@@ -4,6 +4,7 @@ import type {
 } from 'wechaty'
 
 import { db } from '../db/tables.js'
+import { formatTimestamp } from '../utils/utils.js'
 const messageData = db.message
 
 export const addMessage = async (message: Message) => {
@@ -15,13 +16,15 @@ export const addMessage = async (message: Message) => {
     roomJson = JSON.parse(JSON.stringify(room))
     delete roomJson.payload.memberIdList
   }
-
+  const timestamp = message.payload?.timestamp ? (message.payload.timestamp * 1000) : new Date().getTime()
   const messageNew = {
     _id: message.id,
     data: message,
     listener:listener ?? undefined,
     room:roomJson,
     talker,
+    time:formatTimestamp(timestamp)[5],
+    timestamp,
   }
   // log.info('addMessage messageNew:', JSON.stringify(messageNew))
   try {

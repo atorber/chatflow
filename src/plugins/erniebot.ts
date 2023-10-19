@@ -8,10 +8,59 @@ import {
   Wechaty,
 } from 'wechaty'
 import { formatSentMessage } from '../utils/utils.js'
-import type { ProcessEnv } from '../types/mod.js'
+import type { ProcessEnv, SysConfig } from '../types/mod.js'
 import Api2d from 'api2d'
+import axios from 'axios'
 
-async function gpt (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
+/**
+ * 使用 AK，SK 生成鉴权签名（Access Token）
+ * @return string 鉴权签名信息（Access Token）
+ */
+async function getAccessToken (sysConfig:ProcessEnv) {
+  const AK = sysConfig.ERNIE_AK
+  const SK = sysConfig.ERNIE_SK
+  const options = {
+    method: 'POST',
+    url: 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + AK + '&client_secret=' + SK,
+  }
+  const apiUrl = options.url
+  const payload = {}
+
+  try {
+    const response = await axios.post(apiUrl, payload)
+    log.info('access_token:', JSON.stringify(response.data))
+    return response.data.access_token
+  } catch (error) {
+    console.error(error)
+    return  undefined
+  }
+}
+
+async function getFormattedRideInfo (message:Message) {
+  let text: string = message.text()
+  const name:string = message.talker().name()
+  const apiUrl = 'https://openai.api2d.net/v1/chat/completions'
+  const headers = {
+    Authorization: 'Bearer xxxx', // <-- 把 fkxxxxx 替换成你自己的 Forward Key，注意前面的 Bearer 要保留，并且和 Key 中间有一个空格。
+    'Content-Type': 'application/json',
+  }
+  text = `从"发布人：${name}\n信息：${text}"中提取出:类型（人找车、车找人）、出发地、目的地、出发日期、出发时间、联系电话、发布人、车费、途经路线,不要输出任何其他的描述`
+  const payload = {
+    messages: [ { content: text, role: 'user' } ],
+    model: 'gpt-3.5-turbo',
+  }
+
+  try {
+    const response = await axios.post(apiUrl, payload, { headers })
+    log.info('顺风车信息检测结果：', JSON.stringify(response.data))
+    return response.data
+  } catch (error) {
+    console.error(error)
+    return  undefined
+  }
+}
+
+async function ernie (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
   const text = extractKeyword(message, bot.currentUser.name())
   // const talker = message.talker()
   // const room = message.room()
@@ -103,38 +152,48 @@ async function sendMiniProgram (answer: any, bot: Wechaty, message: Message) {
   }
 }
 
-// aibot 函数基本保持不变
-async function aibot (sysConfig: ProcessEnv, query: any) {
-  let answer = {
+async function chatGptRoutine (sysConfig:ProcessEnv, query: string) {
+  const answer = {
     text:'',
   }
-  log.info(`查询内容，query: ${query}`)
+  try {
 
-  async function chatGptRoutine (content: string) {
-    try {
-      const timeout = 1000 * 60
-      const api = new Api2d(sysConfig.CHATGPT_KEY, sysConfig.CHATGPT_ENDPOINT, timeout)
-      const body = prepareChatGptBody(content)
-      log.info(`body: ${JSON.stringify(body)}`)
-      const completion: any = await api.completion(body)
-      const responseMessage = completion
-      log.info('gptbot responseMessage:\n', JSON.stringify(responseMessage))
-      if (responseMessage.choices) {
-        return {
-          messageType: types.Message.Text,
-          text: responseMessage.choices[0].message.content,
-        }
-      } else {
-        return answer
+    const options = {
+      method: 'POST',
+      url: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro?access_token=' + await getAccessToken(sysConfig),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: [
+          { role:'user', content: query },
+        ],
+      }),
+    }
+    const responseMessage = await axios.post(options.url, options.body, { headers:options.headers })
+    console.log(responseMessage.data)
+    log.info('gptbot responseMessage:\n', JSON.stringify(responseMessage))
+
+    if (responseMessage.data.result) {
+      return {
+        messageType: types.Message.Text,
+        text: responseMessage.data.result,
       }
-
-    } catch (err) {
-      console.error(err)
+    } else {
       return answer
     }
-  }
 
-  answer = await chatGptRoutine(query)
+  } catch (err) {
+    console.error(err)
+    return answer
+  }
+}
+
+// aibot 函数基本保持不变
+async function aibot (sysConfig: ProcessEnv, query: any) {
+  log.info(`查询内容，query: ${query}`)
+
+  const answer = await chatGptRoutine(sysConfig, query)
 
   return answer
 }
@@ -150,8 +209,8 @@ function prepareChatGptBody (content: string) {
 }
 
 export {
-  gpt,
+  ernie,
   aibot,
 }
 
-export default gpt
+export default ernie

@@ -14,6 +14,9 @@ export enum EnvironmentVariables {
     WXOPENAI_ENCODINGAESKEY = 'WXOPENAI_ENCODINGAESKEY',
     CHATGPT_KEY = 'CHATGPT_KEY',
     CHATGPT_ENDPOINT = 'CHATGPT_ENDPOINT',
+    CHATGPT_MODEL='CHATGPT_MODEL',
+    ERNIE_AK='ERNIE_AK',
+    ERNIE_SK='ERNIE_SK',
     MQTT_USERNAME = 'MQTT_USERNAME',
     MQTT_PASSWORD = 'MQTT_PASSWORD',
     MQTT_ENDPOINT = 'MQTT_ENDPOINT',
@@ -59,6 +62,11 @@ export interface ProcessEnv {
     // ChatGPT
     CHATGPT_KEY: string;
     CHATGPT_ENDPOINT: string;
+    CHATGPT_MODEL:string;
+
+    // ERNIE
+    ERNIE_AK:string;
+    ERNIE_SK:string;
 
     // MQTT配置
     MQTT_USERNAME: string;

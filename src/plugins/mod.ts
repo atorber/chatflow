@@ -1,4 +1,4 @@
-import { gpt } from './chatgpt.js'
+import { gpt, aibot as gptbot } from './chatgpt.js'
 import { wxai } from './wxai.js'
 
 import { sendNotice } from './group-notice.js'
@@ -28,6 +28,7 @@ export {
   sendNotice,
   wxai,
   gpt,
+  gptbot,
   ChatDevice,
   propertyMessage,
   eventMessage,

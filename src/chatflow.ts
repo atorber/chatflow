@@ -18,6 +18,7 @@ import {
   sendNotice,
   wxai,
   gpt,
+  gptbot,
   ChatDevice,
   propertyMessage,
   eventMessage,
@@ -58,8 +59,9 @@ import {
 } from './services/mod.js'
 import { WxOpenaiBot, type WxOpenaiBotConfig, type SkillInfoArray } from './services/wxopenaiService.js'
 import type { ContactWhiteList, ProcessEnv, RoomWhiteList, ChatMessage } from './types/mod.js'
-import { spawn } from 'child_process'
+// import { spawn } from 'child_process'
 import type { VikaBot } from './db/vika-bot.js'
+import { time } from 'console'
 
 // log.info('初始化配置文件信息:\n', JSON.stringify(config, undefined, 2), '================')
 // log.info('process.env', JSON.stringify(process.env))
@@ -156,6 +158,7 @@ const onReadyOrLogin = async (bot: Wechaty, vikaBot:VikaBot) => {
 
   const user: Contact = bot.currentUser
   log.info('当前登录的账号信息:', user.name())
+
   if (!configEnv.VIKA_SPACE_NAME || !configEnv.VIKA_TOKEN) {
     log.error('维格表配置不全，.env文件或环境变量中设置的token和spaceName之后重启')
     return
@@ -189,15 +192,14 @@ function displayQRCodeInConsole (qrcode: string, status: ScanStatus) {
   qrcodeTerminal.generate(qrcode, { small: true })  // 在控制台显示二维码
 }
 
-// 监听进程退出事件
-process.on('exit', (code) => {
-  if (code === 1) {
-    // 重新启动程序
-    spawn('npm', [ 'run', 'start' ], {
-      stdio: 'inherit',
-    })
-  }
-})
+// 监听进程退出事件，重新启动程序
+// process.on('exit', (code) => {
+//   if (code === 1) {
+//     spawn('npm', [ 'run', 'start' ], {
+//       stdio: 'inherit',
+//     })
+//   }
+// })
 
 // 封装成一个函数来处理错误和成功的消息发送
 async function sendReplyMessage (vikaBot:VikaBot, message:Message, success: boolean, successMsg: string, errorMsg: string) {
@@ -426,6 +428,57 @@ async function handleAutoQAForContact (bot:Wechaty, message:Message, keyWord:str
   }
 }
 
+const extractAtContent = async (vikaBot:VikaBot, message:Message, keyword: string, text: string): Promise<string | null> => {
+  const startTag = '「'
+  const endTag = '」\n'
+  let newText = ''
+  // 判断信息中是否是引用消息
+  const startIndex = text.indexOf(startTag) + startTag.length
+  const endIndex = text.indexOf(endTag, startIndex)
+
+  // 提取「和 」之间的内容
+  if (startIndex !== -1 && endIndex !== -1) {
+    newText = `@${keyword}` + text.substring(startIndex, endIndex)
+    log.info('提取到的内容：', newText)
+  } else {
+    log.info('未提取到内容：', text)
+    newText = text
+  }
+
+  const query = { 'room.payload.id': message.room()?.id }
+  const messageList = await vikaBot.services?.messageService.messageData
+    .sort({ timestamp:-1 })
+    .limit(0, 500)
+    .find(query)
+
+  log.info('查询到的messageList长度:', messageList.length)
+
+  // TBD将消息转换为提示词
+  const style = '详细、严谨、像真人一样表达'
+  const role = '【电影大话西游里的唐三藏】'
+  let p = `以下是一个群组的聊天记录，你将以“${keyword}”的身份作为群聊中的一员参与聊天。你的回复必须结合聊天历史记录和你的知识给出尽可能${style}的回答，回复字数不超过150字，并且听起来语气口吻像${role}。\n\n`
+  const time = new Date().toUTCString()
+  let chatText = ''
+  for (const i in messageList) {
+    const item = messageList[i]
+    if (p.length < 5000 && item.data.payload.type === 7 && item.talker.payload.name !== keyword) {
+      chatText = `[${item.time || time} ${item.talker.payload.name}]:${item.data.payload.text}\n` + chatText
+    }
+  }
+  chatText = chatText + `[${time} ${message.talker().name()}]：${newText}\n`
+  chatText = chatText + `[${time} ${keyword}]：`
+
+  p = p + chatText
+
+  log.info('提示词：', p)
+  const answer = await gptbot(process.env, p)
+
+  if (answer.text && answer.text.length > 0) {
+    await message.say(answer.text)
+  }
+  return null
+}
+
 export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
   logForm('开始启动，启动过程需要30秒到1分钟，请等待系统初始化...')
   const welcomeList:any = []
@@ -453,6 +506,8 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
     bot.on('login', async (_user: Contact) => {
       // log.info('onLogin,当前登录的账号信息:\n', user.name())
 
+      await wait(3000)
+
       await updateConfig(configEnv)
 
       if ([ 'wechaty-puppet-xp' ].includes(configEnv.WECHATY_PUPPET)) await onReadyOrLogin(bot, vikaBot)
@@ -461,6 +516,7 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
     bot.on('ready', async () => {
       // const user: Contact = bot.currentUser
       // log.info('onReady,当前登录的账号信息:\n', user.name())
+      await wait(3000)
       await updateConfig(configEnv)
 
       if (![ 'wechaty-puppet-xp' ].includes(configEnv.WECHATY_PUPPET)) await onReadyOrLogin(bot, vikaBot)
@@ -549,6 +605,9 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
         if (!isSelf) {
           await handleAutoQA(bot, message, keyWord)
           await handleActivityManagement(vikaBot, message)
+          if (text.indexOf(`@${keyWord}`) !== -1) {
+            await extractAtContent(vikaBot, message, keyWord, text)
+          }
         }
         await handleAdminRoomSetting(vikaBot, message)
       }

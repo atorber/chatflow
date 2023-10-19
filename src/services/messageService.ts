@@ -7,8 +7,8 @@ import { getCurTime, waitForMs as wait } from '../utils/utils.js'
 import moment from 'moment'
 import { FileBox } from 'file-box'
 
-// import { db } from '../db/tables.js'
-// const messageData = db.message
+import { db } from '../db/tables.js'
+const messageData = db.message
 
 const MEDIA_PATH = 'data/media/image/'
 
@@ -35,11 +35,13 @@ export class MessageChat {
   private db:VikaSheet
   vikaBot: VikaBot
   msgStore!: any[]
+  messageData: any
 
   constructor (vikaBot:VikaBot) {
     this.vikaBot = vikaBot
     this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.messageSheet)
     this.msgStore = []
+    this.messageData = messageData
     void this.init()
   }
 
