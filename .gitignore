@@ -126,3 +126,4 @@ data/table/*.xlsx
 data/table/*.csv
 data/media/image/*
 data/*.json
+.env-*

@@ -455,8 +455,10 @@ const extractAtContent = async (vikaBot:VikaBot, message:Message, keyword: strin
 
   // TBD将消息转换为提示词
   const style = '详细、严谨、像真人一样表达'
-  const role = '【电影大话西游里的唐三藏】'
-  let p = `以下是一个群组的聊天记录，你将以“${keyword}”的身份作为群聊中的一员参与聊天。你的回复必须结合聊天历史记录和你的知识给出尽可能${style}的回答，回复字数不超过150字，并且听起来语气口吻像${role}。\n\n`
+  // const role = '【电影大话西游里的唐三藏】'
+  const role = '智能助理'
+
+  let p = `以下是一个群组的聊天记录，你将以“${keyword}”的身份作为群聊中的一员参与聊天。你的回复必须结合聊天历史记录和你的知识给出尽可能${style}的回答，回复字数不超过150字，并且听起来语气口吻像${role}的风格。\n\n`
   const time = new Date().toUTCString()
   let chatText = ''
   for (const i in messageList) {
@@ -475,6 +477,8 @@ const extractAtContent = async (vikaBot:VikaBot, message:Message, keyword: strin
 
   if (answer.text && answer.text.length > 0) {
     await message.say(answer.text)
+  } else {
+    await message.say(`${keyword}走神了，再问一次吧~`)
   }
   return null
 }
