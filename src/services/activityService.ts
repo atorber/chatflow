@@ -1,7 +1,7 @@
 /* eslint-disable sort-keys */
-import { Room, Contact, Message, Wechaty, log } from 'wechaty'
+import type { Room, Contact, Message, Wechaty } from 'wechaty'
 import { v4 } from 'uuid'
-import { formatTimestamp, getCurTime } from '../utils/utils.js'
+import { formatTimestamp, getCurTime, logger } from '../utils/utils.js'
 import moment from 'moment'
 import type { VikaBot } from '../db/vika-bot.js'
 import { VikaSheet } from '../db/vika.js'
@@ -96,8 +96,8 @@ export class ActivityChat {
   // 获取维格表中的活动
   async getAct () {
     const records = await this.db.findAll()
-    // log.info(JSON.stringify(this.vikaBot.dataBaseIds, undefined, 2))
-    // log.info('维格表中的活动记录：', JSON.stringify(records))
+    // logger.info(JSON.stringify(this.vikaBot.dataBaseIds, undefined, 2))
+    // logger.info('维格表中的活动记录：' + JSON.stringify(records))
     return records
   }
 
@@ -118,20 +118,20 @@ export class ActivityChat {
       }
     }
 
-    log.info('维格表中的有效活动：', JSON.stringify(activitiesVika))
+    logger.info('维格表中的有效活动：' + JSON.stringify(activitiesVika))
 
     const activitiesDb = await this.getActivityList()
-    log.info('DB中的活动：', JSON.stringify(activitiesDb))
+    logger.info('DB中的活动：' + JSON.stringify(activitiesDb))
 
     const { addArray, removeArray } = findArrayDifferences(activitiesVika, activitiesDb)
-    log.info('新增：', JSON.stringify(addArray))
-    log.info('移除：', JSON.stringify(removeArray))
+    logger.info('新增：' + JSON.stringify(addArray))
+    logger.info('移除：' + JSON.stringify(removeArray))
 
     for (const statistics of addArray) {
       try {
         await this.addActivity(statistics)
       } catch (e) {
-        log.error('写入活动失败：', e)
+        logger.error('写入活动失败：', e)
       }
     }
 
@@ -139,7 +139,7 @@ export class ActivityChat {
       try {
         await this.removeAtivity(statistics._id)
       } catch (e) {
-        log.error('删除活动失败：', e)
+        logger.error('删除活动失败：', e)
       }
     }
 
@@ -148,11 +148,11 @@ export class ActivityChat {
         await this.updateAtivity(statistics._id, statistics)
 
       } catch (e) {
-        log.error('更新活动失败：', e)
+        logger.error('更新活动失败：', e)
       }
     }
 
-    log.info('更新活动：', activitiesVika.length)
+    logger.info('更新活动：' + activitiesVika.length)
 
     return statisticsRecords
   }
@@ -177,14 +177,14 @@ export class ActivityChat {
       },
     ]
 
-    log.info('订单消息:', records)
+    logger.info('订单消息:' + records)
     const datasheet = new VikaSheet(this.vikaBot.vika, this.vikaBot.dataBaseIds.orderSheet)
     datasheet.records.create(records).then((response: { success: any }) => {
       if (!response.success) {
-        log.error('创建订单，写入vika失败：', JSON.stringify(response))
+        logger.error('创建订单，写入vika失败：' + JSON.stringify(response))
       }
       return response
-    }).catch((err: any) => { log.error('创建订单，vika写入接口失败：', err) })
+    }).catch((err: any) => { logger.error('创建订单，vika写入接口失败：', err) })
   }
 
   getHelpText () {
@@ -306,7 +306,7 @@ export class ActivityChat {
       activityList = await activityData.find(query)
     }
 
-    // log.info('获取活动列表：======================\n', JSON.stringify(activityList));
+    // logger.info('获取活动列表：======================\n' + JSON.stringify(activityList));
     return activityList
   };
 
@@ -345,7 +345,7 @@ export class ActivityChat {
 
     const latestActivity = await activityData.findOne({ $or:query })
 
-    // log.info('获取最新活动：======================\n', JSON.stringify(latestActivity));
+    // logger.info('获取最新活动：======================\n' + JSON.stringify(latestActivity));
 
     return latestActivity || {}
   };
@@ -634,7 +634,7 @@ export class ActivityChat {
 
     const orders = await orderData.find({ $or: query })
 
-    log.info('用户的订单：', JSON.stringify(orders))
+    logger.info('用户的订单：' + JSON.stringify(orders))
 
     return orders
   };
@@ -792,10 +792,10 @@ export const activityController = async (vikaBot:VikaBot, message: Message, room
   }
 
   // req = generateResponseMessage('Text', msg, roomid, wxid)
-  // log.info('req===========================', JSON.stringify(req))
+  // logger.info('req===========================' + JSON.stringify(req))
 
   if (msg) {
-    // log.info('活动操作结果：\n', msg)
+    // logger.info('活动操作结果：\n' + msg)
     await message.say(msg)
   }
 }

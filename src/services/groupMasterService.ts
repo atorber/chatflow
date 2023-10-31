@@ -4,13 +4,11 @@ import {
   Contact,
   Message,
   Wechaty,
-  log,
-  ScanStatus,
   WechatyBuilder,
 } from 'wechaty'
 import 'dotenv/config.js'
 
-import qrcodeTerminal from 'qrcode-terminal'
+import { logger } from '../utils/mod.js'
 
 import { FileBox } from 'file-box'
 import mqtt from 'mqtt'
@@ -37,20 +35,20 @@ const extractAtContent = (keyword: string, message: string): string | null => {
 
   // 判断信息中是否包含关键字
   if (message.trim().endsWith(`${keyword}`)) {
-    log.info('包含关键字：', keyword)
+    logger.info('包含关键字：', keyword)
     const startIndex = message.indexOf(startTag) + startTag.length
     const endIndex = message.indexOf(endTag, startIndex)
 
     // 提取「和 」之间的内容
     if (startIndex !== -1 && endIndex !== -1) {
       const newText = message.substring(startIndex, endIndex)
-      log.info('提取到的内容：', newText)
+      logger.info('提取到的内容：', newText)
       return newText
     } else {
-      log.info('未提取到内容：', message)
+      logger.info('未提取到内容：', message)
     }
   } else {
-    log.info('不包含关键字：', keyword)
+    logger.info('不包含关键字：', keyword)
   }
 
   return null
@@ -64,14 +62,14 @@ const commandInvoke = `thing/${productKey}/${wxKey}/command/invoke`
 const msgStore:any = {}
 const reqStore:any = []
 const timerId:any = setInterval(() => {
-  // log.info('待处理消息池长度：', reqStore.length||0);
+  // logger.info('待处理消息池长度：', reqStore.length||0);
   if (reqStore.length) {
-    log.info('待处理消息池长度：', reqStore.length || 0)
+    logger.info('待处理消息池长度：', reqStore.length || 0)
     const req = reqStore.splice(0, 1)
     try {
       pubMsg(req)
         .catch(e => {
-          log.error('e', e)
+          logger.error('e', e)
         })
     } catch (err) {
       console.error('调用API服务失败：', err)
@@ -123,8 +121,8 @@ async function sendAt (bot: Wechaty, params: any) {
 }
 
 async function send (bot: Wechaty, params: any) {
-  log.info(typeof (params))
-  log.info(params)
+  logger.info(typeof (params))
+  logger.info(params)
 
   let msg: any = ''
   if (params.messageType === 'Text') {
@@ -163,7 +161,7 @@ async function send (bot: Wechaty, params: any) {
   } */
     const contactCard = await bot.Contact.find({ id: params.messagePayload })
     if (!contactCard) {
-      log.info('not found')
+      logger.info('not found')
       return {
         msg: '无此联系人',
       }
@@ -275,7 +273,7 @@ async function send (bot: Wechaty, params: any) {
 
   for (let i = 0; i < toContacts.length; i++) {
     if (toContacts[i].split('@').length === 2) {
-      log.info(`向群${toContacts[i]}发消息`)
+      logger.info(`向群${toContacts[i]}发消息`)
       const room = await bot.Room.find({ id: toContacts[i] })
       if (room) {
         try {
@@ -285,7 +283,7 @@ async function send (bot: Wechaty, params: any) {
         }
       }
     } else {
-      log.info(`好友${toContacts[i]}发消息`)
+      logger.info(`好友${toContacts[i]}发消息`)
       const contact = await bot.Contact.find({ id: toContacts[i] })
       if (contact) {
         try {
@@ -310,7 +308,7 @@ function getEventsMsg (eventName: any, msg: any) {
     events,
   }
   payload = JSON.stringify(payload)
-  // log.info(eventName)
+  // logger.info(eventName)
   // print(eventName, payload)
   return payload
 }
@@ -334,15 +332,15 @@ async function pubMsg (datasJsonStr: string) {
           await doSay(bot, response.data)
         }
 
-        log.info('Response:', response.data)
+        logger.info('Response:', response.data)
       } catch (error) {
         console.error('Error:', error)
       }
 
       // request(encodeURI(url), function (error, response, body) {
       //   console.error('error:', error); // Print the error if one occurred
-      //   log.info('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-      //   // log.info('body:', JSON.parse(body)); // Print the HTML for the Google homepage.
+      //   logger.info('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+      //   // logger.info('body:', JSON.parse(body)); // Print the HTML for the Google homepage.
       //   // if (JSON.parse(body).data && JSON.parse(body).data.content) {
 
       //   //   // 小程序返回的活动报名信息发送到群
@@ -389,7 +387,7 @@ function isOverRun (body: any) {
 
 async function doSay (bot: Wechaty, messageJson: any) {
   const obj = messageJson.params
-  log.info(messageJson, obj)
+  logger.info(messageJson, obj)
   let curTo: any = ''
 
   if (obj.wxKey === wxKey && obj.roomid) {
@@ -446,7 +444,7 @@ async function doSay (bot: Wechaty, messageJson: any) {
           atUserList.push(curContact)
         }
       }
-      log.info('atUserList===============================', atUserList)
+      logger.info('atUserList===============================', atUserList)
       await curTo.say(obj.msg, ...atUserList)
     } else {
       await curTo.say(obj.msg || 'dingdingding')
@@ -469,7 +467,7 @@ async function doSay (bot: Wechaty, messageJson: any) {
     // }
     const contactCard = await bot.Contact.find({ id: obj.msg || 'tyutluyc' })
     if (!contactCard) {
-      log.info('not found')
+      logger.info('not found')
       return
     }
     await curTo.say(contactCard)
@@ -507,7 +505,7 @@ async function doSay (bot: Wechaty, messageJson: any) {
     // 5. send MiniProgram (only supported by `wechaty-puppet-macpro`)
     if (obj.wxid && obj.roomid) {
       const miniProgramPayload = obj.msg
-      log.info(miniProgramPayload)
+      logger.info(miniProgramPayload)
       const miniProgram = new bot.MiniProgram(miniProgramPayload)
       await curTo.say(miniProgram)
     } else {
@@ -515,7 +513,7 @@ async function doSay (bot: Wechaty, messageJson: any) {
     }
 
   } else {
-    log.info('不支持的消息类型')
+    logger.info('不支持的消息类型')
   }
 }
 
@@ -642,7 +640,7 @@ export async function handleMessage (message:Message) {
     member,
     create_time: new Date().getTime(),
   }
-  // log.info(payload)
+  // logger.info(payload)
   payload = JSON.stringify(payload)
   print('payload', payload)
 
@@ -660,7 +658,7 @@ export async function handleMessage (message:Message) {
     // pubMsg(reqMsg)
     reqStore.push(reqMsg)
   } else {
-    log.info('self message .......')
+    logger.info('self message .......')
   }
 
   // 1. send Image
@@ -687,7 +685,7 @@ export async function handleMessage (message:Message) {
   if (/^联系超哥$/i.test(message.text())) {
     const contactCard = await bot.Contact.find({ name: 'luyuchao' })
     if (!contactCard) {
-      log.info('not found')
+      logger.info('not found')
       return
     }
     await message.say(contactCard)
@@ -736,18 +734,18 @@ export async function updateContact (bot:Wechaty) {
   if (contactList.length > 0) {
     for (let i = 0; i < contactList.length; i++) {
       if (contactList[i]?.friend()) {
-        // log.info(contactList[i])
+        // logger.info(contactList[i])
         friendContactList.push(contactList[i])
       } else {
-        // log.info(contactList[i].id)
+        // logger.info(contactList[i].id)
         unfriendContactList.push(contactList[i])
       }
     }
   }
 
-  // log.info(unfriendContactList)
+  // logger.info(unfriendContactList)
 
-  log.info('list:', friendContactList.length, unfriendContactList.length)
+  logger.info('list:', friendContactList.length, unfriendContactList.length)
 
   const roomList = await bot.Room.findAll()
   const userSelf = bot.ContactSelf
@@ -768,12 +766,12 @@ const mqttclient = mqtt.connect(`mqtt://${instanceId}.iot.gz.baidubce.com:1883`,
 })
 
 mqttclient.on('connect', function () {
-  log.info('connect------------------------------------------------')
+  logger.info('connect------------------------------------------------')
   mqttclient.subscribe(commandInvoke, function (err:any) {
     if (err) {
-      log.info(err)
+      logger.info(err)
     } else {
-      log.info(commandInvoke)
+      logger.info(commandInvoke)
 
     }
   })
@@ -781,10 +779,10 @@ mqttclient.on('connect', function () {
 
 mqttclient.on('message', (topic: string, message: Buffer) => {
   (async () => {
-    log.info('message', '------------------------------------------------')
+    logger.info('message', '------------------------------------------------')
     try {
       const messageJson = JSON.parse(message.toString())
-      // log.info(messageJson)
+      // logger.info(messageJson)
       if (messageJson.params.wxid || messageJson.params.roomid) {
         await doSay(bot, messageJson)
       }
@@ -795,9 +793,9 @@ mqttclient.on('message', (topic: string, message: Buffer) => {
         await sendAt(bot, messageJson.params)
       }
     } catch (err) {
-      log.error('err:', err)
+      logger.error('err:', err)
     }
   })().catch(err => {
-    log.error('Unhandled error:', err)
+    logger.error('Unhandled error:', err)
   })
 })

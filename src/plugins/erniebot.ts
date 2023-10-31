@@ -3,13 +3,11 @@
 import { FileBox } from 'file-box'
 import {
   Message,
-  log,
   types,
   Wechaty,
 } from 'wechaty'
-import { formatSentMessage } from '../utils/utils.js'
-import type { ProcessEnv, SysConfig } from '../types/mod.js'
-import Api2d from 'api2d'
+import { formatSentMessage, logger } from '../utils/utils.js'
+import type { ProcessEnv } from '../types/mod.js'
 import axios from 'axios'
 
 /**
@@ -28,7 +26,7 @@ async function getAccessToken (sysConfig:ProcessEnv) {
 
   try {
     const response = await axios.post(apiUrl, payload)
-    log.info('access_token:', JSON.stringify(response.data))
+    logger.info('access_token:', JSON.stringify(response.data))
     return response.data.access_token
   } catch (error) {
     console.error(error)
@@ -36,7 +34,7 @@ async function getAccessToken (sysConfig:ProcessEnv) {
   }
 }
 
-async function getFormattedRideInfo (message:Message) {
+ export async function getFormattedRideInfo (message:Message) {
   let text: string = message.text()
   const name:string = message.talker().name()
   const apiUrl = 'https://openai.api2d.net/v1/chat/completions'
@@ -52,7 +50,7 @@ async function getFormattedRideInfo (message:Message) {
 
   try {
     const response = await axios.post(apiUrl, payload, { headers })
-    log.info('顺风车信息检测结果：', JSON.stringify(response.data))
+    logger.info('顺风车信息检测结果：', JSON.stringify(response.data))
     return response.data
   } catch (error) {
     console.error(error)
@@ -172,7 +170,7 @@ async function chatGptRoutine (sysConfig:ProcessEnv, query: string) {
     }
     const responseMessage = await axios.post(options.url, options.body, { headers:options.headers })
     console.log(responseMessage.data)
-    log.info('gptbot responseMessage:\n', JSON.stringify(responseMessage))
+    logger.info('gptbot responseMessage:\n', JSON.stringify(responseMessage))
 
     if (responseMessage.data.result) {
       return {
@@ -191,14 +189,14 @@ async function chatGptRoutine (sysConfig:ProcessEnv, query: string) {
 
 // aibot 函数基本保持不变
 async function aibot (sysConfig: ProcessEnv, query: any) {
-  log.info(`查询内容，query: ${query}`)
+  logger.info(`查询内容，query: ${query}`)
 
   const answer = await chatGptRoutine(sysConfig, query)
 
   return answer
 }
 
-function prepareChatGptBody (content: string) {
+export function prepareChatGptBody (content: string) {
   return {
     model: process.env['CHATGPT_MODEL'],
     messages: [ { role: 'user', content } ],

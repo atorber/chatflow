@@ -1,15 +1,14 @@
-/* eslint-disable no-console */
 /* eslint-disable sort-keys */
 import { FileBox } from 'file-box'
 import {
   Message,
-  log,
   types,
   Wechaty,
 } from 'wechaty'
-import { formatSentMessage } from '../utils/utils.js'
+import { formatSentMessage, logger } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/mod.js'
-import Api2d from 'api2d'
+import axios from 'axios';
+axios.defaults.timeout = 60000
 
 async function gpt (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
   const text = extractKeyword(message, bot.currentUser.name())
@@ -20,7 +19,7 @@ async function gpt (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
     answer = await aibot(sysConfig, text)
   }
 
-  console.debug('回复消息：', JSON.stringify(answer))
+  logger.info('回复消息：', JSON.stringify(answer))
 
   if (isValidAnswer(answer)) {
     await handleAnswer(answer, bot, message)
@@ -108,44 +107,52 @@ async function aibot (sysConfig: ProcessEnv, query: any) {
   let answer = {
     text:'',
   }
-  log.info(`查询内容，query: ${query}`)
 
-  async function chatGptRoutine (content: string) {
-    try {
-      const timeout = 1000 * 60
-      const api = new Api2d(sysConfig.CHATGPT_KEY, sysConfig.CHATGPT_ENDPOINT, timeout)
-      const body = prepareChatGptBody(content)
-      log.info(`body: ${JSON.stringify(body)}`)
-      const completion: any = await api.completion(body)
-      const responseMessage = completion
-      log.info('gptbot responseMessage:\n', JSON.stringify(responseMessage))
-      if (responseMessage.choices) {
-        return {
-          messageType: types.Message.Text,
-          text: responseMessage.choices[0].message.content,
+  try {
+    const response = await axios.post(
+      `${sysConfig.CHATGPT_ENDPOINT}/v1/chat/completions`,
+      {
+        model: sysConfig.CHATGPT_MODEL,  // 使用的模型
+        messages: [
+          // {role: 'system', content: 'You are a helpful assistant.'},
+          {role: 'user', content: query},
+          // {role: 'assistant', content: 'The Los Angeles Dodgers won the World Series in 2020.'},
+          // {role: 'user', content: 'Where was it played?'}
+        ]  // 对话消息数组
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${sysConfig.CHATGPT_KEY}`,
+          'Content-Type': 'application/json',
         }
-      } else {
-        return answer
       }
+    );
 
-    } catch (err) {
-      console.error(err)
+    logger.info('gpt Response:' + JSON.stringify(response.data));
+
+    if (response.data.choices) {
+      return {
+        messageType: types.Message.Text,
+        text: response.data.choices[0].message.content,
+      }
+    } else {
       return answer
     }
+  } catch (error) {
+    logger.error('请求gpt Error:', error);
+    logger.error(`查询内容，query: ${query}`)
+    return answer
+
   }
-
-  answer = await chatGptRoutine(query)
-
-  return answer
 }
 
-function prepareChatGptBody (content: string) {
+export function prepareChatGptBody (content: string) {
   return {
     model: process.env['CHATGPT_MODEL'],
-    messages: [ { role: 'user', content } ],
-    temperature: 1,
-    n: 1,
-    stream: false,
+    prompt: content,
+    temperature: 0.7,
+    // n: 1,
+    // stream: false,
   }
 }
 

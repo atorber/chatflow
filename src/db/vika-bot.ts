@@ -19,7 +19,7 @@ type VikaBotConfigTypes = {
 export interface TaskConfig {
   id: string;
   msg: string;
-  time: string;
+  time: number;
   cycle: string;
   targetType: 'contact' | 'room';
   target: BusinessRoom | BusinessUser;

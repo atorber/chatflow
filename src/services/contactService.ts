@@ -3,11 +3,11 @@ import type { VikaBot } from '../db/vika-bot.js'
 
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { Contact, Wechaty, log } from 'wechaty'
-import { wait } from '../utils/utils.js'
+import { wait, logger } from '../utils/utils.js'
 
 // import { db } from '../db/tables.js'
 // const contactData = db.contact
-// log.info(JSON.stringify(contactData))
+// logger.info(JSON.stringify(contactData))
 
 // 服务类
 export class ContactChat {
@@ -28,7 +28,7 @@ export class ContactChat {
 
   async getContact () {
     const records:IRecord[] = await this.db.findAll()
-    // log.info('维格表中的记录：', JSON.stringify(records))
+    // logger.info('维格表中的记录：' + JSON.stringify(records))
     return records
   }
 
@@ -38,9 +38,11 @@ export class ContactChat {
     try {
       const contacts: Contact[] = await bot.Contact.findAll()
       log.info('最新联系人数量(包含公众号)：', contacts.length)
+      logger.info('最新联系人数量(包含公众号)：' + contacts.length)
       const recordsAll: any = []
       const recordExisting = await this.db.findAll()
       log.info('云端好友数量（不包含公众号）：', recordExisting.length || '0')
+      logger.info('云端好友数量（不包含公众号）：' + recordExisting.length || '0')
 
       let wxids: string[] = []
       const recordIds: string[] = []
@@ -50,7 +52,9 @@ export class ContactChat {
           recordIds.push(record.recordId)
         })
       }
+      logger.info('当前bot使用的puppet:' + puppet)
       log.info('当前bot使用的puppet:', puppet)
+
       if (puppet === 'wechaty-puppet-wechat' || puppet === 'wechaty-puppet-wechat4u') {
         const count = Math.ceil(recordIds.length / 10)
         for (let i = 0; i < count; i++) {
@@ -65,23 +69,24 @@ export class ContactChat {
         const item = contacts[i]
         const isFriend = item?.friend() || false
         // const isIndividual = item?.type() === types.Contact.Individual
-        // log.info('好友详情：', item?.name())
-        // log.info('是否好友：', isFriend)
-        // log.info('是否公众号：', isIndividual)
-
+        // logger.info('好友详情：' + item?.name())
+        // log.info('是否好友：' + isFriend)
+        // logger.info('是否公众号：' + isIndividual)
+        // if(item) log.info('头像信息：', (JSON.stringify((await item?.avatar()).toJSON())))
         if (item && isFriend && !wxids.includes(item.id)) {
-          // log.info('云端不存在：', item.name())
-          let avatar = ''
+          // logger.info('云端不存在：' + item.name())
+          let avatar:any = ''
           let alias = ''
           try {
-            avatar = String(await item.avatar())
+            avatar = (await item.avatar()).toJSON()
+            avatar = avatar.url
           } catch (err) {
-            // log.error('获取好友头像失败：', err)
+            // logger.error('获取好友头像失败：'+ err)
           }
           try {
             alias = await item.alias() || ''
           } catch (err) {
-            log.error('获取好友备注失败：', err)
+            logger.error('获取好友备注失败：'+ err)
           }
           const fields = {
             '备注名称|alias':alias,
@@ -98,20 +103,20 @@ export class ContactChat {
             fields,
           }
           recordsAll.push(record)
-        }
+        } 
       }
-      log.info('好友数量：', recordsAll.length || '0')
+      logger.info('好友数量：' + recordsAll.length || '0')
       for (let i = 0; i < recordsAll.length; i = i + 10) {
         const records = recordsAll.slice(i, i + 10)
         await this.db.insert(records)
-        log.info('好友列表同步中...', i + records.length)
+        logger.info('好友列表同步中...' + i + records.length)
         updateCount = updateCount + records.length
         void await wait(1000)
       }
 
-      log.info('同步好友列表完成，更新到云端好友数量：', updateCount || '0')
+      logger.info('同步好友列表完成，更新到云端好友数量：' + updateCount || '0')
     } catch (err) {
-      log.error('更新好友列表失败：', err)
+      logger.error('更新好友列表失败：' + err)
 
     }
 

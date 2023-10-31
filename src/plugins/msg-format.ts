@@ -200,6 +200,216 @@ async function wechaty2chatdev (message:Message) {
 
 }
 
+async function wechaty2lumen (message:Message) {
+  const curTime = getCurTime()
+  const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
+
+  let msg:any = {
+    reqId: v4(),
+    method: 'thing.event.post',
+    version: '1.0',
+    timestamp: curTime,
+    events: {
+    },
+  }
+
+  const talker = message.talker()
+  const listener = message.listener()
+
+  let text = ''
+  let messageType = ''
+  let textBox:any = {}
+  let file: any
+  const msgId = message.id
+  let msg_type = 1
+  switch (message.type()) {
+    // 文本消息
+    case types.Message.Text:
+      messageType = 'Text'
+      msg_type = 1
+      text = message.text()
+      break
+
+      // 图片消息
+    case types.Message.Image:
+      messageType = 'Image'
+      msg_type = 3
+      file = await message.toImage().artwork()
+      break
+
+      // 链接卡片消息
+    case types.Message.Url:
+      messageType = 'Url'
+      textBox = await message.toUrlLink()
+      text = JSON.stringify(JSON.parse(JSON.stringify(textBox)).payload)
+      break
+
+      // 小程序卡片消息
+    case types.Message.MiniProgram:
+      messageType = 'MiniProgram'
+      textBox = await message.toMiniProgram()
+      text = JSON.stringify(JSON.parse(JSON.stringify(textBox)).payload)
+      /*
+            miniProgram: 小程序卡片数据
+            {
+              appid: "wx363a...",
+              description: "贝壳找房 - 真房源",
+              title: "美国白宫，10室8厅9卫，99999刀/月",
+              iconUrl: "http://mmbiz.qpic.cn/mmbiz_png/.../640?wx_fmt=png&wxfrom=200",
+              pagePath: "pages/home/home.html...",
+              shareId: "0_wx363afd5a1384b770_..._1615104758_0",
+              thumbKey: "84db921169862291...",
+              thumbUrl: "3051020100044a304802010002046296f57502033d14...",
+              username: "gh_8a51...@app"
+            }
+           */
+      break
+
+      // 语音消息
+    case types.Message.Audio:
+      messageType = 'Audio'
+      msg_type = 4
+      file = await message.toFileBox()
+      break
+
+      // 视频消息
+    case types.Message.Video:
+      messageType = 'Video'
+      file = await message.toFileBox()
+      break
+
+      // 动图表情消息
+    case types.Message.Emoticon:
+      messageType = 'Emoticon'
+      msg_type = 1
+      file = await message.toFileBox()
+      break
+
+      // 文件消息
+    case types.Message.Attachment:
+      messageType = 'Attachment'
+      msg_type = 6
+      file = await message.toFileBox()
+      break
+
+    case types.Message.Contact:
+      messageType = 'Contact'
+      try {
+        textBox = await message.toContact()
+      } catch (err) {
+
+      }
+      text = '联系人卡片消息'
+      break
+
+      // 其他消息
+    default:
+      messageType = 'Unknown'
+      text = '未知的消息类型'
+      break
+  }
+
+  if (file) {
+    text = file.name
+  }
+
+  // console.debug('textBox:', textBox)
+
+  const room = message.room()
+  const roomInfo:any = {}
+  if (room && room.id) {
+    roomInfo.id = room.id
+    try {
+      const roomAvatar = await room.avatar()
+      // console.debug('群头像room.avatar()============')
+      // console.debug(typeof roomAvatar)
+      // console.debug(roomAvatar)
+      // console.debug('END============')
+
+      roomInfo.avatar = JSON.parse(JSON.stringify(roomAvatar)).url
+    } catch (err) {
+    //   console.debug('群头像捕获了错误============')
+      // console.debug(typeof err)
+      // console.debug(err)
+      // console.debug('END============')
+    }
+    roomInfo.ownerId = room.owner()?.id || ''
+
+    try {
+      roomInfo.topic = await room.topic()
+    } catch (err) {
+      roomInfo.topic = room.id
+    }
+  }
+
+  let memberAlias:any = ''
+  try {
+    memberAlias = await room?.alias(talker)
+  } catch (err) {
+
+  }
+
+  let avatar:any = ''
+  try {
+
+    avatar = await talker.avatar()
+    // console.debug('好友头像talker.avatar()============')
+    // console.debug(avatar)
+    // console.debug('END============')
+    avatar = JSON.parse(JSON.stringify(avatar)).url
+
+  } catch (err) {
+    // console.debug('好友头像捕获了错误============')
+    // console.debug(err)
+    // console.debug('END============')
+  }
+
+  const content:any = {}
+  content.messageType = messageType
+  content.text = text
+  content.raw = textBox.payload || textBox._payload || {}
+
+  // const receiver_id = room?room.id:listener?.id
+  // const sender_id = talker.id
+  const receiver_id = 6
+  const sender_id = 11
+
+  const _payload = {
+    "sender_id": sender_id,
+    "receiver_id":receiver_id,
+    "talk_type":room?2:1,
+    "data":{
+        "id":message.payload?.timestamp,
+        "sequence":message.payload?.timestamp,
+        "msg_id":message.id,
+        "talk_type":room?2:1,
+        "msg_type":msg_type,
+        "user_id":sender_id,
+        "receiver_id":receiver_id,
+        "nickname":talker.name(),
+        "avatar":"http://localhost:5173/files/public/media/image/avatar/20231022/1fcad192870c5752dc6b626aaf915a33_200x200.png",
+        "is_revoke":0,
+        "is_mark":0,
+        "is_read":0,
+        "content":text,
+        "created_at":timeHms,
+        "extra":{
+            "url":"http://localhost:5173/files/public/media/image/common/20231022/343295c68aa224b1707773df472cb1b2_1024x1024.png",
+            "name":"",
+            "size":0,
+            "width":1024,
+            "height":1024,
+            "suffix":""
+        }
+    }
+}
+
+  msg = JSON.stringify(_payload)
+
+  return msg
+
+}
+
 function propertyMessage (name:string, info:any) {
   let message:any = {
     reqId: v4(),
@@ -228,5 +438,5 @@ function eventMessage (name:string, info:any) {
   return message
 }
 
-export { wechaty2chatdev, propertyMessage, eventMessage }
+export { wechaty2chatdev, propertyMessage, eventMessage, wechaty2lumen }
 export default wechaty2chatdev

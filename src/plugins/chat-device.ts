@@ -2,19 +2,21 @@ import mqtt from 'mqtt'
 import { v4 } from 'uuid'
 import { FileBox } from 'file-box'
 import {
-  log,
   Contact,
   Wechaty,
+  Room,
+  log
 } from 'wechaty'
 import { wechaty2chatdev, propertyMessage, eventMessage } from './msg-format.js'
 
 import {
   formatSentMessage,
+  logger,
 } from '../utils/utils.js'
 
 class ChatDevice {
 
-  chatbot!:any
+  chatbot!:Wechaty
   chatdevice!:any
   bot!: Wechaty
   mqttclient:any
@@ -38,51 +40,61 @@ class ChatDevice {
   }
 
   init (bot:Wechaty) {
+    log.info('bot info:',bot.currentUser.id)
+
     this.chatbot = bot
     this.bot = bot
     const that = this
     this.mqttclient.on('connect', function () {
       that.isConnected = true
+      logger.info('MQTT连接成功')
       log.info('MQTT连接成功')
     })
     this.mqttclient.on('reconnect', function (e:any) {
+      logger.info('subscriber on reconnect'+ e)
       log.info('subscriber on reconnect', e)
     })
     this.mqttclient.on('disconnect', function (e:any) {
+      logger.info('disconnect--------'+ e)
       log.info('disconnect--------', e)
       that.isConnected = false
     })
     this.mqttclient.on('error', function (e:any) {
-      log.info('error----------', e)
+      log.error('error----------'+ e)
+      logger.error('error----------'+ e)
     })
-    this.mqttclient.on('message', this.onMessage)
+    this.mqttclient.on('message', this.onMessage.bind(this))
     this.sub_command()
     this.isOk = true
+  }
+
+  publish(topic:string, payload:string){
+    this.mqttclient.publish(topic, payload)
   }
 
   sub_command () {
     this.mqttclient.subscribe(this.commandApi, function (err:any) {
       if (err) {
-        log.info(err)
+        logger.info(err)
       }
     })
   }
 
   pub_property (msg:any) {
     this.mqttclient.publish(this.propertyApi, msg)
-    log.info('mqtt消息发布:', this.eventApi, msg)
+    logger.info('mqtt消息发布:'+ this.eventApi, msg)
   }
 
   pub_event (msg:any) {
     this.mqttclient.publish(this.eventApi, msg)
-    log.info('mqtt消息发布:', this.eventApi, msg)
+    logger.info('mqtt消息发布:'+ this.eventApi, msg)
   }
 
   async pub_message (msg:any) {
     try {
       const payload = await wechaty2chatdev(msg)
       this.mqttclient.publish(this.eventApi, payload)
-      log.info('mqtt消息发布:', this.eventApi, payload)
+      logger.info('mqtt消息发布:'+ this.eventApi, payload)
     } catch (err) {
       console.error(err)
     }
@@ -94,8 +106,9 @@ class ChatDevice {
   }
 
   async onMessage (topic:string, message:any) {
-    log.info('mqtt onMessage:', topic)
-    log.info('mqtt onMessage:', message.toString())
+    logger.info('mqtt onMessage:'+ topic)
+    logger.info('mqtt onMessage:'+ message.toString())
+    log.info('this.chatbot', this.chatbot)
     try {
     // const content = JSON.parse(message.toString())
       message = JSON.parse(message)
@@ -103,25 +116,25 @@ class ChatDevice {
       const params = message.params
 
       if (name === 'start') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
       }
       if (name === 'stop') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
       }
       if (name === 'logout') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'logonoff') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'userSelf') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'say') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'send') {
@@ -132,42 +145,42 @@ class ChatDevice {
       }
 
       if (name === 'aliasGet') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'aliasSet') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'roomCreate') {
         await createRoom(params, this.chatbot)
       }
       if (name === 'roomAdd') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'roomDel') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'roomAnnounceGet') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'roomAnnounceSet') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'roomQuit') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'roomTopicGet') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'roomTopicSet') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'roomQrcodeGet') {
@@ -175,37 +188,37 @@ class ChatDevice {
 
       }
       if (name === 'memberAllGet') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'contactAdd') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'contactAliasSet') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'contactFindAll') {
         await getAllContact(this.chatdevice, this.chatbot)
       }
       if (name === 'contactFind') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'roomFindAll') {
         await getAllRoom(this.chatdevice, this.chatbot)
       }
       if (name === 'roomFind') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
       if (name === 'config') {
-        log.info('cmd name:', name)
+        logger.info('cmd name:'+ name)
 
       }
     } catch (err) {
-      log.error('MQTT接收到消息错误：', err)
+      logger.error('MQTT接收到消息错误：'+ err)
     }
 
   }
@@ -265,7 +278,7 @@ async function getAllRoom (chatdevice:any, bot:Wechaty) {
 }
 
 async function send (params:any, bot:Wechaty): Promise<any> {
-  log.info('params:', params)
+  logger.info('params:' + JSON.stringify(params))
 
   let msg:any = ''
   if (params.messageType === 'Text') {
@@ -304,7 +317,7 @@ async function send (params:any, bot:Wechaty): Promise<any> {
       } */
     const contactCard = await bot.Contact.find({ id: params.messagePayload })
     if (!contactCard) {
-      log.info('not found')
+      logger.info('not found')
       return {
         msg: '无此联系人',
       }
@@ -352,10 +365,10 @@ async function send (params:any, bot:Wechaty): Promise<any> {
     } */
     // msg = FileBox.fromUrl(params.messagePayload)
     if (params.messagePayload.indexOf('http') !== -1 || params.messagePayload.indexOf('https') !== -1) {
-      log.info('图片http地址：', params.messagePayload)
+      logger.info('图片http地址：', params.messagePayload)
       msg = FileBox.fromUrl(params.messagePayload)
     } else {
-      log.info('图片本地地址：', params.messagePayload)
+      logger.info('图片本地地址：', params.messagePayload)
       msg = FileBox.fromFile(params.messagePayload)
     }
 
@@ -414,34 +427,48 @@ async function send (params:any, bot:Wechaty): Promise<any> {
     }
   }
 
-  log.info('msg:', msg)
+  logger.info('远程发送消息 msg:' + msg)
 
   const toContacts = params.toContacts
 
   for (let i = 0; i < toContacts.length; i++) {
     if (toContacts[i].split('@').length === 2 || toContacts[i].split(':').length === 2) {
-      log.info(`向群${toContacts[i]}发消息`)
-      const room = await bot.Room.find({ id: toContacts[i] })
+      logger.info(`向群${toContacts[i]}发消息`)
+try{      
+      const room:Room|undefined = await bot.Room.find({ id: toContacts[i] })
       if (room) {
         try {
           await room.say(msg)
           await formatSentMessage(bot.currentUser, msg, undefined, room)
+
+          // 发送成功后向前端发送消息
+
         } catch (err) {
-          console.error(err)
+          logger.error('发送群消息失败：'+err)
         }
       }
+}catch(err){
+  log.error('获取群失败：', err)
+  logger.error('获取群失败：'+err)
+}
+
     } else {
-      log.info(`好友${toContacts[i]}发消息`)
-      // log.info(bot)
-      const contact = await bot.Contact.find({ id: toContacts[i] })
-      if (contact) {
-        try {
-          await contact.say(msg)
-          await formatSentMessage(bot.currentUser, msg, contact, undefined)
-        } catch (err) {
-          console.error(err)
-        }
-      }
+      logger.info(`好友${toContacts[i]}发消息`)
+      // logger.info(bot)
+try{
+  const contact:Contact|undefined = await bot.Contact.find({ id: toContacts[i] })
+  if (contact) {
+    try {
+      await contact.say(msg)
+      await formatSentMessage(bot.currentUser, msg, contact, undefined)
+    } catch (err) {
+      logger.error('发送好友消息失败：' + err)
+    }
+  }
+}catch(err){
+  log.error('获取好友失败：', err)
+  logger.error('获取好友失败：'+err)
+}
     }
   }
 
@@ -469,7 +496,7 @@ async function createRoom (params:any, bot:Wechaty) {
   }
 
   const room = await bot.Room.create(contactList, params.topic)
-  // log.info('Bot', 'createDingRoom() new ding room created: %s', room)
+  // logger.info('Bot', 'createDingRoom() new ding room created: %s', room)
   // await room.topic(params.topic)
 
   await room.say('你的专属群创建完成')

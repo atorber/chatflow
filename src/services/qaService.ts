@@ -1,12 +1,12 @@
 /* eslint-disable sort-keys */
 import type { VikaBot, TaskConfig } from '../db/vika-bot.js'
 import { VikaSheet } from '../db/vika.js'
-import { log } from 'wechaty'
 import type { SkillInfoArray } from './wxopenaiService.js'
+import { logger } from '../utils/mod.js' 
 
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice
-// log.info(JSON.stringify(noticeData))
+// logger.info(JSON.stringify(noticeData))
 
 // 服务类
 export class QaChat {
@@ -33,7 +33,7 @@ export class QaChat {
 
   async getRecords () {
     const records = await this.db.findAll()
-    log.info('维格表中的记录：', JSON.stringify(records))
+    logger.info('维格表中的记录：', JSON.stringify(records))
     return records
   }
 
@@ -63,7 +63,7 @@ export class QaChat {
           answer: [ record.fields['机器人回答|answer'] ],
         }
       })
-    log.info('skills:', JSON.stringify(skills))
+    logger.info('skills:', JSON.stringify(skills))
     return skills
   }
 

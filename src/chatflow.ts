@@ -5,10 +5,10 @@ import {
   Contact,
   ScanStatus,
   WechatyPlugin,
-  log,
   Wechaty,
   Room,
   Message,
+  log,
   // types,
 } from 'wechaty'
 
@@ -26,7 +26,7 @@ import {
   exportContactsAndRoomsToXLSX,
   getRoom,
 } from './plugins/mod.js'
-
+import CryptoJS from 'crypto-js'
 import {
   // config,
   getBotOps,
@@ -38,9 +38,11 @@ import {
   waitForMs as wait,
   getNow,
   logForm,
+  logger,
+  formatTimestamp,
 } from './utils/utils.js'
 
-import { addMessage } from './api/message.js'
+import { addMessage, formatMessage } from './api/message.js'
 import { containsContact, containsRoom } from './services/userService.js'
 import { activityController } from './services/activityService.js'
 
@@ -61,15 +63,14 @@ import { WxOpenaiBot, type WxOpenaiBotConfig, type SkillInfoArray } from './serv
 import type { ContactWhiteList, ProcessEnv, RoomWhiteList, ChatMessage } from './types/mod.js'
 // import { spawn } from 'child_process'
 import type { VikaBot } from './db/vika-bot.js'
-import { time } from 'console'
 
-// log.info('初始化配置文件信息:\n', JSON.stringify(config, undefined, 2), '================')
-// log.info('process.env', JSON.stringify(process.env))
+// logger.info('初始化配置文件信息:\n' +  JSON.stringify(config, undefined, 2))
+logger.info('process.env：' + JSON.stringify(process.env))
 
 let chatdev: any = {}
 const envService:EnvChat = new EnvChat()
 let configEnv:ProcessEnv = envService.getConfigFromEnv()
-// log.info('configEnv on env', JSON.stringify(configEnv))
+logger.info('configEnv on env' + JSON.stringify(configEnv))
 
 let whiteList:{contactWhiteList: ContactWhiteList; roomWhiteList: RoomWhiteList;}
 
@@ -99,78 +100,87 @@ export const initializeServices = async (vikaBot: VikaBot) => {
 // services.messageService, services.envService, etc.
 
 const initializeServicesAndEnv = async (vikaBot:VikaBot) => {
-  // log.info('初始化服务开始...')
+  logger.info('初始化服务开始...')
   await envService.init(vikaBot)
   await wait(1000)
   vikaBot.services = await initializeServices(vikaBot)
-  // log.info('services:', JSON.stringify(services))
+  // logger.info('services:' + JSON.stringify(services))
 }
+
 
 const shouldInitializeMQTT = () => {
   return configEnv.MQTT_ENDPOINT && (configEnv.MQTT_MQTTCONTROL || configEnv.MQTT_MQTTMESSAGEPUSH)
 }
 
 const initializeMQTT = (bot: Wechaty) => {
-  chatdev = new ChatDevice(configEnv.MQTT_USERNAME, configEnv.MQTT_PASSWORD, configEnv.MQTT_ENDPOINT, configEnv.MQTT_PORT, configEnv.BASE_BOT_ID)
+  const clientString = configEnv.VIKA_TOKEN + configEnv.VIKA_SPACE_NAME
+  const client = CryptoJS.SHA256(clientString).toString();
+
+  chatdev = new ChatDevice(configEnv.MQTT_USERNAME, configEnv.MQTT_PASSWORD, configEnv.MQTT_ENDPOINT, configEnv.MQTT_PORT, configEnv.BASE_BOT_ID || client)
   chatdev.init(bot)
 }
 
 const postVikaInitialization = async (bot: Wechaty, vikaBot:VikaBot) => {
   const vikaConfig = await envService.getConfigFromVika()
-  // log.info('维格表中的环境变量配置信息：', JSON.stringify(vikaConfig, undefined, 2))
+  logger.info('维格表中的环境变量配置信息：' + JSON.stringify(vikaConfig, undefined, 2))
 
   configEnv = { ...configEnv, ...vikaConfig }
-  // log.info('configEnv on vika', JSON.stringify(configEnv))
+  // logger.info('configEnv on vika' + JSON.stringify(configEnv))
 
   whiteList = await (vikaBot.services as Services).whiteListService.getWhiteList()
 
-  await (vikaBot.services as Services).roomService.updateRooms(bot, configEnv.WECHATY_PUPPET)
-  await (vikaBot.services as Services).contactService.updateContacts(bot, configEnv.WECHATY_PUPPET)
+  // await (vikaBot.services as Services).roomService.updateRooms(bot, configEnv.WECHATY_PUPPET)
+  // await (vikaBot.services as Services).contactService.updateContacts(bot, configEnv.WECHATY_PUPPET)
 
-  setInterval(() => {
-    try {
-      const curDate = new Date().toLocaleString()
-      log.info('当前时间:', curDate)
-      if (chatdev && chatdev.isOk && configEnv.MQTT_MQTTMESSAGEPUSH) {
-        chatdev.pub_property(propertyMessage('lastActive', curDate))
-      }
-    } catch (err) {
-      log.error('发送心跳失败:', err)
-    }
-  }, 300000)
+  // 每30s上报一次心跳
+  // setInterval(() => {
+  //   const curDate = new Date().toLocaleString()
+  //   logger.info('当前时间:' + curDate)
+  //   try {
+  //     if (chatdev && chatdev.isOk && configEnv.MQTT_MQTTMESSAGEPUSH) {
+  //       chatdev.pub_property(propertyMessage('lastActive', curDate))
+  //     }
+  //   } catch (err) {
+  //     logger.error('发送心跳失败:', err)
+  //   }
+  // }, 300000)
 
   await (vikaBot.services as Services).noticeService.updateJobs(bot, (vikaBot.services as Services).messageService)
-  logForm('启动成功，系统准备就绪，在管理员群发送【帮助】可获取操作指令集')
+  const helpText = await (vikaBot.services as Services).keywordService.getSystemKeywordsText()
+  logForm(`启动成功，系统准备就绪，在当前群（管理员群）回复对应指令进行操作\n\n${helpText}`)
+  await notifyAdminRoom(bot,vikaBot)
 }
 
-const notifyAdminRoom = async (bot: Wechaty) => {
+const notifyAdminRoom = async (bot: Wechaty, vikaBot:VikaBot) => {
   if (configEnv.ADMINROOM_ADMINROOMID || configEnv.ADMINROOM_ADMINROOMTOPIC) {
     const adminRoom = await getRoom(bot, { topic: configEnv.ADMINROOM_ADMINROOMTOPIC, id: configEnv.ADMINROOM_ADMINROOMID })
-    await adminRoom?.say(`${new Date().toLocaleString()}\nchatflow启动成功!\n当前登录用户${bot.currentUser.name()}\n可输入【帮助】获取操作指令`)
+    const helpText = await (vikaBot.services as Services).keywordService.getSystemKeywordsText()
+    await adminRoom?.say(`${new Date().toLocaleString()}\nchatflow启动成功!\n当前登录用户${bot.currentUser.name()}\n可在管理员群回复对应指令进行操作\n${helpText}\n`)
   }
 }
 
 const onReadyOrLogin = async (bot: Wechaty, vikaBot:VikaBot) => {
   if (!vikaBot.services) {
-    // log.info('初始化services服务')
+    // logger.info('初始化services服务')
     await initializeServicesAndEnv(vikaBot as VikaBot)
   }
 
   const user: Contact = bot.currentUser
-  log.info('当前登录的账号信息:', user.name())
+  logger.info('当前登录的账号信息:' + user.name())
 
   if (!configEnv.VIKA_SPACE_NAME || !configEnv.VIKA_TOKEN) {
-    log.error('维格表配置不全，.env文件或环境变量中设置的token和spaceName之后重启')
+    logger.error('维格表配置不全，.env文件或环境变量中设置的token和spaceName之后重启')
     return
   }
 
   if (shouldInitializeMQTT()) {
+    logger.info('MQTT服务功能开启，初始化MQTT服务...')
     initializeMQTT(bot)
+  } else {
+    logger.info('MQTT服务功能未开启...')
   }
 
   await postVikaInitialization(bot, vikaBot)
-
-  await notifyAdminRoom(bot)
 }
 
 // 定义一个函数处理二维码上传
@@ -178,7 +188,7 @@ async function uploadQRCodeToVika (vikaBot:VikaBot, qrcode: string, status: Scan
   try {
     await (vikaBot.services as Services).messageService.onScan(qrcode, status)
   } catch (error) {
-    log.error('上传二维码到维格表失败:', error)
+    logger.error('上传二维码到维格表失败:', error)
   }
 }
 
@@ -216,7 +226,7 @@ const adminCommands:AdminCommands = {
   更新配置: async () => {
     try {
       const botConfig = await envService.downConfigFromVika()
-      log.info('botConfig:', JSON.stringify(botConfig))
+      logger.info('botConfig:' + JSON.stringify(botConfig))
       return [ true, '配置更新成功~' ]
     } catch (e) {
       return [ false, '配置更新失败~' ]
@@ -316,7 +326,7 @@ const adminCommands:AdminCommands = {
   下载配置: async () => {
     try {
       const botConfig = await envService.downConfigFromVika()
-      log.info('botConfig:', JSON.stringify(botConfig))
+      logger.info('botConfig:' + JSON.stringify(botConfig))
       return [ true, '下载配置信息成功~' ]
     } catch (e) {
       return [ false, '下载配置信息失败~' ]
@@ -325,12 +335,12 @@ const adminCommands:AdminCommands = {
 }
 
 async function handleCommand (bot:Wechaty, command: string, action: (bot:Wechaty, message:Message) => Promise<FileBox>, message: any, services: any) {
-  log.info(`Handling command: ${command}`)
+  logger.info(`Handling command: ${command}`)
   try {
     const fileBox = await action(bot, message)
     await sendMsg(message, fileBox, services.messageService)
   } catch (err) {
-    log.error(`${command} failed`, err)
+    logger.error(`${command} failed`, err)
     await sendMsg(message, '下载失败，请重试~', services.messageService)
   }
 }
@@ -349,25 +359,25 @@ async function handleAutoQA (bot:Wechaty, message:Message, keyWord:string) {
   const room = message.room() as Room
   const topic = await room.topic()
   const text = message.text()
-  log.info('群消息请求智能问答：', text === keyWord)
+  logger.info('群消息请求智能问答：' + JSON.stringify(text === keyWord))
   if (configEnv.AUTOQA_AUTOREPLY) {
     const isInRoomWhiteList = await containsRoom(whiteList.roomWhiteList.qa, room)
     if (isInRoomWhiteList) {
-      log.info('当前群在qa白名单内，请求问答...')
+      logger.info('当前群在qa白名单内，请求问答...')
       try {
         await wxai(configEnv, bot, message)
       } catch (e) {
-        log.error('发起请求wxai失败', topic, e)
+        logger.error('发起请求wxai失败', topic, e)
       }
     }
 
     const isInGptRoomWhiteList = await containsRoom(whiteList.roomWhiteList.gpt, room)
     if (isInGptRoomWhiteList) {
-      log.info('当前群在qa白名单内，请求问答gpt...')
+      logger.info('当前群在qa白名单内，请求问答gpt...')
       try {
         await gpt(configEnv, bot, message)
       } catch (e) {
-        log.error('发起请求gpt失败', topic, e)
+        logger.error('发起请求gpt失败', topic, e)
       }
     }
   }
@@ -378,11 +388,11 @@ async function handleActivityManagement (vikaBot:VikaBot, message:Message) {
   const topic = await room.topic()
   const isActInRoomWhiteList = await containsRoom(whiteList.roomWhiteList.act, room)
   if (isActInRoomWhiteList) {
-    log.info('当前群在act白名单内，开始请求活动管理...')
+    logger.info('当前群在act白名单内，开始请求活动管理...')
     try {
       await activityController(vikaBot as VikaBot, message, room)
     } catch (e) {
-      log.error('活动管理失败', topic, e)
+      logger.error('活动管理失败', topic, e)
     }
   }
 }
@@ -401,29 +411,29 @@ async function handleAdminRoomSetting (vikaBot:VikaBot, message:Message) {
 async function handleAutoQAForContact (bot:Wechaty, message:Message, keyWord:string) {
   const talker = message.talker()
   const text = message.text()
-  log.info('联系人请求智能问答：', text === keyWord)
+  logger.info('联系人请求智能问答：' + (text === keyWord))
   if (configEnv.AUTOQA_AUTOREPLY) {
     const isInContactWhiteList = await containsContact(whiteList.contactWhiteList.qa, talker)
     if (isInContactWhiteList) {
-      log.info('当前好友在qa白名单内，请求问答...')
+      logger.info('当前好友在qa白名单内，请求问答...')
       try {
         await wxai(configEnv, bot, message)
       } catch (e) {
-        log.error('发起请求wxai失败', talker.name(), e)
+        logger.error('发起请求wxai失败', talker.name(), e)
       }
     } else {
-      log.info('当前好友不在qa白名单内，流程结束')
+      logger.info('当前好友不在qa白名单内，流程结束')
     }
     const isInGptContactWhiteList = await containsContact(whiteList.contactWhiteList.gpt, talker)
     if (isInGptContactWhiteList) {
-      log.info('当前好友在qa白名单内，请求问答gpt...')
+      logger.info('当前好友在qa白名单内，请求问答gpt...')
       try {
         await gpt(configEnv, bot, message)
       } catch (e) {
-        log.error('发起请求wxai失败', talker.name(), e)
+        logger.error('发起请求wxai失败', talker.name(), e)
       }
     } else {
-      log.info('当前好友不在gpt白名单内，gpt流程结束')
+      logger.info('当前好友不在gpt白名单内，gpt流程结束')
     }
   }
 }
@@ -439,9 +449,9 @@ const extractAtContent = async (vikaBot:VikaBot, message:Message, keyword: strin
   // 提取「和 」之间的内容
   if (startIndex !== -1 && endIndex !== -1) {
     newText = `@${keyword}` + text.substring(startIndex, endIndex)
-    log.info('提取到的内容：', newText)
+    logger.info('提取到的内容：' + newText)
   } else {
-    log.info('未提取到内容：', text)
+    logger.info('未提取到内容：' + text)
     newText = text
   }
 
@@ -451,28 +461,35 @@ const extractAtContent = async (vikaBot:VikaBot, message:Message, keyword: strin
     .limit(0, 500)
     .find(query)
 
-  log.info('查询到的messageList长度:', messageList.length)
+  logger.info('查询到的messageList长度:' + messageList.length)
 
   // TBD将消息转换为提示词
   const style = '详细、严谨、像真人一样表达'
-  // const role = '【电影大话西游里的唐三藏】'
+  // const role = '电影《大话西游》里的唐三藏这个角色'
   const role = '智能助理'
 
   let p = `以下是一个群组的聊天记录，你将以“${keyword}”的身份作为群聊中的一员参与聊天。你的回复必须结合聊天历史记录和你的知识给出尽可能${style}的回答，回复字数不超过150字，并且听起来语气口吻像${role}的风格。\n\n`
-  const time = new Date().toUTCString()
+  
+  const time = formatTimestamp(new Date().getTime())[5]
   let chatText = ''
   for (const i in messageList) {
     const item = messageList[i]
-    if (p.length < 5000 && item.data.payload.type === 7 && item.talker.payload.name !== keyword) {
+    if (chatText.length < 2000 && item.data.payload.type === 7) {
       chatText = `[${item.time || time} ${item.talker.payload.name}]:${item.data.payload.text}\n` + chatText
+    } else {
+
     }
   }
-  chatText = chatText + `[${time} ${message.talker().name()}]：${newText}\n`
-  chatText = chatText + `[${time} ${keyword}]：`
+  // chatText = chatText + `[${time} ${message.talker().name()}]：${newText}\n`
+  // chatText = chatText + `[${time} ${keyword}]：`
 
   p = p + chatText
 
-  log.info('提示词：', p)
+  p = `微信群聊天记录:\n${chatText}\n\n指令:\n你是微信聊天群里的成员【${keyword}】，你正在参与大家的群聊天，先在轮到你发言了，你的回复尽可能清晰、严谨，字数不超过150字，并且你需要使用${role}的风格回复。当前时间是${time}。`
+
+  p = p + `\n\n最新的对话:\n[${time} ${message.talker().name()}]：${newText}\n[${time} ${keyword}]：`
+  logger.info('提示词：' + p )
+
   const answer = await gptbot(process.env, p)
 
   if (answer.text && answer.text.length > 0) {
@@ -484,14 +501,14 @@ const extractAtContent = async (vikaBot:VikaBot, message:Message, keyword: strin
 }
 
 export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
-  logForm('开始启动，启动过程需要30秒到1分钟，请等待系统初始化...')
+  logForm('开始启动...\n启动过程需要30秒到1分钟\n请等待系统初始化...')
   const welcomeList:any = []
 
   return function ChatFlowPlugin (bot: Wechaty): void {
 
     bot.on('scan', async (qrcode: string, status: ScanStatus) => {
       if (!vikaBot.services) {
-        // log.info('初始化services服务')
+        // logger.info('初始化services服务')
         await initializeServicesAndEnv(vikaBot)
         await wait(3000)
       }
@@ -503,12 +520,12 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
       await uploadQRCodeToVika(vikaBot, qrcode, status)
 
       if (status !== ScanStatus.Waiting && status !== ScanStatus.Timeout) {
-        log.error('机器人启动，获取登录二维码失败', `onScan: ${ScanStatus[status]}(${status})`)
+        logger.error('机器人启动，获取登录二维码失败', `onScan: ${ScanStatus[status]}(${status})`)
       }
     })
 
     bot.on('login', async (_user: Contact) => {
-      // log.info('onLogin,当前登录的账号信息:\n', user.name())
+      // logger.info('onLogin,当前登录的账号信息:\n' + user.name())
 
       await wait(3000)
 
@@ -519,24 +536,23 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
 
     bot.on('ready', async () => {
       // const user: Contact = bot.currentUser
-      // log.info('onReady,当前登录的账号信息:\n', user.name())
+      // logger.info('onReady,当前登录的账号信息:\n' + user.name())
       await wait(3000)
       await updateConfig(configEnv)
 
       if (![ 'wechaty-puppet-xp' ].includes(configEnv.WECHATY_PUPPET)) await onReadyOrLogin(bot, vikaBot)
-
     })
 
     bot.on('logout', (user: Contact) => {
-      log.info('logout，退出登录:', '%s logout', user)
+      logger.info('logout，退出登录:' + user)
       // job.cancel()
     })
 
     bot.on('message', async message => {
       // if (message.type() === types.Message.Text) {
-      //   log.info('onMessage,接收到消息:\n', JSON.stringify(message.payload))
+      //   logger.info('onMessage,接收到消息:\n' + JSON.stringify(message.payload))
       // } else {
-      //   log.info('onMessage,接收到消息:\n', JSON.stringify(message.payload))
+      //   logger.info('onMessage,接收到消息:\n' + JSON.stringify(message.payload))
       // }
 
       // 存储消息到db，如果写入失败则终止
@@ -573,7 +589,8 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
           alias: await listener?.alias(),
         },
       }
-      log.info('onMessage,接收到消息,chatMessage:\n', JSON.stringify(chatMessage))
+      logger.info('bot onMessage,接收到消息,chatMessage:\n' + JSON.stringify(chatMessage))
+      log.info('bot onMessage,接收到消息,chatMessage:\n' + JSON.stringify(chatMessage))
 
       // 管理员群接收到管理指令时执行相关操作
       if (isAdminRoom) {
@@ -592,7 +609,7 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
           }
         }
 
-        if ([ '更新配置', '更新定时提醒', '更新通讯录' ].includes(text)) {
+        if ([ '更新配置', '更新定时提醒', '更新通讯录' ].includes(text) && !configEnv.VIKA_TOKEN) {
           await sendMsg(message, '未配置维格表，指令无效', (vikaBot.services as Services).messageService)
         }
 
@@ -623,7 +640,7 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
 
       // 消息存储到维格表
       if (configEnv.VIKA_UPLOADMESSAGETOVIKA) {
-        // log.info('消息同步到维格表...')
+        // logger.info('消息同步到维格表...')
         await (vikaBot.services as Services).messageService.onMessage(message)
       }
 
@@ -633,7 +650,8 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
           将消息通过mqtt通道上报到云端
           */
         // chatdev.pub_message(message)
-        chatdev.pub_event(eventMessage('onMessage', message))
+
+        chatdev.pub_event(eventMessage('onMessage', await formatMessage(message)))
       }
 
     })
@@ -643,7 +661,7 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
       const nameList = inviteeList.map(c => c.name()).join(',')
       const inviterName = inviter.name()
 
-      log.info(`Room Join: Room "${roomTopic}" got new members "${nameList}", invited by "${inviterName}"`)
+      logger.info(`Room Join: Room "${roomTopic}" got new members "${nameList}", invited by "${inviterName}"`)
 
       // Check if Vika is OK and if the room is in the welcome list
       if (welcomeList?.includes(room.id)) {
@@ -656,7 +674,7 @@ export function ChatFlow (vikaBot:VikaBot): WechatyPlugin {
     })
 
     bot.on('error', async (err: any) => {
-      log.error('onError，bot运行错误:', JSON.stringify(err))
+      logger.error('onError，bot运行错误:', JSON.stringify(err))
       // 退出当前进程并重启程序
       // process.exit(1)
     },

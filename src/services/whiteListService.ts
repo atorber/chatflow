@@ -2,8 +2,7 @@
 import type { VikaBot } from '../db/vika-bot.js'
 
 import { VikaSheet } from '../db/vika.js'
-import { log } from 'wechaty'
-import { wait } from '../utils/utils.js'
+import { wait, logger } from '../utils/utils.js'
 import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/finder.js'
 
@@ -44,7 +43,7 @@ export class WhiteListChat {
 
   async getRecords () {
     const records = await this.db.findAll()
-    log.info('维格表中的记录：', JSON.stringify(records))
+    logger.info('维格表中的记录：' + JSON.stringify(records))
     return records
   }
 
@@ -57,7 +56,7 @@ export class WhiteListChat {
       const record = whiteListRecords[i]
       const fields = record.fields
       const app: 'qa' | 'msg' | 'act' | 'gpt' = fields['所属应用|app']?.split('|')[1]
-      // log.info('当前app:', app)
+      // logger.info('当前app:' + app)
       if (fields['昵称/群名称|name'] || fields['好友ID/群ID(选填)|id'] || fields['好友备注(选填)|alias']) {
         if (record.fields['类型|type'] === '群') {
           const room: BusinessRoom = {
@@ -79,7 +78,7 @@ export class WhiteListChat {
 
     whiteList.contactWhiteList = this.contactWhiteList
     whiteList.roomWhiteList = this.roomWhiteList
-    log.info('whiteList:', JSON.stringify(whiteList))
+    logger.info('whiteList:' + JSON.stringify(whiteList))
     return whiteList
   }
 
