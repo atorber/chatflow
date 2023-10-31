@@ -10,21 +10,21 @@ import type {
 } from 'wechaty'
 
 import type { TaskConfig } from '../db/vika-bot.js'
-import * as winston from 'winston';
+import * as winston from 'winston'
 
 // 创建一个 Winston 日志记录器实例
 export const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`)
+    winston.format.printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`),
   ),
   defaultMeta: { service: 'user-service' },
   transports: [
     new winston.transports.File({ filename: 'data/logs/error.log', level: 'error' }),
     new winston.transports.File({ filename: 'data/logs/info.log' }),
   ],
-});
+})
 
 async function formatSentMessage (userSelf: Contact, text: string, talker: Contact|undefined, room: Room|undefined) {
   // console.debug('发送的消息：', text)
@@ -83,15 +83,15 @@ function getCurTime () {
   return time
 }
 
-export function getCurrentTime(timestamp?:number) {
-  const now = timestamp? new Date(timestamp):new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-  const second = now.getSeconds();
-  return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
+export function getCurrentTime (timestamp?:number) {
+  const now = timestamp ? new Date(timestamp) : new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  const day = now.getDate()
+  const hour = now.getHours()
+  const minute = now.getMinutes()
+  const second = now.getSeconds()
+  return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`
 }
 
 const getRule = (task:TaskConfig) => {

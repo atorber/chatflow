@@ -2,7 +2,7 @@
 import type { VikaBot, TaskConfig, Notifications } from '../db/vika-bot.js'
 
 import { VikaSheet } from '../db/vika.js'
-import type { Message, Wechaty, } from 'wechaty'
+import type { Message, Wechaty } from 'wechaty'
 import { transformKeys } from './activityService.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/mod.js'
 import { generateRandomNumber, wait, logger } from '../utils/mod.js'

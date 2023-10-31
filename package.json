@@ -1,6 +1,6 @@
 {
   "name": "chatflow",
-  "version": "2.0.25",
+  "version": "2.0.26",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
@@ -25,7 +25,7 @@
     "test-vika-orm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/vika-orm-test.ts",
     "test": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/test.ts",
     "start:index": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
-    "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/bot.ts",
+    "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/ding-dong-bot.ts",
     "start:store": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/plugins/store-messages-locally.ts",
     "start:meet": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/plugins/store-messages-locally.ts",
     "rm-temp": "rm -r temp; mkdir temp",
@@ -34,7 +34,7 @@
     "lint:md": "markdownlint README.md",
     "lint:ts": "tsc --isolatedModules --noEmit",
     "lint:es": "eslint \"src/**/*.ts\" --ignore-pattern tests/fixtures/",
-    "lint-fix": "eslint --fix \"src/**/*.ts\" \"src/**/*.js\""
+    "lint:fix": "eslint --fix \"src/**/*.ts\" \"src/**/*.js\""
   },
   "repository": {
     "type": "git",

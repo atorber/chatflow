@@ -64,7 +64,7 @@ export class RoomChat {
       }
 
       for (let i = 0; i < rooms.length; i++) {
-        
+
         const item: Room | undefined = rooms[i]
         // if(item) log.info('头像信息：', (JSON.stringify((await item.avatar()).toJSON())))
 

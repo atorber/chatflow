@@ -7,7 +7,7 @@ import {
 } from 'wechaty'
 import { formatSentMessage, logger } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/mod.js'
-import axios from 'axios';
+import axios from 'axios'
 axios.defaults.timeout = 60000
 
 async function gpt (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
@@ -104,7 +104,7 @@ async function sendMiniProgram (answer: any, bot: Wechaty, message: Message) {
 
 // aibot 函数基本保持不变
 async function aibot (sysConfig: ProcessEnv, query: any) {
-  let answer = {
+  const answer = {
     text:'',
   }
 
@@ -115,20 +115,20 @@ async function aibot (sysConfig: ProcessEnv, query: any) {
         model: sysConfig.CHATGPT_MODEL,  // 使用的模型
         messages: [
           // {role: 'system', content: 'You are a helpful assistant.'},
-          {role: 'user', content: query},
+          { role: 'user', content: query },
           // {role: 'assistant', content: 'The Los Angeles Dodgers won the World Series in 2020.'},
           // {role: 'user', content: 'Where was it played?'}
-        ]  // 对话消息数组
+        ],  // 对话消息数组
       },
       {
         headers: {
-          'Authorization': `Bearer ${sysConfig.CHATGPT_KEY}`,
+          Authorization: `Bearer ${sysConfig.CHATGPT_KEY}`,
           'Content-Type': 'application/json',
-        }
-      }
-    );
+        },
+      },
+    )
 
-    logger.info('gpt Response:' + JSON.stringify(response.data));
+    logger.info('gpt Response:' + JSON.stringify(response.data))
 
     if (response.data.choices) {
       return {
@@ -139,7 +139,7 @@ async function aibot (sysConfig: ProcessEnv, query: any) {
       return answer
     }
   } catch (error) {
-    logger.error('请求gpt Error:', error);
+    logger.error('请求gpt Error:', error)
     logger.error(`查询内容，query: ${query}`)
     return answer
 

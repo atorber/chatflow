@@ -5,7 +5,8 @@
   },
   "exclude": [
     "node_modules/",
-    "dist/"
+    "dist/",
+    "src/api/sdk/openai/*.js"
   ],
   "include": [
     "./*.ts",

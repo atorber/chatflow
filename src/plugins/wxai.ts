@@ -9,7 +9,7 @@ import { FileBox } from 'file-box'
 import {
   Room,
   Message,
-  log,
+  // log,
   types,
   Wechaty,
 } from 'wechaty'

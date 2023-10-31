@@ -86,7 +86,7 @@ export class ContactChat {
           try {
             alias = await item.alias() || ''
           } catch (err) {
-            logger.error('获取好友备注失败：'+ err)
+            logger.error('获取好友备注失败：' + err)
           }
           const fields = {
             '备注名称|alias':alias,
@@ -103,7 +103,7 @@ export class ContactChat {
             fields,
           }
           recordsAll.push(record)
-        } 
+        }
       }
       logger.info('好友数量：' + recordsAll.length || '0')
       for (let i = 0; i < recordsAll.length; i = i + 10) {

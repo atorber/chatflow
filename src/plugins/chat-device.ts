@@ -5,7 +5,7 @@ import {
   Contact,
   Wechaty,
   Room,
-  log
+  log,
 } from 'wechaty'
 import { wechaty2chatdev, propertyMessage, eventMessage } from './msg-format.js'
 
@@ -40,7 +40,7 @@ class ChatDevice {
   }
 
   init (bot:Wechaty) {
-    log.info('bot info:',bot.currentUser.id)
+    log.info('bot info:', bot.currentUser.id)
 
     this.chatbot = bot
     this.bot = bot
@@ -51,24 +51,24 @@ class ChatDevice {
       log.info('MQTT连接成功')
     })
     this.mqttclient.on('reconnect', function (e:any) {
-      logger.info('subscriber on reconnect'+ e)
+      logger.info('subscriber on reconnect' + e)
       log.info('subscriber on reconnect', e)
     })
     this.mqttclient.on('disconnect', function (e:any) {
-      logger.info('disconnect--------'+ e)
+      logger.info('disconnect--------' + e)
       log.info('disconnect--------', e)
       that.isConnected = false
     })
     this.mqttclient.on('error', function (e:any) {
-      log.error('error----------'+ e)
-      logger.error('error----------'+ e)
+      log.error('error----------' + e)
+      logger.error('error----------' + e)
     })
     this.mqttclient.on('message', this.onMessage.bind(this))
     this.sub_command()
     this.isOk = true
   }
 
-  publish(topic:string, payload:string){
+  publish (topic:string, payload:string) {
     this.mqttclient.publish(topic, payload)
   }
 
@@ -82,19 +82,19 @@ class ChatDevice {
 
   pub_property (msg:any) {
     this.mqttclient.publish(this.propertyApi, msg)
-    logger.info('mqtt消息发布:'+ this.eventApi, msg)
+    logger.info('mqtt消息发布:' + this.eventApi, msg)
   }
 
   pub_event (msg:any) {
     this.mqttclient.publish(this.eventApi, msg)
-    logger.info('mqtt消息发布:'+ this.eventApi, msg)
+    logger.info('mqtt消息发布:' + this.eventApi, msg)
   }
 
   async pub_message (msg:any) {
     try {
       const payload = await wechaty2chatdev(msg)
       this.mqttclient.publish(this.eventApi, payload)
-      logger.info('mqtt消息发布:'+ this.eventApi, payload)
+      logger.info('mqtt消息发布:' + this.eventApi, payload)
     } catch (err) {
       console.error(err)
     }
@@ -106,8 +106,8 @@ class ChatDevice {
   }
 
   async onMessage (topic:string, message:any) {
-    logger.info('mqtt onMessage:'+ topic)
-    logger.info('mqtt onMessage:'+ message.toString())
+    logger.info('mqtt onMessage:' + topic)
+    logger.info('mqtt onMessage:' + message.toString())
     log.info('this.chatbot', this.chatbot)
     try {
     // const content = JSON.parse(message.toString())
@@ -116,25 +116,25 @@ class ChatDevice {
       const params = message.params
 
       if (name === 'start') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
       }
       if (name === 'stop') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
       }
       if (name === 'logout') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'logonoff') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'userSelf') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'say') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'send') {
@@ -145,42 +145,42 @@ class ChatDevice {
       }
 
       if (name === 'aliasGet') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'aliasSet') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'roomCreate') {
         await createRoom(params, this.chatbot)
       }
       if (name === 'roomAdd') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'roomDel') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'roomAnnounceGet') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'roomAnnounceSet') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'roomQuit') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'roomTopicGet') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'roomTopicSet') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'roomQrcodeGet') {
@@ -188,37 +188,37 @@ class ChatDevice {
 
       }
       if (name === 'memberAllGet') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'contactAdd') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'contactAliasSet') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'contactFindAll') {
         await getAllContact(this.chatdevice, this.chatbot)
       }
       if (name === 'contactFind') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'roomFindAll') {
         await getAllRoom(this.chatdevice, this.chatbot)
       }
       if (name === 'roomFind') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
       if (name === 'config') {
-        logger.info('cmd name:'+ name)
+        logger.info('cmd name:' + name)
 
       }
     } catch (err) {
-      logger.error('MQTT接收到消息错误：'+ err)
+      logger.error('MQTT接收到消息错误：' + err)
     }
 
   }
@@ -434,41 +434,41 @@ async function send (params:any, bot:Wechaty): Promise<any> {
   for (let i = 0; i < toContacts.length; i++) {
     if (toContacts[i].split('@').length === 2 || toContacts[i].split(':').length === 2) {
       logger.info(`向群${toContacts[i]}发消息`)
-try{      
-      const room:Room|undefined = await bot.Room.find({ id: toContacts[i] })
-      if (room) {
-        try {
-          await room.say(msg)
-          await formatSentMessage(bot.currentUser, msg, undefined, room)
+      try {
+        const room:Room|undefined = await bot.Room.find({ id: toContacts[i] })
+        if (room) {
+          try {
+            await room.say(msg)
+            await formatSentMessage(bot.currentUser, msg, undefined, room)
 
-          // 发送成功后向前端发送消息
+            // 发送成功后向前端发送消息
 
-        } catch (err) {
-          logger.error('发送群消息失败：'+err)
+          } catch (err) {
+            logger.error('发送群消息失败：' + err)
+          }
         }
+      } catch (err) {
+        log.error('获取群失败：', err)
+        logger.error('获取群失败：' + err)
       }
-}catch(err){
-  log.error('获取群失败：', err)
-  logger.error('获取群失败：'+err)
-}
 
     } else {
       logger.info(`好友${toContacts[i]}发消息`)
       // logger.info(bot)
-try{
-  const contact:Contact|undefined = await bot.Contact.find({ id: toContacts[i] })
-  if (contact) {
-    try {
-      await contact.say(msg)
-      await formatSentMessage(bot.currentUser, msg, contact, undefined)
-    } catch (err) {
-      logger.error('发送好友消息失败：' + err)
-    }
-  }
-}catch(err){
-  log.error('获取好友失败：', err)
-  logger.error('获取好友失败：'+err)
-}
+      try {
+        const contact:Contact|undefined = await bot.Contact.find({ id: toContacts[i] })
+        if (contact) {
+          try {
+            await contact.say(msg)
+            await formatSentMessage(bot.currentUser, msg, contact, undefined)
+          } catch (err) {
+            logger.error('发送好友消息失败：' + err)
+          }
+        }
+      } catch (err) {
+        log.error('获取好友失败：', err)
+        logger.error('获取好友失败：' + err)
+      }
     }
   }
 
