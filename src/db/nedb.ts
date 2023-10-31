@@ -17,7 +17,7 @@ class DB {
     this.limitValue = 15
   }
 
-  public limit (offset: number, limit: number): this {
+  public limit (offset?: number, limit?: number): this {
     this.offsetValue = offset || 0
     this.limitValue = limit || 15
     return this

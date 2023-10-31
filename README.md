@@ -1,8 +1,12 @@
 # ChatFlow
 
+<img alt="GitHub stars badge" src="https://img.shields.io/github/stars/atorber/chatflow"> <img alt="GitHub forks badge" src="https://img.shields.io/github/forks/atorber/chatflow"> <img alt="GitHub license badge" src="https://img.shields.io/github/license/atorber/chatflow">
+
 > wechat-qa-bot 2.0项目更新为ChatFlow
 
 [访问项目语雀文档了解更多信息](https://www.yuque.com/atorber/oegota)
+
+> 最新版本2.0.25是相对稳定的版本，数据表与之前版本不兼容，在运行时建议配置全新的维格表空间或删除原空间全部表
 
 ## 简介
 
@@ -173,4 +177,4 @@ atorber/chatflow:latest
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=choogoo/chatflow&type=Date)](https://star-history.com/#choogoo/chatflow&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=atorber/chatflow&type=Date)](https://star-history.com/#atorber/chatflow&Date)

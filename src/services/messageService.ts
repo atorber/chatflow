@@ -1,15 +1,39 @@
 /* eslint-disable sort-keys */
-import { db } from '../db/tables.js'
 import type { VikaBot } from '../db/vika-bot.js'
 
 import { VikaSheet } from '../db/vika.js'
-import { Message, ScanStatus, log, types } from 'wechaty'
-import { getCurTime, waitForMs as wait } from '../utils/utils.js'
+import { Message, ScanStatus, types } from 'wechaty'
+import { getCurTime, waitForMs as wait, logger } from '../utils/utils.js'
 import moment from 'moment'
-import fs from 'fs'
 import { FileBox } from 'file-box'
 
+import { db } from '../db/tables.js'
 const messageData = db.message
+
+const MEDIA_PATH = 'data/media/image'
+
+async function handleFileMessage (file:FileBox, db:VikaSheet, message: Message) {
+  const fileName = file.name
+  const room = message.room()
+  const talker = message.talker()
+  let filePath = `${MEDIA_PATH}/contact/${talker.id}_${fileName}`
+  if(room){
+    filePath = `${MEDIA_PATH}/room/${room.id}_${fileName}`
+  }
+
+  // logger.info('文件路径filePath:', filePath)
+
+  try {
+    await file.toFile(filePath, true)
+    logger.info('保存文件到本地成功')
+  } catch (err) {
+    logger.error('保存文件到本地失败', err)
+    return ''
+  }
+
+  await wait(1000)
+  return await db.upload(filePath, '')
+}
 
 // 服务类
 export class MessageChat {
@@ -17,11 +41,13 @@ export class MessageChat {
   private db:VikaSheet
   vikaBot: VikaBot
   msgStore!: any[]
+  messageData: any
 
   constructor (vikaBot:VikaBot) {
     this.vikaBot = vikaBot
     this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.messageSheet)
     this.msgStore = []
+    this.messageData = messageData
     void this.init()
   }
 
@@ -29,33 +55,31 @@ export class MessageChat {
   async init () {
     const that = this
     setInterval(() => {
-      // log.info('待处理消息池长度：', that.msgStore.length || '0')
+      // logger.info('待处理消息池长度：', that.msgStore.length || '0')
 
       if (that.msgStore.length) {
         const end = that.msgStore.length < 10 ? that.msgStore.length : 10
         const records = that.msgStore.splice(0, end)
-        // log.info('写入vika的消息：', JSON.stringify(records))
+        // logger.info('写入vika的消息：', JSON.stringify(records))
         try {
           this.db.insert(records).then((response: { success: any }) => {
             if (!response.success) {
-              log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
-            } else {
-              log.info('调用vika写入接口成功，写入vika成功~')
+              logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
             }
             return response
-          }).catch((err: any) => { log.error('调用vika写入接口失败：', err) })
+          }).catch((err: any) => { logger.error('调用vika写入接口失败：', err) })
         } catch (err) {
-          log.error('调用datasheet.records.create失败：', err)
+          logger.error('调用datasheet.records.create失败：', err)
         }
       }
     }, 1000)
   }
 
   addRecord (record: any) {
-    log.info('消息入列:', JSON.stringify(record))
+    logger.info('消息入列:', JSON.stringify(record))
     if (record.fields) {
       this.msgStore.push(record)
-      // log.info('最新消息池长度：', this.msgStore.length)
+      // logger.info('最新消息池长度：', this.msgStore.length)
     }
   }
 
@@ -71,11 +95,38 @@ export class MessageChat {
     const curTime = getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
     const files: any = []
+    let wxAvatar:any = ''
+    let roomAvatar:any = ''
+    let listenerAvatar:any = ''
+    try {
+      wxAvatar = (await talker.avatar()).toJSON()
+      wxAvatar = wxAvatar.url
+    }catch (e) {
+      logger.error('获取发言人头像失败：', e)
+    }
+
+    if(listener){
+      try {
+        listenerAvatar = (await listener.avatar()).toJSON()
+        listenerAvatar = listenerAvatar.url
+      }catch (e) {
+        logger.error('获取发言人头像失败：', e)
+      }
+    }
+
+    if(room){
+      try {
+        roomAvatar = (await room.avatar()).toJSON()
+        roomAvatar = roomAvatar.url
+      }catch (e) {
+        logger.error('获取发言人头像失败：', e)
+      }
+    }
 
     try {
       if (uploadedAttachments) {
-        files.push(uploadedAttachments)
-        text = JSON.stringify(uploadedAttachments)
+        files.push(uploadedAttachments.data)
+        // text = JSON.stringify(uploadedAttachments.data)
       }
 
       const record = {
@@ -92,25 +143,28 @@ export class MessageChat {
           '消息ID|messageId': msg.id,
           '接收人|listener': topic ? '--' : (await listener?.alias() || listener?.name()),
           '接收人ID|listenerid':topic ? '--' : listener?.id,
+          '发送者头像|wxAvatar': wxAvatar,
+          '群头像|roomAvatar':roomAvatar,
+          '接收人头像|listenerAvatar':listenerAvatar,
         },
       }
-      // log.info('addChatRecord:', JSON.stringify(record))
+      // logger.info('addChatRecord:', JSON.stringify(record))
       this.msgStore.push(record)
-      log.info('最新消息池长度：', this.msgStore.length)
+      // logger.info('最新消息池长度：', this.msgStore.length)
     } catch (e) {
-      log.error('添加记录失败：', e)
+      logger.error('添加记录失败：', e)
 
     }
 
   }
 
-  async addScanRecord (uploadedAttachments: string, text: string) {
+  async addScanRecord (uploadedAttachments: any, text: string) {
 
     const curTime = getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
     const files: any = []
-    if (uploadedAttachments) {
-      files.push(uploadedAttachments)
+    if (uploadedAttachments.data) {
+      files.push(uploadedAttachments.data)
     }
 
     const records = [
@@ -128,13 +182,12 @@ export class MessageChat {
       },
     ]
 
-    log.info('登录二维码消息:', records)
-    this.db.records.create(records).then((response: { success: any }) => {
-      if (!response.success) {
-        log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
-      }
-      return response
-    }).catch((err: any) => { log.error('调用vika写入接口失败：', err) })
+    // logger.info('待写入登录二维码消息:', JSON.stringify(records))
+    const response = await this.db.insert(records)
+    if (!response.success) {
+      logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
+    }
+    return response
   }
 
   async addHeartbeatRecord (text: string) {
@@ -155,17 +208,18 @@ export class MessageChat {
         '文件图片|file': files,
       },
     }
-    log.info('心跳消息:', JSON.stringify(record))
+    logger.info('心跳消息:', JSON.stringify(record))
     this.msgStore.push(record)
   }
 
   async onMessage (message: Message) {
+    const room = message.room()
+    const talker = message.talker()
     try {
 
-      let uploadedAttachments = ''
+      let uploadedAttachments:any = ''
       const msgType = types.Message[message.type()]
-      let file: any = ''
-      let filePath = ''
+      let file: any
       let text = ''
 
       let urlLink
@@ -180,16 +234,19 @@ export class MessageChat {
           // 图片消息
 
         case types.Message.Image:
-
+          const img = await message.toImage()
+          await wait(1500)
           try {
-            // await wait(2500)
-            // const img = await message.toImage()
-            // file = await img.thumbnail()
-            file = await message.toFileBox()
+            file = await img.hd()
+            // file = await message.toFileBox()
 
           } catch (e) {
-            log.error('Image解析失败：', e)
-            file = ''
+            logger.error('Image解析img.hd()失败：', e)
+            try{
+            file = await img.thumbnail()
+            }catch (e) {
+            logger.error('Image解析img.thumbnail()失败：', e)
+            }
           }
 
           break
@@ -208,7 +265,7 @@ export class MessageChat {
 
           text = JSON.stringify(JSON.parse(JSON.stringify(miniProgram)).payload)
 
-          // log.info(miniProgram)
+          // logger.info(miniProgram)
           /*
           miniProgram: 小程序卡片数据
           {
@@ -227,12 +284,11 @@ export class MessageChat {
 
         // 语音消息
         case types.Message.Audio:
-
+          await wait(1500)
           try {
             file = await message.toFileBox()
-
           } catch (e) {
-            log.error('Audio解析失败：', e)
+            logger.error('Audio解析失败：', e)
             file = ''
           }
 
@@ -240,12 +296,12 @@ export class MessageChat {
 
         // 视频消息
         case types.Message.Video:
-
+          await wait(1500)
           try {
             file = await message.toFileBox()
 
           } catch (e) {
-            log.error('Video解析失败：', e)
+            logger.error('Video解析失败：', e)
             file = ''
           }
           break
@@ -257,7 +313,7 @@ export class MessageChat {
             file = await message.toFileBox()
 
           } catch (e) {
-            log.error('Emoticon解析失败：', e)
+            logger.error('Emoticon解析失败：', e)
             file = ''
           }
 
@@ -265,12 +321,12 @@ export class MessageChat {
 
         // 文件消息
         case types.Message.Attachment:
-
+          await wait(1500)
           try {
             file = await message.toFileBox()
 
           } catch (e) {
-            log.error('Attachment解析失败：', e)
+            logger.error('Attachment解析失败：', e)
             file = ''
           }
 
@@ -279,7 +335,7 @@ export class MessageChat {
         case types.Message.Location:
 
           // const location = await message.toLocation()
-          // text = JSON.stringify(JSON.parse(JSON.stringify(location)).payload)
+          text = message.text()
           break
         case types.Message.Unknown:
           // const location = await message.toLocation()
@@ -291,20 +347,13 @@ export class MessageChat {
       }
 
       if (file) {
-        filePath = 'data/media/image/' + file.name
-        try {
-          const writeStream = fs.createWriteStream(filePath)
-          await file.pipe(writeStream)
-          await wait(1000)
-          uploadedAttachments = await this.db.upload(filePath)
-          await wait(1000)
-          // fs.unlink(filePath, (err) => {
-          //   log.info('上传vika成功，删除文件：', filePath, err)
-          // })
-        } catch {
-          log.info('上传vika失败：', filePath)
+        logger.info('文件file:', file)
+        if(room){
+          text = `/room/${room.id}_${file.name}`
+        } else{
+          text = `/contact/${talker.id}_${file.name}`
         }
-
+        uploadedAttachments = await handleFileMessage(file, this.db,message)
       }
 
       if (message.type() !== types.Message.Unknown) {
@@ -312,7 +361,7 @@ export class MessageChat {
       }
 
     } catch (e) {
-      log.info('vika 写入失败：', e)
+      logger.error('onMessage消息转换失败：', e)
     }
   }
 
@@ -323,37 +372,44 @@ export class MessageChat {
         'https://wechaty.js.org/qrcode/',
         qrcodeUrl,
       ].join('')
-      // log.info('StarterBot', 'vika onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
+      // logger.info('StarterBot', 'vika onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
 
-      let uploadedAttachments = ''
+      let uploadedAttachments:any = ''
       let file: FileBox
-      let filePath = 'qrcode.png'
+      let filePath = ''
       try {
         file = FileBox.fromQRCode(qrcode)
-        filePath = './' + file.name
+        filePath = 'data/media/image/qrcode/' + file.name
         try {
-          const writeStream = fs.createWriteStream(filePath)
-          await file.pipe(writeStream)
+          // const writeStream = fs.createWriteStream(filePath)
+          // await file.pipe(writeStream)
+          await file.toFile(filePath, true)
           await wait(1000)
-          uploadedAttachments = await this.db.upload(filePath)
+          uploadedAttachments = await this.db.upload(filePath, '')
           const text = qrcodeImageUrl
-          await this.addScanRecord(uploadedAttachments, text)
-          fs.unlink(filePath, (err) => {
-            log.info('二维码上传vika完成删除文件：', filePath, err)
-          })
+          if (uploadedAttachments.data) {
+            try {
+              await this.addScanRecord(uploadedAttachments, text)
+              // fs.unlink(filePath, (err) => {
+              //   logger.info('二维码上传vika完成删除文件：', filePath, err)
+              // })
+            } catch (err) {
+              logger.error('二维码vika 写入失败：', err)
+            }
+          }
         } catch {
-          log.info('二维码上传失败：', filePath)
-          fs.unlink(filePath, (err) => {
-            log.info('二维码上传vika失败删除文件', filePath, err)
-          })
+          logger.info('二维码上传失败：', filePath)
+          // fs.unlink(filePath, (err) => {
+          //   logger.info('二维码上传vika失败删除文件', filePath, err)
+          // })
         }
 
       } catch (e) {
-        log.info('二维码vika 写入失败：', e)
+        logger.error('onScan,二维码vika 写入失败：', e)
       }
 
     } else {
-      log.info('机器人启动，二维码上传维格表', 'onScan: %s(%s)', ScanStatus[status], status)
+      logger.info('机器人启动，二维码上传维格表', 'onScan: %s(%s)', ScanStatus[status], status)
     }
   }
 

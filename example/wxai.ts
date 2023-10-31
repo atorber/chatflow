@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable sort-keys */
-import { WxOpenaiBot, AIBotConfig, SkillInfoArray  } from '../src/services/wxopenaiService.js'
+import { WxOpenaiBot, WxOpenaiBotConfig, SkillInfoArray  } from '../src/services/wxopenaiService.js'
 import 'dotenv/config.js'
 
 // Usage
@@ -37,7 +37,7 @@ const skills:SkillInfoArray  = [
 //   managerid: process.env['MANAGER_ID'] || '',
 // }
 
-const config: AIBotConfig = {
+const config: WxOpenaiBotConfig = {
   encodingAESKey: '',
   token: '',
   nonce: 'ABSBSDSD',

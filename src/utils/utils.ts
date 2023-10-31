@@ -1,5 +1,6 @@
 /* eslint-disable sort-keys */
 import moment from 'moment'
+import boxen from 'boxen'
 
 import type {
   Contact,
@@ -9,6 +10,21 @@ import type {
 } from 'wechaty'
 
 import type { TaskConfig } from '../db/vika-bot.js'
+import * as winston from 'winston';
+
+// 创建一个 Winston 日志记录器实例
+export const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`)
+  ),
+  defaultMeta: { service: 'user-service' },
+  transports: [
+    new winston.transports.File({ filename: 'data/logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'data/logs/info.log' }),
+  ],
+});
 
 async function formatSentMessage (userSelf: Contact, text: string, talker: Contact|undefined, room: Room|undefined) {
   // console.debug('发送的消息：', text)
@@ -65,6 +81,17 @@ function getCurTime () {
   const offsetGMT = new Date().getTimezoneOffset() // 本地时间和格林威治的时间差，单位为分钟
   const time = timestamp + offsetGMT * 60 * 1000 + timezone * 60 * 60 * 1000
   return time
+}
+
+export function getCurrentTime(timestamp?:number) {
+  const now = timestamp? new Date(timestamp):new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const second = now.getSeconds();
+  return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
 }
 
 const getRule = (task:TaskConfig) => {
@@ -158,7 +185,19 @@ function generateRandomNumber (base:number): number {
 
 const wait = waitForMs
 
+const logForm = (msg:string) => {
+  const time = new Date().toTimeString()
+  console.info(boxen(msg, {
+    title: ` ChatFlow ${time}`,
+    padding: 1,
+    margin: 1,
+    borderStyle: 'classic',
+  // borderStyle: 'double',
+  }))
+}
+
 export {
+  logForm,
   generateRandomNumber,
   toDBC,
   getNow,
