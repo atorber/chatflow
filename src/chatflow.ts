@@ -20,7 +20,7 @@ import {
   gpt,
   gptbot,
   ChatDevice,
-  propertyMessage,
+  // propertyMessage,
   eventMessage,
   exportContactsAndRoomsToCSV,
   exportContactsAndRoomsToXLSX,
@@ -107,14 +107,13 @@ const initializeServicesAndEnv = async (vikaBot:VikaBot) => {
   // logger.info('services:' + JSON.stringify(services))
 }
 
-
 const shouldInitializeMQTT = () => {
   return configEnv.MQTT_ENDPOINT && (configEnv.MQTT_MQTTCONTROL || configEnv.MQTT_MQTTMESSAGEPUSH)
 }
 
 const initializeMQTT = (bot: Wechaty) => {
   const clientString = configEnv.VIKA_TOKEN + configEnv.VIKA_SPACE_NAME
-  const client = CryptoJS.SHA256(clientString).toString();
+  const client = CryptoJS.SHA256(clientString).toString()
 
   chatdev = new ChatDevice(configEnv.MQTT_USERNAME, configEnv.MQTT_PASSWORD, configEnv.MQTT_ENDPOINT, configEnv.MQTT_PORT, configEnv.BASE_BOT_ID || client)
   chatdev.init(bot)
@@ -148,7 +147,7 @@ const postVikaInitialization = async (bot: Wechaty, vikaBot:VikaBot) => {
   await (vikaBot.services as Services).noticeService.updateJobs(bot, (vikaBot.services as Services).messageService)
   const helpText = await (vikaBot.services as Services).keywordService.getSystemKeywordsText()
   logForm(`启动成功，系统准备就绪，在当前群（管理员群）回复对应指令进行操作\n\n${helpText}`)
-  await notifyAdminRoom(bot,vikaBot)
+  await notifyAdminRoom(bot, vikaBot)
 }
 
 const notifyAdminRoom = async (bot: Wechaty, vikaBot:VikaBot) => {
@@ -469,16 +468,14 @@ const extractAtContent = async (vikaBot:VikaBot, message:Message, keyword: strin
   const role = '智能助理'
 
   let p = `以下是一个群组的聊天记录，你将以“${keyword}”的身份作为群聊中的一员参与聊天。你的回复必须结合聊天历史记录和你的知识给出尽可能${style}的回答，回复字数不超过150字，并且听起来语气口吻像${role}的风格。\n\n`
-  
+
   const time = formatTimestamp(new Date().getTime())[5]
   let chatText = ''
   for (const i in messageList) {
     const item = messageList[i]
     if (chatText.length < 2000 && item.data.payload.type === 7) {
       chatText = `[${item.time || time} ${item.talker.payload.name}]:${item.data.payload.text}\n` + chatText
-    } else {
-
-    }
+    } else { /* empty */ }
   }
   // chatText = chatText + `[${time} ${message.talker().name()}]：${newText}\n`
   // chatText = chatText + `[${time} ${keyword}]：`
@@ -488,7 +485,7 @@ const extractAtContent = async (vikaBot:VikaBot, message:Message, keyword: strin
   p = `微信群聊天记录:\n${chatText}\n\n指令:\n你是微信聊天群里的成员【${keyword}】，你正在参与大家的群聊天，先在轮到你发言了，你的回复尽可能清晰、严谨，字数不超过150字，并且你需要使用${role}的风格回复。当前时间是${time}。`
 
   p = p + `\n\n最新的对话:\n[${time} ${message.talker().name()}]：${newText}\n[${time} ${keyword}]：`
-  logger.info('提示词：' + p )
+  logger.info('提示词：' + p)
 
   const answer = await gptbot(process.env, p)
 

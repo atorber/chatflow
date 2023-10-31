@@ -2,7 +2,7 @@
 import type { VikaBot, TaskConfig } from '../db/vika-bot.js'
 import { VikaSheet } from '../db/vika.js'
 import type { SkillInfoArray } from './wxopenaiService.js'
-import { logger } from '../utils/mod.js' 
+import { logger } from '../utils/mod.js'
 
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice

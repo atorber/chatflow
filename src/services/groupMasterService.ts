@@ -61,7 +61,7 @@ const commandInvoke = `thing/${productKey}/${wxKey}/command/invoke`
 
 const msgStore:any = {}
 const reqStore:any = []
-const timerId:any = setInterval(() => {
+setInterval(() => {
   // logger.info('待处理消息池长度：', reqStore.length||0);
   if (reqStore.length) {
     logger.info('待处理消息池长度：', reqStore.length || 0)
@@ -294,7 +294,7 @@ async function send (bot: Wechaty, params: any) {
       }
     }
   }
-
+  return null
 }
 
 function getEventsMsg (eventName: any, msg: any) {
@@ -777,7 +777,7 @@ mqttclient.on('connect', function () {
   })
 })
 
-mqttclient.on('message', (topic: string, message: Buffer) => {
+mqttclient.on('message', (_topic: string, message: Buffer) => {
   (async () => {
     logger.info('message', '------------------------------------------------')
     try {

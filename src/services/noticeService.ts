@@ -14,13 +14,13 @@ import { sendMsg } from './configService.js'
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice
 
-function getRemainingTime(taskTime:number):string{
-  const time =taskTime - new Date().getTime()
-    const seconds = Math.floor((time / 1000) % 60);
-    const minutes = Math.floor((time / (1000 * 60)) % 60);
-    const hours = Math.floor((time / (1000 * 60 * 60)) % 24);
-    const days = Math.floor(time / (1000 * 60 * 60 * 24));
-    return `${days}天${hours}小时${minutes}分钟${seconds}秒`;
+function getRemainingTime (taskTime:number):string {
+  const time = taskTime - new Date().getTime()
+  const seconds = Math.floor((time / 1000) % 60)
+  const minutes = Math.floor((time / (1000 * 60)) % 60)
+  const hours = Math.floor((time / (1000 * 60 * 60)) % 24)
+  const days = Math.floor(time / (1000 * 60 * 60 * 24))
+  return `${days}天${hours}小时${minutes}分钟${seconds}秒`
 }
 
 type TaskFields = {
@@ -131,7 +131,7 @@ export class NoticeChat {
               let text = task.msg
               // 如果task.msg中包含“d%”将其替换为task.time减去当前时间得到的剩余时间（精确到秒）赋值给task.msg，示例消息：距离高考还有：d%
               if (task.msg.includes('d%')) {
-                text = task.msg.replace(/d%/g, getRemainingTime(task.time));
+                text = task.msg.replace(/d%/g, getRemainingTime(task.time))
               }
 
               try {

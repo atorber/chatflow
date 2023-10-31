@@ -4,7 +4,7 @@ import { wxai } from './wxai.js'
 import { sendNotice } from './group-notice.js'
 
 import { ChatDevice } from './chat-device.js'
-import { propertyMessage, eventMessage, wechaty2lumen } from './msg-format.js'
+import { propertyMessage, eventMessage } from './msg-format.js'
 import { getFormattedRideInfo } from './riding.js'
 
 import {
@@ -36,7 +36,6 @@ export {
   getRoom,
   isThisContact,
   isThisRoom,
-  wechaty2lumen,
 }
 
 export type {

@@ -17,7 +17,7 @@ async function handleFileMessage (file:FileBox, db:VikaSheet, message: Message) 
   const room = message.room()
   const talker = message.talker()
   let filePath = `${MEDIA_PATH}/contact/${talker.id}_${fileName}`
-  if(room){
+  if (room) {
     filePath = `${MEDIA_PATH}/room/${room.id}_${fileName}`
   }
 
@@ -101,24 +101,24 @@ export class MessageChat {
     try {
       wxAvatar = (await talker.avatar()).toJSON()
       wxAvatar = wxAvatar.url
-    }catch (e) {
+    } catch (e) {
       logger.error('获取发言人头像失败：', e)
     }
 
-    if(listener){
+    if (listener) {
       try {
         listenerAvatar = (await listener.avatar()).toJSON()
         listenerAvatar = listenerAvatar.url
-      }catch (e) {
+      } catch (e) {
         logger.error('获取发言人头像失败：', e)
       }
     }
 
-    if(room){
+    if (room) {
       try {
         roomAvatar = (await room.avatar()).toJSON()
         roomAvatar = roomAvatar.url
-      }catch (e) {
+      } catch (e) {
         logger.error('获取发言人头像失败：', e)
       }
     }
@@ -233,7 +233,8 @@ export class MessageChat {
 
           // 图片消息
 
-        case types.Message.Image:
+        case types.Message.Image:{
+
           const img = await message.toImage()
           await wait(1500)
           try {
@@ -242,14 +243,15 @@ export class MessageChat {
 
           } catch (e) {
             logger.error('Image解析img.hd()失败：', e)
-            try{
-            file = await img.thumbnail()
-            }catch (e) {
-            logger.error('Image解析img.thumbnail()失败：', e)
+            try {
+              file = await img.thumbnail()
+            } catch (e) {
+              logger.error('Image解析img.thumbnail()失败：', e)
             }
           }
 
           break
+        }
 
         // 链接卡片消息
         case types.Message.Url:
@@ -348,12 +350,12 @@ export class MessageChat {
 
       if (file) {
         logger.info('文件file:', file)
-        if(room){
+        if (room) {
           text = `/room/${room.id}_${file.name}`
-        } else{
+        } else {
           text = `/contact/${talker.id}_${file.name}`
         }
-        uploadedAttachments = await handleFileMessage(file, this.db,message)
+        uploadedAttachments = await handleFileMessage(file, this.db, message)
       }
 
       if (message.type() !== types.Message.Unknown) {

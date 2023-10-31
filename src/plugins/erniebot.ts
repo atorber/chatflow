@@ -34,7 +34,7 @@ async function getAccessToken (sysConfig:ProcessEnv) {
   }
 }
 
- export async function getFormattedRideInfo (message:Message) {
+export async function getFormattedRideInfo (message:Message) {
   let text: string = message.text()
   const name:string = message.talker().name()
   const apiUrl = 'https://openai.api2d.net/v1/chat/completions'
