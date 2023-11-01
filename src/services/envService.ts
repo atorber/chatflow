@@ -5,13 +5,27 @@ import { VikaSheet, IRecord } from '../db/vika.js'
 import { log } from 'wechaty'
 import { wait } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/env.js'
+import { BaseEntity, MappingOptions } from '../db/vika-orm.js'
 
 // import { db } from '../db/tables.js'
 // const envData = db.env
 // log.info(JSON.stringify(envData))
 
+const mappingOptions: MappingOptions = {  // 定义字段映射选项
+  fieldMapping: {  // 字段映射
+    name: '配置项|name',
+    key: '标识|key',
+    value: '值|value',
+    desc: '说明|desc',
+    syncStatus: '同步状态|syncStatus',
+    lastOperationTime: '最后操作时间|lastOperationTime',
+    action: '操作|action',
+  },
+  tableName: '环境变量|Env',  // 表名
+}
+
 // 服务类
-export class EnvChat {
+export class EnvChat extends BaseEntity {
 
   db!:VikaSheet
   vikaBot!: VikaBot
@@ -21,21 +35,33 @@ export class EnvChat {
   vikaIdMap: any
   vikaData: any
 
-  constructor () {
-    this.getConfigFromEnv()
+  protected static override mappingOptions: MappingOptions = mappingOptions  // 设置映射选项为上面定义的 mappingOptions
+
+  protected static override getMappingOptions (): MappingOptions {  // 获取映射选项的方法
+    return this.mappingOptions  // 返回当前类的映射选项
+  }
+
+  static override setMappingOptions (options: MappingOptions) {  // 设置映射选项的方法
+    this.mappingOptions = options  // 更新当前类的映射选项
   }
 
   // 初始化
   async init (vikaBot:VikaBot) {
     this.vikaBot = vikaBot
-    this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.envSheet)
-    await this.getAll()
+    const token = vikaBot.token || ''
+    const baseId = vikaBot.dataBaseIds.envSheet
+    this.db = new VikaSheet(vikaBot.vika, baseId)
+    EnvChat.setVikaOptions({
+      apiKey: token,
+      baseId: vikaBot.dataBaseIds.envSheet, // 设置 base ID
+    })
+    this.getConfigFromEnv()
+    this.records = await this.getAll()
   }
 
   async getAll () {
     const records = await this.db.findAll()
     // log.info('维格表中的记录：', JSON.stringify(records))
-    this.records = records
     return records
   }
 

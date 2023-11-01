@@ -9,20 +9,20 @@ import {
 // import Koa from 'koa'
 // import bodyParser from 'koa-bodyparser'
 
-import { ChatFlow, configEnv, getBotOps } from '../src/chatflow.js'
+import { ChatFlow, getBotOps } from '../src/chatflow.js'
 import { logForm } from '../src/utils/utils.js'
 import {
   VikaBot,
 } from '../src/db/vika-bot.js'
 
 // 构建机器人
-const ops = getBotOps(configEnv.WECHATY_PUPPET, configEnv.WECHATY_TOKEN)
+const ops = getBotOps(process.env.WECHATY_PUPPET, process.env.WECHATY_TOKEN)
 const bot = WechatyBuilder.build(ops)
 
 const initializeVika = async () => {
   const vikaBot = new VikaBot({
-    spaceName: configEnv.VIKA_SPACE_NAME || '',
-    token: configEnv.VIKA_TOKEN || '',
+    spaceName: process.env.VIKA_SPACE_NAME || '',
+    token: process.env.VIKA_TOKEN || '',
   })
   try {
     await vikaBot.init()

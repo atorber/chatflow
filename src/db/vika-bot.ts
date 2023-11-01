@@ -95,6 +95,7 @@ export class VikaBot {
   reminderList!: any[]
   statisticRecords: any
   services!:Services | undefined
+  token?: string
 
   constructor (config: VikaBotConfigTypes) {
     if (!config.token) {
@@ -104,6 +105,7 @@ export class VikaBot {
     } else {
       this.spaceName = config.spaceName
       this.vika = new Vika({ token: config.token })
+      this.token = config.token
       this.spaceId = ''
       this.msgStore = []
       this.services = undefined

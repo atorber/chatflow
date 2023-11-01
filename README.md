@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 MD033 -->
 # ChatFlow
 
 <img alt="GitHub stars badge" src="https://img.shields.io/github/stars/atorber/chatflow"> <img alt="GitHub forks badge" src="https://img.shields.io/github/forks/atorber/chatflow"> <img alt="GitHub license badge" src="https://img.shields.io/github/license/atorber/chatflow">
@@ -78,7 +79,9 @@ npm run start
 
 5.2 如果不希望每个群都开启智能问答，需设置群白名单,首先需要将上图中的群白名单开关设置为开启
 
-然后将群加入到问答白名单，在“群白名单”表中，加入需要开启的群ID（roomid），群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
+然后将群加入到问答白名单，在“群白名单”表中，加入需要开启的群ID（roomid）
+
+群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
 
 详细操作参考 [手把手教程](https://www.yuque.com/atorber/oegota/zm4ulnwnqp9whmd6)
 
