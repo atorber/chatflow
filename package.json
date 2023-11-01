@@ -1,6 +1,6 @@
 {
   "name": "chatflow",
-  "version": "2.0.29",
+  "version": "2.0.30",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {

@@ -30,11 +30,9 @@ export enum EnvironmentVariables {
     AUTOQA_AUTOREPLY = 'AUTOQA_AUTOREPLY',
     VIKA_USEVIKA = 'VIKA_USEVIKA',
     VIKA_UPLOADMESSAGETOVIKA = 'VIKA_UPLOADMESSAGETOVIKA',
-    VIKA_AUTOMATICCLOUD = 'VIKA_AUTOMATICCLOUD',
     WEBHOOK_WEBHOOKMESSAGEPUSH = 'WEBHOOK_WEBHOOKMESSAGEPUSH',
     MQTT_MQTTMESSAGEPUSH = 'MQTT_MQTTMESSAGEPUSH',
     MQTT_MQTTCONTROL = 'MQTT_MQTTCONTROL',
-    IM_IMCHAT = 'IM_IMCHAT',
   }
 
 export interface ProcessEnv {
@@ -50,7 +48,6 @@ export interface ProcessEnv {
     ADMINROOM_ADMINROOMID: string;
     ADMINROOM_ADMINROOMTOPIC: string;
     BASE_BOT_ID: string;
-    BASE_WELCOM_EMESSAGE_FOR_JOIN_ROOM: string;
     BASE_WELCOME_MESSAGE_FOR_ADD_FRIEND: string;
 
     // 智能问答配置
@@ -95,12 +92,9 @@ export interface ProcessEnv {
     // 维格表配置
     VIKA_USEVIKA: string | boolean;
     VIKA_UPLOADMESSAGETOVIKA: string | boolean;
-    VIKA_AUTOMATICCLOUD: string | boolean;
 
     WEBHOOK_WEBHOOKMESSAGEPUSH: string | boolean;
 
     MQTT_MQTTMESSAGEPUSH: string | boolean;
     MQTT_MQTTCONTROL: string | boolean;
-
-    IM_IMCHAT: string | boolean;
   }

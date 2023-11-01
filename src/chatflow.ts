@@ -64,6 +64,8 @@ import { WxOpenaiBot, type WxOpenaiBotConfig, type SkillInfoArray } from './serv
 import type { ContactWhiteList, ProcessEnv, RoomWhiteList, ChatMessage } from './types/mod.js'
 // import { spawn } from 'child_process'
 import type { VikaBot } from './db/vika-bot.js'
+import { VikaBot as VikaBotClass } from './db/vika-bot.js'
+import { type } from 'os'
 
 // logger.info('初始化配置文件信息:\n' +  JSON.stringify(config, undefined, 2))
 logger.info('process.env：' + JSON.stringify(process.env))
@@ -702,6 +704,39 @@ bot.on('error', async (err: any) => {
 
 }
 
-export {
-  getBotOps,
+type WechatyConfig = {
+  puppet: string,
+  token: string,
 }
+
+// 获取配置信息
+const initializeVika = async (vikaConfig:{
+  token:string,
+  spaceName:string
+}) => {
+  const vikaBot = new VikaBotClass(vikaConfig)
+  await vikaBot.init()
+  let config:any[] = await vikaBot.getAllRecords(vikaBot.dataBaseIds.envSheet)
+  config = config.filter((item:any) => item.fields['标识|key'] === 'WECHATY_PUPPET' || item.fields['标识|key'] === 'WECHATY_TOKEN')
+
+  const wechatyConfig :WechatyConfig = {
+    puppet:config[0].fields['值|value'],
+    token:config[1].fields['值|value'],
+  }
+  // log.info('vikaBot配置信息：', JSON.stringify(vikaconfig, undefined, 2))
+  return {
+    vikaBot,
+    wechatyConfig,
+  }
+}
+
+export {
+  initializeVika,
+  getBotOps,
+  VikaBot,
+  VikaBotClass,
+  log,
+  logForm,
+}
+
+export type { WechatyConfig }

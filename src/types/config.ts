@@ -43,7 +43,6 @@ interface SysConfig {
   WEB_HOOK_ONOFF: boolean;
   mqtt_PUB_ONOFF: boolean;
   mqtt_SUB_ONOFF: boolean;
-  imOpen: boolean;
 }
 
 interface BotInfo {
@@ -69,7 +68,6 @@ interface AutoQa {
 interface Vika {
   useVika: boolean;
   uploadMessageToVika: boolean;
-  autoMaticCloud: boolean;
 }
 
 interface WebHook {
@@ -81,16 +79,11 @@ interface Mqtt {
   mqttControl: boolean;
 }
 
-interface Im {
-  imChat: boolean;
-}
-
 interface FunctionOnStatus {
   autoQa: AutoQa;
   vika: Vika;
   webHook: WebHook;
   mqtt: Mqtt;
-  im: Im;
 }
 
 interface WechatyConfig {
