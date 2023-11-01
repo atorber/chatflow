@@ -1,6 +1,6 @@
+/* eslint-disable guard-for-in */
 import { Vika, ICreateRecordsReqParams } from '@vikadata/vika'
-import { log } from 'wechaty'
-import 'dotenv/config.js'
+// import 'dotenv/config.js'
 
 interface IField {
   [key:string]: string | '';
@@ -67,6 +67,7 @@ export abstract class BaseEntity {
    */
 
   static setVikaOptions (options: VikaOptions) {
+    console.debug('setVikaOptions:', options)
     if (!options.apiKey || !options.baseId) {
       throw Error('loss apiKey or baseId')
     } else {
@@ -93,14 +94,14 @@ export abstract class BaseEntity {
   static formatData (data: Record<string, any>) {
     const formatted: Record<string, any> = {}
     const mappingOptions = this.getMappingOptions()
-    // log.info('this.mappingOptions', mappingOptions)
+    // console.debug('this.mappingOptions', mappingOptions)
     for (const key in data) {
       const mappedKey = mappingOptions.fieldMapping[key]
       if (mappedKey) {
         formatted[mappedKey] = data[key]
       }
     }
-    // log.info('formatted:', JSON.stringify(formatted))
+    // console.debug('formatted:', JSON.stringify(formatted))
     return formatted
   }
 
@@ -125,11 +126,11 @@ export abstract class BaseEntity {
    */
   static async create<T extends BaseEntity> (entity: Partial<T>) {
     const recordFormat = this.formatData(entity)
-    // log.info('recordFormat', JSON.stringify(recordFormat))
+    // console.debug('recordFormat', JSON.stringify(recordFormat))
     const records:ICreateRecordsReqParams = [ { fields:recordFormat } ]
     try {
       const res = await this.datasheet.records.create(records)
-      // log.info('record res:', JSON.stringify(res))
+      // console.debug('record res:', JSON.stringify(res))
       const record = res.data.records[0]
       return this.createFromRecord(record) as T
     } catch (err) {
@@ -141,19 +142,19 @@ export abstract class BaseEntity {
    * 批量创建记录
    */
   static async createBatch<T extends BaseEntity> (entity: Partial<T>[]) {
-    // log.info('写入维格表:', records.length)
-    const recordsNew:ICreateRecordsReqParams = entity.map((r: any) => { return { fields:this.formatData(r) } })
+    // console.debug('写入维格表:', records.length)
+    const recordsNew:ICreateRecordsReqParams = entity.map((r: any) => ({ fields:this.formatData(r) }))
     try {
       const res = await this.datasheet.records.create(recordsNew)
       if (res.success) {
-        // log.info(res.data.records)
+        // console.debug(res.data.records)
       } else {
-        log.error('记录写入维格表失败：', res)
+        console.error('记录写入维格表失败：', res)
       }
       const records = res.data.records.map((r: any) => this.createFromRecord(r))
       return records
     } catch (err) {
-      log.error('请求维格表写入失败：', err)
+      console.error('请求维格表写入失败：', err)
       return err
     }
   }
@@ -170,12 +171,12 @@ export abstract class BaseEntity {
     try {
       const res = await this.datasheet.records.update([ { fields:data, recordId:id } ])
       if (!res.success) {
-        log.error('记录更新维格表失败：', res)
+        console.error('记录更新维格表失败：', res)
       }
-      const record = res.data.records[0]
-      return this.createFromRecord(record) as T
+      const record:IRecord = res.data.records[0]
+      return this.createFromRecord(record) as IRecord
     } catch (err) {
-      log.error('请求维格表更新失败：', err)
+      console.error('请求维格表更新失败：', err)
       return err
     }
   }
@@ -186,7 +187,7 @@ export abstract class BaseEntity {
   static async delete (id: string) {
     const response = await this.datasheet.records.delete([ id ])
     if (!response.success) {
-      log.error('删除记录失败：', response)
+      console.error('删除记录失败：', response)
     }
     return response
   }
@@ -197,7 +198,7 @@ export abstract class BaseEntity {
   static async deleteBatch (ids: string[]) {
     const response = await this.datasheet.records.delete(ids)
     if (!response.success) {
-      log.error('删除记录失败：', response)
+      console.error('删除记录失败：', response)
     }
     return response
   }
@@ -205,7 +206,7 @@ export abstract class BaseEntity {
   /**
    * 根据 ID 查找单个记录
    */
-  static async findById<T extends BaseEntity> (id: string): Promise<T | null> {
+  static async findById (id: string): Promise<IRecord | null> {
 
     let records: IRecord[] = []
     const query = { recordIds:id }
@@ -213,19 +214,19 @@ export abstract class BaseEntity {
     const response = await this.datasheet.records.query(query)
     if (response.success) {
       records = response.data.records
-      if (records.length) return this.createFromRecord(records[0]) as T
-      // log.info(records)
+      if (records.length) return this.createFromRecord(records[0]) as IRecord
+      // console.debug(records)
       return null
-    } else {
-      log.error('获取数据记录失败：', JSON.stringify(response))
+    } 
+      console.error('获取数据记录失败：', JSON.stringify(response))
       throw response
-    }
+    
   }
 
   /**
    * 根据字段查询多条记录
    */
-  static async findByField<T extends BaseEntity> (fieldName: string, value: any): Promise<T[]> {
+  static async findByField (fieldName: string, value: any): Promise<IRecord[]|undefined[]> {
     const field = this.mappingOptions.fieldMapping[fieldName]
     let records: IRecord[] = []
     if (!field) {
@@ -236,43 +237,62 @@ export abstract class BaseEntity {
       filterByFormula:`{${field}}="${value}"`,
       pageSize:1000,
     }
-    log.info('query:', JSON.stringify(query))
+    console.debug('query:', JSON.stringify(query))
     // 分页获取记录，默认返回第一页
     const response = await this.datasheet.records.query(query)
     if (response.success) {
       records = response.data.records
-      // log.info(records)
-      return records.map((r: any) => this.createFromRecord(r)) as T[]
-    } else {
-      log.error('获取数据记录失败：', JSON.stringify(response))
+      // console.debug(records)
+      return records.map((r: any) => this.createFromRecord(r)) as IRecord[]
+    } 
+      console.error('获取数据记录失败：', JSON.stringify(response))
       return response
-    }
+    
   }
+
+    /**
+   * 根据字段查询多条记录
+   */
+    static async findByQuery (filterByFormula: string): Promise<IRecord[]|undefined[]> {  
+      const query = {
+        filterByFormula,
+        pageSize:1000,
+      }
+      console.debug('query:', JSON.stringify(query))
+      // 分页获取记录，默认返回第一页
+      const response = await this.datasheet.records.query(query)
+      if (response.success) {
+        const {records} = response.data
+        // console.debug(records)
+        return records.map((r: any) => this.createFromRecord(r)) as IRecord[]
+      } 
+        console.error('获取数据记录失败：', JSON.stringify(response))
+        return response
+      
+    }
 
   /**
    * 查询所有记录
    */
-  static async findAll<T extends BaseEntity> (): Promise<T[]> {
-    const records = []
-
+  static async findAll (): Promise<IRecord[]|unknown[]> {
+    const records:IRecord[] = []
     try {
       // Automatically handle pagination and iterate through all records.
       const recordsIter = this.datasheet.records.queryAll()
 
       // The for-await loop requires an async function and has specific version requirements for Node.js/browser.
       for await (const eachPageRecords of recordsIter) {
-        // log.info('findAll ():', JSON.stringify(eachPageRecords))
+        // console.debug('findAll ():', JSON.stringify(eachPageRecords))
         records.push(...eachPageRecords)
       }
 
-      // log.info('findAll() records:', records.length)
-      return records.map((r: any) => this.createFromRecord(r)) as T[]
+      // console.debug('findAll() records:', records.length)
+      return records.map((r: any) => this.createFromRecord(r)) as IRecord[]
 
     } catch (error) {
-      log.error('Error in findAll():', error)
+      console.error('Error in findAll():', error)
       throw error
     }
-
   }
 
   /**
