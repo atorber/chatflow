@@ -163,7 +163,7 @@ function initDatabase (filename: string) {
 }
 
 // Test usage
-async function test () {
+export async function test () {
   initDatabase('user.db')
 
   User.on('created', (user: User) => {
@@ -177,5 +177,3 @@ async function test () {
     console.error('Error saving user:', error)
   }
 }
-
-await test()
