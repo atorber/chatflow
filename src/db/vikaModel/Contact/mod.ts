@@ -5,36 +5,19 @@ import type {
   // Field,
 } from '../Model'
 
-import fs from 'fs'
-
-import path from 'path'
 import { replaceSyncStatus, actionState } from '../actionBar.js'
 
 const name = '好友列表|Contact'
 const code = 'contactSheet'
 
-// 使用 import.meta.url 获取当前模块的 URL
-// 创建一个获取当前目录的函数
-const getCurrentDir = () => {
-  const err = new Error()
-  const stack = err.stack?.split('\n')
-  // 寻找调用这个函数的位置
-  const callerLine = stack?.find(line => line.includes('at'))
-  const match = callerLine?.match(/\((.*):[0-9]+:[0-9]+\)/)
-  return match ? path.dirname(match[1] || '') : undefined
-}
-
-// 使用函数获取当前目录
-const currentDir = getCurrentDir() || ''
-
-const vikaFields = JSON.parse(fs.readFileSync(path.join(currentDir, 'fields.json'), 'utf-8'))
-let fields = vikaFields.data.fields
+const vikaFields = { code:200, success:true, data:{ fields:[ { id:'fldQkY67dBZ4e', name:'好友ID|id', type:'SingleText', property:{}, editable:true, isPrimary:true }, { id:'fldsQQJOJHIkX', name:'好友昵称|name', type:'SingleText', property:{ defaultValue:'' }, editable:true }, { id:'fldmnMANJ1IqN', name:'备注名称|alias', type:'SingleText', property:{ defaultValue:'' }, editable:true }, { id:'fld0CxvEhhO5A', name:'性别|gender', type:'SingleText', property:{ defaultValue:'' }, editable:true }, { id:'fldrAMLW8Ysg9', name:'更新时间|updated', type:'SingleText', property:{ defaultValue:'' }, editable:true }, { id:'fldZh6vCCEUb0', name:'是否好友|friend', type:'Checkbox', property:{ icon:'✅' }, editable:true }, { id:'fldj9vvNOciYB', name:'类型|type', type:'SingleText', property:{ defaultValue:'' }, editable:true }, { id:'fldkTLOkFxGdP', name:'头像|avatar', type:'Text', editable:true }, { id:'fldysArm2EbRI', name:'手机号|phone', type:'SingleText', property:{ defaultValue:'' }, editable:true }, { id:'fldYxqREKJ3Or', name:'头像图片|file', type:'Attachment', editable:true } ] }, message:'SUCCESS' }
+let fields:any = vikaFields.data.fields
 
 if (actionState[code]) {
   fields = replaceSyncStatus(fields)
 }
 
-const defaultRecords = JSON.parse(fs.readFileSync(path.join(currentDir, 'records.json'), 'utf-8'))
+const defaultRecords = { code:200, success:true, data:{ total:0, records:[], pageNum:1, pageSize:0 }, message:'SUCCESS' }
 
 export const sheet: Sheet = {
   fields,
