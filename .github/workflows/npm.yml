@@ -21,7 +21,10 @@ jobs:
 
       - name: chmod
         run: chmod +x ./scripts/generate-package-json.sh
-
+      
+      - name: chmod
+        run: chmod +x ./scripts/package-publish-config-tag.sh
+        
       - name: Generate Package JSON
         run: ./scripts/generate-package-json.sh
 
