@@ -1,5 +1,6 @@
 const rules = {
   'multiline-ternary': 'off',
+  'sort-keys': 'off',
 }
 
 module.exports = {

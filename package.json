@@ -1,6 +1,6 @@
 {
   "name": "@atorber/chatflow",
-  "version": "2.0.38",
+  "version": "2.0.39",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
