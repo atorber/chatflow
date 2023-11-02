@@ -11,6 +11,7 @@ export interface Database {
   groupNotice:any;
   notice:any;
   whiteList:any;
+  config:any;
 }
 
 export const db: Database = {
@@ -24,4 +25,5 @@ export const db: Database = {
   order: DB('data/db/orders.db'),
   room: DB('data/db/rooms.db'),
   whiteList: DB('data/db/whiteLists.db'),
+  config: DB('data/db/configs.db'),
 }

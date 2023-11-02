@@ -1,10 +1,9 @@
+<!-- markdownlint-disable MD013 MD033 -->
 # ChatFlow
 
 <img alt="GitHub stars badge" src="https://img.shields.io/github/stars/atorber/chatflow"> <img alt="GitHub forks badge" src="https://img.shields.io/github/forks/atorber/chatflow"> <img alt="GitHub license badge" src="https://img.shields.io/github/license/atorber/chatflow">
 
-> wechat-qa-bot 2.0项目更新为ChatFlow
-
-[访问项目语雀文档了解更多信息](https://www.yuque.com/atorber/oegota)
+wechat-qa-bot 更名为ChatFlow，[访问项目语雀文档了解更多信息](https://www.yuque.com/atorber/chatflow)
 
 > 最新版本2.0.25是相对稳定的版本，数据表与之前版本不兼容，在运行时建议配置全新的维格表空间或删除原空间全部表
 
@@ -80,7 +79,9 @@ npm run start
 
 5.2 如果不希望每个群都开启智能问答，需设置群白名单,首先需要将上图中的群白名单开关设置为开启
 
-然后将群加入到问答白名单，在“群白名单”表中，加入需要开启的群ID（roomid），群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
+然后将群加入到问答白名单，在“群白名单”表中，加入需要开启的群ID（roomid）
+
+群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
 
 详细操作参考 [手把手教程](https://www.yuque.com/atorber/oegota/zm4ulnwnqp9whmd6)
 

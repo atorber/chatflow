@@ -14,7 +14,6 @@ const config: configTypes.Config = {
     vika: {
       useVika: process.env[EnvironmentVariables.VIKA_USEVIKA] === 'true',
       uploadMessageToVika: process.env[EnvironmentVariables.VIKA_UPLOADMESSAGETOVIKA] === 'true',
-      autoMaticCloud: process.env[EnvironmentVariables.VIKA_AUTOMATICCLOUD] === 'true',
     },
     webHook: {
       webhookMessagePush: process.env[EnvironmentVariables.WEBHOOK_WEBHOOKMESSAGEPUSH] === 'true',
@@ -22,9 +21,6 @@ const config: configTypes.Config = {
     mqtt: {
       mqttMessagePush: process.env[EnvironmentVariables.MQTT_MQTTMESSAGEPUSH] === 'true',
       mqttControl: process.env[EnvironmentVariables.MQTT_MQTTCONTROL] === 'true' || true,
-    },
-    im: {
-      imChat: process.env[EnvironmentVariables.IM_IMCHAT] === 'true',
     },
   },
   botConfig: {
@@ -123,6 +119,7 @@ function getBotOps (puppet: string, token: string) {
 
   if (puppet === 'wechaty-puppet-service') {
     process.env['WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT'] = 'true'
+    process.env['WECHATY_PUPPET_SERVICE_AUTHORITY'] = 'token-service-discovery-test.juzibot.com'
   }
 
   if ([ 'wechaty-puppet-wechat4u', 'wechaty-puppet-xp', 'wechaty-puppet-engine' ].includes(puppet)) {
