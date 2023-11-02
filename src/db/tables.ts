@@ -2,21 +2,22 @@ import DB from './nedb.js'
 
 export interface Database {
   activity:any;
-  message: any;
   bot: any;
-  room: any;
+  config:any;
   contact: any;
-  order:any;
   env:any;
   groupNotice:any;
+  message: any;
   notice:any;
+  order:any;
+  room: any;
   whiteList:any;
-  config:any;
 }
 
 export const db: Database = {
   activity: DB('data/db/activities.db'),
   bot: DB('data/db/bots.db'),
+  config: DB('data/db/configs.db'),
   contact: DB('data/db/contacts.db'),
   env: DB('data/db/envs.db'),
   groupNotice: DB('data/db/groupNotices.db'),
@@ -25,5 +26,4 @@ export const db: Database = {
   order: DB('data/db/orders.db'),
   room: DB('data/db/rooms.db'),
   whiteList: DB('data/db/whiteLists.db'),
-  config: DB('data/db/configs.db'),
 }

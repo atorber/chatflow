@@ -65,7 +65,6 @@ import type { ContactWhiteList, ProcessEnv, RoomWhiteList, ChatMessage } from '.
 // import { spawn } from 'child_process'
 import type { VikaBot } from './db/vika-bot.js'
 import { VikaBot as VikaBotClass } from './db/vika-bot.js'
-import { type } from 'os'
 
 // logger.info('初始化配置文件信息:\n' +  JSON.stringify(config, undefined, 2))
 logger.info('process.env：' + JSON.stringify(process.env))
