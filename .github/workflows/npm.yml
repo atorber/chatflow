@@ -52,7 +52,7 @@ jobs:
           VERSION=$(npx pkg-jq -r .version)
           if npx version-exists "$NAME" "$VERSION"
           then echo "$NAME@$VERSION exists on NPM, skipped."
-          else npm publish
+          else npm publish --access=public
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
