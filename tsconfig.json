@@ -1,12 +1,15 @@
 {
   "extends": "@chatie/tsconfig",
   "compilerOptions": {
-    "outDir": "dist/esm"
+    "outDir": "dist/esm",
+    "module": "esnext", 
+    "target": "es2020", 
   },
   "exclude": [
     "node_modules/",
     "dist/",
-    "src/api/sdk/openai/*.js"
+    "src/api/sdk/openai/*.js",
+    "tests/vika-orm-test.ts"
   ],
   "include": [
     "./*.ts",
