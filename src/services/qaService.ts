@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys */
-import type { VikaBot, TaskConfig } from '../db/vika-bot.js'
+import { ChatFlowConfig, TaskConfig } from '../db/vika-bot.js'
 import { VikaSheet } from '../db/vika.js'
 import type { SkillInfoArray } from './wxopenaiService.js'
 import { logger } from '../utils/mod.js'
@@ -12,16 +12,14 @@ import { logger } from '../utils/mod.js'
 export class QaChat {
 
   private db: VikaSheet
-  vikaBot: VikaBot
   envsOnVika: any
   roomWhiteList: any
   contactWhiteList: any
   reminderList: TaskConfig[] = []
   records: any
 
-  constructor (vikaBot: VikaBot) {
-    this.vikaBot = vikaBot
-    this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.qaSheet)
+  constructor () {
+    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.qaSheet)
     // void this.init()
   }
 

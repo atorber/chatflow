@@ -3,7 +3,7 @@ import type { Room, Contact, Message, Wechaty } from 'wechaty'
 import { v4 } from 'uuid'
 import { formatTimestamp, getCurTime, logger } from '../utils/utils.js'
 import moment from 'moment'
-import type { VikaBot } from '../db/vika-bot.js'
+import { ChatFlowConfig } from '../db/vika-bot.js'
 import { VikaSheet } from '../db/vika.js'
 
 import { db } from '../db/tables.js'
@@ -81,11 +81,9 @@ export class ActivityChat {
 
   private activities: Activity[] = []
   private db:VikaSheet
-  vikaBot: VikaBot
 
-  constructor (vikaBot:VikaBot) {
-    this.vikaBot = vikaBot
-    this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.statisticSheet)
+  constructor () {
+    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.statisticSheet)
   }
 
   // 初始化
@@ -96,7 +94,7 @@ export class ActivityChat {
   // 获取维格表中的活动
   async getAct () {
     const records = await this.db.findAll()
-    // logger.info(JSON.stringify(this.vikaBot.dataBaseIds, undefined, 2))
+    // logger.info(JSON.stringify(this.chatflowConfig.dataBaseIds, undefined, 2))
     // logger.info('维格表中的活动记录：' + JSON.stringify(records))
     return records
   }
@@ -178,7 +176,7 @@ export class ActivityChat {
     ]
 
     logger.info('订单消息:' + records)
-    const datasheet = new VikaSheet(this.vikaBot.vika, this.vikaBot.dataBaseIds.orderSheet)
+    const datasheet = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.orderSheet)
     datasheet.records.create(records).then((response: { success: any }) => {
       if (!response.success) {
         logger.error('创建订单，写入vika失败：' + JSON.stringify(response))
@@ -731,8 +729,8 @@ export const generateResponseMessage = (msgType: string, msg: string, roomid: st
 }
 
 // 控制器
-export const activityController = async (vikaBot:VikaBot, message: Message, room: Room) => {
-  const activityService = new ActivityChat(vikaBot)
+export const activityController = async (message: Message, room: Room) => {
+  const activityService = new ActivityChat()
 
   const text = message.text()
   const createdTime = new Date().getTime()

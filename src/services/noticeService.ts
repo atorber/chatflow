@@ -1,9 +1,9 @@
 /* eslint-disable sort-keys */
 import type { Message, Wechaty } from 'wechaty'
-import type { VikaBot, TaskConfig } from '../db/vika-bot.js'
+import { ChatFlowConfig, TaskConfig } from '../db/vika-bot.js'
 import { VikaSheet, IRecord } from '../db/vika.js'
 import schedule from 'node-schedule'
-import { getRule, wait, logger } from '../utils/mod.js'
+import { getRule, delay, logger } from '../utils/mod.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/mod.js'
 import {
   getContact,
@@ -38,16 +38,14 @@ type TaskFields = {
 export class NoticeChat {
 
   private db:VikaSheet
-  vikaBot: VikaBot
   envsOnVika: any
   roomWhiteList: any
   contactWhiteList: any
   reminderList: TaskConfig[] = []
   jobs!: {[key:string]:any}
 
-  constructor (vikaBot:VikaBot) {
-    this.vikaBot = vikaBot
-    this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.noticeSheet)
+  constructor () {
+    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.noticeSheet)
     void this.init()
   }
 
@@ -140,7 +138,7 @@ export class NoticeChat {
                     const contact = await getContact(bot, task.target as BusinessUser)
                     if (contact) {
                       await sendMsg(contact, text, messageService)
-                      await wait(200)
+                      await delay(200)
                     } else {
                       logger.info('当前好友不存在:' + JSON.stringify(task.target))
                     }
@@ -154,7 +152,7 @@ export class NoticeChat {
                     const room = await getRoom(bot, task.target as BusinessRoom)
                     if (room) {
                       await sendMsg(room, text, messageService)
-                      await wait(200)
+                      await delay(200)
                     } else {
                       logger.info('当前群不存在:' + JSON.stringify(task.target))
                     }

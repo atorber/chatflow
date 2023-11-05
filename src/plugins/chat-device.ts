@@ -40,7 +40,7 @@ class ChatDevice {
   }
 
   init (bot:Wechaty) {
-    log.info('bot info:', bot.currentUser.id)
+    // log.info('bot info:', bot.currentUser.id)
 
     this.chatbot = bot
     this.bot = bot

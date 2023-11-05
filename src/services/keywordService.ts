@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys */
-import type { VikaBot } from '../db/vika-bot.js'
+import { ChatFlowConfig } from '../db/vika-bot.js'
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { logger } from '../utils/mod.js'
 
@@ -7,12 +7,10 @@ import { logger } from '../utils/mod.js'
 export class KeywordChat {
 
   private db:VikaSheet
-  vikaBot: VikaBot
   records: IRecord[] | undefined
 
-  constructor (vikaBot:VikaBot) {
-    this.vikaBot = vikaBot
-    this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.keywordSheet)
+  constructor () {
+    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.keywordSheet)
     void this.init()
   }
 
