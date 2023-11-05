@@ -1,9 +1,9 @@
 /* eslint-disable sort-keys */
-import type { VikaBot } from '../db/vika-bot.js'
+import { ChatFlowConfig } from '../db/vika-bot.js'
 
 import { VikaSheet } from '../db/vika.js'
 import { Message, ScanStatus, types } from 'wechaty'
-import { getCurTime, waitForMs as wait, logger } from '../utils/utils.js'
+import { getCurTime, delay, logger } from '../utils/utils.js'
 import moment from 'moment'
 import { FileBox } from 'file-box'
 
@@ -31,7 +31,7 @@ async function handleFileMessage (file:FileBox, db:VikaSheet, message: Message) 
     return ''
   }
 
-  await wait(1000)
+  await delay(1000)
   return await db.upload(filePath, '')
 }
 
@@ -39,13 +39,11 @@ async function handleFileMessage (file:FileBox, db:VikaSheet, message: Message) 
 export class MessageChat {
 
   private db:VikaSheet
-  vikaBot: VikaBot
   msgStore!: any[]
   messageData: any
 
-  constructor (vikaBot:VikaBot) {
-    this.vikaBot = vikaBot
-    this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.messageSheet)
+  constructor () {
+    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.messageSheet)
     this.msgStore = []
     this.messageData = messageData
     void this.init()
@@ -236,7 +234,7 @@ export class MessageChat {
         case types.Message.Image:{
 
           const img = await message.toImage()
-          await wait(1500)
+          await delay(1500)
           try {
             file = await img.hd()
             // file = await message.toFileBox()
@@ -286,7 +284,7 @@ export class MessageChat {
 
         // 语音消息
         case types.Message.Audio:
-          await wait(1500)
+          await delay(1500)
           try {
             file = await message.toFileBox()
           } catch (e) {
@@ -298,7 +296,7 @@ export class MessageChat {
 
         // 视频消息
         case types.Message.Video:
-          await wait(1500)
+          await delay(1500)
           try {
             file = await message.toFileBox()
 
@@ -323,7 +321,7 @@ export class MessageChat {
 
         // 文件消息
         case types.Message.Attachment:
-          await wait(1500)
+          await delay(1500)
           try {
             file = await message.toFileBox()
 
@@ -386,7 +384,7 @@ export class MessageChat {
           // const writeStream = fs.createWriteStream(filePath)
           // await file.pipe(writeStream)
           await file.toFile(filePath, true)
-          await wait(1000)
+          await delay(1000)
           uploadedAttachments = await this.db.upload(filePath, '')
           const text = qrcodeImageUrl
           if (uploadedAttachments.data) {

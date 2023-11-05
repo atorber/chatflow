@@ -1,8 +1,8 @@
 /* eslint-disable sort-keys */
-import type { VikaBot } from '../db/vika-bot.js'
+import { ChatFlowConfig } from '../db/vika-bot.js'
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { Room, Wechaty, log } from 'wechaty'
-import { wait, logger } from '../utils/utils.js'
+import { delay, logger } from '../utils/utils.js'
 
 // import { db } from '../db/tables.js'
 // const roomData = db.room
@@ -11,12 +11,10 @@ import { wait, logger } from '../utils/utils.js'
 export class RoomChat {
 
   private db:VikaSheet
-  vikaBot: VikaBot
   rooms!: any[]
 
-  constructor (vikaBot:VikaBot) {
-    this.vikaBot = vikaBot
-    this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.roomSheet)
+  constructor () {
+    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.roomSheet)
     void this.init()
   }
 
@@ -58,7 +56,7 @@ export class RoomChat {
           const records = recordIds.splice(0, 10)
           logger.info('删除：', records.length)
           await this.db.remove(records)
-          await wait(1000)
+          await delay(1000)
         }
         wxids = []
       }
@@ -98,10 +96,10 @@ export class RoomChat {
           await this.db.insert(records)
           logger.info('群列表同步完成...' + i + records.length)
           updateCount = updateCount + records.length
-          void await wait(1000)
+          void await delay(1000)
         } catch (err) {
           logger.error('群列表同步失败,待系统就绪后再管理群发送【更新通讯录】可手动更新...' + i + 10)
-          void await wait(1000)
+          void await delay(1000)
         }
       }
 

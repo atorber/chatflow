@@ -1,7 +1,7 @@
 import { log } from 'wechaty' // 导入 wechaty 的 log 模块
 import { BaseEntity, VikaOptions, MappingOptions } from '../src/db/vika-orm.js' // 导入 BaseEntity, VikaOptions, 和 MappingOptions 类型/类
 import 'dotenv/config.js'  // 导入环境变量配置
-import { wait } from '../src/utils/utils.js'  // 导入 wait 功能
+import { delay } from '../src/utils/utils.js'  // 导入 delay 功能
 import { v4 as uuidv4 } from 'uuid'
 
 const vikaOptions: VikaOptions = {  // 定义 Vika API 的选项
@@ -52,7 +52,7 @@ newUser1.email = 'bob@example.com'  // 设置用户电子邮件为 bob@example.c
 newUser1.id = uuidv4()
 const res = await newUser1.save()  // 保存用户实例
 log.info('保存newUser1:', JSON.stringify(res))  // 输出新用户的信息
-await wait(500)  // 等待 500 毫秒
+await delay(500)  // 等待 500 毫秒
 
 // 增
 const newUser2 = await User.create<User>({  // 创建一个新的用户
@@ -62,28 +62,28 @@ const newUser2 = await User.create<User>({  // 创建一个新的用户
 })
 
 log.info('保存newUser2:', JSON.stringify(newUser2))  // 输出新用户的信息
-await wait(500)  // 等待 500 毫秒
+await delay(500)  // 等待 500 毫秒
 
 // 改
 const updateRes = await User.update(newUser2.recordId, { email: 'newalice@example.com' } as Partial<User>)  // 更新新用户的电子邮件
 log.info('更新newUser2:', JSON.stringify(updateRes))  // 输出更新后的新用户信息
-await wait(500)  // 等待 500 毫秒
+await delay(500)  // 等待 500 毫秒
 
 // 查
 const queryRes = await User.findById(newUser2.recordId)
 log.info('查询findById:', JSON.stringify(queryRes))  // 输出更新后的新用户信息
-await wait(500)  // 等待 500 毫秒
+await delay(500)  // 等待 500 毫秒
 
 const query2Res = await User.findByField('email', 'bob@example.com')
 log.info('查询findByField:', JSON.stringify(query2Res))  // 输出更新后的新用户信息
-await wait(500)  // 等待 500 毫秒
+await delay(500)  // 等待 500 毫秒
 
 // 删
 const deleteRes = await User.delete(newUser2.recordId)  // 删除新用户
 log.info('删除newUser2:', JSON.stringify(deleteRes))  // 输出更新后的新用户信息
-await wait(500)  // 等待 500 毫秒
+await delay(500)  // 等待 500 毫秒
 
 // 查
 const users = await User.findAll()  // 查找所有用户（当前被注释掉）
 log.info('查询users:', JSON.stringify(users))  // 输出新用户的信息
-await wait(500)  // 等待 500 毫秒
+await delay(500)  // 等待 500 毫秒

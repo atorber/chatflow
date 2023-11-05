@@ -1,9 +1,9 @@
 /* eslint-disable sort-keys */
-import type { VikaBot } from '../db/vika-bot.js'
+import { ChatFlowConfig } from '../db/vika-bot.js'
 
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { Contact, Wechaty, log } from 'wechaty'
-import { wait, logger } from '../utils/utils.js'
+import { delay, logger } from '../utils/utils.js'
 
 // import { db } from '../db/tables.js'
 // const contactData = db.contact
@@ -13,11 +13,9 @@ import { wait, logger } from '../utils/utils.js'
 export class ContactChat {
 
   private db:VikaSheet
-  vikaBot: VikaBot
 
-  constructor (vikaBot:VikaBot) {
-    this.vikaBot = vikaBot
-    this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.contactSheet)
+  constructor () {
+    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.contactSheet)
     void this.init()
   }
 
@@ -61,7 +59,7 @@ export class ContactChat {
           const records = recordIds.splice(0, 10)
           log.info('删除：', records.length)
           await this.db.remove(records)
-          await wait(1000)
+          await delay(1000)
         }
         wxids = []
       }
@@ -111,7 +109,7 @@ export class ContactChat {
         await this.db.insert(records)
         logger.info('好友列表同步中...' + i + records.length)
         updateCount = updateCount + records.length
-        void await wait(1000)
+        void await delay(1000)
       }
 
       logger.info('同步好友列表完成，更新到云端好友数量：' + updateCount || '0')

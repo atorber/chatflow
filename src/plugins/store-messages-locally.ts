@@ -20,7 +20,7 @@ let messages: string[] = []
 // 定义一个定时器，用于每10秒批量写入消息到csv文件
 let timer:any
 
-const wait = (ms: number | undefined) => new Promise(resolve => setTimeout(resolve, ms))
+const delay = (ms: number | undefined) => new Promise(resolve => setTimeout(resolve, ms))
 
 // 使用WechatyBuilder构建一个Wechaty实例，并指定使用wechaty-puppet-wechat作为puppet
 // const bot = WechatyBuilder.build({
@@ -62,7 +62,7 @@ bot.on('message', async message => {
   // 如果消息类型是图片、视频、文件或语音，将其保存到本地文件夹，并获取其存储路径
   let path = ''
   if (type === PUPPET.types.Message.Image || type === PUPPET.types.Message.Video || type === PUPPET.types.Message.Attachment || type === PUPPET.types.Message.Audio) {
-    await wait(3000)
+    await delay(3000)
     try {
     // 创建文件夹，如果已存在则忽略错误
       fs.mkdirSync(mediaFolder, { recursive: true })

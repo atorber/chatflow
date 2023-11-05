@@ -67,8 +67,13 @@ function formatTimestamp (timestamp: string | number | Date) {
   return res
 }
 
-// 定义一个延时方法
-const waitForMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+/**
+ * 延时函数
+ * @param {*} ms 毫秒
+ */
+async function delay (ms:number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 function getNow () {
   return new Date().toLocaleString()
@@ -183,8 +188,6 @@ function generateRandomNumber (base:number): number {
   return Math.floor(Math.random() * 100) + base
 }
 
-const wait = waitForMs
-
 const logForm = (msg:string) => {
   const time = new Date().toTimeString()
   console.info(boxen(msg, {
@@ -201,12 +204,11 @@ export {
   generateRandomNumber,
   toDBC,
   getNow,
-  wait,
-  waitForMs,
+  delay,
   formatSentMessage,
   getRule,
   formatTimestamp,
   getCurTime,
 }
 
-export default waitForMs
+export default delay

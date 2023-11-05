@@ -1,9 +1,9 @@
 /* eslint-disable sort-keys */
-import type { VikaBot } from '../db/vika-bot.js'
+import { ChatFlowConfig } from '../db/vika-bot.js'
 
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { log } from 'wechaty'
-import { wait } from '../utils/utils.js'
+import { delay } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/env.js'
 import { BaseEntity, MappingOptions } from '../db/vika-orm.js'
 
@@ -28,7 +28,6 @@ const mappingOptions: MappingOptions = {  // 定义字段映射选项
 export class EnvChat extends BaseEntity {
 
   db!:VikaSheet
-  vikaBot!: VikaBot
   envIdMap: any
   records!: IRecord[]
   envData: ProcessEnv | undefined
@@ -46,14 +45,13 @@ export class EnvChat extends BaseEntity {
   }
 
   // 初始化
-  async init (vikaBot:VikaBot) {
-    this.vikaBot = vikaBot
-    const token = vikaBot.token || ''
-    const baseId = vikaBot.dataBaseIds.envSheet
-    this.db = new VikaSheet(vikaBot.vika, baseId)
+  async init () {
+    const token = ChatFlowConfig.token || ''
+    const baseId = ChatFlowConfig.dataBaseIds.envSheet
+    this.db = new VikaSheet(ChatFlowConfig.vika, baseId)
     EnvChat.setVikaOptions({
       apiKey: token,
-      baseId: vikaBot.dataBaseIds.envSheet, // 设置 base ID
+      baseId: ChatFlowConfig.dataBaseIds.envSheet, // 设置 base ID
     })
     this.getConfigFromEnv()
     this.records = await this.getAll()
@@ -77,12 +75,13 @@ export class EnvChat extends BaseEntity {
 
   // 从维格表中获取环境变量配置
   async getConfigFromVika () {
+    log.info('从维格表中获取环境变量配置,getConfigFromVika ()')
     const vikaIdMap: any = {}
     const vikaData: any = {}
 
     const configRecords = await this.getAll()
 
-    await wait(1000)
+    await delay(1000)
     // log.info(configRecords)
 
     for (let i = 0; i < configRecords.length; i++) {

@@ -1,6 +1,6 @@
 import { MessageChat } from './messageService.js'
 import { EnvChat } from './envService.js'
-import { WhiteListChat } from './whiteListService.js'
+import { WhiteListChat, WhiteList } from './whiteListService.js'
 import { GroupNoticeChat } from './groupNoticeService.js'
 import { RoomChat } from './roomService.js'
 import { ContactChat } from './contactService.js'
@@ -32,6 +32,7 @@ export {
   NoticeChat,
   QaChat,
 }
+export type { WhiteList }
 
 export interface Services {
   [key: string]: any;  // 索引签名

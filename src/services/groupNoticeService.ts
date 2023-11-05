@@ -1,11 +1,11 @@
 /* eslint-disable sort-keys */
-import type { VikaBot, TaskConfig, Notifications } from '../db/vika-bot.js'
+import { ChatFlowConfig, TaskConfig, Notifications } from '../db/vika-bot.js'
 
 import { VikaSheet } from '../db/vika.js'
 import type { Message, Wechaty } from 'wechaty'
 import { transformKeys } from './activityService.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/mod.js'
-import { generateRandomNumber, wait, logger } from '../utils/mod.js'
+import { generateRandomNumber, delay, logger } from '../utils/mod.js'
 import {
   getContact,
   getRoom,
@@ -20,15 +20,13 @@ import { sendMsg } from './configService.js'
 export class GroupNoticeChat {
 
   db:VikaSheet
-  vikaBot: VikaBot
   envsOnVika: any
   roomWhiteList: any
   contactWhiteList: any
   reminderList: TaskConfig[] = []
 
-  constructor (vikaBot:VikaBot) {
-    this.vikaBot = vikaBot
-    this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.groupNoticeSheet)
+  constructor () {
+    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.groupNoticeSheet)
     void this.init()
   }
 
@@ -104,7 +102,7 @@ export class GroupNoticeChat {
         if (room) {
           try {
             await sendMsg(room, notice.text, messageService)
-            await wait(generateRandomNumber(200))
+            await delay(generateRandomNumber(200))
             resPub.push({
               recordId: notice.recordId,
               fields: {
@@ -145,7 +143,7 @@ export class GroupNoticeChat {
         if (contact) {
           try {
             await sendMsg(contact, notice.text, messageService)
-            await wait(generateRandomNumber(200))
+            await delay(generateRandomNumber(200))
             resPub.push({
               recordId: notice.recordId,
               fields: {
@@ -188,7 +186,7 @@ export class GroupNoticeChat {
       const records = resPub.slice(i, i + 10)
       await this.db.update(records)
       logger.info('群发消息同步中...', i + 10)
-      void await wait(1000)
+      void await delay(1000)
     }
 
     return `\n发送成功:群${successRoom.length},好友${successContact.length}\n发送失败：群${failRoom.length},好友${failContact.length}`

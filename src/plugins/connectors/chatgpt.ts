@@ -27,7 +27,7 @@ import path from 'path'
 // import os from 'os'
 
 import {
-  waitForMs as wait,
+  delay,
   formatSentMessage,
 } from '../../utils/utils.js'
 
@@ -155,7 +155,7 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
         const filePath = __dirname + `\\data\\media\\image\\${new Date().getTime() + fileName}`
         // let filePath = `C:\\Users\\wechaty\\Documents\\WeChat Files\\wxid_0o1t51l3f57221\\FileStorage\\File\\2022-05\\${file.name}`
         await file.toFile(filePath)
-        await wait(1000)
+        await delay(1000)
         log.info('fileName=====', filePath)
 
         // await excel2order(filePath, message)
@@ -167,7 +167,7 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
   }
 
   // if (message.type() === types.Message.Image) {
-  //   await wait(1000)
+  //   await delay(1000)
   //   try {
   //     const file = await message.toFileBox()
   //     log.info('image=====', file)

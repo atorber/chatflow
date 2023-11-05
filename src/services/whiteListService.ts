@@ -1,26 +1,26 @@
 /* eslint-disable sort-keys */
-import type { VikaBot } from '../db/vika-bot.js'
+import { ChatFlowConfig } from '../db/vika-bot.js'
 
 import { VikaSheet } from '../db/vika.js'
-import { wait, logger } from '../utils/utils.js'
+import { delay, logger } from '../utils/utils.js'
 import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/finder.js'
 
 // import { db } from '../db/tables.js'
 // const whiteListData = db.whiteList
 
+export type WhiteList = { contactWhiteList: ContactWhiteList; roomWhiteList: RoomWhiteList }
+
 // 服务类
 export class WhiteListChat {
 
   private db:VikaSheet
-  vikaBot: VikaBot
   envsOnVika: any
   roomWhiteList: any
   contactWhiteList: any
 
-  constructor (vikaBot:VikaBot) {
-    this.vikaBot = vikaBot
-    this.db = new VikaSheet(vikaBot.vika, vikaBot.dataBaseIds.whiteListSheet)
+  constructor () {
+    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.whiteListSheet)
     this.contactWhiteList = {
       qa: [],
       msg: [],
@@ -49,9 +49,9 @@ export class WhiteListChat {
 
   // 获取白名单
   async getWhiteList () {
-    const whiteList: { contactWhiteList: ContactWhiteList; roomWhiteList: RoomWhiteList } = { contactWhiteList: this.contactWhiteList, roomWhiteList: this.roomWhiteList }
+    const whiteList: WhiteList = { contactWhiteList: this.contactWhiteList, roomWhiteList: this.roomWhiteList }
     const whiteListRecords: any[] = await this.getRecords()
-    await wait(1000)
+    await delay(1000)
     for (let i = 0; i < whiteListRecords.length; i++) {
       const record = whiteListRecords[i]
       const fields = record.fields
