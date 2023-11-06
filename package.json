@@ -1,6 +1,6 @@
 {
   "name": "@atorber/chatflow",
-  "version": "2.0.42",
+  "version": "2.0.43",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
@@ -38,15 +38,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/choogoo/chatflow.git"
+    "url": "git+https://github.com/atorber/chatflow.git"
   },
   "keywords": [],
   "author": "atorber <atorber@163.com>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/choogoo/chatflow/issues"
+    "url": "https://github.com/atorber/chatflow/issues"
   },
-  "homepage": "https://github.com/choogoo/chatflow#readme",
+  "homepage": "https://github.com/atorber/chatflow#readme",
   "dependencies": {
     "@types/boxen": "^3.0.1",
     "@vikadata/vika": "^1.0.5",
@@ -87,8 +87,6 @@
     "@chatie/tsconfig": "^4.6.3",
     "@types/crypto-js": "^4.1.3",
     "@types/jest": "^29.2.3",
-    "@types/koa": "^2.13.8",
-    "@types/koa-bodyparser": "^4.3.10",
     "@types/mustache": "^4.2.2",
     "@types/nedb": "^1.8.13",
     "@types/node": "^18.11.9",

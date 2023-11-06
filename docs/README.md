@@ -75,8 +75,8 @@ ChatFlow是一个聊天机器人管理系统，可以帮助你实现一些原生
 1. 下载源码并安装依赖
 
 ```
-git clone https://github.com/choogoo/wechat-openai-qa-bot.git
-cd ./wechat-openai-qa-bot
+git clone https://github.com/atorber/chatflow.git
+cd ./chatflow
 npm install
 ```
 
@@ -186,7 +186,7 @@ npm run start
 1. clone （下载）项目代码,运行以下命令：
 
 ```
-git clone https://github.com/atorber/wechat-openai-qa-bot.git
+git clone https://github.com/atorber/chatflow.git
 ```
 
 考虑对git不熟悉的用户，可以在页面直接下载项目.zip到电脑上,下载后解压缩即可
@@ -224,7 +224,7 @@ git clone https://github.com/atorber/wechat-openai-qa-bot.git
 4. 在复制如下命令在Windows PoweShell中执行
 
 ```
-cd C:\Users\wechaty\Documents\GitHub\wechat-openai-qa-bot
+cd C:\Users\wechaty\Documents\GitHub\chatflow
 npm install
 ```
 
@@ -366,7 +366,7 @@ npm run dev
 
 如果你对以上操作感觉困难而不能使用，添加ledongmao微信，提供你需要的问答清单，我们可以提供一个免费的机器人供体验
 
-当然，最好的反馈方式是在这里 https://github.com/choogoo/wechat-openai-qa-bot/issues 提交一个issues
+当然，最好的反馈方式是在这里 https://github.com/atorber/chatflow/issues 提交一个issues
 
 ## 在线交流
 QQ群 583830241
