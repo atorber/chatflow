@@ -1,10 +1,5 @@
 /* eslint-disable no-console */
 /* eslint-disable sort-keys */
-import {
-  init,
-  chatAibot,
-  genToken,
-} from '../api/sdk/openai/index.js'
 import { FileBox } from 'file-box'
 import {
   Contact,
@@ -17,7 +12,12 @@ import {
 import { formatSentMessage } from '../utils/utils.js'
 import type { configTypes } from '../types/mod.js'
 import Api2d from 'api2d'
-import type { ResponseCHAT } from '../api/sdk/openai/lib/response.js'
+import openai from 'openai-sdk'
+const {
+  init,
+  chat,
+  // nlp,
+} = openai
 
 async function wxai (sysConfig: configTypes.Config, bot: Wechaty, talker: Contact, room: Room | undefined, message: Message) {
   const text = extractKeyword(message, bot.currentUser.name())
@@ -104,12 +104,10 @@ async function sendMiniProgram (answer: any, bot: Wechaty, room: Room | undefine
   }
 }
 
-  interface  QueryData {
-    first_priority_skills: string[];
-    query:string;
-    signature:string;
-    second_priority_skills?:string [];
-  }
+interface  QueryData {
+  username:string;
+  msg:string;
+}
 
 // aibot 函数基本保持不变
 async function aibot (sysConfig: configTypes.Config, talker: any, room: any, query: any) {
@@ -130,9 +128,9 @@ async function aibot (sysConfig: configTypes.Config, talker: any, room: any, que
     log.info('开始请求微信对话平台...')
     init(ops)
     try {
-      const { username, userid, queryData } = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query)
-      log.info('username, userid', { username, userid })
-      const resMsg = await chatAibot(queryData)
+      const queryData = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query)
+      log.info('username, userid', queryData)
+      const resMsg:any = await chat(queryData)
       log.info(`回答内容： ${resMsg.msgtype}, ${resMsg.query}, ${resMsg.answer}`)
       return handleWxOpenAiResponse(resMsg)
     } catch (err) {
@@ -175,26 +173,16 @@ async function aibot (sysConfig: configTypes.Config, talker: any, room: any, que
 }
 
 function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:string, wxid:string, roomid:string, query: any) {
-  const username = room ? `${nickName}/${topic}` : nickName
-  const userid = room ? `${wxid}/${roomid}` : wxid
-  const signature = genToken({ userid, username })
-  let queryData:QueryData = {
-    first_priority_skills: [],
-    query: '',
-    signature: '',
-    second_priority_skills:[],
+  const username = room ? `${nickName}|${wxid}/${topic}|${roomid}` : `${nickName}|${wxid}`
+  const queryData:QueryData = {
+    msg:query,
+    username,
   }
 
-  queryData = {
-    first_priority_skills: [],
-    query,
-    signature,
-  }
-
-  return { username, userid, queryData }
+  return queryData
 }
 
-function handleWxOpenAiResponse (resMsg: ResponseCHAT) {
+function handleWxOpenAiResponse (resMsg: any) {
   let answer = {}
   if (resMsg.msgtype && resMsg.confidence > 0.8) {
     answer = prepareAnswerBasedOnMsgType(resMsg)

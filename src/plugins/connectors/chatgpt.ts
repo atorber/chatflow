@@ -1,13 +1,5 @@
 /* eslint-disable no-console */
 /* eslint-disable sort-keys */
-import {
-  init,
-  // chat,
-  chatAibot,
-  // nlp,
-  // QueryData,
-  genToken,
-} from '../../api/sdk/openai/index.js'
 
 import { FileBox } from 'file-box'
 // import excel2order from '../excel.js'
@@ -32,10 +24,6 @@ import {
 } from '../../utils/utils.js'
 
 import { ChatGPTAPI } from 'chatgpt'
-
-const botTpyes = [ 'WxOpenai', 'ChatGPT' ]
-const useBot = 0
-const callBot = botTpyes[useBot]
 
 const config = {
   AutoReply: true,
@@ -179,128 +167,31 @@ async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room |
 
 };
 
-async function aibot (sysConfig: any, talker: any, room: any, query: any) {
+async function aibot (_sysConfig: any, _talker: any, _room: any, query: any) {
   let answer = {}
-  const roomid = room?.id
-  const wxid = talker.id
-  const nickName = talker.name()
-  const topic = await room?.topic()
   const content = query
 
   // log.info(opt)
 
-  let answerJson
-  switch (callBot) {
-    case 'WxOpenai':
-      // log.info('开始请求微信对话平台...')
-      init({
-        EncodingAESKey: sysConfig.WXOPENAI_ENCODINGAESKEY,
-        TOKEN: sysConfig.WXOPENAI_TOKEN,
-      })
-
-      try {
-        const username = room ? (nickName + '/' + topic) : nickName
-        const userid = room ? (wxid + '/' + roomid) : wxid
-        const signature = genToken({
-          userid,
-          username,
-        })
-
-        let queryData
-        if (sysConfig.DIFF_REPLY_ONOFF && room) {
-          queryData = {
-            first_priority_skills: [ topic || '' ],
-            query,
-            second_priority_skills: [ '通用问题' ],
-            signature,
-          }
-        } else {
-          queryData = {
-            first_priority_skills: [ '通用问题' ],
-            query,
-            signature,
-          }
-        }
-
-        const resMsg = await chatAibot(queryData)
-        // console.debug(resMsg)
-        log.info('对话返回原始：', resMsg)
-        // log.info('对话返回：', JSON.stringify(resMsg).replace(/[\r\n]/g, "").replace(/\ +/g, ""))
-        log.info('回答内容：', resMsg.msgtype, resMsg.query, resMsg.answer)
-        // console.debug(resMsg.query)
-        // console.debug(resMsg.answer)
-
-        if (resMsg.msgtype && resMsg.confidence > 0.8) {
-          switch (resMsg.msgtype) {
-            case 'text':
-              answer = {
-                messageType: types.Message.Text,
-                text: resMsg.answer || resMsg.msg[0].content,
-              }
-              break
-            case 'miniprogrampage':
-              answerJson = JSON.parse(resMsg.answer)
-              answer = {
-                messageType: types.Message.MiniProgram,
-                text: answerJson.miniprogrampage,
-              }
-              break
-            case 'image':
-              answerJson = JSON.parse(resMsg.answer)
-              answer = {
-                messageType: types.Message.Image,
-                text: answerJson.image,
-              }
-              break
-            case 'callback':
-              if (resMsg.answer_type === 'text') {
-                answer = {
-                  messageType: types.Message.Text,
-                  text: resMsg.answer,
-                }
-              }
-
-              break
-            default:
-              log.info(JSON.stringify({ msg: '没有命中关键字', nickName, query, roomid, topic }))
-              break
-          }
-
-          if (sysConfig.DIFF_REPLY_ONOFF) {
-            if (room && (resMsg.skill_name !== topic && resMsg.skill_name !== '通用问题')) {
-              answer = {}
-            }
-          }
-        }
-      } catch (err) {
-        log.error(JSON.stringify(err))
-      }
-      break
-    case 'ChatGPT':
-      try {
-        const api = new ChatGPTAPI({ sessionToken: config.ChatGPTSessionToken })
-        // ensure the API is properly authenticated (optional)
-        await api.ensureAuth()
-        const t0 = new Date().getTime()
-        console.log('content: ', content)
-        // send a message and wait for the response
-        const response = await api.sendMessage(content)
-        // TODO: format response to compatible with wechat messages
-        const t1 = new Date().getTime()
-        console.log('response: ', response)
-        console.log('耗时: ', (t1 - t0) / 1000, 's')
-        // response is a markdown-formatted string
-        answer = {
-          messageType: types.Message.Text,
-          text: response,
-        }
-      } catch (err) {
-        console.error(err)
-      }
-      break
-    default:
-      console.debug('没有匹配')
-      break
+  try {
+    const api = new ChatGPTAPI({ sessionToken: config.ChatGPTSessionToken })
+    // ensure the API is properly authenticated (optional)
+    await api.ensureAuth()
+    const t0 = new Date().getTime()
+    console.log('content: ', content)
+    // send a message and wait for the response
+    const response = await api.sendMessage(content)
+    // TODO: format response to compatible with wechat messages
+    const t1 = new Date().getTime()
+    console.log('response: ', response)
+    console.log('耗时: ', (t1 - t0) / 1000, 's')
+    // response is a markdown-formatted string
+    answer = {
+      messageType: types.Message.Text,
+      text: response,
+    }
+  } catch (err) {
+    console.error(err)
   }
 
   return answer

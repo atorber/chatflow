@@ -1,10 +1,5 @@
 /* eslint-disable no-console */
 /* eslint-disable sort-keys */
-import {
-  init,
-  chatAibot,
-  genToken,
-} from '../api/sdk/openai/index.js'
 import { FileBox } from 'file-box'
 import {
   Room,
@@ -15,7 +10,12 @@ import {
 } from 'wechaty'
 import { formatSentMessage, logger } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/mod.js'
-import type { ResponseCHAT } from '../api/sdk/openai/lib/response.js'
+import openai from 'openai-sdk'
+const {
+  init,
+  chat,
+  // nlp,
+} = openai
 
 async function wxai (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
   const text = extractKeyword(message, bot.currentUser.name())
@@ -110,10 +110,8 @@ async function sendMiniProgram (answer: any, bot: Wechaty, message: Message) {
 }
 
 interface  QueryData {
-  first_priority_skills?: string[];
-  query:string;
-  signature:string;
-  second_priority_skills?:string [];
+  username:string;
+  msg:string;
 }
 
 // aibot 函数基本保持不变
@@ -134,12 +132,10 @@ async function aibot (sysConfig: ProcessEnv, talker: any, room: any, query: any)
     logger.info('开始请求微信对话平台...')
     init(ops)
     try {
-      const {
-        // username,
-        // userid,
-        queryData,
-      } = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query)
-      const resMsg = await chatAibot(queryData)
+      const queryData = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query)
+
+      const resMsg:any = await chat(queryData)
+
       logger.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
       logger.info(`回答内容： ${resMsg.msgtype}, ${resMsg.query}, ${resMsg.answer}`)
       return handleWxOpenAiResponse(resMsg)
@@ -155,26 +151,16 @@ async function aibot (sysConfig: ProcessEnv, talker: any, room: any, query: any)
 }
 
 function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:string, wxid:string, roomid:string, query: any) {
-  const username = room ? `${nickName}/${topic}` : nickName
-  const userid = room ? `${wxid}/${roomid}` : wxid
-  const signature = genToken({ userid, username })
-  let queryData:QueryData = {
-    // first_priority_skills: [],
-    query: '',
-    signature: '',
-    // second_priority_skills:[],
+  const username = room ? `${nickName}|${wxid}/${topic}|${roomid}` : `${nickName}|${wxid}`
+  const queryData:QueryData = {
+    msg:query,
+    username,
   }
 
-  queryData = {
-    // first_priority_skills: [ '通用问题' ],
-    query,
-    signature,
-  }
-
-  return { username, userid, queryData }
+  return queryData
 }
 
-function handleWxOpenAiResponse (resMsg: ResponseCHAT) {
+function handleWxOpenAiResponse (resMsg: any) {
   let answer = {}
   // 置信度大于0.8时回复，低于0.8时不回复
   if (resMsg.msgtype && resMsg.confidence > 0.8) {
