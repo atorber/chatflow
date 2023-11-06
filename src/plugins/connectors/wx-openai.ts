@@ -1,14 +1,5 @@
 /* eslint-disable no-console */
 /* eslint-disable sort-keys */
-import {
-  init,
-  // chat,
-  chatAibot,
-  // nlp,
-  // QueryData,
-  genToken,
-} from '../../api/sdk/openai/index.js'
-
 import { FileBox } from 'file-box'
 // import excel2order from '../excel.js'
 
@@ -32,6 +23,17 @@ import {
 } from '../../utils/utils.js'
 
 import { ChatGPTAPI } from 'chatgpt'
+import openai from 'openai-sdk'
+const {
+  init,
+  chat,
+  // nlp,
+} = openai
+
+interface  QueryData {
+  username:string;
+  msg:string;
+}
 
 const botTpyes = [ 'WxOpenai', 'ChatGPT' ]
 const useBot = 0
@@ -45,6 +47,16 @@ const config = {
 const __dirname = path.resolve()
 // const userInfo = os.userInfo()
 // const rootPath = `${userInfo.homedir}\\Documents\\WeChat Files\\`
+
+function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:string, wxid:string, roomid:string, query: any) {
+  const username = room ? `${nickName}|${wxid}/${topic}|${roomid}` : `${nickName}|${wxid}`
+  const queryData:QueryData = {
+    msg:query,
+    username,
+  }
+
+  return queryData
+}
 
 async function wxai (sysConfig: any, bot: Wechaty, talker: Contact, room: Room | undefined, message: Message) {
   // const talker = message.talker()
@@ -198,30 +210,9 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
       })
 
       try {
-        const username = room ? (nickName + '/' + topic) : nickName
-        const userid = room ? (wxid + '/' + roomid) : wxid
-        const signature = genToken({
-          userid,
-          username,
-        })
+        const queryData = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query)
+        const resMsg:any = await chat(queryData)
 
-        let queryData
-        if (sysConfig.DIFF_REPLY_ONOFF && room) {
-          queryData = {
-            first_priority_skills: [ topic || '' ],
-            query,
-            second_priority_skills: [ '通用问题' ],
-            signature,
-          }
-        } else {
-          queryData = {
-            first_priority_skills: [ '通用问题' ],
-            query,
-            signature,
-          }
-        }
-
-        const resMsg = await chatAibot(queryData)
         // console.debug(resMsg)
         log.info('对话返回原始：', resMsg)
         // log.info('对话返回：', JSON.stringify(resMsg).replace(/[\r\n]/g, "").replace(/\ +/g, ""))
