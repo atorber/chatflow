@@ -8,7 +8,6 @@
   "exclude": [
     "node_modules/",
     "dist/",
-    "src/api/sdk/openai/*",
     "tests/vika-orm-test.ts"
   ],
   "include": [
