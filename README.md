@@ -59,10 +59,6 @@ VIKA_TOKEN="" #维格表token
 
 # 基础配置
 ADMINROOM_ADMINROOMTOPIC="瓦力是群主" # 管理群名称，需尽量保持名称复杂，避免重名群干扰
-
-# 智能问答配置
-WXOPENAI_TOKEN="" # 微信对话开放平台中获取
-WXOPENAI_ENCODINGAESKEY="" # 微信对话开放平台中获取
 ```
 
 4.启动程序

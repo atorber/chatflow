@@ -1,6 +1,6 @@
 {
   "name": "@atorber/chatflow",
-  "version": "2.0.43",
+  "version": "2.0.45",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
@@ -62,8 +62,6 @@
     "fast-csv": "^4.3.6",
     "file-box": "^1.5.5",
     "html-to-docx": "^1.8.0",
-    "koa": "^2.14.2",
-    "koa-bodyparser": "^4.4.1",
     "langchain": "^0.0.111",
     "language-monitor": "^1.0.3",
     "moment": "^2.29.1",
