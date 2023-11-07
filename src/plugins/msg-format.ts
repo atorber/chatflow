@@ -14,7 +14,7 @@ function getCurTime () {
   return time
 }
 
-async function wechaty2chatdev (message:Message) {
+async function wechaty2mqtt (message:Message) {
   const curTime = getCurTime()
   const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
 
@@ -228,5 +228,5 @@ function eventMessage (name:string, info:any) {
   return message
 }
 
-export { wechaty2chatdev, propertyMessage, eventMessage }
-export default wechaty2chatdev
+export { wechaty2mqtt, propertyMessage, eventMessage }
+export default wechaty2mqtt

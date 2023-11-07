@@ -646,7 +646,7 @@ export async function handleMessage (message:Message) {
 
   payload = JSON.parse(payload)
 
-  // mqttclient.publish(eventPost, getEventsMsg('message', payload));
+  // mqttClient.publish(eventPost, getEventsMsg('message', payload));
 
   const reqMsg = getEventsMsg('message', payload)
 
@@ -749,11 +749,11 @@ export async function updateContact (bot:Wechaty) {
 
   const roomList = await bot.Room.findAll()
   const userSelf = bot.ContactSelf
-  // mqttclient.publish(eventPost, getEventsMsg('ready', { contactList, roomList, userSelf }));
+  // mqttClient.publish(eventPost, getEventsMsg('ready', { contactList, roomList, userSelf }));
   await pubMsg(getEventsMsg('ready', { friendContactList, roomList, userSelf }))
 }
 
-const mqttclient = mqtt.connect(`mqtt://${instanceId}.iot.gz.baidubce.com:1883`, {
+const mqttClient = mqtt.connect(`mqtt://${instanceId}.iot.gz.baidubce.com:1883`, {
   username,
   password,
   clientId,
@@ -765,9 +765,9 @@ const mqttclient = mqtt.connect(`mqtt://${instanceId}.iot.gz.baidubce.com:1883`,
   },
 })
 
-mqttclient.on('connect', function () {
+mqttClient.on('connect', function () {
   logger.info('connect------------------------------------------------')
-  mqttclient.subscribe(commandInvoke, function (err:any) {
+  mqttClient.subscribe(commandInvoke, function (err:any) {
     if (err) {
       logger.info(err)
     } else {
@@ -777,7 +777,7 @@ mqttclient.on('connect', function () {
   })
 })
 
-mqttclient.on('message', (_topic: string, message: Buffer) => {
+mqttClient.on('message', (_topic: string, message: Buffer) => {
   (async () => {
     logger.info('message', '------------------------------------------------')
     try {

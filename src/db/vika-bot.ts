@@ -120,7 +120,6 @@ export class ChatFlowConfig {
     },
   }
 
-  static chatdev:any
   static bot:Wechaty
 
   // constructor (config: ChatFlowConfigConfigTypes) {

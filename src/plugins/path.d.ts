@@ -1,2 +1,2 @@
-declare module './chat-device.js'
+declare module './mqtt-proxy.js'
 declare module './msg-format.js'

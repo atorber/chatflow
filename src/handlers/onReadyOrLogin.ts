@@ -11,9 +11,13 @@ import {
 import { logForm } from '../utils/mod.js'
 import CryptoJS from 'crypto-js'
 import {
-  ChatDevice,
   getRoom,
 } from '../plugins/mod.js'
+
+import {
+  MqttProxy,
+  IClientOptions,
+} from '../plugins/mqtt-proxy.js'
 
 import { onMessage } from './on-message.js'
 
@@ -23,11 +27,31 @@ export const handleSay = async (talker: Room | Contact | Message, sayable: Sayab
 }
 
 const initializeMQTT = (bot: Wechaty) => {
+  // 计算clientid原始字符串
   const clientString = ChatFlowConfig.configEnv.VIKA_TOKEN + ChatFlowConfig.configEnv.VIKA_SPACE_NAME
+  // clientid加密
   const client = CryptoJS.SHA256(clientString).toString()
 
-  ChatFlowConfig.chatdev = new ChatDevice(ChatFlowConfig.configEnv.MQTT_USERNAME, ChatFlowConfig.configEnv.MQTT_PASSWORD, ChatFlowConfig.configEnv.MQTT_ENDPOINT, ChatFlowConfig.configEnv.MQTT_PORT, ChatFlowConfig.configEnv.BASE_BOT_ID || client)
-  ChatFlowConfig.chatdev.init(bot)
+  // 初始化mqtt
+  const config:IClientOptions = {
+    username: ChatFlowConfig.configEnv.MQTT_USERNAME,
+    password: ChatFlowConfig.configEnv.MQTT_PASSWORD,
+    host: ChatFlowConfig.configEnv.MQTT_ENDPOINT,
+    port: Number(ChatFlowConfig.configEnv.MQTT_PORT),
+    clientId: ChatFlowConfig.configEnv.BASE_BOT_ID || client,
+    clean: false,
+    reconnectPeriod: 1000,
+    connectTimeout: 30 * 1000,
+    keepalive: 60,
+    resubscribe: true,
+    protocolId: 'MQTT',
+    protocolVersion: 4,
+    rejectUnauthorized: false,
+  }
+
+  const mqttProxy = MqttProxy.getInstance(config)
+  mqttProxy.setWechaty(bot)
+  return mqttProxy
 }
 
 const notifyAdminRoom = async (bot: Wechaty) => {
@@ -66,8 +90,8 @@ const postVikaInitialization = async (bot: Wechaty) => {
       //   const curDate = new Date().toLocaleString()
       //   logger.info('当前时间:' + curDate)
       //   try {
-      //     if (chatdev && chatdev.isOk && configEnv.MQTT_MQTTMESSAGEPUSH) {
-      //       chatdev.pub_property(propertyMessage('lastActive', curDate))
+      //     if (mqttProxy.isOk && configEnv.MQTT_MQTTMESSAGEPUSH) {
+      //       mqttProxy.pubProperty(propertyMessage('lastActive', curDate))
       //     }
       //   } catch (err) {
       //     logger.error('发送心跳失败:', err)

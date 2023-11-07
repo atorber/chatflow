@@ -34,6 +34,9 @@ import type {
 import { containsContact, containsRoom } from '../services/userService.js'
 import { handleSay } from './onReadyOrLogin.js'
 import { activityController } from '../services/activityService.js'
+import { MqttProxy } from '../plugins/mqtt-proxy.js'
+
+const mqttProxy = MqttProxy.getInstance()
 
 async function handleActivityManagement (message: Message) {
   const room = message.room() as Room
@@ -422,13 +425,13 @@ export async function onMessage (message: Message) {
   }
 
   // 消息通过MQTT上报
-  if (ChatFlowConfig.chatdev && ChatFlowConfig.chatdev.isOk && ChatFlowConfig.configEnv.MQTT_MQTTMESSAGEPUSH) {
+  if (mqttProxy.isOk && ChatFlowConfig.configEnv.MQTT_MQTTMESSAGEPUSH) {
     /*
             将消息通过mqtt通道上报到云端
             */
-    // chatdev.pub_message(message)
+    // mqttProxy.pubMessage(message)
 
-    ChatFlowConfig.chatdev.pub_event(eventMessage('onMessage', await formatMessage(message)))
+    mqttProxy.pubEvent(eventMessage('onMessage', await formatMessage(message)))
   }
 
 }
