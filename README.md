@@ -9,11 +9,15 @@ wechat-qa-bot 更名为ChatFlow，[访问项目语雀文档了解更多信息](h
 
 ## 简介
 
-本项目使用wechat机器人快速实现一个免费的QA问答系统，如果你是一个社群工作者、拼团团长、业务群运营经理，使用这个项目可以帮助你解决一些重复性问答。
+ChatFlow是一个聊天机器人管理系统，可以帮助你实现一些原生IM无法支持的功能。
 
-同时，本项目也具备微信消息收集、定时通知等常用场景功能。
+如果你是一个社群工作者、拼团团长、业务群运营经理，使用这个项目可以帮助你解决一些实际工作中的问题。
 
-已适配网页版微信，linux、mac、Windows均可运行。
+此外还提供定时任务、消息存档等功能。
+
+基于开源项目Wechaty实现，目前主要验证了对微信的支持，理论上支持微信、钉钉、飞书、whatsapp等。
+
+已适配网页版微信，linux、mac、Windows均可免费运行。
 
 ### 功能列表
 
@@ -37,7 +41,7 @@ wechat-qa-bot 更名为ChatFlow，[访问项目语雀文档了解更多信息](h
 1.下载源码并安装依赖
 
 ```Shell
-git clone <https://github.com/choogoo/chatflow.git>
+git clone <https://github.com/atorber/chatflow.git>
 cd ./chatflow
 npm install
 ```
@@ -55,13 +59,7 @@ VIKA_TOKEN="" #维格表token
 
 # 基础配置
 ADMINROOM_ADMINROOMTOPIC="瓦力是群主" # 管理群名称，需尽量保持名称复杂，避免重名群干扰
-
-# 智能问答配置
-WXOPENAI_TOKEN="" # 微信对话开放平台中获取
-WXOPENAI_ENCODINGAESKEY="" # 微信对话开放平台中获取
 ```
-
-> 只有加入到roomWhiteList里的群才会开启只能问答机器人
 
 4.启动程序
 
@@ -126,7 +124,7 @@ atorber/chatflow:latest
 
 2. 到 [项目语雀知识库](https://www.yuque.com/atorber/oegota/ibnui5v8mob11d70) 查看常用问题
 
-3. 提交一个issues <https://github.com/choogoo/wechat-openai-qa-bot/issues>
+3. 提交一个issues <https://github.com/atorber/chatflow/issues>
 
 ## 效果展示
 
@@ -171,10 +169,6 @@ atorber/chatflow:latest
 - [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973)
 
   将过去复杂的IT数据库技术，做得像表格一样简单(如果要注册，通过这个链接，或者使用邀请码 55152973 )
-
-- [vue-im](https://github.com/polk6/vue-im)
-
-  由@polk6开源的客服web项目，实现客服后台回复咨询消息
 
 ## Star History
 

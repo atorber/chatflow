@@ -171,7 +171,7 @@
         "id": "2c4ff291c950275c",
         "type": "exec",
         "z": "dcb6b2cc74a2666a",
-        "command": "cd C:\\Users\\wechaty\\Documents\\GitHub\\wechat-openai-qa-bot",
+        "command": "cd C:\\Users\\wechaty\\Documents\\GitHub\\chatflow",
         "addpay": "",
         "append": "",
         "useSpawn": "false",

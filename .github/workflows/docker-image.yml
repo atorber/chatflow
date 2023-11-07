@@ -13,10 +13,32 @@ jobs:  # workflow中的job
   push_to_registry:  # job的名字
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest   # job运行的基础环境
+    strategy:
+      matrix:
+        include:
+          - platform: linux/amd64
+            tag_suffix: amd64
+          - platform: linux/arm/v7
+            tag_suffix: armv7
+          - platform: linux/arm64
+            tag_suffix: arm64
 
     steps:  # 一个job由一个或多个step组成
       - name: Check out the repo
         uses: actions/checkout@v2   # 官方的action，获取代码
+
+      - name: Install jq
+        run: sudo apt-get install jq
+
+      - name: Extract package version
+        id: package_version
+        run: echo "::set-output name=VERSION::$(jq -r '.version' package.json)"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+  
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v1  # 三方的action操作， 执行docker login
@@ -28,12 +50,14 @@ jobs:  # workflow中的job
         id: meta
         uses: docker/metadata-action@v3  # 抽取项目信息，主要是镜像的tag
         with:
-          images: atorber/chatflow
+          images: atorber/chatflow-worker
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2 # docker build & push
         with:
           context: .
+          file: ./Dockerfile
+          platforms: ${{ matrix.platform }}
+          tags: atorber/chatflow:${{ steps.package_version.outputs.VERSION }}-${{ matrix.tag_suffix }}
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
