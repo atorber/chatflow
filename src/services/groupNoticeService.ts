@@ -2,9 +2,10 @@
 /* eslint-disable sort-keys */
 import type { TaskConfig, Notifications } from '../api/base-config.js'
 import { VikaDB } from '../db/vika-db.js'
+import { ChatFlowConfig } from '../api/base-config.js'
 
 import { VikaSheet } from '../db/vika.js'
-import type { Message, Wechaty } from 'wechaty'
+import { Wechaty, log } from 'wechaty'
 import { transformKeys } from './activityService.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/mod.js'
 import { generateRandomNumber, delay, logger } from '../utils/mod.js'
@@ -21,30 +22,32 @@ import { sendMsg } from './configService.js'
 // 服务类
 export class GroupNoticeChat {
 
-  db:VikaSheet
-  envsOnVika: any
-  roomWhiteList: any
-  contactWhiteList: any
-  reminderList: TaskConfig[] = []
+  static db:VikaSheet
+  static envsOnVika: any
+  static roomWhiteList: any
+  static contactWhiteList: any
+  static reminderList: TaskConfig[] = []
+  static bot:Wechaty = ChatFlowConfig.bot
 
-  constructor () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.groupNoticeSheet)
-    void this.init()
+  private constructor () {
+
   }
 
   // 初始化
-  async init () {
+  static async init () {
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.groupNoticeSheet)
     await this.getRecords()
+    log.info('初始化 GroupNoticeChat 成功...')
   }
 
-  async getRecords () {
+  static async getRecords () {
     const records = await this.db.findAll()
     // logger.info('维格表中的记录：', JSON.stringify(records))
     return records
   }
 
   // 获取群发通知
-  async getGroupNotifications () {
+  static async getGroupNotifications () {
     // const query = {
     //   filterByFormula: '{状态|state}="待发送|waiting"',
     // }
@@ -88,7 +91,7 @@ export class GroupNoticeChat {
     }
   }
 
-  async pubGroupNotifications (bot: Wechaty, messageService: { onMessage: (arg0: Message) => any }) {
+  static async pubGroupNotifications () {
     const groupNotifications = await this.getGroupNotifications()
     const resPub: any[] = []
     const failRoom: any[] = []
@@ -100,10 +103,10 @@ export class GroupNoticeChat {
       const timestamp = new Date().getTime()
       // logger.info('当前消息：', JSON.stringify(notice))
       if (notice.type === 'room') {
-        const room = await getRoom(bot, notice.room as BusinessRoom)
+        const room = await getRoom(this.bot, notice.room as BusinessRoom)
         if (room) {
           try {
-            await sendMsg(room, notice.text, messageService)
+            await sendMsg(room, notice.text)
             await delay(generateRandomNumber(200))
             resPub.push({
               recordId: notice.recordId,
@@ -141,10 +144,10 @@ export class GroupNoticeChat {
           logger.error('发送失败：群不存在', JSON.stringify(notice))
         }
       } else {
-        const contact = await getContact(bot, notice.contact as BusinessUser)
+        const contact = await getContact(this.bot, notice.contact as BusinessUser)
         if (contact) {
           try {
-            await sendMsg(contact, notice.text, messageService)
+            await sendMsg(contact, notice.text)
             await delay(generateRandomNumber(200))
             resPub.push({
               recordId: notice.recordId,

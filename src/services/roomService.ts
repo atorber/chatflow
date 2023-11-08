@@ -3,6 +3,7 @@ import { VikaSheet, IRecord } from '../db/vika.js'
 import { Room, Wechaty, log } from 'wechaty'
 import { delay, logger } from '../utils/utils.js'
 import { VikaDB } from '../db/vika-db.js'
+import { ChatFlowConfig } from '../api/base-config.js'
 
 // import { db } from '../db/tables.js'
 // const roomData = db.room
@@ -10,31 +11,33 @@ import { VikaDB } from '../db/vika-db.js'
 // 服务类
 export class RoomChat {
 
-  private db:VikaSheet
-  rooms!: any[]
+  static db:VikaSheet
+  static rooms: any[]
+  static bot:Wechaty = ChatFlowConfig.bot
 
-  constructor () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.roomSheet)
-    void this.init()
+  private constructor () {
+
   }
 
   // 初始化
-  async init () {
+  static async init () {
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.roomSheet)
     const rooms = await this.getRoom()
     this.rooms = rooms
+    log.info('初始化 RoomChat 成功...')
   }
 
-  async getRoom () {
+  static async getRoom () {
     const records = await this.db.findAll()
     // logger.info('维格表中的记录：', JSON.stringify(records))
     return records
   }
 
   // 上传群列表
-  async updateRooms (bot: Wechaty, puppet:string) {
+  static async updateRooms (puppet:string) {
     let updateCount = 0
     try {
-      const rooms: Room[] = await bot.Room.findAll()
+      const rooms: Room[] = await this.bot.Room.findAll()
       log.info('最新微信群数量：', rooms.length)
       const recordsAll: any = []
       const recordExisting = await this.db.findAll()

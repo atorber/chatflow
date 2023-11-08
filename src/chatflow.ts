@@ -1,11 +1,7 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 /* eslint-disable sort-keys */
 import 'dotenv/config.js'
-import {
-  WechatyPlugin,
-  Wechaty,
-  log,
-} from 'wechaty'
+import { WechatyPlugin, Wechaty, log } from 'wechaty'
 import onScan from './handlers/on-scan.js'
 import onError from './handlers/on-error.js'
 import onRoomjoin from './handlers/on-roomjoin.js'
@@ -20,7 +16,7 @@ import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
 import { VikaDB } from './db/vika-db.js'
 
 export function ChatFlow (): WechatyPlugin {
-  logForm('开始启动...\n启动过程需要30秒到1分钟\n请等待系统初始化...')
+  logForm('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...')
 
   return function ChatFlowPlugin (bot: Wechaty): void {
 
@@ -32,6 +28,7 @@ export function ChatFlow (): WechatyPlugin {
     bot.on('message', onMessage)
     bot.on('room-join', onRoomjoin)
     bot.on('error', onError)
+
   }
 
 }

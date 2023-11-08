@@ -1,26 +1,31 @@
 /* eslint-disable sort-keys */
 import { VikaDB } from '../db/vika-db.js'
+import { ChatFlowConfig } from '../api/base-config.js'
+import { Wechaty, log } from 'wechaty'
+
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { logger } from '../utils/mod.js'
 
 // 服务类
 export class KeywordChat {
 
-  private db:VikaSheet
-  records: IRecord[] | undefined
+  static db:VikaSheet
+  static records: IRecord[] | undefined
+  static bot:Wechaty = ChatFlowConfig.bot
 
-  constructor () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.keywordSheet)
-    void this.init()
+  private constructor () {
+
   }
 
   // 初始化
-  async init () {
+  static async init () {
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.keywordSheet)
     await this.getKeywords()
+    log.info('初始化 KeywordChat 成功...')
   }
 
   // 获取关键字
-  async getKeywords () {
+  static async getKeywords () {
     if (this.records) return this.records
     const keywordsRecords = await this.db.findAll()
     this.records = keywordsRecords
@@ -28,7 +33,7 @@ export class KeywordChat {
     return this.records
   }
 
-  async getKeywordsText () {
+  static async getKeywordsText () {
     const records = await this.getKeywords()
     let text :string = '【操作说明】\n'
     for (const record of records) {
@@ -38,7 +43,7 @@ export class KeywordChat {
     return text
   }
 
-  async getSystemKeywordsText () {
+  static async getSystemKeywordsText () {
     const records = await this.getKeywords()
     let text :string = '【操作说明】\n'
     for (const record of records) {

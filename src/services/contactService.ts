@@ -3,6 +3,7 @@ import { VikaSheet, IRecord } from '../db/vika.js'
 import { Contact, Wechaty, log } from 'wechaty'
 import { delay, logger } from '../utils/utils.js'
 import { VikaDB } from '../db/vika-db.js'
+import { ChatFlowConfig } from '../api/base-config.js'
 
 // import { db } from '../db/tables.js'
 // const contactData = db.contact
@@ -11,29 +12,31 @@ import { VikaDB } from '../db/vika-db.js'
 // 服务类
 export class ContactChat {
 
-  private db:VikaSheet
+  static db:VikaSheet
+  static bot:Wechaty = ChatFlowConfig.bot
 
-  constructor () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.contactSheet)
-    void this.init()
+  private constructor () {
+
   }
 
   // 初始化
-  async init () {
+  static async init () {
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.contactSheet)
     await this.getContact()
+    log.info('初始化 ContactChat 成功...')
   }
 
-  async getContact () {
+  static async getContact () {
     const records:IRecord[] = await this.db.findAll()
     // logger.info('维格表中的记录：' + JSON.stringify(records))
     return records
   }
 
   // 上传联系人列表
-  async updateContacts (bot: Wechaty, puppet:string) {
+  static async updateContacts (puppet:string) {
     let updateCount = 0
     try {
-      const contacts: Contact[] = await bot.Contact.findAll()
+      const contacts: Contact[] = await this.bot.Contact.findAll()
       log.info('最新联系人数量(包含公众号)：', contacts.length)
       logger.info('最新联系人数量(包含公众号)：' + contacts.length)
       const recordsAll: any = []

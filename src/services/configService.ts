@@ -3,6 +3,7 @@ import { Contact, Message, Room, Sayable, log } from 'wechaty'
 import type { configTypes } from '../types/mod.js'
 import { EnvironmentVariables } from '../types/mod.js'
 import fs from 'fs'
+import { MessageChat } from './messageService.js'
 
 const config: configTypes.Config = {
   botInfo: {},
@@ -134,7 +135,7 @@ function getBotOps (puppet: string, token: string) {
 }
 
 // 消息发布器
-export const sendMsg = async (publisher: Message | Room | Contact, sayable: Sayable, messageService: { onMessage: (arg0: Message) => any }, inviteeList?: Contact[]) => {
+export const sendMsg = async (publisher: Message | Room | Contact, sayable: Sayable, inviteeList?: Contact[]) => {
   try {
     let replyMessage: Message | void
     if (inviteeList?.length) {
@@ -144,7 +145,7 @@ export const sendMsg = async (publisher: Message | Room | Contact, sayable: Saya
       replyMessage = await publisher.say(sayable)
     }
     if (replyMessage) {
-      await messageService.onMessage(replyMessage)
+      await MessageChat.onMessage(replyMessage)
     }
   } catch (e) {
     log.error('消息发送失败:', publisher, sayable, e)

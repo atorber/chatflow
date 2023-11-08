@@ -6,7 +6,9 @@ import { ChatFlowConfig } from '../api/base-config.js'
 import { initializeServicesAndEnv } from '../proxy/initializeServicesAndEnv.js'
 import {
   EnvChat,
-  Services,
+  KeywordChat,
+  WhiteListChat,
+  NoticeChat,
 } from '../services/mod.js'
 import { logForm } from '../utils/mod.js'
 import {
@@ -25,7 +27,7 @@ const notifyAdminRoom = async (bot: Wechaty) => {
 
   if (ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMID || ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMTOPIC) {
     const adminRoom = await getRoom(bot, { topic: ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMTOPIC, id: ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMID })
-    const helpText = await (ChatFlowConfig.services as Services).keywordService.getSystemKeywordsText()
+    const helpText = await KeywordChat.getSystemKeywordsText()
     const text = `${new Date().toLocaleString()}\nchatflow启动成功!\n当前登录用户${bot.currentUser.name()}\n可在管理员群回复对应指令进行操作\n${helpText}\n`
     if (adminRoom) await handleSay(adminRoom, text)
     // await adminRoom?.say(text)
@@ -45,7 +47,7 @@ const postVikaInitialization = async (bot: Wechaty) => {
 
     try {
       log.info('开始请求获取白名单...')
-      ChatFlowConfig.whiteList = await (ChatFlowConfig.services as Services).whiteListService.getWhiteList()
+      ChatFlowConfig.whiteList = await WhiteListChat.getWhiteList()
       // await (chatflowConfig.services as Services).roomService.updateRooms(bot, configEnv.WECHATY_PUPPET)
       // await (chatflowConfig.services as Services).contactService.updateContacts(bot, configEnv.WECHATY_PUPPET)
 
@@ -63,8 +65,8 @@ const postVikaInitialization = async (bot: Wechaty) => {
       // }, 300000)
 
       try {
-        await (ChatFlowConfig.services as Services).noticeService.updateJobs(bot, (ChatFlowConfig.services as Services).messageService)
-        const helpText = await (ChatFlowConfig.services as Services).keywordService.getSystemKeywordsText()
+        await NoticeChat.updateJobs()
+        const helpText = await KeywordChat.getSystemKeywordsText()
         logForm(`启动成功，系统准备就绪\n\n当前登录用户：${bot.currentUser.name()}\nID:${bot.currentUser.id}\n\n在当前群（管理员群）回复对应指令进行操作\n${helpText}`)
       } catch (err) {
         log.error('获取帮助文案失败', err)
@@ -87,20 +89,18 @@ const postVikaInitialization = async (bot: Wechaty) => {
 }
 
 export const onReadyOrLogin = async (bot: Wechaty) => {
-  if (!ChatFlowConfig.services) {
-    log.info('初始化services服务,initializeServicesAndEnv()')
-    await initializeServicesAndEnv()
-    await delay(500)
-    const res = await EnvChat.findByField('key', 'BASE_BOT_ID')
-    // log.info('当前云端配置的BASE_BOT_ID:', JSON.stringify(res))
-    const BASE_BOT_ID:any = res[0]
-    await delay(500)
-    BASE_BOT_ID.fields.value = bot.currentUser.id
-    BASE_BOT_ID.fields.lastOperationTime = new Date().getTime()
-    BASE_BOT_ID.fields.syncStatus = '已同步'
+  log.info('初始化services服务...')
+  await initializeServicesAndEnv()
+  await delay(500)
+  const res = await EnvChat.findByField('key', 'BASE_BOT_ID')
+  // log.info('当前云端配置的BASE_BOT_ID:', JSON.stringify(res))
+  const BASE_BOT_ID:any = res[0]
+  await delay(500)
+  BASE_BOT_ID.fields.value = bot.currentUser.id
+  BASE_BOT_ID.fields.lastOperationTime = new Date().getTime()
+  BASE_BOT_ID.fields.syncStatus = '已同步'
 
-    await EnvChat.update(BASE_BOT_ID.recordId, BASE_BOT_ID.fields)
-  }
+  await EnvChat.update(BASE_BOT_ID.recordId, BASE_BOT_ID.fields)
 
   const user: Contact = bot.currentUser
   log.info('当前登录的账号信息:', user.name())

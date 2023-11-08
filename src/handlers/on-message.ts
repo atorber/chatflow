@@ -26,11 +26,20 @@ import {
   getNow,
   logger,
   formatTimestamp,
+  logForm,
 } from '../utils/mod.js'
 
 import {
-  Services,
   EnvChat,
+  MessageChat,
+  NoticeChat,
+  ContactChat,
+  RoomChat,
+  ActivityChat,
+  WhiteListChat,
+  GroupNoticeChat,
+  QaChat,
+  KeywordChat,
 } from '../services/mod.js'
 import { containsContact, containsRoom } from '../services/userService.js'
 import { handleSay } from './onReadyOrLogin.js'
@@ -55,7 +64,7 @@ interface CommandActions {
     [key: string]: (bot: Wechaty, message: Message) => Promise<FileBox>
   }
 
-async function handleAutoQA (bot: Wechaty, message: Message, keyWord: string) {
+async function handleAutoQA (message: Message, keyWord: string) {
   const room = message.room() as Room
   const topic = await room.topic()
   const text = message.text()
@@ -65,7 +74,7 @@ async function handleAutoQA (bot: Wechaty, message: Message, keyWord: string) {
     if (isInRoomWhiteList) {
       logger.info('当前群在qa白名单内，请求问答...')
       try {
-        await wxai(ChatFlowConfig.configEnv, bot, message)
+        await wxai(ChatFlowConfig.configEnv, ChatFlowConfig.bot, message)
       } catch (e) {
         logger.error('发起请求wxai失败', topic, e)
       }
@@ -75,29 +84,12 @@ async function handleAutoQA (bot: Wechaty, message: Message, keyWord: string) {
     if (isInGptRoomWhiteList) {
       logger.info('当前群在qa白名单内，请求问答gpt...')
       try {
-        await gpt(ChatFlowConfig.configEnv, bot, message)
+        await gpt(ChatFlowConfig.configEnv, ChatFlowConfig.bot, message)
       } catch (e) {
         logger.error('发起请求gpt失败', topic, e)
       }
     }
   }
-}
-
-async function handleCommand (bot: Wechaty, command: string, action: (bot: Wechaty, message: Message) => Promise<FileBox>, message: any, services: any) {
-  logger.info(`Handling command: ${command}`)
-  try {
-    const fileBox = await action(bot, message)
-    await sendMsg(message, fileBox, services.messageService)
-  } catch (err) {
-    logger.error(`${command} failed`, err)
-    await sendMsg(message, '下载失败，请重试~', services.messageService)
-  }
-}
-
-const commandActions: CommandActions = {
-  下载csv通讯录: (bot: Wechaty) => exportContactsAndRoomsToCSV(bot),
-  下载通讯录: (bot: Wechaty) => exportContactsAndRoomsToXLSX(bot),
-  下载通知模板: () => Promise.resolve(FileBox.fromFile('./src/public/templates/群发通知模板.xlsx')),
 }
 
 const extractAtContent = async (message: Message, keyword: string, text: string): Promise<string | null> => {
@@ -118,7 +110,7 @@ const extractAtContent = async (message: Message, keyword: string, text: string)
   }
 
   const query = { 'room.payload.id': message.room()?.id }
-  const messageList = await ChatFlowConfig.services?.messageService.messageData
+  const messageList = await MessageChat.messageData
     .sort({ timestamp: -1 })
     .limit(0, 500)
     .find(query)
@@ -165,7 +157,7 @@ const extractAtContent = async (message: Message, keyword: string, text: string)
 // 封装成一个函数来处理错误和成功的消息发送
 async function sendReplyMessage (message: Message, success: boolean, successMsg: string, errorMsg: string) {
   const replyText = success ? successMsg : errorMsg
-  await sendMsg(message, getNow() + replyText, (ChatFlowConfig.services as Services).messageService)
+  await sendMsg(message, getNow() + replyText)
 }
 
 async function handleAdminRoomSetting (message: Message) {
@@ -175,7 +167,7 @@ async function handleAdminRoomSetting (message: Message) {
     ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMID = room.id
     ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMTOPIC = await room.topic()
     // await updateConfig(ChatFlowConfig.configEnv)
-    await sendMsg(message, '设置管理群成功', (ChatFlowConfig.services as Services).messageService)
+    await sendMsg(message, '设置管理群成功')
   }
 }
 
@@ -193,51 +185,51 @@ const adminCommands: AdminCommands = {
       return [ false, '配置更新失败~' ]
     }
   },
-  更新定时提醒: async (bot: Wechaty) => {
+  更新定时提醒: async () => {
     try {
-      await (ChatFlowConfig.services as Services).noticeService.updateJobs(bot, (ChatFlowConfig.services as Services).messageService)
+      await NoticeChat.updateJobs()
       return [ true, '提醒任务更新成功~' ]
     } catch (e) {
       return [ false, '提醒任务更新失败~' ]
     }
   },
-  更新通讯录: async (bot: Wechaty) => {
+  更新通讯录: async () => {
     try {
-      await (ChatFlowConfig.services as Services).contactService.updateContacts(bot, ChatFlowConfig.configEnv.WECHATY_PUPPET)
-      await (ChatFlowConfig.services as Services).roomService.updateRooms(bot, ChatFlowConfig.configEnv.WECHATY_PUPPET)
+      await ContactChat.updateContacts(ChatFlowConfig.configEnv.WECHATY_PUPPET)
+      await RoomChat.updateRooms(ChatFlowConfig.configEnv.WECHATY_PUPPET)
       return [ true, '通讯录更新成功~' ]
     } catch (e) {
       return [ false, '通讯录更新失败~' ]
     }
   },
-  更新白名单: async (_bot: Wechaty) => {
+  更新白名单: async () => {
     try {
-      ChatFlowConfig.whiteList = await (ChatFlowConfig.services as Services).whiteListService.getWhiteList()
+      ChatFlowConfig.whiteList = await WhiteListChat.getWhiteList()
       return [ true, '热更新白名单~' ]
     } catch (e) {
       return [ false, '白名单更新失败~' ]
     }
   },
-  更新活动: async (_bot: Wechaty) => {
+  更新活动: async () => {
     try {
-      await (ChatFlowConfig.services as Services).activityService.getStatistics()
+      await ActivityChat.getStatistics()
       return [ true, '热更新活动~' ]
     } catch (e) {
       return [ false, '活动更新失败~' ]
     }
   },
-  群发通知: async (bot: Wechaty) => {
+  群发通知: async () => {
     try {
-      const replyText = await (ChatFlowConfig.services as Services).groupNoticeService.pubGroupNotifications(bot, (ChatFlowConfig.services as Services).messageService)
+      const replyText = await GroupNoticeChat.pubGroupNotifications()
       return [ true, replyText ]
     } catch (e) {
       return [ false, '群发通知失败~' ]
     }
   },
-  更新问答: async (_bot: Wechaty) => {
+  更新问答: async () => {
     let replyText = ''
     try {
-      const skills: SkillInfoArray = await (ChatFlowConfig.services as Services).qaService.getQa()
+      const skills: SkillInfoArray = await QaChat.getQa()
       if (skills.length) {
         const config: WxOpenaiBotConfig = {
           encodingAESKey: ChatFlowConfig.configEnv.WXOPENAI_ENCODINGAESKEY || '',
@@ -267,9 +259,9 @@ const adminCommands: AdminCommands = {
       return [ false, '问答列表更新失败~' ]
     }
   },
-  报名活动: async (_bot: Wechaty, message: Message) => {
+  报名活动: async (_bot:Wechaty, message: Message) => {
     try {
-      await (ChatFlowConfig.services as Services).activityService.createOrder(message)
+      await ActivityChat.createOrder(message)
       return [ true, '报名成功~' ]
     } catch (e) {
       return [ false, '报名失败~' ]
@@ -295,7 +287,7 @@ const adminCommands: AdminCommands = {
   },
 }
 
-async function handleAutoQAForContact (bot: Wechaty, message: Message, keyWord: string) {
+async function handleAutoQAForContact (message: Message, keyWord: string) {
   const talker = message.talker()
   const text = message.text()
   logger.info('联系人请求智能问答：' + (text === keyWord))
@@ -304,7 +296,7 @@ async function handleAutoQAForContact (bot: Wechaty, message: Message, keyWord: 
     if (isInContactWhiteList) {
       logger.info('当前好友在qa白名单内，请求问答...')
       try {
-        await wxai(ChatFlowConfig.configEnv, bot, message)
+        await wxai(ChatFlowConfig.configEnv, ChatFlowConfig.bot, message)
       } catch (e) {
         logger.error('发起请求wxai失败', talker.name(), e)
       }
@@ -315,7 +307,7 @@ async function handleAutoQAForContact (bot: Wechaty, message: Message, keyWord: 
     if (isInGptContactWhiteList) {
       logger.info('当前好友在qa白名单内，请求问答gpt...')
       try {
-        await gpt(ChatFlowConfig.configEnv, bot, message)
+        await gpt(ChatFlowConfig.configEnv, ChatFlowConfig.bot, message)
       } catch (e) {
         logger.error('发起请求wxai失败', talker.name(), e)
       }
@@ -326,7 +318,6 @@ async function handleAutoQAForContact (bot: Wechaty, message: Message, keyWord: 
 }
 
 export async function onMessage (message: Message) {
-  const bot = ChatFlowConfig.bot
   // if (message.type() === types.Message.Text) {
   //   logger.info('onMessage,接收到消息:\n' + JSON.stringify(message.payload))
   // } else {
@@ -335,7 +326,7 @@ export async function onMessage (message: Message) {
 
   // 存储消息到db，如果写入失败则终止
   const addRes = await addMessage(message)
-  if (!addRes || !ChatFlowConfig.services) return
+  if (!addRes) return
 
   const text = message.text()
   const talker = message.talker()
@@ -344,7 +335,7 @@ export async function onMessage (message: Message) {
   const roomId = room?.id
   const topic = await room?.topic()
   const type = message.type()
-  const keyWord = bot.currentUser.name()
+  const keyWord = ChatFlowConfig.bot.currentUser.name()
   const isSelf = message.self()
   const isAdminRoom: boolean = (roomId && (roomId === ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMID || topic === ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMTOPIC)) || isSelf
 
@@ -369,33 +360,45 @@ export async function onMessage (message: Message) {
   }
 
   // logger.info('bot onMessage,接收到消息,chatMessage:\n' + JSON.stringify(chatMessage))
-  log.info('bot onMessage,接收到消息,chatMessage:\n' + JSON.stringify(chatMessage))
+  logForm(JSON.stringify(chatMessage))
 
   // 管理员群接收到管理指令时执行相关操作
   if (isAdminRoom) {
-    if (message.type() === bot.Message.Type.Attachment) {
-      await sendNotice(bot, message)
+    if (message.type() === ChatFlowConfig.bot.Message.Type.Attachment) {
+      await sendNotice(ChatFlowConfig.bot, message)
     }
 
     if (text === '帮助') {
-      const replyText = await (ChatFlowConfig.services as Services).keywordService.getSystemKeywordsText()
-      await sendMsg(message, replyText, (ChatFlowConfig.services as Services).messageService)
+      const replyText = await KeywordChat.getSystemKeywordsText()
+      await sendMsg(message, replyText)
     } else if (Object.prototype.hasOwnProperty.call(adminCommands, text)) {
       const command = adminCommands[text as keyof typeof adminCommands]
       if (typeof command === 'function') {
-        const [ success, replyText ] = await command(bot, message)
+        const [ success, replyText ] = await command(ChatFlowConfig.bot, message)
         await sendReplyMessage(message, success, replyText, replyText)
       }
     }
 
     if ([ '更新配置', '更新定时提醒', '更新通讯录' ].includes(text) && !ChatFlowConfig.configEnv.VIKA_TOKEN) {
-      await sendMsg(message, '未配置维格表，指令无效', (ChatFlowConfig.services as Services).messageService)
+      await sendMsg(message, '未配置维格表，指令无效')
+    }
+
+    const commandActions: CommandActions = {
+      下载csv通讯录: (bot: Wechaty) => exportContactsAndRoomsToCSV(bot),
+      下载通讯录: (bot: Wechaty) => exportContactsAndRoomsToXLSX(bot),
+      下载通知模板: () => Promise.resolve(FileBox.fromFile('./src/public/templates/群发通知模板.xlsx')),
     }
 
     if (Object.prototype.hasOwnProperty.call(commandActions, text)) {
       const command = commandActions[text]
       if (typeof command === 'function') {
-        await handleCommand(bot, text, command, message, ChatFlowConfig.services)
+        try {
+          const fileBox = await command(ChatFlowConfig.bot, message)
+          await sendMsg(message, fileBox)
+        } catch (err) {
+          logger.error(`${command} failed`, err)
+          await sendMsg(message, '下载失败，请重试~')
+        }
       }
     }
   }
@@ -403,7 +406,7 @@ export async function onMessage (message: Message) {
   // 群消息处理
   if (room && room.id) {
     if (!isSelf) {
-      await handleAutoQA(bot, message, keyWord)
+      await handleAutoQA(message, keyWord)
       await handleActivityManagement(message)
       if (text.indexOf(`@${keyWord}`) !== -1) {
         await extractAtContent(message, keyWord, text)
@@ -414,13 +417,13 @@ export async function onMessage (message: Message) {
 
   // 非群消息处理
   if ((!room || !room.id) && !isSelf) {
-    await handleAutoQAForContact(bot, message, keyWord)
+    await handleAutoQAForContact(message, keyWord)
   }
 
   // 消息存储到维格表
   if (ChatFlowConfig.configEnv.VIKA_UPLOADMESSAGETOVIKA) {
     // logger.info('消息同步到维格表...')
-    await (ChatFlowConfig.services as Services).messageService.onMessage(message)
+    await MessageChat.onMessage(message)
   }
 
   const mqttProxy = MqttProxy.getInstance()

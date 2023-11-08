@@ -7,7 +7,7 @@ import {
   Wechaty,
 } from 'wechaty'
 
-import type { Services, EnvChat, WhiteList } from '../services/mod.js'
+import type { WhiteList } from '../services/mod.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/finder.js'
 import { VikaDB } from '../db/vika-db.js'
 import type {
@@ -92,7 +92,6 @@ export class ChatFlowConfig {
   static switchsOnVika: any[]
   static reminderList: any[]
   static statisticRecords: any
-  static services:Services | undefined
   static configEnv : ProcessEnv
   static whiteList:WhiteList = {
     contactWhiteList: {
@@ -173,10 +172,6 @@ export class ChatFlowConfig {
       log.error('\n\n指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息\n\n================================================\n')
       return undefined
     }
-  }
-
-  protected static updateServices (services:Services) {
-    this.services = services
   }
 
 }

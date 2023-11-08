@@ -2,7 +2,7 @@
 import { ICreateRecordsReqParams, Vika } from '@vikadata/vika'
 import type { Sheets, Field } from './vikaModel/Model.js'
 import { sheets } from './vikaModel/index.js'
-import { delay } from '../utils/utils.js'
+import { delay, logForm } from '../utils/utils.js'
 
 export type VikaConfig = {
   spaceName: string,
@@ -61,6 +61,7 @@ export class VikaDB {
   static dataBaseNames: DateBase
 
   static async init (config:VikaConfig) {
+    logForm('初始化检查系统表...')
     this.spaceName = config.spaceName
     this.vika = new Vika({ token: config.token })
     this.token = config.token
@@ -95,7 +96,7 @@ export class VikaDB {
         const sheet = sheets[k as keyof Sheets]
         // console.info('数据模型：', k, sheet)
         if (sheet && !tables[sheet.name]) {
-          console.info('表不存在开始创建...', k + ':' + sheet.name)
+          logForm(`表不存在，创建表并初始化数据...\n${k}/${sheet.name}/${tables[sheet.name]}`)
           const fields = sheet.fields
           // console.info('fields:', JSON.stringify(fields))
           const newFields: Field[] = []
@@ -195,18 +196,19 @@ export class VikaDB {
               await this.createRecord(this.dataBaseIds[k as keyof DateBase], records)
               await delay(1000)
             }
-            console.info(sheet.name, '初始化数据写入完成...')
+            logForm(sheet.name + '初始化数据写入完成...')
           }
-          console.info(sheet.name, '数据表配置完成...')
         } else if (sheet) {
+          // logForm(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
           this.dataBaseIds[k as keyof DateBase] = tables[sheet.name]
           this.dataBaseNames[sheet.name as keyof DateBase] = tables[sheet.name]
         } else { /* empty */ }
       }
+      logForm('初始化表完成...')
 
       return true
     } else {
-      console.error('\n\n指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息\n\n================================================\n')
+      logForm('\n\n指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息\n\n')
       return false
     }
   }
