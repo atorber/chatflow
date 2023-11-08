@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys */
-import { ChatFlowConfig } from '../db/vika-bot.js'
+import { VikaDB } from '../db/vika-db.js'
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { logger } from '../utils/mod.js'
 
@@ -10,7 +10,7 @@ export class KeywordChat {
   records: IRecord[] | undefined
 
   constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.keywordSheet)
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.keywordSheet)
     void this.init()
   }
 

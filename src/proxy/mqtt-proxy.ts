@@ -8,11 +8,13 @@ import {
   log,
 } from 'wechaty'
 import { wechaty2mqtt, propertyMessage, eventMessage } from '../plugins/msg-format.js'
-
+import CryptoJS from 'crypto-js'
 import {
   formatSentMessage,
   logger,
 } from '../utils/utils.js'
+
+import { MQTTAgent } from './mqtt-agent.js'
 
 class MqttProxy {
 
@@ -26,6 +28,13 @@ class MqttProxy {
   eventApi: string
   commandApi: string
   isOk: boolean
+
+  static getClientId (clientString:string) {
+    // clientid加密
+    const clientId = CryptoJS.SHA256(clientString).toString()
+    return clientId
+  }
+
   private constructor (config: IClientOptions) {
     this.propertyApi = `thing/chatbot/${config.clientId}/property/post`
     this.eventApi = `thing/chatbot/${config.clientId}/event/post`
@@ -36,7 +45,7 @@ class MqttProxy {
     this.mqttClient = mqtt.connect(config)
 
     this.mqttClient.on('connect', () => {
-      log.info('MQTT connected')
+      log.info('MQTT连接成功...')
       this.isConnected = true
       // 发送所有排队的消息
       this.messageQueue.forEach(({ topic, message }) => {
@@ -72,13 +81,10 @@ class MqttProxy {
     this.bot = bot
   }
 
-  public static getInstance (config?: IClientOptions): MqttProxy {
+  public static getInstance (config?: IClientOptions): MqttProxy|undefined {
     if (!MqttProxy.instance && config) {
       MqttProxy.instance = new MqttProxy(config)
-    } else if (!MqttProxy.instance) {
-      throw new Error('MQTTProxy has not been initialized with a config.')
     }
-
     return MqttProxy.instance
   }
 
@@ -137,6 +143,10 @@ class MqttProxy {
       message = JSON.parse(message)
       const name = message.name
       const params = message.params
+
+      // 接收到mqtt消息后，调用mqttAgent处理
+      MQTTAgent.handleMQTTMessage(name, params)
+
       if (MqttProxy.instance) {
         if (name === 'start') {
           logger.info('cmd name:' + name)

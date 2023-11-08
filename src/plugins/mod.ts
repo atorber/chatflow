@@ -1,5 +1,5 @@
 import { gpt, aibot as gptbot } from './chatgpt.js'
-import { wxai } from './wxai.js'
+import { wxai } from '../proxy/weixin-chatbot-proxy.js'
 
 import { sendNotice } from './group-notice.js'
 

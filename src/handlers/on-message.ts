@@ -2,7 +2,7 @@ import { Message, log, Wechaty, Room } from 'wechaty'
 import { FileBox } from 'file-box'
 
 import { addMessage, formatMessage } from '../api/message.js'
-import { ChatFlowConfig } from '../db/vika-bot.js'
+import { ChatFlowConfig } from '../api/base-config.js'
 import type { ChatMessage } from '../types/mod.js'
 import {
   sendNotice,
@@ -35,8 +35,6 @@ import { containsContact, containsRoom } from '../services/userService.js'
 import { handleSay } from './onReadyOrLogin.js'
 import { activityController } from '../services/activityService.js'
 import { MqttProxy } from '../proxy/mqtt-proxy.js'
-
-const mqttProxy = MqttProxy.getInstance()
 
 async function handleActivityManagement (message: Message) {
   const room = message.room() as Room
@@ -424,8 +422,9 @@ export async function onMessage (message: Message) {
     await (ChatFlowConfig.services as Services).messageService.onMessage(message)
   }
 
+  const mqttProxy = MqttProxy.getInstance()
   // 消息通过MQTT上报
-  if (mqttProxy.isOk && ChatFlowConfig.configEnv.MQTT_MQTTMESSAGEPUSH) {
+  if (mqttProxy && mqttProxy.isOk && ChatFlowConfig.configEnv.MQTT_MQTTMESSAGEPUSH) {
     /*
             将消息通过mqtt通道上报到云端
             */

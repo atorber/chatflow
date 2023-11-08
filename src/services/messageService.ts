@@ -1,11 +1,10 @@
 /* eslint-disable sort-keys */
-import { ChatFlowConfig } from '../db/vika-bot.js'
-
 import { VikaSheet } from '../db/vika.js'
 import { Message, ScanStatus, types } from 'wechaty'
 import { getCurTime, delay, logger } from '../utils/utils.js'
 import moment from 'moment'
 import { FileBox } from 'file-box'
+import { VikaDB } from '../db/vika-db.js'
 
 import { db } from '../db/tables.js'
 const messageData = db.message
@@ -43,7 +42,7 @@ export class MessageChat {
   messageData: any
 
   constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.messageSheet)
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.messageSheet)
     this.msgStore = []
     this.messageData = messageData
     void this.init()

@@ -1,9 +1,8 @@
 /* eslint-disable sort-keys */
-import { ChatFlowConfig } from '../db/vika-bot.js'
-
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { Contact, Wechaty, log } from 'wechaty'
 import { delay, logger } from '../utils/utils.js'
+import { VikaDB } from '../db/vika-db.js'
 
 // import { db } from '../db/tables.js'
 // const contactData = db.contact
@@ -15,7 +14,7 @@ export class ContactChat {
   private db:VikaSheet
 
   constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.contactSheet)
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.contactSheet)
     void this.init()
   }
 

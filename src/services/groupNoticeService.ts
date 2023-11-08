@@ -1,5 +1,7 @@
 /* eslint-disable sort-keys */
-import { ChatFlowConfig, TaskConfig, Notifications } from '../db/vika-bot.js'
+/* eslint-disable sort-keys */
+import type { TaskConfig, Notifications } from '../api/base-config.js'
+import { VikaDB } from '../db/vika-db.js'
 
 import { VikaSheet } from '../db/vika.js'
 import type { Message, Wechaty } from 'wechaty'
@@ -26,7 +28,7 @@ export class GroupNoticeChat {
   reminderList: TaskConfig[] = []
 
   constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.groupNoticeSheet)
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.groupNoticeSheet)
     void this.init()
   }
 

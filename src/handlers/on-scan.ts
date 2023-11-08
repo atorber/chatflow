@@ -4,7 +4,7 @@ import {
 } from 'wechaty'
 
 import qrcodeTerminal from 'qrcode-terminal'
-import { ChatFlowConfig } from '../db/vika-bot.js'
+import { ChatFlowConfig } from '../api/base-config.js'
 import {
   logger,
   delay,

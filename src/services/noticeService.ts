@@ -1,6 +1,6 @@
 /* eslint-disable sort-keys */
 import type { Message, Wechaty } from 'wechaty'
-import { ChatFlowConfig, TaskConfig } from '../db/vika-bot.js'
+import type { TaskConfig } from '../api/base-config.js'
 import { VikaSheet, IRecord } from '../db/vika.js'
 import schedule from 'node-schedule'
 import { getRule, delay, logger } from '../utils/mod.js'
@@ -10,6 +10,7 @@ import {
   getRoom,
 } from '../plugins/mod.js'
 import { sendMsg } from './configService.js'
+import { VikaDB } from '../db/vika-db.js'
 
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice
@@ -45,7 +46,7 @@ export class NoticeChat {
   jobs!: {[key:string]:any}
 
   constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.noticeSheet)
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.noticeSheet)
     void this.init()
   }
 

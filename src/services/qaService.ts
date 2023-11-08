@@ -1,8 +1,9 @@
 /* eslint-disable sort-keys */
-import { ChatFlowConfig, TaskConfig } from '../db/vika-bot.js'
+import type { TaskConfig } from '../api/base-config.js'
 import { VikaSheet } from '../db/vika.js'
 import type { SkillInfoArray } from './wxopenaiService.js'
 import { logger } from '../utils/mod.js'
+import { VikaDB } from '../db/vika-db.js'
 
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice
@@ -19,7 +20,7 @@ export class QaChat {
   records: any
 
   constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.qaSheet)
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.qaSheet)
     // void this.init()
   }
 

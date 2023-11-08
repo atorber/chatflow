@@ -1,10 +1,9 @@
-/* eslint-disable no-console */
 /* eslint-disable sort-keys */
 import { FileBox } from 'file-box'
 import {
   Room,
   Message,
-  // log,
+  log,
   types,
   Wechaty,
 } from 'wechaty'
@@ -26,7 +25,7 @@ async function wxai (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
     answer = await aibot(sysConfig, talker, room, text)
   }
 
-  console.debug('回复消息：', JSON.stringify(answer))
+  log.info('回复消息：', JSON.stringify(answer))
 
   if (isValidAnswer(answer)) {
     await handleAnswer(answer, bot, message)

@@ -1,10 +1,9 @@
 /* eslint-disable sort-keys */
-import { ChatFlowConfig } from '../db/vika-bot.js'
-
 import { VikaSheet } from '../db/vika.js'
 import { delay, logger } from '../utils/utils.js'
 import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/finder.js'
+import { VikaDB } from '../db/vika-db.js'
 
 // import { db } from '../db/tables.js'
 // const whiteListData = db.whiteList
@@ -20,7 +19,7 @@ export class WhiteListChat {
   contactWhiteList: any
 
   constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.whiteListSheet)
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.whiteListSheet)
     this.contactWhiteList = {
       qa: [],
       msg: [],

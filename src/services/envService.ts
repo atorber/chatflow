@@ -1,11 +1,10 @@
 /* eslint-disable sort-keys */
-import { ChatFlowConfig } from '../db/vika-bot.js'
-
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { log } from 'wechaty'
 import { delay } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/env.js'
 import { BaseEntity, MappingOptions } from '../db/vika-orm.js'
+import { VikaDB } from '../db/vika-db.js'
 
 // import { db } from '../db/tables.js'
 // const envData = db.env
@@ -46,12 +45,12 @@ export class EnvChat extends BaseEntity {
 
   // 初始化
   async init () {
-    const token = ChatFlowConfig.token || ''
-    const baseId = ChatFlowConfig.dataBaseIds.envSheet
-    this.db = new VikaSheet(ChatFlowConfig.vika, baseId)
+    const token = VikaDB.token || ''
+    const baseId = VikaDB.dataBaseIds.envSheet
+    this.db = new VikaSheet(VikaDB.vika, baseId)
     EnvChat.setVikaOptions({
       apiKey: token,
-      baseId: ChatFlowConfig.dataBaseIds.envSheet, // 设置 base ID
+      baseId: VikaDB.dataBaseIds.envSheet, // 设置 base ID
     })
     this.getConfigFromEnv()
     this.records = await this.getAll()

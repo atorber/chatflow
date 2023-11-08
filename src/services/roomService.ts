@@ -1,8 +1,8 @@
 /* eslint-disable sort-keys */
-import { ChatFlowConfig } from '../db/vika-bot.js'
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { Room, Wechaty, log } from 'wechaty'
 import { delay, logger } from '../utils/utils.js'
+import { VikaDB } from '../db/vika-db.js'
 
 // import { db } from '../db/tables.js'
 // const roomData = db.room
@@ -14,7 +14,7 @@ export class RoomChat {
   rooms!: any[]
 
   constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.roomSheet)
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.roomSheet)
     void this.init()
   }
 

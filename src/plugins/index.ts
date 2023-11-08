@@ -1,5 +1,5 @@
-import { ChatFlowConfig, DateBase } from '../db/vika-bot.js'
-import { wxai } from './wxai.js'
+import { ChatFlowConfig, DateBase } from '../api/base-config.js'
+import { wxai } from '../proxy/weixin-chatbot-proxy.js'
 import { sendNotice } from './group-notice.js'
 
 import { MqttProxy } from '../proxy/mqtt-proxy.js'

@@ -3,8 +3,8 @@ import type { Room, Contact, Message, Wechaty } from 'wechaty'
 import { v4 } from 'uuid'
 import { formatTimestamp, getCurTime, logger } from '../utils/utils.js'
 import moment from 'moment'
-import { ChatFlowConfig } from '../db/vika-bot.js'
 import { VikaSheet } from '../db/vika.js'
+import { VikaDB } from '../db/vika-db.js'
 
 import { db } from '../db/tables.js'
 const activityData = db.activity
@@ -83,7 +83,7 @@ export class ActivityChat {
   private db:VikaSheet
 
   constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.statisticSheet)
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.statisticSheet)
   }
 
   // 初始化
@@ -176,7 +176,7 @@ export class ActivityChat {
     ]
 
     logger.info('订单消息:' + records)
-    const datasheet = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.orderSheet)
+    const datasheet = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.orderSheet)
     datasheet.records.create(records).then((response: { success: any }) => {
       if (!response.success) {
         logger.error('创建订单，写入vika失败：' + JSON.stringify(response))

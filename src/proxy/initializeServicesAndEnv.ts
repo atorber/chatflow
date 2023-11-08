@@ -1,4 +1,4 @@
-import { ChatFlowConfig } from '../db/vika-bot.js'
+import { ChatFlowConfig } from '../api/base-config.js'
 import { logger, delay } from '../utils/mod.js'
 import {
   MessageChat,

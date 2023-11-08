@@ -4,7 +4,9 @@ import 'dotenv/config.js'
 import {
   WechatyBuilder,
 } from 'wechaty'
-import { ChatFlow, getBotOps, log, logForm, ChatFlowConfig, WechatyConfig } from '../src/chatflow.js'
+
+import { ChatFlow, getBotOps, log, logForm, ChatFlowConfig, WechatyConfig, VikaDB, IClientOptions, MqttProxy } from '../src/chatflow.js'
+
 // import { spawn } from 'child_process'
 
 // 监听进程退出事件，重新启动程序
@@ -25,10 +27,17 @@ const main = async () => {
     return
   }
 
-  const config: { wechatyConfig: WechatyConfig } | undefined = await ChatFlowConfig.init({
+  await VikaDB.init({
     spaceName: VIKA_SPACE_NAME,
     token: VIKA_TOKEN,
   })
+
+  const config: {
+    mqttConfig: IClientOptions,
+    wechatyConfig: WechatyConfig,
+    mqttIsOn: boolean,
+  } | undefined = await ChatFlowConfig.init()
+
   // log.info('vikaBot配置信息：', JSON.stringify(config, undefined, 2))
 
   if (config) {
@@ -36,6 +45,14 @@ const main = async () => {
     const ops = getBotOps(config.wechatyConfig.puppet, config.wechatyConfig.token)
 
     const bot = WechatyBuilder.build(ops)
+
+    // 如果MQTT推送或MQTT控制打开，则启动MQTT代理
+    if (config.mqttIsOn) {
+      const mqttProxy = MqttProxy.getInstance(config.mqttConfig)
+      if (mqttProxy) {
+        mqttProxy.setWechaty(bot)
+      }
+    }
 
     bot.use(ChatFlow())
     bot.start()

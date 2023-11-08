@@ -15,21 +15,200 @@ import {
 
 import type { MqttProxy } from './mqtt-proxy.js'
 
-// 接口文档参考 https://app.swaggerhub.com/apis/zixia/WechatyPuppet/0.20.16#/Puppet/Puppet_MessageImageStream
-class WchatyAPI {
+class MQTTAgent {
 
   private static bot: Wechaty
-  private constructor () {
 
+  private static mqttProxy: MqttProxy
+
+  private constructor () {}
+
+  static handleMQTTMessage (name:string, params:any) {
+    const that = this as any
+    if (that[name] && typeof that[name] === 'function') {
+      that[name](params)
+    } else {
+      throw new Error("MQTTAgent don't have this method")
+    }
   }
 
   setWechaty (bot: Wechaty) {
     // log.info('bot info:', bot.currentUser.id)
-    WchatyAPI.bot = bot
+    MQTTAgent.bot = bot
   }
 
-  async contactsGet (mqttProxy: MqttProxy) {
-    const contactList: Contact[] = await WchatyAPI.bot.Contact.findAll()
+  setMqttProxy (mqttProxy: MqttProxy) {
+    // log.info('bot info:', bot.currentUser.id)
+    MQTTAgent.mqttProxy = mqttProxy
+  }
+
+  // 启动wechaty
+  async wechatyStart (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 停止wechaty
+  async wechatyStop (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 注销wechaty
+  async wechatyLogout (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 检查wechaty的登录状态
+  async wechatyLogonoff (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 获取wechaty当前用户自己的信息
+  async wechatyUserSelf (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 让wechaty发送消息
+  async wechatySay (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 查找消息
+  async messageFind (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 查找所有消息
+  async messageFindAll (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 发送消息
+  async messageSay (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 获取被撤回的消息
+  async messageToRecalled (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 让联系人说话
+  async contactSay (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 查找联系人
+  async contactFind (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 查找所有联系人
+  async contactFindAll (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 让房间发送消息
+  async roomSay (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 设置房间主题
+  async roomTopic (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 发布房间公告
+  async roomAnnounce (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 获取房间二维码
+  async roomQrcode (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 获取房间别名
+  async roomAlias (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 添加成员到房间
+  async roomAdd (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 从房间删除成员
+  async roomDel (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 退出房间
+  async roomQuit (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 检查成员是否在房间内
+  async roomHas (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 获取房间内所有成员
+  async roomMemberAll (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 获取房间成员
+  async roomMember (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 创建房间
+  async roomCreate (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 查找所有房间
+  async roomFindAll (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 查找房间
+  async roomFind (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 接受房间邀请
+  async roomInvitationAccept (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 查找所有房间邀请
+  async roomInvitationFindAll (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 获取邀请人信息
+  async roomInvitationInviter (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 接受好友请求
+  async friendshipAccept (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 搜索好友
+  async friendshipSearch (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  // 添加好友
+  async friendshipAdd (params:any) {
+    log.info('params:' + JSON.stringify(params))
+  }
+
+  async contactsGet () {
+    const contactList: Contact[] = await MQTTAgent.bot.Contact.findAll()
     let friends = []
     for (const i in contactList) {
       const contact = contactList[i]
@@ -50,16 +229,16 @@ class WchatyAPI {
 
       if (friends.length === 100) {
         const msg = propertyMessage('contactList', friends)
-        mqttProxy.pubProperty(msg)
+        MQTTAgent.mqttProxy.pubProperty(msg)
         friends = []
       }
     }
     const msg = propertyMessage('contactList', friends)
-    mqttProxy.pubProperty(msg)
+    MQTTAgent.mqttProxy.pubProperty(msg)
   }
 
-  async roomsGet (mqttProxy: MqttProxy) {
-    const roomList = await WchatyAPI.bot.Room.findAll()
+  async roomsGet () {
+    const roomList = await MQTTAgent.bot.Room.findAll()
     for (const i in roomList) {
       const room = roomList[i]
       const roomInfo: any = {}
@@ -77,7 +256,7 @@ class WchatyAPI {
       roomList[i] = roomInfo
     }
     const msg = propertyMessage('roomList', roomList)
-    mqttProxy.pubProperty(msg)
+    MQTTAgent.mqttProxy.pubProperty(msg)
   }
 
   async send (params: any): Promise<any> {
@@ -118,7 +297,7 @@ class WchatyAPI {
                 "messagePayload":"tyutluyc"
             }
         } */
-      const contactCard = await WchatyAPI.bot.Contact.find({ id: params.messagePayload })
+      const contactCard = await MQTTAgent.bot.Contact.find({ id: params.messagePayload })
       if (!contactCard) {
         logger.info('not found')
         return {
@@ -238,11 +417,11 @@ class WchatyAPI {
       if (toContacts[i].split('@').length === 2 || toContacts[i].split(':').length === 2) {
         logger.info(`向群${toContacts[i]}发消息`)
         try {
-          const room: Room | undefined = await WchatyAPI.bot.Room.find({ id: toContacts[i] })
+          const room: Room | undefined = await MQTTAgent.bot.Room.find({ id: toContacts[i] })
           if (room) {
             try {
               await room.say(msg)
-              await formatSentMessage(WchatyAPI.bot.currentUser, msg, undefined, room)
+              await formatSentMessage(MQTTAgent.bot.currentUser, msg, undefined, room)
 
               // 发送成功后向前端发送消息
 
@@ -259,11 +438,11 @@ class WchatyAPI {
         logger.info(`好友${toContacts[i]}发消息`)
         // logger.info(bot)
         try {
-          const contact: Contact | undefined = await WchatyAPI.bot.Contact.find({ id: toContacts[i] })
+          const contact: Contact | undefined = await MQTTAgent.bot.Contact.find({ id: toContacts[i] })
           if (contact) {
             try {
               await contact.say(msg)
-              await formatSentMessage(WchatyAPI.bot.currentUser, msg, contact, undefined)
+              await formatSentMessage(MQTTAgent.bot.currentUser, msg, contact, undefined)
             } catch (err) {
               logger.error('发送好友消息失败：' + err)
             }
@@ -279,42 +458,42 @@ class WchatyAPI {
 
   async sendAt (params: any) {
     const atUserIdList = params.toContacts
-    const room = await WchatyAPI.bot.Room.find({ id: params.room })
+    const room = await MQTTAgent.bot.Room.find({ id: params.room })
     const atUserList = []
     for (const userId of atUserIdList) {
-      const curContact = await WchatyAPI.bot.Contact.find({ id: userId })
+      const curContact = await MQTTAgent.bot.Contact.find({ id: userId })
       atUserList.push(curContact)
     }
     await room?.say(params.messagePayload, ...atUserList)
-    await formatSentMessage(WchatyAPI.bot.currentUser, params.messagePayload, undefined, room)
+    await formatSentMessage(MQTTAgent.bot.currentUser, params.messagePayload, undefined, room)
   }
 
   async createRoom (params: any) {
     const contactList: Contact[] = []
     for (const i in params.contactList) {
-      const c = await WchatyAPI.bot.Contact.find({ name: params.contactList[i] })
+      const c = await MQTTAgent.bot.Contact.find({ name: params.contactList[i] })
       if (c) {
         contactList.push(c)
       }
     }
 
-    const room = await WchatyAPI.bot.Room.create(contactList, params.topic)
+    const room = await MQTTAgent.bot.Room.create(contactList, params.topic)
     // logger.info('Bot', 'createDingRoom() new ding room created: %s', room)
     // await room.topic(params.topic)
 
     await room.say('你的专属群创建完成')
-    await formatSentMessage(WchatyAPI.bot.currentUser, '你的专属群创建完成', undefined, room)
+    await formatSentMessage(MQTTAgent.bot.currentUser, '你的专属群创建完成', undefined, room)
   }
 
-  async getQrcod (params: any, mqttProxy: MqttProxy) {
+  async getQrcod (params: any) {
     const roomId = params.roomId
-    const room = await WchatyAPI.bot.Room.find({ id: roomId })
+    const room = await MQTTAgent.bot.Room.find({ id: roomId })
     const qr = await room?.qrCode()
     const msg = eventMessage('qrcode', qr)
-    mqttProxy.pubEvent(msg)
+    MQTTAgent.mqttProxy.pubEvent(msg)
   }
 
 }
 
-export { WchatyAPI }
-export default WchatyAPI
+export { MQTTAgent }
+export default MQTTAgent
