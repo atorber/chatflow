@@ -14,8 +14,7 @@ import onLogin from './handlers/on-login.js'
 import onReady from './handlers/on-ready.js'
 import { onMessage } from './handlers/on-message.js'
 import { getBotOps } from './services/configService.js'
-import { logForm, logger } from './utils/utils.js'
-import { EnvChat } from './services/mod.js'
+import { logForm } from './utils/utils.js'
 import { ChatFlowConfig, WechatyConfig } from './api/base-config.js'
 import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
 import { VikaDB } from './db/vika-db.js'
@@ -26,11 +25,6 @@ export function ChatFlow (): WechatyPlugin {
   return function ChatFlowPlugin (bot: Wechaty): void {
 
     ChatFlowConfig.bot = bot
-    ChatFlowConfig.envService = new EnvChat()
-
-    ChatFlowConfig.configEnv = ChatFlowConfig.envService.getConfigFromEnv()
-    logger.info('ChatFlowConfig.configEnv on env' + JSON.stringify(ChatFlowConfig.configEnv))
-
     bot.on('scan', onScan)
     bot.on('login', onLogin)
     bot.on('ready', onReady)

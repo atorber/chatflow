@@ -37,8 +37,7 @@ const postVikaInitialization = async (bot: Wechaty) => {
 
   try {
     log.info('开始请求维格表中的环境变量配置信息...')
-    await ChatFlowConfig.envService.init()
-    const vikaConfig = await ChatFlowConfig.envService.getConfigFromVika()
+    const vikaConfig = await EnvChat.getConfigFromVika()
 
     // 合并配置信息，如果维格表中有对应配置则覆盖环境变量中的配置
     ChatFlowConfig.configEnv = { ...vikaConfig, ...(ChatFlowConfig.configEnv) }

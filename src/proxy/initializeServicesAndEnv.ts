@@ -16,11 +16,9 @@ import {
 
 export const initializeServicesAndEnv = async () => {
   logger.info('初始化服务开始...')
-  const envService: EnvChat = new EnvChat()
-  await envService.init()
+  await EnvChat.init()
   await delay(1000)
   ChatFlowConfig.services = await initializeServices()
-  ChatFlowConfig.services['envService'] = envService
   // logger.info('services:' + JSON.stringify(services))
 }
 

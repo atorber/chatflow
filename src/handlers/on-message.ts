@@ -28,8 +28,9 @@ import {
   formatTimestamp,
 } from '../utils/mod.js'
 
-import type {
+import {
   Services,
+  EnvChat,
 } from '../services/mod.js'
 import { containsContact, containsRoom } from '../services/userService.js'
 import { handleSay } from './onReadyOrLogin.js'
@@ -185,7 +186,7 @@ interface AdminCommands {
 const adminCommands: AdminCommands = {
   更新配置: async () => {
     try {
-      const botConfig = await ChatFlowConfig.envService.downConfigFromVika()
+      const botConfig = await EnvChat.downConfigFromVika()
       logger.info('botConfig:' + JSON.stringify(botConfig))
       return [ true, '配置更新成功~' ]
     } catch (e) {
@@ -276,7 +277,7 @@ const adminCommands: AdminCommands = {
   },
   上传配置: async () => {
     try {
-      await ChatFlowConfig.envService.updateConfigToVika(ChatFlowConfig.configEnv)
+      await EnvChat.updateConfigToVika(ChatFlowConfig.configEnv)
 
       return [ true, '上传配置信息成功~' ]
     } catch (e) {
@@ -285,7 +286,7 @@ const adminCommands: AdminCommands = {
   },
   下载配置: async () => {
     try {
-      const botConfig = await ChatFlowConfig.envService.downConfigFromVika()
+      const botConfig = await EnvChat.downConfigFromVika()
       logger.info('botConfig:' + JSON.stringify(botConfig))
       return [ true, '下载配置信息成功~' ]
     } catch (e) {

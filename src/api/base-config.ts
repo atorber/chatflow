@@ -94,7 +94,6 @@ export class ChatFlowConfig {
   static statisticRecords: any
   static services:Services | undefined
   static configEnv : ProcessEnv
-  static envService: EnvChat
   static whiteList:WhiteList = {
     contactWhiteList: {
       qa: [],
@@ -114,7 +113,7 @@ export class ChatFlowConfig {
 
   static async init () {
 
-    log.info('初始化维格配置信息...,init()')
+    // log.info('初始化维格配置信息...,init()')
 
     if (VikaDB.spaceId) {
       const vikaIdMap: any = {}

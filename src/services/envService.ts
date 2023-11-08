@@ -26,12 +26,12 @@ const mappingOptions: MappingOptions = {  // 定义字段映射选项
 // 服务类
 export class EnvChat extends BaseEntity {
 
-  db!:VikaSheet
-  envIdMap: any
-  records!: IRecord[]
-  envData: ProcessEnv | undefined
-  vikaIdMap: any
-  vikaData: any
+  static db:VikaSheet
+  static envIdMap: any
+  static records: IRecord[]
+  static envData: ProcessEnv | undefined
+  static vikaIdMap: any
+  static vikaData: any
 
   protected static override mappingOptions: MappingOptions = mappingOptions  // 设置映射选项为上面定义的 mappingOptions
 
@@ -44,7 +44,7 @@ export class EnvChat extends BaseEntity {
   }
 
   // 初始化
-  async init () {
+  static async init () {
     const token = VikaDB.token || ''
     const baseId = VikaDB.dataBaseIds.envSheet
     this.db = new VikaSheet(VikaDB.vika, baseId)
@@ -52,33 +52,33 @@ export class EnvChat extends BaseEntity {
       apiKey: token,
       baseId: VikaDB.dataBaseIds.envSheet, // 设置 base ID
     })
-    this.getConfigFromEnv()
+    EnvChat.getConfigFromEnv()
     this.records = await this.getAll()
   }
 
-  async getAll () {
+  static async getAll () {
     const records = await this.db.findAll()
     // log.info('维格表中的记录：', JSON.stringify(records))
     return records
   }
 
   // 更新环境变量配置到云端
-  async updateConfigToVika (config: any) {
+  static async updateConfigToVika (config: any) {
     log.info('当前环境变量：', config)
   }
 
   // 下载环境变量配置
-  async downConfigFromVika () {
+  static async downConfigFromVika () {
     return await this.getConfigFromVika()
   }
 
   // 从维格表中获取环境变量配置
-  async getConfigFromVika () {
+  static async getConfigFromVika () {
     log.info('从维格表中获取环境变量配置,getConfigFromVika ()')
     const vikaIdMap: any = {}
     const vikaData: any = {}
 
-    const configRecords = await this.getAll()
+    const configRecords = await EnvChat.getAll()
 
     await delay(1000)
     // log.info(configRecords)
@@ -107,7 +107,7 @@ export class EnvChat extends BaseEntity {
   }
 
   // 从环境变量中获取环境变量配置
-  getConfigFromEnv () {
+  static getConfigFromEnv () {
     const envData: any = {}
 
     const config:ProcessEnv = process.env
@@ -147,14 +147,14 @@ export class EnvChat extends BaseEntity {
           const fields:{
             [key: string]: any;
         } = { '值|value':process.env[key] }
-          const item = { recordId:this.envIdMap[key], fields }
+          const item = { recordId:EnvChat.envIdMap[key], fields }
           newData.push(item)
         }
       }
     }
 
     if (newData.length) {
-      await this.db.update(newData)
+      await EnvChat.db.update(newData)
     }
 
     return newData
@@ -170,8 +170,8 @@ export class EnvChat extends BaseEntity {
   }
 
   getBotOps () {
-    const puppet = this.envData?.WECHATY_PUPPET || 'wechaty-puppet-wechat'
-    const token = this.envData?.WECHATY_TOKEN
+    const puppet = EnvChat.envData?.WECHATY_PUPPET || 'wechaty-puppet-wechat'
+    const token = EnvChat.envData?.WECHATY_TOKEN
     const ops: any = {
       name: 'chatflow',
       puppet,

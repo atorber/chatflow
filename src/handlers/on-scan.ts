@@ -7,52 +7,12 @@ import qrcodeTerminal from 'qrcode-terminal'
 import { ChatFlowConfig } from '../api/base-config.js'
 import {
   logger,
-  delay,
   logForm,
 } from '../utils/mod.js'
 
-import {
-  MessageChat,
-  WhiteListChat,
-  GroupNoticeChat,
-  RoomChat,
-  ContactChat,
-  ActivityChat,
-  NoticeChat,
-  QaChat,
-  KeywordChat,
+import type {
   Services,
 } from '../services/mod.js'
-
-const initializeServices = async () => {
-  const services: Services = {} as Services
-  const serviceClasses = [
-    { service: MessageChat, variable: 'messageService' },
-    { service: WhiteListChat, variable: 'whiteListService' },
-    { service: GroupNoticeChat, variable: 'groupNoticeService' },
-    { service: RoomChat, variable: 'roomService' },
-    { service: ContactChat, variable: 'contactService' },
-    { service: ActivityChat, variable: 'activityService' },
-    { service: NoticeChat, variable: 'noticeService' },
-    { service: QaChat, variable: 'qaService' },
-    { service: KeywordChat, variable: 'keywordService' },
-  ]
-
-  for (const { service, variable } of serviceClasses) {
-    const Service = service
-    services[variable] = new Service()
-    await delay(1000)
-  }
-  return services
-}
-
-const initializeServicesAndEnv = async () => {
-  logger.info('初始化服务开始...')
-  await ChatFlowConfig.envService.init()
-  await delay(1000)
-  ChatFlowConfig.services = await initializeServices()
-  // logger.info('services:' + JSON.stringify(services))
-}
 
 // 定义一个函数显示二维码在控制台
 function displayQRCodeInConsole (qrcode: string, status: ScanStatus) {
@@ -74,11 +34,6 @@ async function uploadQRCodeToVika (qrcode: string, status: ScanStatus) {
 }
 
 export async function onScan (qrcode: string, status: ScanStatus) {
-  if (!ChatFlowConfig.services) {
-    // logger.info('初始化services服务')
-    await initializeServicesAndEnv()
-    await delay(3000)
-  }
 
   // 控制台显示二维码
   displayQRCodeInConsole(qrcode, status)
