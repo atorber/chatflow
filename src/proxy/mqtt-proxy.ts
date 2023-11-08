@@ -7,7 +7,7 @@ import {
   Room,
   log,
 } from 'wechaty'
-import { wechaty2mqtt, propertyMessage, eventMessage } from './msg-format.js'
+import { wechaty2mqtt, propertyMessage, eventMessage } from '../plugins/msg-format.js'
 
 import {
   formatSentMessage,
@@ -26,7 +26,7 @@ class MqttProxy {
   eventApi: string
   commandApi: string
   isOk: boolean
-  private constructor(config: IClientOptions) {
+  private constructor (config: IClientOptions) {
     this.propertyApi = `thing/chatbot/${config.clientId}/property/post`
     this.eventApi = `thing/chatbot/${config.clientId}/event/post`
     this.commandApi = `thing/chatbot/${config.clientId}/command/invoke`
@@ -66,13 +66,13 @@ class MqttProxy {
     this.isOk = true
   }
 
-  setWechaty(bot: Wechaty) {
+  setWechaty (bot: Wechaty) {
     // log.info('bot info:', bot.currentUser.id)
     MqttProxy.chatbot = bot
     this.bot = bot
   }
 
-  public static getInstance(config?: IClientOptions): MqttProxy {
+  public static getInstance (config?: IClientOptions): MqttProxy {
     if (!MqttProxy.instance && config) {
       MqttProxy.instance = new MqttProxy(config)
     } else if (!MqttProxy.instance) {
@@ -82,7 +82,7 @@ class MqttProxy {
     return MqttProxy.instance
   }
 
-  public publish(topic: string, message: string) {
+  public publish (topic: string, message: string) {
     if (this.isConnected) {
       this.mqttClient.publish(topic, message, (error) => {
         if (error) {
@@ -95,7 +95,7 @@ class MqttProxy {
     }
   }
 
-  subCommand() {
+  subCommand () {
     this.mqttClient.subscribe(this.commandApi, function (err: any) {
       if (err) {
         logger.info(err)
@@ -103,17 +103,17 @@ class MqttProxy {
     })
   }
 
-  pubProperty(msg: any) {
+  pubProperty (msg: any) {
     this.mqttClient.publish(this.propertyApi, msg)
     logger.info('mqtt消息发布:' + this.eventApi, msg)
   }
 
-  pubEvent(msg: any) {
+  pubEvent (msg: any) {
     this.mqttClient.publish(this.eventApi, msg)
     logger.info('mqtt消息发布:' + this.eventApi, msg)
   }
 
-  async pubMessage(msg: any) {
+  async pubMessage (msg: any) {
     try {
       const payload = await wechaty2mqtt(msg)
       this.mqttClient.publish(this.eventApi, payload)
@@ -124,7 +124,7 @@ class MqttProxy {
 
   }
 
-  getBot() {
+  getBot () {
     return this.bot
   }
 
@@ -286,82 +286,95 @@ class MqttProxy {
   }
 
   static onMessage2 = (topic: string, message: any) => {
-    const logCommand = (name: string) => logger.info(`cmd name: ${name}`);
-    const processCommand = (name: string, action: { (): Promise<any>; (): Promise<void>; (): Promise<void>; (): Promise<void>; (): Promise<void>; (): Promise<void>; (): Promise<any> }) => {
-      logCommand(name);
+    const logCommand = (name: string) => logger.info(`cmd name: ${name}`)
+    const processCommand = (name: string, action: any) => {
+      logCommand(name)
       if (action) {
         action().then((res: any) => {
-          log.info(`${name} res:`, res);
-          return res;
+          log.info(`${name} res:`, res)
+          return res
         }).catch((err: any) => {
-          log.error(`${name} err:`, err);
-        });
+          log.error(`${name} err:`, err)
+        })
       }
-    };
-
-    logger.info(`mqtt onMessage: ${topic}`);
-    logger.info(`mqtt onMessage: ${message.toString()}`);
-    log.info('MqttProxy.chatbot', MqttProxy.chatbot);
-
-    try {
-      message = JSON.parse(message);
-      const { name, params } = message;
-
-      if (MqttProxy.instance) {
-        switch (name) {
-          case 'start':
-          case 'stop':
-          case 'logout':
-          case 'logonoff':
-          case 'userSelf':
-          case 'say':
-          case 'aliasGet':
-          case 'aliasSet':
-          case 'roomAdd':
-          case 'roomDel':
-          case 'roomAnnounceGet':
-          case 'roomAnnounceSet':
-          case 'roomQuit':
-          case 'roomTopicGet':
-          case 'roomTopicSet':
-          case 'memberAllGet':
-          case 'contactAdd':
-          case 'contactAliasSet':
-          case 'contactFind':
-          case 'config':
-            logCommand(name);
-            break;
-          case 'send':
-            processCommand(name, () => send(params, MqttProxy.chatbot));
-            break;
-          case 'sendAt':
-            processCommand(name, () => sendAt(params, MqttProxy.chatbot));
-            break;
-          case 'roomCreate':
-            processCommand(name, () => createRoom(params, MqttProxy.chatbot));
-            break;
-          case 'roomQrcodeGet':
-            processCommand(name, () => getQrcod(params, MqttProxy.chatbot, MqttProxy.instance));
-            break;
-          case 'contactFindAll':
-            processCommand(name, () => getAllContact(MqttProxy.instance, MqttProxy.chatbot));
-            break;
-          case 'roomFindAll':
-            processCommand(name, () => getAllRoom(MqttProxy.instance, MqttProxy.chatbot));
-            break;
-          default:
-            log.error('Unknown command:', name);
-        }
-      }
-    } catch (err) {
-      logger.error(`MQTT接收到消息错误: ${err}`);
     }
-  };
 
+    logger.info(`mqtt onMessage: ${topic}`)
+    logger.info(`mqtt onMessage: ${message.toString()}`)
+    log.info('MqttProxy.chatbot', MqttProxy.chatbot)
+
+    const mqttProxy = MqttProxy.instance
+    if (mqttProxy) {
+      try {
+        message = JSON.parse(message)
+        const { name, params } = message
+        switch (name) {
+          case 'wechaty.start':
+          case 'wechaty.stop':
+          case 'wechaty.logout':
+          case 'wechaty.logonoff':
+          case 'wechaty.userSelf':
+          case 'wechaty.say':
+          case 'message.find':
+          case 'message.findAll':
+          case 'message.say':
+          case 'message.toRecalled':
+          case 'contact.say':
+          case 'contact.find':
+          case 'contact.findAll':
+          case 'room.say':
+          case 'room.topic':
+          case 'room.announce':
+          case 'room.qrcode':
+          case 'room.alias':
+          case 'room.add':
+          case 'room.del':
+          case 'room.quit':
+          case 'room.has':
+          case 'room.memberAll':
+          case 'room.member':
+          case 'room.create':
+          case 'room.findAll':
+          case 'room.find':
+          case 'roomInvitation.accept':
+          case 'roomInvitation.findAll':
+          case 'roomInvitation.inviter':
+          case 'friendship.accept':
+          case 'Friendship.search':
+          case 'Friendship.add':
+            logCommand(name)
+            break
+          case 'send':
+            processCommand(name, () => send(params, MqttProxy.chatbot))
+            break
+          case 'sendAt':
+            processCommand(name, () => sendAt(params, MqttProxy.chatbot))
+            break
+          case 'roomCreate':
+            processCommand(name, () => createRoom(params, MqttProxy.chatbot))
+            break
+          case 'roomQrcodeGet':
+            processCommand(name, () => getQrcod(params, MqttProxy.chatbot, mqttProxy))
+            break
+          case 'contactFindAll':
+            processCommand(name, () => getAllContact(mqttProxy, MqttProxy.chatbot))
+            break
+          case 'roomFindAll':
+            processCommand(name, () => getAllRoom(mqttProxy, MqttProxy.chatbot))
+            break
+          default:
+            log.error('Unknown command:', name)
+        }
+
+      } catch (err) {
+        logger.error(`MQTT接收到消息错误: ${err}`)
+      }
+    }
+  }
 
 }
 
-async function getAllContact(mqttProxy: MqttProxy, bot: Wechaty) {
+async function getAllContact (mqttProxy: MqttProxy, bot: Wechaty) {
   const contactList: Contact[] = await bot.Contact.findAll()
   let friends = []
   for (const i in contactList) {
@@ -391,7 +404,7 @@ async function getAllContact(mqttProxy: MqttProxy, bot: Wechaty) {
   mqttProxy.pubProperty(msg)
 }
 
-async function getAllRoom(mqttProxy: MqttProxy, bot: Wechaty) {
+async function getAllRoom (mqttProxy: MqttProxy, bot: Wechaty) {
   const roomList = await bot.Room.findAll()
   for (const i in roomList) {
     const room = roomList[i]
@@ -413,7 +426,7 @@ async function getAllRoom(mqttProxy: MqttProxy, bot: Wechaty) {
   mqttProxy.pubProperty(msg)
 }
 
-async function send(params: any, bot: Wechaty): Promise<any> {
+async function send (params: any, bot: Wechaty): Promise<any> {
   logger.info('params:' + JSON.stringify(params))
 
   let msg: any = ''
@@ -610,7 +623,7 @@ async function send(params: any, bot: Wechaty): Promise<any> {
 
 }
 
-async function sendAt(params: any, bot: Wechaty) {
+async function sendAt (params: any, bot: Wechaty) {
   const atUserIdList = params.toContacts
   const room = await bot.Room.find({ id: params.room })
   const atUserList = []
@@ -622,7 +635,7 @@ async function sendAt(params: any, bot: Wechaty) {
   await formatSentMessage(bot.currentUser, params.messagePayload, undefined, room)
 }
 
-async function createRoom(params: any, bot: Wechaty) {
+async function createRoom (params: any, bot: Wechaty) {
   const contactList: Contact[] = []
   for (const i in params.contactList) {
     const c = await bot.Contact.find({ name: params.contactList[i] })
@@ -639,7 +652,7 @@ async function createRoom(params: any, bot: Wechaty) {
   await formatSentMessage(bot.currentUser, '你的专属群创建完成', undefined, room)
 }
 
-async function getQrcod(params: any, bot: Wechaty, mqttProxy: MqttProxy) {
+async function getQrcod (params: any, bot: Wechaty, mqttProxy: MqttProxy) {
   const roomId = params.roomId
   const room = await bot.Room.find({ id: roomId })
   const qr = await room?.qrCode()

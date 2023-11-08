@@ -17,7 +17,7 @@ import {
 import {
   MqttProxy,
   IClientOptions,
-} from '../plugins/mqtt-proxy.js'
+} from '../proxy/mqtt-proxy.js'
 
 import { onMessage } from './on-message.js'
 

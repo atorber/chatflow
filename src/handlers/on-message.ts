@@ -34,7 +34,7 @@ import type {
 import { containsContact, containsRoom } from '../services/userService.js'
 import { handleSay } from './onReadyOrLogin.js'
 import { activityController } from '../services/activityService.js'
-import { MqttProxy } from '../plugins/mqtt-proxy.js'
+import { MqttProxy } from '../proxy/mqtt-proxy.js'
 
 const mqttProxy = MqttProxy.getInstance()
 

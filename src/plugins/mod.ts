@@ -3,7 +3,7 @@ import { wxai } from './wxai.js'
 
 import { sendNotice } from './group-notice.js'
 
-import { MqttProxy } from './mqtt-proxy.js'
+import { MqttProxy } from '../proxy/mqtt-proxy.js'
 import { propertyMessage, eventMessage } from './msg-format.js'
 import { getFormattedRideInfo } from './riding.js'
 
