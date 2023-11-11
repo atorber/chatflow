@@ -6,6 +6,7 @@ import moment from 'moment'
 import { FileBox } from 'file-box'
 import { VikaDB } from '../db/vika-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'
+import type { ChatMessage } from '../types/mod.js'
 
 import { db } from '../db/tables.js'
 const messageData = db.message
@@ -417,6 +418,36 @@ export class MessageChat {
     } catch (e) {
       logger.error('onMessage消息转换失败：', e)
     }
+  }
+
+  static async formatMessage (message: Message) {
+    const text = message.text()
+    const talker = message.talker()
+    const listener = message.listener()
+    const room = message.room()
+    const topic = await room?.topic()
+    const type = message.type()
+
+    const chatMessage: ChatMessage = {
+      id: message.id,
+      text,
+      type,
+      talker: {
+        name: talker.name(),
+        id: talker.id,
+        alias: await talker.alias(),
+      },
+      room: {
+        topic,
+        id: room?.id,
+      },
+      listener: {
+        id: listener?.id,
+        name: listener?.name(),
+        alias: await listener?.alias(),
+      },
+    }
+    return chatMessage
   }
 
 }

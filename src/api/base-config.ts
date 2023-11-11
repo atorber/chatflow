@@ -8,7 +8,7 @@ import {
 } from 'wechaty'
 
 import type { WhiteList } from '../services/mod.js'
-import type { BusinessRoom, BusinessUser } from '../plugins/finder.js'
+import type { BusinessRoom, BusinessUser } from './contact-room-finder.js'
 import { VikaDB } from '../db/vika-db.js'
 import type {
   IClientOptions,

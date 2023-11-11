@@ -6,7 +6,7 @@ import {
   log,
 } from 'wechaty'
 
-import { propertyMessage, eventMessage } from '../plugins/msg-format.js'
+import { propertyMessage, eventMessage } from '../proxy/mqtt-proxy.js'
 
 import {
   formatSentMessage,

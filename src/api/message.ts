@@ -29,7 +29,7 @@ export const formatMessage = async (message: Message) => {
   return messageNew
 }
 
-export const addMessage = async (message: Message) => {
+export const saveMessage = async (message: Message) => {
   const talker = message.talker()
   const listener = message.listener()
   const room = message.room()
@@ -48,7 +48,7 @@ export const addMessage = async (message: Message) => {
     time:formatTimestamp(timestamp)[5],
     timestamp,
   }
-  // log.info('addMessage messageNew:', JSON.stringify(messageNew))
+  // log.info('saveMessage messageNew:', JSON.stringify(messageNew))
   try {
     await messageData.insert(messageNew)
     // log.info('消息写入数据库成功:', res._id)

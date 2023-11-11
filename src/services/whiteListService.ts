@@ -2,7 +2,7 @@
 import { VikaSheet } from '../db/vika.js'
 import { delay, logger } from '../utils/utils.js'
 import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
-import type { BusinessRoom, BusinessUser } from '../plugins/finder.js'
+import type { BusinessRoom, BusinessUser } from '../api/contact-room-finder.js'
 import { VikaDB } from '../db/vika-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'
 import { Wechaty, log } from 'wechaty'
