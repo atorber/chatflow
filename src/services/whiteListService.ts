@@ -1,10 +1,11 @@
 /* eslint-disable sort-keys */
-import { ChatFlowConfig } from '../db/vika-bot.js'
-
 import { VikaSheet } from '../db/vika.js'
 import { delay, logger } from '../utils/utils.js'
 import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
-import type { BusinessRoom, BusinessUser } from '../plugins/finder.js'
+import type { BusinessRoom, BusinessUser } from '../api/contact-room-finder.js'
+import { VikaDB } from '../db/vika-db.js'
+import { ChatFlowConfig } from '../api/base-config.js'
+import { Wechaty, log } from 'wechaty'
 
 // import { db } from '../db/tables.js'
 // const whiteListData = db.whiteList
@@ -14,13 +15,19 @@ export type WhiteList = { contactWhiteList: ContactWhiteList; roomWhiteList: Roo
 // 服务类
 export class WhiteListChat {
 
-  private db:VikaSheet
-  envsOnVika: any
-  roomWhiteList: any
-  contactWhiteList: any
+  static db:VikaSheet
+  static envsOnVika: any
+  static roomWhiteList: any
+  static contactWhiteList: any
+  static bot:Wechaty = ChatFlowConfig.bot
 
-  constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.whiteListSheet)
+  private constructor () {
+
+  }
+
+  // 初始化
+  static async init () {
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.whiteListSheet)
     this.contactWhiteList = {
       qa: [],
       msg: [],
@@ -33,22 +40,18 @@ export class WhiteListChat {
       act: [],
       gpt: [],
     }
-    // void this.init()
-  }
-
-  // 初始化
-  async init () {
     await this.getRecords()
+    log.info('初始化 WhiteListChat 成功...')
   }
 
-  async getRecords () {
+  static async getRecords () {
     const records = await this.db.findAll()
     logger.info('维格表中的记录：' + JSON.stringify(records))
     return records
   }
 
   // 获取白名单
-  async getWhiteList () {
+  static async getWhiteList () {
     const whiteList: WhiteList = { contactWhiteList: this.contactWhiteList, roomWhiteList: this.roomWhiteList }
     const whiteListRecords: any[] = await this.getRecords()
     await delay(1000)

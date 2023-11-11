@@ -1,10 +1,11 @@
 /* eslint-disable sort-keys */
-import type { Room, Contact, Message, Wechaty } from 'wechaty'
+import { Room, Contact, Message, Wechaty, log } from 'wechaty'
 import { v4 } from 'uuid'
 import { formatTimestamp, getCurTime, logger } from '../utils/utils.js'
 import moment from 'moment'
-import { ChatFlowConfig } from '../db/vika-bot.js'
 import { VikaSheet } from '../db/vika.js'
+import { VikaDB } from '../db/vika-db.js'
+import { ChatFlowConfig } from '../api/base-config.js'
 
 import { db } from '../db/tables.js'
 const activityData = db.activity
@@ -79,20 +80,22 @@ function findArrayDifferences (vika: Activity[], db: Activity[]): { addArray: Ac
 // 服务类
 export class ActivityChat {
 
-  private activities: Activity[] = []
-  private db:VikaSheet
+  static activities: Activity[] = []
+  static db:VikaSheet
+  static bot:Wechaty = ChatFlowConfig.bot
 
-  constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.statisticSheet)
+  private constructor () {
   }
 
   // 初始化
-  async init () {
+  static async init () {
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.statisticSheet)
     await this.getStatistics()
+    log.info('初始化 ActivityChat 成功...')
   }
 
   // 获取维格表中的活动
-  async getAct () {
+  static async getAct () {
     const records = await this.db.findAll()
     // logger.info(JSON.stringify(this.chatflowConfig.dataBaseIds, undefined, 2))
     // logger.info('维格表中的活动记录：' + JSON.stringify(records))
@@ -100,7 +103,7 @@ export class ActivityChat {
   }
 
   // 获取统计打卡
-  async getStatistics () {
+  static async getStatistics () {
     const statisticsRecords = await this.getAct()
     const activitiesVika: Activity[] = []
 
@@ -127,7 +130,7 @@ export class ActivityChat {
 
     for (const statistics of addArray) {
       try {
-        await this.addActivity(statistics)
+        await ActivityChat.addActivity(statistics)
       } catch (e) {
         logger.error('写入活动失败：', e)
       }
@@ -156,7 +159,7 @@ export class ActivityChat {
   }
 
   // 创建订单
-  async createOrder (message: Message) {
+  static async createOrder (message: Message) {
     const talker = message.talker()
     const room = message.room()
 
@@ -176,7 +179,7 @@ export class ActivityChat {
     ]
 
     logger.info('订单消息:' + records)
-    const datasheet = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.orderSheet)
+    const datasheet = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.orderSheet)
     datasheet.records.create(records).then((response: { success: any }) => {
       if (!response.success) {
         logger.error('创建订单，写入vika失败：' + JSON.stringify(response))
@@ -185,7 +188,7 @@ export class ActivityChat {
     }).catch((err: any) => { logger.error('创建订单，vika写入接口失败：', err) })
   }
 
-  getHelpText () {
+  static getHelpText () {
     const keywordsBase: Record<string, string> = {
       '【报名】': '报名活动1人',
       '【取消】': '取消报名1人',
@@ -208,7 +211,7 @@ export class ActivityChat {
   }
 
   // 创建活动
-  async addActivity (activity: Activity): Promise<Activity | any> {
+  static async addActivity (activity: Activity): Promise<Activity | any> {
     try {
       await activityData.insert(activity)
       this.activities.push(activity)
@@ -219,7 +222,7 @@ export class ActivityChat {
   }
 
   // 删除活动
-  async removeAtivity (activityId: string): Promise<any> {
+  static async removeAtivity (activityId: string): Promise<any> {
     try {
       await activityData.remove({ _id: activityId })
       const indexToRemove = this.activities.findIndex(activity => activity._id === activityId)
@@ -233,7 +236,7 @@ export class ActivityChat {
   }
 
   // 更新活动
-  async updateAtivity (activityId: string, data: Activity): Promise<any> {
+  static async updateAtivity (activityId: string, data: Activity): Promise<any> {
     try {
       await activityData.update({ _id: activityId }, data)
       const indexToUpdate = this.activities.findIndex(activity => activity._id === activityId)
@@ -247,7 +250,7 @@ export class ActivityChat {
   }
 
   // 增加名额替补转正
-  async assignSubstituteParticipants (activity: Activity, additionalParticipants: number, bot: Wechaty) {
+  static async assignSubstituteParticipants (activity: Activity, additionalParticipants: number) {
     const canceledParticipants = additionalParticipants
     const newlyAssignedParticipants:any[] = []
 
@@ -260,7 +263,7 @@ export class ActivityChat {
       let remainingAdditionalParticipants = canceledParticipants
 
       for (const substituteOrder of substituteOrders) {
-        const member = await bot.Contact.find({ id: substituteOrder.wxid })
+        const member = await this.bot.Contact.find({ id: substituteOrder.wxid })
 
         if (member) {
           const participantsToAssign = Math.min(substituteOrder.totalNum, remainingAdditionalParticipants)
@@ -281,7 +284,7 @@ export class ActivityChat {
   }
 
   // 获取活动列表
-  async getActivityList (room?: Room) {
+  static async getActivityList (room?: Room) {
     let query: any = {}
     let activityList = []
     if (room) {
@@ -308,7 +311,7 @@ export class ActivityChat {
     return activityList
   };
 
-  async getActivityListText (room: Room) {
+  static async getActivityListText (room: Room) {
     const acts = await this.getActivityList(room)
     let msg: string = ''
     if (acts.length > 1) {
@@ -325,7 +328,7 @@ export class ActivityChat {
   }
 
   // 获取群组最新或指定活动信息
-  async getLatestActivity (room: Room, shortCode?: string) {
+  static async getLatestActivity (room: Room, shortCode?: string) {
     const query: any = [ {
       roomid: room.id,
       type: '活动报名',
@@ -348,9 +351,9 @@ export class ActivityChat {
     return latestActivity || {}
   };
 
-  async getLatestActivityText (room: Room, shortCode?: string) {
+  static async getLatestActivityText (room: Room, shortCode?: string) {
     let msg: string = ''
-    const act = await this.getLatestActivity(room, shortCode)
+    const act = await ActivityChat.getLatestActivity(room, shortCode)
     if (act._id) {
       const orders = await this.getAllOrdersForActivity(act)
       msg = this.generateOrderText(act, orders, msg)
@@ -362,7 +365,7 @@ export class ActivityChat {
   }
 
   // 获取指定活动全部订单
-  async getAllOrdersForActivity (activity: Activity) {
+  static async getAllOrdersForActivity (activity: Activity) {
     const query = {
       act_id: activity._id,
     }
@@ -371,7 +374,7 @@ export class ActivityChat {
   };
 
   // 获取活动报名人数
-  getActivityTotalParticipants (orders: Order[]) {
+  static getActivityTotalParticipants (orders: Order[]) {
     let totalParticipants = 0
     for (const order of orders) {
       totalParticipants += order.totalNum
@@ -380,7 +383,7 @@ export class ActivityChat {
   };
 
   // 报名活动
-  async registerActivity (activity: Activity, member: Contact, additionalNumber: number, isBench: boolean, createTime: number) {
+  static async registerActivity (activity: Activity, member: Contact, additionalNumber: number, isBench: boolean, createTime: number) {
     const timestamp = new Date().getTime()
     const orderId = v4()
 
@@ -414,7 +417,7 @@ export class ActivityChat {
   };
 
   // 报名活动或替补
-  async signUpForActivity (activity: Activity, member: Contact, additionalNumber: any, createTime: number) {
+  static async signUpForActivity (activity: Activity, member: Contact, additionalNumber: any, createTime: number) {
     activity.maximum = activity.maximum || 999
     const currentUserOrders: Order[] = await this.getCurrentUserOrdersForActivity(activity, member)
     let currentTotalNumber: any = 0
@@ -433,7 +436,7 @@ export class ActivityChat {
       const totalParticipants = await this.getActivityTotalParticipants(currentUserOrders)
 
       if (activity.maximum && totalParticipants >= activity.maximum) { // 报名已满
-        await this.registerActivity(activity, member, additionalNumber, true, createTime)
+        await ActivityChat.registerActivity(activity, member, additionalNumber, true, createTime)
         const orders = await this.getAllOrdersForActivity(activity)
         message = `@${member.name()} 【替补报名】${additionalNumber} 人成功!\n------------------------------\n`
         message = this.generateOrderText(activity, orders, message)
@@ -459,7 +462,7 @@ export class ActivityChat {
     return message
   };
 
-  async signUpForActivityText (room: Room, member: Contact, additionalNumber: any, createTime: number, shortCode?: string) {
+  static async signUpForActivityText (room: Room, member: Contact, additionalNumber: any, createTime: number, shortCode?: string) {
     let msg = ''
     if (additionalNumber < 3) {
       const act = await this.getLatestActivity(room, shortCode)
@@ -475,7 +478,7 @@ export class ActivityChat {
   }
 
   // 取消报名或替补，替补转正
-  async cancelForActivity (act: Activity, curOrders: Order[], addNum: number, member: Contact) {
+  static async cancelForActivity (act: Activity, curOrders: Order[], addNum: number, member: Contact) {
     let cancelNumTotal = 0
     let newAddNumAll = addNum
     let cancelNum: number = 0
@@ -524,7 +527,7 @@ export class ActivityChat {
         for (const key in benchs) {
           if (benchs[key].totalNum <= newAddNum) {
 
-            await this.registerActivity(act, member, benchs[key].totalNum, false, benchs[key].create_time)
+            await ActivityChat.registerActivity(act, member, benchs[key].totalNum, false, benchs[key].create_time)
             newAdder.push(member.id)
             await orderData.remove({ _id: benchs[key]._id })
 
@@ -536,7 +539,7 @@ export class ActivityChat {
 
           } else {
 
-            await this.registerActivity(act, member, newAddNum, false, benchs[key].create_time)
+            await ActivityChat.registerActivity(act, member, newAddNum, false, benchs[key].create_time)
             newAdder.push(member.id)
 
             break
@@ -549,7 +552,7 @@ export class ActivityChat {
     return [ cancelNum, newAdder, cancelNumTotal ]
   }
 
-  async cancelForActivityText (room: Room, addNum: number, member: Contact, shortCode?: string) {
+  static async cancelForActivityText (room: Room, addNum: number, member: Contact, shortCode?: string) {
     let msg = ''
 
     const act: Activity = await this.getLatestActivity(room, shortCode)
@@ -561,7 +564,7 @@ export class ActivityChat {
 
       if (curOrders.length > 0 && addNum === 1) {
 
-        const cancelNum: any = await this.cancelForActivity(act, curOrders, addNum, member)
+        const cancelNum: any = await ActivityChat.cancelForActivity(act, curOrders, addNum, member)
 
         // 获取全部订单
         const orders = await this.getAllOrdersForActivity(act)
@@ -585,7 +588,7 @@ export class ActivityChat {
   }
 
   // 更新报名信息
-  async updateSignInOrder (currentOrder: Order, additionalParticipants: any) {
+  static async updateSignInOrder (currentOrder: Order, additionalParticipants: any) {
     return await orderData.update({ _id: currentOrder._id }, {
       $set: {
         totalNum: currentOrder.totalNum + additionalParticipants,
@@ -594,7 +597,7 @@ export class ActivityChat {
   }
 
   // 获取当前用户订单
-  async getCurrentOrderForMember (activity: Activity, member: Contact) {
+  static async getCurrentOrderForMember (activity: Activity, member: Contact) {
     const query: any = [ {
       act_id: activity._id,
       wxid: member.id,
@@ -614,7 +617,7 @@ export class ActivityChat {
   }
 
   // 获取活动订单
-  async getCurrentUserOrdersForActivity (activity: Activity, member: Contact) {
+  static async getCurrentUserOrdersForActivity (activity: Activity, member: Contact) {
     const query: any = [ {
       act_id: activity._id,
       wxid: member.id,
@@ -638,7 +641,7 @@ export class ActivityChat {
   };
 
   // 活动报名信息拼接
-  generateOrderText (activity: Activity, orders: Order[], message: string) {
+  static generateOrderText (activity: Activity, orders: Order[], message: string) {
     const newOrders:any = []
     activity.maximum = activity.maximum || 999
     for (const order of orders) {
@@ -725,75 +728,5 @@ export const generateResponseMessage = (msgType: string, msg: string, roomid: st
         data: '',
       },
     }
-  }
-}
-
-// 控制器
-export const activityController = async (message: Message, room: Room) => {
-  const activityService = new ActivityChat()
-
-  const text = message.text()
-  const createdTime = new Date().getTime()
-  const member = message.talker()
-  const isSelf = message.self()
-
-  let msg = ''
-
-  const pattern = /已报(\d+)\/\d+人/g
-  const matches = text.match(pattern)
-  const matchActivityCode = /^活动\d+/g.exec(text.replace(/\s*/g, ''))
-
-  if (matches && !isSelf) { // 复制粘贴报名无效提示
-    msg = '复制粘贴无效！！！请直接在群内回复【报名】或 【报名2人】'
-  }
-
-  if (text.replace(/\s*/g, '') === '活动帮助') { // 帮助信息
-    msg = activityService.getHelpText()
-  }
-
-  if (text.replace(/\s*/g, '') === '活动') {
-    msg = await activityService.getActivityListText(room)
-  }
-
-  if (matchActivityCode) { // 查询指定编号的活动
-    const shortCode = matchActivityCode[0].substring(2)
-    msg = await activityService.getLatestActivityText(room, shortCode)
-  }
-
-  if ([ '报名', '报名活动' ].includes(text.replace(/\s*/g, '')) || /^报名\d人/g.test(text.replace(/\s*/g, ''))) { // 报名活动
-    const trimmedContent = text.replace(/\s*/g, '')
-    const addNum = trimmedContent === '报名' || trimmedContent === '报名活动' ? 1 : Number(trimmedContent.slice(2, 3))
-    msg = await activityService.signUpForActivityText(room, member, addNum, createdTime)
-  }
-
-  if (/^报名\d/g.test(text.replace(/\s*/g, ''))) { // 报名指定编号的活动
-    const addNum = 1
-    const shortCode = text.replace(/\s*/g, '').slice(2, 1000000)
-    msg = await activityService.signUpForActivityText(room, member, addNum, createdTime, shortCode)
-  }
-
-  if ([ '取消', '取消报名' ].includes(text.replace(/\s*/g, '')) || /^取消\d人/g.test(text.replace(/\s*/g, ''))) { // 取消活动报名
-    // 取消报名
-    let addNum = 0
-    if ([ '取消', '取消报名' ].includes(text.replace(/\s*/g, ''))) {
-      addNum = 1
-    } else {
-      addNum = Number(text.replace(/\s*/g, '').slice(2, 3))
-    }
-    msg = await activityService.cancelForActivityText(room, addNum, member)
-  }
-
-  if (/^取消\d/g.test(text.replace(/\s*/g, ''))) { // 取消指定活动报名
-    const addNum = 1
-    const shortCode = text.replace(/\s*/g, '').slice(2, 1000000)
-    msg = await activityService.cancelForActivityText(room, addNum, member, shortCode)
-  }
-
-  // req = generateResponseMessage('Text', msg, roomid, wxid)
-  // logger.info('req===========================' + JSON.stringify(req))
-
-  if (msg) {
-    // logger.info('活动操作结果：\n' + msg)
-    await message.say(msg)
   }
 }

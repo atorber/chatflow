@@ -17,7 +17,7 @@ ChatFlow是一个聊天机器人管理系统，可以帮助你实现一些原生
 
 基于开源项目Wechaty实现，目前主要验证了对微信的支持，理论上支持微信、钉钉、飞书、whatsapp等。
 
-已适配网页版微信，linux、mac、Windows均可免费运行。
+已适配网页版微信，支持在Linux、Mac、Windows上运行。
 
 ### 功能列表
 

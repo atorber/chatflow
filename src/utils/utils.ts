@@ -9,7 +9,7 @@ import type {
   // WechatyBuilder,
 } from 'wechaty'
 
-import type { TaskConfig } from '../db/vika-bot.js'
+import type { TaskConfig } from '../api/base-config.js'
 import * as winston from 'winston'
 
 // 创建一个 Winston 日志记录器实例

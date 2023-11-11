@@ -1,16 +1,15 @@
-import { gpt, aibot as gptbot } from './chatgpt.js'
-import { wxai } from './wxai.js'
+import { gpt, aibot as gptbot } from '../proxy/chatgpt-proxy.js'
+import { wxai } from '../proxy/weixin-chatbot-proxy.js'
 
-import { sendNotice } from './group-notice.js'
+import { sendNotice } from '../app/group-notice.js'
 
-import { ChatDevice } from './chat-device.js'
-import { propertyMessage, eventMessage } from './msg-format.js'
-import { getFormattedRideInfo } from './riding.js'
+import { MqttProxy } from '../proxy/mqtt-proxy.js'
+import { getFormattedRideInfo } from '../app/riding.js'
 
 import {
   exportContactsAndRoomsToCSV,
   exportContactsAndRoomsToXLSX,
-} from './contact-room.js'
+} from '../app/contact-room-export.js'
 
 import {
   getContact,
@@ -19,7 +18,7 @@ import {
   isThisRoom,
   BusinessRoom,
   BusinessUser,
-} from './finder.js'
+} from '../api/contact-room-finder.js'
 
 export {
   exportContactsAndRoomsToCSV,
@@ -29,9 +28,7 @@ export {
   wxai,
   gpt,
   gptbot,
-  ChatDevice,
-  propertyMessage,
-  eventMessage,
+  MqttProxy,
   getContact,
   getRoom,
   isThisContact,

@@ -1,8 +1,11 @@
 /* eslint-disable sort-keys */
-import { ChatFlowConfig, TaskConfig } from '../db/vika-bot.js'
+import type { TaskConfig } from '../api/base-config.js'
 import { VikaSheet } from '../db/vika.js'
 import type { SkillInfoArray } from './wxopenaiService.js'
 import { logger } from '../utils/mod.js'
+import { VikaDB } from '../db/vika-db.js'
+import { ChatFlowConfig } from '../api/base-config.js'
+import { Wechaty, log } from 'wechaty'
 
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice
@@ -11,32 +14,34 @@ import { logger } from '../utils/mod.js'
 // 服务类
 export class QaChat {
 
-  private db: VikaSheet
-  envsOnVika: any
-  roomWhiteList: any
-  contactWhiteList: any
-  reminderList: TaskConfig[] = []
-  records: any
+  static db: VikaSheet
+  static envsOnVika: any
+  static roomWhiteList: any
+  static contactWhiteList: any
+  static reminderList: TaskConfig[] = []
+  static records: any
+  static bot:Wechaty = ChatFlowConfig.bot
 
-  constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.qaSheet)
-    // void this.init()
+  private constructor () {
+
   }
 
   // 初始化
-  async init () {
+  static async init () {
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.qaSheet)
     const records = await this.getRecords()
     this.records = records
+    log.info('初始化 QaChat 成功...')
   }
 
-  async getRecords () {
+  static async getRecords () {
     const records = await this.db.findAll()
     logger.info('维格表中的记录：', JSON.stringify(records))
     return records
   }
 
   // 获取定时提醒
-  async getQa (): Promise<SkillInfoArray> {
+  static async getQa (): Promise<SkillInfoArray> {
     await this.init()
     if (!this.records) {
       // Handle error

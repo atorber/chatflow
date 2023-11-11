@@ -5,7 +5,7 @@
 // services/userService.ts
 // import { User } from '../types';
 import { Contact, Room, log } from 'wechaty'
-import type { BusinessRoom, BusinessUser } from '../plugins/finder.js'
+import type { BusinessRoom, BusinessUser } from '../api/contact-room-finder.js'
 
 type User = {
     id:number

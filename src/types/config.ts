@@ -1,4 +1,4 @@
-import type { BusinessRoom, BusinessUser } from '../plugins/finder'
+import type { BusinessRoom, BusinessUser } from '../api/contact-room-finder'
 
 type AIType = 'WxOpenai' | string;
 

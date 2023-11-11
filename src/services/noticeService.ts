@@ -1,6 +1,6 @@
 /* eslint-disable sort-keys */
-import type { Message, Wechaty } from 'wechaty'
-import { ChatFlowConfig, TaskConfig } from '../db/vika-bot.js'
+import { Wechaty, log } from 'wechaty'
+import type { TaskConfig } from '../api/base-config.js'
 import { VikaSheet, IRecord } from '../db/vika.js'
 import schedule from 'node-schedule'
 import { getRule, delay, logger } from '../utils/mod.js'
@@ -10,6 +10,8 @@ import {
   getRoom,
 } from '../plugins/mod.js'
 import { sendMsg } from './configService.js'
+import { VikaDB } from '../db/vika-db.js'
+import { ChatFlowConfig } from '../api/base-config.js'
 
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice
@@ -37,31 +39,32 @@ type TaskFields = {
 // 服务类
 export class NoticeChat {
 
-  private db:VikaSheet
-  envsOnVika: any
-  roomWhiteList: any
-  contactWhiteList: any
-  reminderList: TaskConfig[] = []
-  jobs!: {[key:string]:any}
+  static db:VikaSheet
+  static envsOnVika: any
+  static roomWhiteList: any
+  static contactWhiteList: any
+  static reminderList: TaskConfig[] = []
+  static jobs: {[key:string]:any}
+  static bot:Wechaty = ChatFlowConfig.bot
 
-  constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.noticeSheet)
-    void this.init()
+  private constructor () {
   }
 
   // 初始化
-  async init () {
+  static async init () {
+    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.noticeSheet)
     await this.getRecords()
+    log.info('初始化 NoticeChat 成功...')
   }
 
-  async getRecords () {
+  static async getRecords () {
     const records = await this.db.findAll()
     // logger.info('维格表中的记录：', JSON.stringify(records))
     return records
   }
 
   // 获取定时提醒
-  async getTimedTask (): Promise<TaskConfig[]> {
+  static async getTimedTask (): Promise<TaskConfig[]> {
     const taskRecords: IRecord[] = await this.db.findAll()
 
     const timedTasks: TaskConfig[] = taskRecords
@@ -102,7 +105,7 @@ export class NoticeChat {
   }
 
   // 更新任务
-  async updateJobs (bot: Wechaty, messageService: { onMessage: (arg0: Message) => any }) {
+  static async updateJobs () {
     const that = this
     try {
     // 结束所有任务
@@ -135,9 +138,9 @@ export class NoticeChat {
               try {
                 if (task.targetType === 'contact') {
                   try {
-                    const contact = await getContact(bot, task.target as BusinessUser)
+                    const contact = await getContact(this.bot, task.target as BusinessUser)
                     if (contact) {
-                      await sendMsg(contact, text, messageService)
+                      await sendMsg(contact, text)
                       await delay(200)
                     } else {
                       logger.info('当前好友不存在:' + JSON.stringify(task.target))
@@ -149,9 +152,9 @@ export class NoticeChat {
 
                 if (task.targetType === 'room') {
                   try {
-                    const room = await getRoom(bot, task.target as BusinessRoom)
+                    const room = await getRoom(this.bot, task.target as BusinessRoom)
                     if (room) {
-                      await sendMsg(room, text, messageService)
+                      await sendMsg(room, text)
                       await delay(200)
                     } else {
                       logger.info('当前群不存在:' + JSON.stringify(task.target))

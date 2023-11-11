@@ -1,87 +1,71 @@
 /* eslint-disable sort-keys */
-import { ChatFlowConfig } from '../db/vika-bot.js'
-
 import { VikaSheet } from '../db/vika.js'
-import { Message, ScanStatus, types } from 'wechaty'
+import { Message, ScanStatus, types, Wechaty, log } from 'wechaty'
 import { getCurTime, delay, logger } from '../utils/utils.js'
 import moment from 'moment'
 import { FileBox } from 'file-box'
+import { VikaDB } from '../db/vika-db.js'
+import { ChatFlowConfig } from '../api/base-config.js'
+import type { ChatMessage } from '../types/mod.js'
 
 import { db } from '../db/tables.js'
 const messageData = db.message
 
 const MEDIA_PATH = 'data/media/image'
 
-async function handleFileMessage (file:FileBox, db:VikaSheet, message: Message) {
-  const fileName = file.name
-  const room = message.room()
-  const talker = message.talker()
-  let filePath = `${MEDIA_PATH}/contact/${talker.id}_${fileName}`
-  if (room) {
-    filePath = `${MEDIA_PATH}/room/${room.id}_${fileName}`
-  }
-
-  // logger.info('文件路径filePath:', filePath)
-
-  try {
-    await file.toFile(filePath, true)
-    logger.info('保存文件到本地成功')
-  } catch (err) {
-    logger.error('保存文件到本地失败', err)
-    return ''
-  }
-
-  await delay(1000)
-  return await db.upload(filePath, '')
-}
-
 // 服务类
 export class MessageChat {
 
-  private db:VikaSheet
-  msgStore!: any[]
-  messageData: any
+  static db:VikaSheet | undefined
+  static msgStore: any[]
+  static messageData: any
+  static bot:Wechaty = ChatFlowConfig.bot
 
-  constructor () {
-    this.db = new VikaSheet(ChatFlowConfig.vika, ChatFlowConfig.dataBaseIds.messageSheet)
-    this.msgStore = []
-    this.messageData = messageData
-    void this.init()
+  private constructor () {
+
   }
 
   // 初始化
-  async init () {
-    const that = this
-    setInterval(() => {
+  static async init () {
+    if (!MessageChat.db) {
+      const that = this
+      MessageChat.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.messageSheet)
+      this.msgStore = []
+      this.messageData = messageData
+
+      // 启动定时任务，每秒钟写入一次，每次写入10条
+      setInterval(() => {
       // logger.info('待处理消息池长度：', that.msgStore.length || '0')
 
-      if (that.msgStore.length) {
-        const end = that.msgStore.length < 10 ? that.msgStore.length : 10
-        const records = that.msgStore.splice(0, end)
-        // logger.info('写入vika的消息：', JSON.stringify(records))
-        try {
-          this.db.insert(records).then((response: { success: any }) => {
-            if (!response.success) {
-              logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
-            }
-            return response
-          }).catch((err: any) => { logger.error('调用vika写入接口失败：', err) })
-        } catch (err) {
-          logger.error('调用datasheet.records.create失败：', err)
+        if (that.msgStore.length) {
+          const end = that.msgStore.length < 10 ? that.msgStore.length : 10
+          const records = that.msgStore.splice(0, end)
+          // logger.info('写入vika的消息：', JSON.stringify(records))
+          try {
+            MessageChat.db?.insert(records).then((response: { success: any }) => {
+              if (!response.success) {
+                logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
+              }
+              return response
+            }).catch((err: any) => { logger.error('调用vika写入接口失败：', err) })
+          } catch (err) {
+            logger.error('调用datasheet.records.create失败：', err)
+          }
         }
-      }
-    }, 1000)
+      }, 1000)
+      log.info('初始化 MessageChat 成功...')
+    }
   }
 
-  addRecord (record: any) {
+  static addRecord (record: any) {
     logger.info('消息入列:', JSON.stringify(record))
     if (record.fields) {
-      this.msgStore.push(record)
+      MessageChat.msgStore.push(record)
       // logger.info('最新消息池长度：', this.msgStore.length)
     }
   }
 
-  async addChatRecord (msg: Message, uploadedAttachments: any, msgType: any, text: string) {
+  static async addChatRecord (msg: Message, uploadedAttachments: any, msgType: any, text: string) {
     const talker = msg.talker()
     const listener = msg.listener()
     text = text || msg.text()
@@ -147,7 +131,7 @@ export class MessageChat {
         },
       }
       // logger.info('addChatRecord:', JSON.stringify(record))
-      this.msgStore.push(record)
+      MessageChat.msgStore.push(record)
       // logger.info('最新消息池长度：', this.msgStore.length)
     } catch (e) {
       logger.error('添加记录失败：', e)
@@ -156,7 +140,55 @@ export class MessageChat {
 
   }
 
-  async addScanRecord (uploadedAttachments: any, text: string) {
+  // 处理二维码上传
+  static async uploadQRCodeToVika (qrcode: string, status: ScanStatus) {
+
+    if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
+
+      const qrcodeUrl = encodeURIComponent(qrcode)
+      const qrcodeImageUrl = [ 'https://wechaty.js.org/qrcode/', qrcodeUrl ].join('')
+      // logger.info('StarterBot', 'vika onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
+
+      let uploadedAttachments:any = ''
+      let file: FileBox
+      let filePath = ''
+      try {
+        file = FileBox.fromQRCode(qrcode)
+        filePath = 'data/media/image/qrcode/' + file.name
+        try {
+          // const writeStream = fs.createWriteStream(filePath)
+          // await file.pipe(writeStream)
+          await file.toFile(filePath, true)
+          await delay(1000)
+          uploadedAttachments = await MessageChat.db?.upload(filePath, '')
+          const text = qrcodeImageUrl
+          if (uploadedAttachments.data) {
+            try {
+              await this.addScanRecord(uploadedAttachments, text)
+              // fs.unlink(filePath, (err) => {
+              //   logger.info('二维码上传vika完成删除文件：', filePath, err)
+              // })
+            } catch (err) {
+              logger.error('二维码vika 写入失败：', err)
+            }
+          }
+        } catch {
+          logger.info('二维码上传失败：', filePath)
+          // fs.unlink(filePath, (err) => {
+          //   logger.info('二维码上传vika失败删除文件', filePath, err)
+          // })
+        }
+
+      } catch (e) {
+        logger.error('onScan,二维码vika 写入失败：', e)
+      }
+
+    } else {
+      logger.info('机器人启动，二维码上传维格表', 'onScan: %s(%s)', ScanStatus[status], status)
+    }
+  }
+
+  static async addScanRecord (uploadedAttachments: any, text: string) {
 
     const curTime = getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
@@ -181,14 +213,37 @@ export class MessageChat {
     ]
 
     // logger.info('待写入登录二维码消息:', JSON.stringify(records))
-    const response = await this.db.insert(records)
+    const response = await this.db?.insert(records)
     if (!response.success) {
       logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
     }
     return response
   }
 
-  async addHeartbeatRecord (text: string) {
+  static async handleFileMessage (file:FileBox, message: Message) {
+    const fileName = file.name
+    const room = message.room()
+    const talker = message.talker()
+    let filePath = `${MEDIA_PATH}/contact/${talker.id}_${fileName}`
+    if (room) {
+      filePath = `${MEDIA_PATH}/room/${room.id}_${fileName}`
+    }
+
+    // logger.info('文件路径filePath:', filePath)
+
+    try {
+      await file.toFile(filePath, true)
+      logger.info('保存文件到本地成功')
+    } catch (err) {
+      logger.error('保存文件到本地失败', err)
+      return ''
+    }
+
+    await delay(1000)
+    return await this.db?.upload(filePath, '')
+  }
+
+  static async addHeartbeatRecord (text: string) {
 
     const curTime = getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
@@ -207,10 +262,10 @@ export class MessageChat {
       },
     }
     logger.info('心跳消息:', JSON.stringify(record))
-    this.msgStore.push(record)
+    MessageChat.msgStore.push(record)
   }
 
-  async onMessage (message: Message) {
+  static async onMessage (message: Message) {
     const room = message.room()
     const talker = message.talker()
     try {
@@ -353,7 +408,7 @@ export class MessageChat {
         } else {
           text = `/contact/${talker.id}_${file.name}`
         }
-        uploadedAttachments = await handleFileMessage(file, this.db, message)
+        uploadedAttachments = await MessageChat.handleFileMessage(file, message)
       }
 
       if (message.type() !== types.Message.Unknown) {
@@ -365,52 +420,34 @@ export class MessageChat {
     }
   }
 
-  async onScan (qrcode: string, status: ScanStatus) {
-    if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
-      const qrcodeUrl = encodeURIComponent(qrcode)
-      const qrcodeImageUrl = [
-        'https://wechaty.js.org/qrcode/',
-        qrcodeUrl,
-      ].join('')
-      // logger.info('StarterBot', 'vika onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
+  static async formatMessage (message: Message) {
+    const text = message.text()
+    const talker = message.talker()
+    const listener = message.listener()
+    const room = message.room()
+    const topic = await room?.topic()
+    const type = message.type()
 
-      let uploadedAttachments:any = ''
-      let file: FileBox
-      let filePath = ''
-      try {
-        file = FileBox.fromQRCode(qrcode)
-        filePath = 'data/media/image/qrcode/' + file.name
-        try {
-          // const writeStream = fs.createWriteStream(filePath)
-          // await file.pipe(writeStream)
-          await file.toFile(filePath, true)
-          await delay(1000)
-          uploadedAttachments = await this.db.upload(filePath, '')
-          const text = qrcodeImageUrl
-          if (uploadedAttachments.data) {
-            try {
-              await this.addScanRecord(uploadedAttachments, text)
-              // fs.unlink(filePath, (err) => {
-              //   logger.info('二维码上传vika完成删除文件：', filePath, err)
-              // })
-            } catch (err) {
-              logger.error('二维码vika 写入失败：', err)
-            }
-          }
-        } catch {
-          logger.info('二维码上传失败：', filePath)
-          // fs.unlink(filePath, (err) => {
-          //   logger.info('二维码上传vika失败删除文件', filePath, err)
-          // })
-        }
-
-      } catch (e) {
-        logger.error('onScan,二维码vika 写入失败：', e)
-      }
-
-    } else {
-      logger.info('机器人启动，二维码上传维格表', 'onScan: %s(%s)', ScanStatus[status], status)
+    const chatMessage: ChatMessage = {
+      id: message.id,
+      text,
+      type,
+      talker: {
+        name: talker.name(),
+        id: talker.id,
+        alias: await talker.alias(),
+      },
+      room: {
+        topic,
+        id: room?.id,
+      },
+      listener: {
+        id: listener?.id,
+        name: listener?.name(),
+        alias: await listener?.alias(),
+      },
     }
+    return chatMessage
   }
 
 }
