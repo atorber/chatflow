@@ -198,6 +198,8 @@ export class VikaDB {
             }
             logForm(sheet.name + '初始化数据写入完成...')
           }
+          this.dataBaseIds[k as keyof DateBase] = tables[sheet.name]
+          this.dataBaseNames[sheet.name as keyof DateBase] = tables[sheet.name]
         } else if (sheet) {
           // logForm(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
           this.dataBaseIds[k as keyof DateBase] = tables[sheet.name]
