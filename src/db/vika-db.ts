@@ -96,7 +96,7 @@ export class VikaDB {
         const sheet = sheets[k as keyof Sheets]
         // console.info('数据模型：', k, sheet)
         if (sheet && !tables[sheet.name]) {
-          logForm(`表不存在，创建表并初始化数据...\n${k}/${sheet.name}/${tables[sheet.name]}`)
+          logForm(`表不存在，创建表并初始化数据...\n${k}/${sheet.name}`)
           const fields = sheet.fields
           // console.info('fields:', JSON.stringify(fields))
           const newFields: Field[] = []
