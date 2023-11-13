@@ -20,6 +20,8 @@ import {
   BusinessUser,
 } from '../api/contact-room-finder.js'
 
+import { GroupMaster, GroupMasterConfig } from './group-master/mod.js'
+
 export {
   exportContactsAndRoomsToCSV,
   exportContactsAndRoomsToXLSX,
@@ -33,9 +35,11 @@ export {
   getRoom,
   isThisContact,
   isThisRoom,
+  GroupMaster,
 }
 
 export type {
+  GroupMasterConfig,
   BusinessRoom,
   BusinessUser,
 }

@@ -15,7 +15,9 @@ import { ChatFlowConfig, WechatyConfig } from './api/base-config.js'
 import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
 import { VikaDB } from './db/vika-db.js'
 
-export function ChatFlow (): WechatyPlugin {
+import { GroupMaster, GroupMasterConfig } from './plugins/mod.js'
+
+function ChatFlow (): WechatyPlugin {
   logForm('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...')
 
   return function ChatFlowPlugin (bot: Wechaty): void {
@@ -41,6 +43,12 @@ export {
   VikaDB,
   type IClientOptions,
   MqttProxy,
+  ChatFlow,
+  GroupMaster,
+}
+
+export type {
+  GroupMasterConfig,
 }
 
 export type { WechatyConfig }
