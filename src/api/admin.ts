@@ -194,10 +194,6 @@ export const adminAction = async (message:Message) => {
       }
     }
 
-    if ([ '更新配置', '更新定时提醒', '更新通讯录' ].includes(text) && !ChatFlowConfig.configEnv.VIKA_TOKEN) {
-      await sendMsg(message, '未配置维格表，指令无效')
-    }
-
     const commandActions: CommandActions = {
       下载csv通讯录: (bot: Wechaty) => exportContactsAndRoomsToCSV(bot),
       下载通讯录: (bot: Wechaty) => exportContactsAndRoomsToXLSX(bot),
