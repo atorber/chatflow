@@ -82,7 +82,7 @@ export class ActivityChat {
 
   static activities: Activity[] = []
   static db:VikaSheet
-  static bot:Wechaty = ChatFlowConfig.bot
+  static bot:Wechaty
 
   private constructor () {
   }
@@ -91,6 +91,8 @@ export class ActivityChat {
   static async init () {
     this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.statisticSheet)
     await this.getStatistics()
+    this.bot = ChatFlowConfig.bot
+
     log.info('初始化 ActivityChat 成功...')
   }
 
@@ -140,7 +142,7 @@ export class ActivityChat {
       try {
         await this.removeAtivity(statistics._id)
       } catch (e) {
-        logger.error('删除活动失败：', e)
+        log.error('删除活动失败：', e)
       }
     }
 
@@ -149,11 +151,11 @@ export class ActivityChat {
         await this.updateAtivity(statistics._id, statistics)
 
       } catch (e) {
-        logger.error('更新活动失败：', e)
+        log.error('更新活动失败：', e)
       }
     }
 
-    logger.info('更新活动：' + activitiesVika.length)
+    log.info('更新活动：' + activitiesVika.length)
 
     return statisticsRecords
   }

@@ -11,7 +11,7 @@ export class KeywordChat {
 
   static db:VikaSheet
   static records: IRecord[] | undefined
-  static bot:Wechaty = ChatFlowConfig.bot
+  static bot:Wechaty
 
   private constructor () {
 
@@ -21,6 +21,8 @@ export class KeywordChat {
   static async init () {
     this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.keywordSheet)
     await this.getKeywords()
+    this.bot = ChatFlowConfig.bot
+
     log.info('初始化 KeywordChat 成功...')
   }
 

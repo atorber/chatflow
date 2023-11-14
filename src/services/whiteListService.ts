@@ -19,7 +19,7 @@ export class WhiteListChat {
   static envsOnVika: any
   static roomWhiteList: any
   static contactWhiteList: any
-  static bot:Wechaty = ChatFlowConfig.bot
+  static bot:Wechaty
 
   private constructor () {
 
@@ -41,6 +41,8 @@ export class WhiteListChat {
       gpt: [],
     }
     await this.getRecords()
+    this.bot = ChatFlowConfig.bot
+
     log.info('初始化 WhiteListChat 成功...')
   }
 
@@ -81,7 +83,7 @@ export class WhiteListChat {
 
     whiteList.contactWhiteList = this.contactWhiteList
     whiteList.roomWhiteList = this.roomWhiteList
-    logger.info('whiteList:' + JSON.stringify(whiteList))
+    log.info('获取的最新白名单:' + JSON.stringify(whiteList))
     return whiteList
   }
 

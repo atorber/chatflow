@@ -135,7 +135,7 @@ export const onMessage = async (message:Message) => {
   }
   // log.info(payload)
   payload = JSON.stringify(payload)
-  log.info('payload', payload)
+  // log.info('payload', payload)
 
   payload = JSON.parse(payload)
 
@@ -150,8 +150,6 @@ export const onMessage = async (message:Message) => {
   } else if (!message.self()) {
     // pubMsg(reqMsg)
     GroupMasterStore.reqStore.push(reqMsg)
-  } else {
-    log.info('self message .......')
   }
 
   // 1. send Image

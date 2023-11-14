@@ -13,7 +13,7 @@ import { ChatFlowConfig } from '../api/base-config.js'
 export class ContactChat {
 
   static db:VikaSheet
-  static bot:Wechaty = ChatFlowConfig.bot
+  static bot:Wechaty
 
   private constructor () {
 
@@ -23,6 +23,7 @@ export class ContactChat {
   static async init () {
     this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.contactSheet)
     await this.getContact()
+    this.bot = ChatFlowConfig.bot
     log.info('初始化 ContactChat 成功...')
   }
 
@@ -114,9 +115,9 @@ export class ContactChat {
         void await delay(1000)
       }
 
-      logger.info('同步好友列表完成，更新到云端好友数量：' + updateCount || '0')
+      log.info('同步好友列表完成，更新到云端好友数量：' + updateCount || '0')
     } catch (err) {
-      logger.error('更新好友列表失败：' + err)
+      log.error('更新好友列表失败：' + err)
 
     }
 

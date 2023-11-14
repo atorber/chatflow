@@ -27,7 +27,7 @@ export class GroupNoticeChat {
   static roomWhiteList: any
   static contactWhiteList: any
   static reminderList: TaskConfig[] = []
-  static bot:Wechaty = ChatFlowConfig.bot
+  static bot:Wechaty
 
   private constructor () {
 
@@ -37,6 +37,8 @@ export class GroupNoticeChat {
   static async init () {
     this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.groupNoticeSheet)
     await this.getRecords()
+    this.bot = ChatFlowConfig.bot
+
     log.info('初始化 GroupNoticeChat 成功...')
   }
 

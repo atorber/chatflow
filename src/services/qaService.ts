@@ -20,7 +20,7 @@ export class QaChat {
   static contactWhiteList: any
   static reminderList: TaskConfig[] = []
   static records: any
-  static bot:Wechaty = ChatFlowConfig.bot
+  static bot:Wechaty
 
   private constructor () {
 
@@ -31,6 +31,8 @@ export class QaChat {
     this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.qaSheet)
     const records = await this.getRecords()
     this.records = records
+    this.bot = ChatFlowConfig.bot
+
     log.info('初始化 QaChat 成功...')
   }
 

@@ -45,7 +45,7 @@ export class NoticeChat {
   static contactWhiteList: any
   static reminderList: TaskConfig[] = []
   static jobs: {[key:string]:any}
-  static bot:Wechaty = ChatFlowConfig.bot
+  static bot:Wechaty
 
   private constructor () {
   }
@@ -54,6 +54,8 @@ export class NoticeChat {
   static async init () {
     this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.noticeSheet)
     await this.getRecords()
+    this.bot = ChatFlowConfig.bot
+
     log.info('初始化 NoticeChat 成功...')
   }
 
@@ -112,7 +114,7 @@ export class NoticeChat {
       await schedule.gracefulShutdown()
       // logger.info('结束所有任务成功...')
     } catch (e) {
-      logger.error('结束所有任务失败：' + e)
+      log.error('结束所有任务失败：' + e)
     }
     try {
       const tasks = await this.getTimedTask()
@@ -173,10 +175,10 @@ export class NoticeChat {
           }
         }
       }
-      // logger.info('定时提醒任务初始化完成，创建任务数量:\n', Object.keys(this.jobs).length)
+      log.info('定时提醒任务初始化完成，创建任务数量:\n', Object.keys(this.jobs).length || '0')
 
     } catch (err: any) {
-      logger.error('更新定时提醒列表任务失败:\n' + err)
+      log.error('更新定时提醒列表任务失败:\n' + err)
     }
   }
 

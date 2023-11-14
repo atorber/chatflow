@@ -19,7 +19,7 @@ export class MessageChat {
   static db:VikaSheet | undefined
   static msgStore: any[]
   static messageData: any
-  static bot:Wechaty = ChatFlowConfig.bot
+  static bot:Wechaty
 
   private constructor () {
 
@@ -55,6 +55,7 @@ export class MessageChat {
       }, 1000)
       log.info('初始化 MessageChat 成功...')
     }
+    this.bot = ChatFlowConfig.bot
   }
 
   static addRecord (record: any) {

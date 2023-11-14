@@ -13,7 +13,7 @@ export class RoomChat {
 
   static db:VikaSheet
   static rooms: any[]
-  static bot:Wechaty = ChatFlowConfig.bot
+  static bot:Wechaty
 
   private constructor () {
 
@@ -24,6 +24,8 @@ export class RoomChat {
     this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.roomSheet)
     const rooms = await this.getRoom()
     this.rooms = rooms
+    this.bot = ChatFlowConfig.bot
+
     log.info('初始化 RoomChat 成功...')
   }
 

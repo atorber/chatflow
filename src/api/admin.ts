@@ -43,7 +43,7 @@ const adminCommands: AdminCommands = {
   更新配置: async () => {
     try {
       const botConfig = await EnvChat.downConfigFromVika()
-      log.info('botConfig:', JSON.stringify(botConfig))
+      log.info('获取到新配信息:', JSON.stringify(botConfig))
       return [ true, '配置更新成功~' ]
     } catch (e) {
       return [ false, '配置更新失败~' ]
@@ -92,36 +92,41 @@ const adminCommands: AdminCommands = {
   },
   更新问答: async () => {
     let replyText = ''
-    try {
-      const skills: SkillInfoArray = await QaChat.getQa()
-      if (skills.length) {
-        const config: WxOpenaiBotConfig = {
-          encodingAESKey: ChatFlowConfig.configEnv.WXOPENAI_ENCODINGAESKEY || '',
-          token: ChatFlowConfig.configEnv.WXOPENAI_TOKEN || '',
-          nonce: 'ABSBSDSD',
-          appid: ChatFlowConfig.configEnv.WXOPENAI_APPID || '',
-          managerid: ChatFlowConfig.configEnv.WXOPENAI_MANAGERID || '',
-        }
+    if (ChatFlowConfig.configEnv.WXOPENAI_APPID && ChatFlowConfig.configEnv.WXOPENAI_MANAGERID) {
+      try {
+        const skills: SkillInfoArray = await QaChat.getQa()
+        if (skills.length) {
+          const config: WxOpenaiBotConfig = {
+            encodingAESKey: ChatFlowConfig.configEnv.WXOPENAI_ENCODINGAESKEY || '',
+            token: ChatFlowConfig.configEnv.WXOPENAI_TOKEN || '',
+            nonce: 'ABSBSDSD',
+            appid: ChatFlowConfig.configEnv.WXOPENAI_APPID || '',
+            managerid: ChatFlowConfig.configEnv.WXOPENAI_MANAGERID || '',
+          }
 
-        const aiBotInstance = new WxOpenaiBot(config)
-        const result: any = await aiBotInstance.updateSkill(skills, 1)
-        if (result.data && result.data.task_id) {
-          const res = await aiBotInstance.publishSkill()
-          console.info('发布技能成功:', res)
-          replyText = '更新问答列表成功~'
+          const aiBotInstance = new WxOpenaiBot(config)
+          const result: any = await aiBotInstance.updateSkill(skills, 1)
+          if (result.data && result.data.task_id) {
+            const res = await aiBotInstance.publishSkill()
+            log.info('发布技能成功:', res)
+            replyText = '更新问答列表成功~'
 
+          } else {
+            // eslint-disable-next-line no-console
+            log.error('更新问答失败Error:', result)
+            replyText = '更新问答列表失败~'
+          }
         } else {
-          // eslint-disable-next-line no-console
-          console.error('更新问答失败Error:', result)
-          replyText = '更新问答列表失败~'
+          replyText = '问答列表为空，未更新任何内容~'
         }
-      } else {
-        replyText = '问答列表为空，未更新任何内容~'
+        return [ true, replyText ]
+      } catch (e) {
+        return [ false, '问答列表更新失败~' ]
       }
-      return [ true, replyText ]
-    } catch (e) {
-      return [ false, '问答列表更新失败~' ]
+    } else {
+      return [ false, '微信对话平台配置信息不全，请检查配置信息~' ]
     }
+
   },
   报名活动: async (_bot:Wechaty, message: Message) => {
     try {
