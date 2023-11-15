@@ -12,7 +12,7 @@ async function onReady (this:Wechaty) {
     await delay(1000)
     // await updateConfig(configEnv)
 
-    if (![ 'wechaty-puppet-xp' ].includes(this.puppet.constructor.name)) await onReadyOrLogin(this)
+    if (![ 'PuppetXp' ].includes(this.puppet.constructor.name)) await onReadyOrLogin(this)
   } catch (e) {
     log.info('on ready error:', e)
   }

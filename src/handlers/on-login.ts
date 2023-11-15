@@ -14,7 +14,7 @@ async function onLogin (this:Wechaty) {
 
   // await updateConfig(configEnv)
 
-  if ([ 'wechaty-puppet-xp' ].includes(this.puppet.constructor.name)) await onReadyOrLogin(this)
+  if ([ 'PuppetXp' ].includes(this.puppet.constructor.name)) await onReadyOrLogin(this)
 
 }
 export default onLogin

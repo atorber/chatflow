@@ -27,7 +27,6 @@ export async function onScan (qrcode: string, status: ScanStatus) {
   qrcodeTerminal.generate(qrcode, { small: true })
 
   // 上传二维码到维格表，可通过扫码维格表中二维码登录
-  await MessageChat.init()
   await MessageChat.uploadQRCodeToVika(qrcode, status)
 
 }

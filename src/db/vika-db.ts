@@ -184,6 +184,8 @@ export class VikaDB {
           // console.info('创建表，表信息：', JSON.stringify(newFields, undefined, 2))
 
           await this.createDataSheet(k, sheet.name, newFields)
+          this.dataBaseIds[k as keyof DateBase] = tables[sheet.name]
+          this.dataBaseNames[sheet.name as keyof DateBase] = tables[sheet.name]
           await delay(1000)
           const defaultRecords = sheet.defaultRecords
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -198,8 +200,6 @@ export class VikaDB {
             }
             logForm(sheet.name + '初始化数据写入完成...')
           }
-          this.dataBaseIds[k as keyof DateBase] = tables[sheet.name]
-          this.dataBaseNames[sheet.name as keyof DateBase] = tables[sheet.name]
         } else if (sheet) {
           // logForm(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
           this.dataBaseIds[k as keyof DateBase] = tables[sheet.name]
