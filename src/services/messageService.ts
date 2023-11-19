@@ -8,10 +8,24 @@ import { VikaDB } from '../db/vika-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'
 import type { ChatMessage } from '../types/mod.js'
 
+import fs from 'fs'
+import path from 'path'
+
 import { db } from '../db/tables.js'
 const messageData = db.message
 
 const MEDIA_PATH = 'data/media/image'
+const MEDIA_PATH_QRCODE = path.join(MEDIA_PATH, 'qrcode')
+const MEDIA_PATH_CONTACT = path.join(MEDIA_PATH, 'contact')
+const MEDIA_PATH_ROOM = path.join(MEDIA_PATH, 'room')
+
+const paths = [ MEDIA_PATH, MEDIA_PATH_QRCODE, MEDIA_PATH_CONTACT, MEDIA_PATH_ROOM ]
+
+paths.forEach((p) => {
+  if (!fs.existsSync(p)) {
+    fs.mkdirSync(p, { recursive: true })
+  }
+})
 
 // 服务类
 export class MessageChat {
@@ -155,7 +169,7 @@ export class MessageChat {
       let filePath = ''
       try {
         file = FileBox.fromQRCode(qrcode)
-        filePath = 'data/media/image/qrcode/' + file.name
+        filePath = `${MEDIA_PATH_QRCODE}/` + file.name
         try {
           // const writeStream = fs.createWriteStream(filePath)
           // await file.pipe(writeStream)
@@ -225,9 +239,9 @@ export class MessageChat {
     const fileName = file.name
     const room = message.room()
     const talker = message.talker()
-    let filePath = `${MEDIA_PATH}/contact/${talker.id}_${fileName}`
+    let filePath = `${MEDIA_PATH_CONTACT}/${talker.id}_${fileName}`
     if (room) {
-      filePath = `${MEDIA_PATH}/room/${room.id}_${fileName}`
+      filePath = `${MEDIA_PATH_ROOM}/${room.id}_${fileName}`
     }
 
     // logger.info('文件路径filePath:', filePath)
@@ -405,9 +419,9 @@ export class MessageChat {
       if (file) {
         logger.info('文件file:', file)
         if (room) {
-          text = `/room/${room.id}_${file.name}`
+          text = `room/${room.id}_${file.name}`
         } else {
-          text = `/contact/${talker.id}_${file.name}`
+          text = `contact/${talker.id}_${file.name}`
         }
         uploadedAttachments = await MessageChat.handleFileMessage(file, message)
       }

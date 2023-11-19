@@ -67,7 +67,7 @@ export const ServeGetContactsVika = async () => {
     data: {
       items: [
         {
-          avatar: 'http://localhost:5173/files/public/media/image/avatar/20231022/4f67de6461b9e930be9ac97b3a6cee4c_200x200.png',
+          avatar: '',
           gender: 0,
           group_id: 0,
           id: 7,
@@ -83,7 +83,7 @@ export const ServeGetContactsVika = async () => {
   const items = res.map((value:any) => {
     if (value.fields.name) {
       return {
-        avatar: value.fields.avatar || 'http://localhost:5173/files/public/media/image/avatar/20231022/4f67de6461b9e930be9ac97b3a6cee4c_200x200.png',
+        avatar: value.fields.avatar,
         gender: value.fields.gender,
         group_id: 0,
         id: value.fields.id,
@@ -109,7 +109,7 @@ export const ServeSearchContactVika = async (parse:{name?:string, id:string}) =>
     code: 200,
     message: 'success',
     data: {
-      avatar: 'http://localhost:5173/files/public/media/image/avatar/20231022/4f67de6461b9e930be9ac97b3a6cee4c_200x200.png',
+      avatar: '',
       gender: 0,
       group_id: 0,
       id: 7,
@@ -124,7 +124,7 @@ export const ServeSearchContactVika = async (parse:{name?:string, id:string}) =>
   if (res.length > 0) {
     const value:any = res[0]
     item = {
-      avatar: value.fields.avatar || 'http://localhost:5173/files/public/media/image/avatar/20231022/4f67de6461b9e930be9ac97b3a6cee4c_200x200.png',
+      avatar: value.fields.avatar,
       gender: value.fields.gender,
       group_id: 0,
       id: value.fields.id,
