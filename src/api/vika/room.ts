@@ -60,7 +60,7 @@ export const ServeGetGroupsVika = async () => {
     data: {
       items: [
         {
-          avatar: 'http://localhost:5173/files/public/media/image/avatar/20231022/4f67de6461b9e930be9ac97b3a6cee4c_200x200.png',
+          avatar: '',
           creator_id: 2055,
           group_name: '抖聊开发群',
           id: 1026,
@@ -75,7 +75,7 @@ export const ServeGetGroupsVika = async () => {
   const items = res.map((value:any) => {
     if (value.fields.topic) {
       return {
-        avatar: value.fields.avatar || 'http://localhost:5173/files/public/media/image/avatar/20231022/4f67de6461b9e930be9ac97b3a6cee4c_200x200.png',
+        avatar: value.fields.avatar,
         creator_id: value.fields.ownerId,
         group_name: value.fields.topic,
         id: value.fields.id,
@@ -117,7 +117,7 @@ export const ServeGroupDetailVika = async (parse:any) => {
   if (res.length > 0) {
     const groupInfo = res[0].fields
     item = {
-      avatar: groupInfo.avatar || 'http://localhost:5173/files/public/media/image/avatar/20231022/4f67de6461b9e930be9ac97b3a6cee4c_200x200.png',
+      avatar: groupInfo.avatar,
       creator_id: groupInfo.ownerId,
       group_name: groupInfo.topic,
       id: groupInfo.id,
