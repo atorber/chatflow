@@ -128,3 +128,4 @@ data/media/image/*
 data/*.json
 .env-*
 data/media/file/*
+admin

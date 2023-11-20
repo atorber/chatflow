@@ -14,6 +14,7 @@ import { logForm } from './utils/utils.js'
 import { ChatFlowConfig, WechatyConfig } from './api/base-config.js'
 import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
 import { VikaDB } from './db/vika-db.js'
+import { LarkDB } from './db/lark-db.js'
 
 import { GroupMaster, GroupMasterConfig } from './plugins/mod.js'
 
@@ -41,6 +42,7 @@ export {
   log,
   logForm,
   VikaDB,
+  LarkDB,
   type IClientOptions,
   MqttProxy,
   ChatFlow,

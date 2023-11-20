@@ -10,6 +10,7 @@ import {
   NoticeChat,
   QaChat,
   KeywordChat,
+  LarkChat,
 } from '../services/mod.js'
 
 export const initializeServicesAndEnv = async () => {
@@ -17,6 +18,8 @@ export const initializeServicesAndEnv = async () => {
   await EnvChat.init()
   await delay(500)
   await MessageChat.init()
+  await delay(500)
+  await LarkChat.init()
   await delay(500)
   await ActivityChat.init()
   await delay(500)

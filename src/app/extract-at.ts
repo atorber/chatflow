@@ -67,7 +67,7 @@ export const extractAtContent = async (message: Message): Promise<string | null>
     p = p + `\n\n最新的对话:\n[${time} ${message.talker().name()}]：${newText}\n[${time} ${keyWord}]：`
     log.info('提示词：', p)
 
-    const answer = await gptbot(process.env, p)
+    const answer = await gptbot(p)
 
     if (answer.text && answer.text.length > 0) {
       await handleSay(message, answer.text)

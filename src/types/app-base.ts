@@ -49,15 +49,15 @@ class AppBase {
 
 export default AppBase
 
-const app = AppBase.getInstance()
+// const app = AppBase.getInstance()
 
-app.enableService()
+// app.enableService()
 
-app.updateWhitelist([ 'serviceA', 'serviceB' ])
+// app.updateWhitelist([ 'serviceA', 'serviceB' ])
 
-app.callService('serviceA') // Output: Service serviceA is allowed.
-app.callService('serviceC') // Output: Service serviceC is not allowed.
+// app.callService('serviceA') // Output: Service serviceA is allowed.
+// app.callService('serviceC') // Output: Service serviceC is not allowed.
 
-app.disableService()
+// app.disableService()
 
-app.callService('serviceA') // Output: Service is currently disabled.
+// app.callService('serviceA') // Output: Service is currently disabled.

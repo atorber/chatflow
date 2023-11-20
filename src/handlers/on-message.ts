@@ -1,17 +1,17 @@
 import { Message, log } from 'wechaty'
-
-import { saveMessage, formatMessage } from '../api/message.js'
+import {
+  formatMessageToMQTT,
+  formatMessageToDB,
+  saveMessageToDB,
+  formatMessageToLog,
+  formatMessageToCloud,
+  saveMessageToCloud,
+} from '../api/message.js'
 import { ChatFlowConfig } from '../api/base-config.js'
-import type { ChatMessage } from '../types/mod.js'
-
 import {
   // logger,
   logForm,
 } from '../utils/mod.js'
-
-import {
-  MessageChat,
-} from '../services/mod.js'
 
 import { MqttProxy, eventMessage } from '../proxy/mqtt-proxy.js'
 
@@ -23,15 +23,16 @@ import { extractAtContent } from '../app/extract-at.js'
 export async function onMessage (message: Message) {
 
   // 存储消息到db，如果写入失败则终止，用于检测是否是重复消息
-  const addRes = await saveMessage(message)
-  if (!addRes) return
+  try {
+    const messageToDB = await formatMessageToDB(message)
+    const addRes = await saveMessageToDB(messageToDB)
+    if (!addRes) return
+  } catch (e) {
+    log.error('消息写入数据库失败:\n', e)
+  }
 
-  const room = message.room()
-  const isSelf = message.self()
-
-  const chatMessage: ChatMessage = await MessageChat.formatMessage(message)
-
-  // logger.info('bot onMessage,接收到消息,chatMessage:\n' + JSON.stringify(chatMessage))
+  // 输出格式化消息log
+  const chatMessage = await formatMessageToLog(message)
   logForm(JSON.stringify(chatMessage))
 
   // 请求管理员群操作
@@ -49,8 +50,9 @@ export async function onMessage (message: Message) {
   }
 
   // 群消息处理，判断非机器人自己发的消息
+  const room = message.room()
+  const isSelf = message.self()
   if (room && room.id && !isSelf) {
-
     // 活动管理
     await handleActivityManagement(message, room)
 
@@ -58,19 +60,17 @@ export async function onMessage (message: Message) {
     await extractAtContent(message)
   }
 
-  // 消息存储到维格表
+  // 消息存储到云表格，维格表或者飞书多维表格
   if (ChatFlowConfig.configEnv.VIKA_UPLOADMESSAGETOVIKA) {
-    // logger.info('消息同步到维格表...')
-    await MessageChat.onMessage(message)
+    const messageToCloud = await formatMessageToCloud(message)
+    if (messageToCloud) await saveMessageToCloud(messageToCloud)
   }
-
-  const mqttProxy = MqttProxy.getInstance()
 
   // 消息通过MQTT上报
+  const mqttProxy = MqttProxy.getInstance()
   if (mqttProxy && mqttProxy.isOk && ChatFlowConfig.configEnv.MQTT_MQTTMESSAGEPUSH) {
-    mqttProxy.pubEvent(eventMessage('onMessage', await formatMessage(message)))
+    mqttProxy.pubEvent(eventMessage('onMessage', await formatMessageToMQTT(message)))
   }
-
 }
 
 export default onMessage

@@ -277,14 +277,3 @@ export class VikaSheet {
 }
 
 export default VikaSheet
-
-// const client = new VikaSheet(new Vika({ token:process.env['VIKA_TOKEN'] as string }), 'dstSQVXuiF81YpoD7j')
-
-// const records = await client.findAll()
-
-// const keyData = client.keyConversion(records)
-
-// log.info('keyData:', JSON.stringify(keyData))
-
-// const nameData = await client.nameConversion(keyData)
-// log.info('nameData:', JSON.stringify(nameData))

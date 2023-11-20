@@ -28,7 +28,7 @@ async function handleAutoQAForContact (message: Message, keyWord: string) {
     if (isInGptContactWhiteList) {
       log.info('当前好友在qa白名单内，请求问答gpt...')
       try {
-        await gpt(ChatFlowConfig.configEnv, ChatFlowConfig.bot, message)
+        await gpt(ChatFlowConfig.bot, message)
       } catch (e) {
         log.error('发起请求wxai失败', talker.name(), e)
       }
@@ -58,7 +58,7 @@ async function handleAutoQA (message: Message, keyWord: string) {
     if (isInGptRoomWhiteList) {
       log.info('当前群在qa白名单内，请求问答gpt...')
       try {
-        await gpt(ChatFlowConfig.configEnv, ChatFlowConfig.bot, message)
+        await gpt(ChatFlowConfig.bot, message)
       } catch (e) {
         log.error('发起请求gpt失败', topic, e)
       }

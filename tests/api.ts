@@ -1,22 +1,19 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 /* eslint-disable sort-keys */
+/* eslint-disable no-console */
 import 'dotenv/config.js'
 import {
-  WechatyBuilder,
-} from 'wechaty'
-
-import {
-  ChatFlow,
-  getBotOps,
-  log,
-  logForm,
   ChatFlowConfig,
   WechatyConfig,
   VikaDB,
   // LarkDB,
   IClientOptions,
-  MqttProxy,
 } from '../src/chatflow.js'
+// import { getSetting } from '../src/api/setting.js'
+import { getRoomList } from '../src/api/room.js'
+import { getContactList } from '../src/api/contact.js'
+
+import { MessageChat, ContactChat, RoomChat } from '../src/services/mod.js'
 
 // import { spawn } from 'child_process'
 
@@ -38,6 +35,7 @@ const main = async () => {
     spaceName: process.env['VIKA_SPACE_NAME'],
     token: process.env['VIKA_TOKEN'],
   })
+  // console.debug('VikaDB:', VikaDB)
 
   // 使用Lark
   // await LarkDB.init({
@@ -53,32 +51,18 @@ const main = async () => {
     wechatyConfig: WechatyConfig,
     mqttIsOn: boolean,
   } | undefined = await ChatFlowConfig.init() // 默认使用vika，使用lark时，需要传入'lark'参数await ChatFlowConfig.init('lark')
+  console.debug('config:', config)
+  await MessageChat.init()
+  //   const setting = await getSetting()
+  //   console.debug('setting:', setting)
+  await ContactChat.init()
+  const contactList = await getContactList()
+  console.debug('contactList:', contactList)
 
-  if (config) {
-    // 构建机器人
-    const ops = getBotOps(config.wechatyConfig.puppet, config.wechatyConfig.token)
+  await RoomChat.init()
+  const roomList = await getRoomList()
+  console.debug('roomList:', roomList)
 
-    const bot = WechatyBuilder.build(ops)
-
-    // 如果MQTT推送或MQTT控制打开，则启动MQTT代理
-    if (config.mqttIsOn) {
-      try {
-        const mqttProxy = MqttProxy.getInstance(config.mqttConfig)
-        if (mqttProxy) {
-          mqttProxy.setWechaty(bot)
-        }
-      } catch (e) {
-        log.error('MQTT代理启动失败，检查mqtt配置信息是否正确...', e)
-      }
-    }
-
-    bot.use(ChatFlow())
-    bot.start()
-      .then(() => logForm('1. 机器人启动，如出现二维码，请使用微信扫码登录\n\n2. 如果已经登录成功，则不会显示二维码\n\n3. 如未能成功登录访问 https://www.yuque.com/atorber/chatflow/ibnui5v8mob11d70 查看常见问题解决方法'))
-      .catch((e: any) => log.error('机器人运行异常：', JSON.stringify(e)))
-  } else {
-    logForm('维格表配置不全，缺少必要的配置信息')
-  }
 }
 
 void main()
