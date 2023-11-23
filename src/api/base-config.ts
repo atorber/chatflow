@@ -114,7 +114,7 @@ export class ChatFlowConfig {
   static bot:Wechaty
 
   static async init (dataBaseType?:'vika' | 'lark') {
-    this.dataBaseType = dataBaseType || process.env['DATA_BASE_TYPE'] || 'vika'
+    this.dataBaseType = dataBaseType || 'vika'
     // log.info('初始化维格配置信息...,init()')
     if (this.dataBaseType === 'vika' && VikaDB.spaceId) {
       const vikaIdMap: any = {}
@@ -141,7 +141,7 @@ export class ChatFlowConfig {
       }
 
       // 计算clientid原始字符串
-      const clientString = VikaDB.token + VikaDB.spaceName
+      const clientString = VikaDB.token + (VikaDB.spaceName || VikaDB.spaceId)
       // clientid加密
       const client = CryptoJS.SHA256(clientString).toString()
 

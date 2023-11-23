@@ -110,7 +110,7 @@ export class EnvChat extends BaseEntity {
   static getConfigFromEnv () {
     const envData: any = {}
 
-    const config:ProcessEnv = process.env
+    const config:any = process.env
     // log.info(configRecords)
 
     for (const key in config) {

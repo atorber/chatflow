@@ -5,7 +5,8 @@ import { sheets } from './vikaModel/index.js'
 import { delay, logForm } from '../utils/utils.js'
 
 export type VikaConfig = {
-  spaceName: string,
+  spaceId?: string,
+  spaceName?: string,
   token: string,
 }
 
@@ -62,7 +63,8 @@ export class VikaDB {
 
   static async init (config:VikaConfig) {
     logForm('初始化检查系统表...')
-    this.spaceName = config.spaceName
+    if (config.spaceName) this.spaceName = config.spaceName
+    if (config.spaceId) this.spaceId = config.spaceId
     this.vika = new Vika({ token: config.token })
     this.token = config.token
     this.spaceId = ''
@@ -81,7 +83,8 @@ export class VikaDB {
       qaSheet:'',
     }
     this.dataBaseNames = { ...this.dataBaseIds }
-    this.spaceId = await this.getSpaceId()
+
+    if (!this.spaceId && this.spaceName) this.spaceId = await this.getSpaceId()
     // console.info('空间ID:', this.spaceId)
 
     if (this.spaceId) {
@@ -286,7 +289,7 @@ export class VikaDB {
     return fields
   }
 
-  protected static async createDataSheet (key: string, name: string, fields: { name: string; type: string }[]) {
+  static async createDataSheet (key: string, name: string, fields: { name: string; type: string }[]) {
     // console.info('创建表...')
     const datasheetRo = {
       fields,
@@ -297,7 +300,7 @@ export class VikaDB {
       try {
         const res: any = await this.vika.space(this.spaceId).datasheets.create(datasheetRo)
 
-        console.info(`系统表【${name}】创建成功，表ID【${res.data.id}】`)
+        console.info(`系统表【${name}】创建结果:`, JSON.stringify(res))
 
         this.dataBaseIds[key as keyof DateBase] = res.data.id
         this.dataBaseNames[name as keyof DateBase] = res.data.id

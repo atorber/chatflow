@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable sort-keys */
 import { VikaSheet } from '../db/vika.js'
 import { Message, ScanStatus, types, Wechaty, log } from 'wechaty'
@@ -102,35 +103,41 @@ export class MessageChat extends BaseEntity {
   static async init () {
     if (!MessageChat.db) {
       const that = this
-      MessageChat.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.messageSheet)
-      MessageChat.setVikaOptions({
-        apiKey: VikaDB.token,
-        baseId: VikaDB.dataBaseIds.messageSheet, // 设置 base ID
-      })
-      this.msgStore = []
-      this.messageData = messageData
+      try {
+        // console.debug(VikaDB)
+        MessageChat.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.messageSheet)
+        MessageChat.setVikaOptions({
+          apiKey: VikaDB.token,
+          baseId: VikaDB.dataBaseIds.messageSheet, // 设置 base ID
+        })
+        this.msgStore = []
+        this.messageData = messageData
 
-      // 启动定时任务，每秒钟写入一次，每次写入10条
-      setInterval(() => {
-      // logger.info('待处理消息池长度：', that.msgStore.length || '0')
+        // 启动定时任务，每秒钟写入一次，每次写入10条
+        setInterval(() => {
+        // logger.info('待处理消息池长度：', that.msgStore.length || '0')
 
-        if (that.msgStore.length) {
-          const end = that.msgStore.length < 10 ? that.msgStore.length : 10
-          const records = that.msgStore.splice(0, end)
-          // logger.info('写入vika的消息：', JSON.stringify(records))
-          try {
-            MessageChat.db?.insert(records).then((response: { success: any }) => {
-              if (!response.success) {
-                logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
-              }
-              return response
-            }).catch((err: any) => { logger.error('调用vika写入接口失败：', err) })
-          } catch (err) {
-            logger.error('调用datasheet.records.create失败：', err)
+          if (that.msgStore.length) {
+            const end = that.msgStore.length < 10 ? that.msgStore.length : 10
+            const records = that.msgStore.splice(0, end)
+            // logger.info('写入vika的消息：', JSON.stringify(records))
+            try {
+              MessageChat.db?.insert(records).then((response: { success: any }) => {
+                if (!response.success) {
+                  logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
+                }
+                return response
+              }).catch((err: any) => { logger.error('调用vika写入接口失败：', err) })
+            } catch (err) {
+              logger.error('调用datasheet.records.create失败：', err)
+            }
           }
-        }
-      }, 1000)
-      log.info('初始化 MessageChat 成功...')
+        }, 1000)
+
+        log.info('初始化 MessageChat 成功...')
+      } catch (e) {
+        log.error('初始化 MessageChat 失败：', e)
+      }
     }
     this.bot = ChatFlowConfig.bot
   }

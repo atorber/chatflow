@@ -12,15 +12,19 @@ import {
   KeywordChat,
   LarkChat,
 } from '../services/mod.js'
+import { ChatFlowConfig } from '../chatflow.js'
 
 export const initializeServicesAndEnv = async () => {
   logger.info('初始化服务开始...')
   await EnvChat.init()
   await delay(500)
-  await MessageChat.init()
-  await delay(500)
-  await LarkChat.init()
-  await delay(500)
+  if (ChatFlowConfig.dataBaseType === 'lark') {
+    await LarkChat.init()
+    await delay(500)
+  } else {
+    await MessageChat.init()
+    await delay(500)
+  }
   await ActivityChat.init()
   await delay(500)
   await ContactChat.init()
