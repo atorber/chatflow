@@ -53,7 +53,7 @@ const main = async () => {
     wechatyConfig: WechatyConfig,
     mqttIsOn: boolean,
   } | undefined = await ChatFlowConfig.init() // 默认使用vika，使用lark时，需要传入'lark'参数await ChatFlowConfig.init('lark')
-
+  // log.info('config', JSON.stringify(config, undefined, 2))
   if (config) {
     // 构建机器人
     const ops = getBotOps(config.wechatyConfig.puppet, config.wechatyConfig.token)
@@ -62,6 +62,7 @@ const main = async () => {
 
     // 如果MQTT推送或MQTT控制打开，则启动MQTT代理
     if (config.mqttIsOn) {
+      log.info('启动MQTT代理...', JSON.stringify(config.mqttConfig))
       try {
         const mqttProxy = MqttProxy.getInstance(config.mqttConfig)
         if (mqttProxy) {

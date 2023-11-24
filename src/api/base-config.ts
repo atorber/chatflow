@@ -149,6 +149,7 @@ export class ChatFlowConfig {
         username: this.configEnv.MQTT_USERNAME,
         password: this.configEnv.MQTT_PASSWORD,
         host: this.configEnv.MQTT_ENDPOINT,
+        protocol:'mqtts',
         port: Number(this.configEnv.MQTT_PORT),
         clientId: client,
         clean: false,
@@ -161,6 +162,7 @@ export class ChatFlowConfig {
         rejectUnauthorized: false,
       }
 
+      // log.info('mqttConfig', JSON.stringify(mqttConfig, undefined, 2))
       const mqttIsOn = Boolean(this.configEnv.MQTT_MQTTMESSAGEPUSH || this.configEnv.MQTT_MQTTCONTROL)
 
       // log.info('vikaBot配置信息：', JSON.stringify(configVika, undefined, 2))
@@ -203,7 +205,8 @@ export class ChatFlowConfig {
         username: this.configEnv.MQTT_USERNAME,
         password: this.configEnv.MQTT_PASSWORD,
         host: this.configEnv.MQTT_ENDPOINT,
-        port: Number(this.configEnv.MQTT_PORT),
+        port: Number(this.configEnv.MQTT_PORT_SSL),
+        protocol:'wss',
         clientId: client,
         clean: false,
         reconnectPeriod: 1000,
