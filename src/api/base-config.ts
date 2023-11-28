@@ -141,7 +141,7 @@ export class ChatFlowConfig {
       }
 
       // 计算clientid原始字符串
-      const clientString = VikaDB.token + (VikaDB.spaceName || VikaDB.spaceId)
+      const clientString = VikaDB.token + VikaDB.spaceId
       // clientid加密
       const client = CryptoJS.SHA256(clientString).toString()
 

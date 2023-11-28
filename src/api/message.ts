@@ -349,6 +349,7 @@ export const uploadToCloud = async (path: string) => {
 }
 
 export const formatMessageToMQTT = async (message: Message) => {
+  log.info('formatMessageToMQTT message:', JSON.stringify(message))
   const talker = message.talker()
   const listener = message.listener()
   const room = message.room()
