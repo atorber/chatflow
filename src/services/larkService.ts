@@ -1,21 +1,15 @@
-/* eslint-disable no-console */
 /* eslint-disable sort-keys */
-import { VikaSheet } from '../db/vika.js'
+import { LarkSheet } from '../db/lark.js'
 import { Message, ScanStatus, types, Wechaty, log } from 'wechaty'
 import { getCurTime, delay, logger } from '../utils/utils.js'
 import moment from 'moment'
 import { FileBox } from 'file-box'
-import { VikaDB } from '../db/vika-db.js'
-import { BaseEntity, MappingOptions } from '../db/vika-orm.js'
-
+import { LarkDB } from '../db/lark-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'
 import type { ChatMessage } from '../types/mod.js'
 
 import fs from 'fs'
 import path from 'path'
-
-import { db } from '../db/tables.js'
-const messageData = db.message
 
 const MEDIA_PATH = 'data/media/image'
 const MEDIA_PATH_QRCODE = path.join(MEDIA_PATH, 'qrcode')
@@ -30,133 +24,63 @@ paths.forEach((p) => {
   }
 })
 
-const mappingOptions: MappingOptions = {  // 定义字段映射选项
-  fieldMapping: {  // 字段映射
-    timeHms: '时间|timeHms',
-    name: '发送者|name',
-    alias: '好友备注|alias',
-    topic: '群名称|topic',
-    listener: '接收人|listener',
-    messagePayload: '消息内容|messagePayload',
-    file: '文件图片|file',
-    messageType: '消息类型|messageType',
-    wxid: '好友ID|wxid',
-    listenerid: '接收人ID|listenerid',
-    roomid: '群ID|roomid',
-    messageId: '消息ID|messageId',
-    wxAvatar: '发送者头像|wxAvatar',
-    roomAvatar: '群头像|roomAvatar',
-    listenerAvatar: '接收人头像|listenerAvatar',
-  },
-  tableName: '消息记录|Message',  // 表名
-}
-
 // 服务类
-export class MessageChat extends BaseEntity {
+export class LarkChat {
 
-  static db:VikaSheet | undefined
-  static msgStore: any[]
+  static db:LarkSheet | undefined
+  static msgStore: any[] = []
   static messageData: any
   static bot:Wechaty
 
-  timeHms?: string
+  private constructor () {
 
-  name?: string
-
-  alias?: string
-
-  topic?: string
-
-  listener?: string
-
-  messagePayload?: string
-
-  file?: any
-
-  messageType?: string
-
-  wxid?: string
-
-  roomid?: string
-
-  messageId?: string
-
-  wxAvatar?: string
-
-  roomAvatar?: string
-
-  listenerAvatar?: string
-
-  // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
-
-  protected static override mappingOptions: MappingOptions = mappingOptions  // 设置映射选项为上面定义的 mappingOptions
-
-  protected static override getMappingOptions (): MappingOptions {  // 获取映射选项的方法
-    return this.mappingOptions  // 返回当前类的映射选项
-  }
-
-  static override setMappingOptions (options: MappingOptions) {  // 设置映射选项的方法
-    this.mappingOptions = options  // 更新当前类的映射选项
   }
 
   // 初始化
   static async init () {
-    if (!MessageChat.db) {
-      const that = this
-      try {
-        // console.debug(VikaDB)
-        MessageChat.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.messageSheet)
-        MessageChat.setVikaOptions({
-          apiKey: VikaDB.token,
-          baseId: VikaDB.dataBaseIds.messageSheet, // 设置 base ID
-        })
-        this.msgStore = []
-        this.messageData = messageData
+    const that = this
+    LarkSheet.init(LarkDB.lark, LarkDB.dataBaseIds.messageSheet)
+    this.msgStore = []
 
-        // 启动定时任务，每秒钟写入一次，每次写入10条
-        setInterval(() => {
-        // logger.info('待处理消息池长度：', that.msgStore.length || '0')
+    // 启动定时任务，每秒钟写入一次，每次写入10条
+    setInterval(() => {
+      // logger.info('待处理消息池长度：', that.msgStore.length || '0')
 
-          if (that.msgStore.length) {
-            const end = that.msgStore.length < 10 ? that.msgStore.length : 10
-            const records = that.msgStore.splice(0, end)
-            // logger.info('写入vika的消息：', JSON.stringify(records))
-            try {
-              MessageChat.db?.insert(records).then((response: { success: any }) => {
-                if (!response.success) {
-                  logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
-                }
-                return response
-              }).catch((err: any) => { logger.error('调用vika写入接口失败：', err) })
-            } catch (err) {
-              logger.error('调用datasheet.records.create失败：', err)
+      if (that.msgStore.length) {
+        const end = that.msgStore.length < 10 ? that.msgStore.length : 10
+        const records = that.msgStore.splice(0, end)
+        // logger.info('写入Lark的消息：', JSON.stringify(records))
+        try {
+          LarkSheet.insert(records).then((response:any) => {
+            if (!response.data) {
+              log.error('调用Lark写入接口成功，写入Lark失败：', JSON.stringify(response))
             }
-          }
-        }, 1000)
-
-        log.info('初始化 MessageChat 成功...')
-      } catch (e) {
-        log.error('初始化 MessageChat 失败：', e)
+            return response
+          }).catch((err: any) => { log.error('调用Lark写入接口失败：', err) })
+        } catch (err) {
+          log.error('调用datasheet.records.create失败：', err)
+        }
       }
-    }
+    }, 1000)
+    log.info('初始化 LarkChat 成功...')
     this.bot = ChatFlowConfig.bot
   }
 
   static addRecord (record: any) {
     logger.info('消息入列:', JSON.stringify(record))
     if (record.fields) {
-      MessageChat.msgStore.push(record)
+      LarkChat.msgStore.push(record)
       // logger.info('最新消息池长度：', this.msgStore.length)
     }
   }
 
-  static async addChatRecord (record:any) {
-
+  static async addChatRecord (record: any) {
     try {
-      MessageChat.msgStore.push(record)
+      log.info('addChatRecord:', JSON.stringify(record))
+      LarkChat.msgStore.push(record)
       // logger.info('最新消息池长度：', this.msgStore.length)
     } catch (e) {
-      logger.error('添加记录失败：', e)
+      log.error('添加记录失败：', e)
 
     }
 
@@ -169,7 +93,7 @@ export class MessageChat extends BaseEntity {
 
       const qrcodeUrl = encodeURIComponent(qrcode)
       const qrcodeImageUrl = [ 'https://wechaty.js.org/qrcode/', qrcodeUrl ].join('')
-      // logger.info('StarterBot', 'vika onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
+      // logger.info('StarterBot', 'Lark onScan: %s(%s) - %s', ScanStatus[status], status, qrcodeImageUrl)
 
       let uploadedAttachments:any = ''
       let file: FileBox
@@ -182,27 +106,27 @@ export class MessageChat extends BaseEntity {
           // await file.pipe(writeStream)
           await file.toFile(filePath, true)
           await delay(1000)
-          uploadedAttachments = await MessageChat.db?.upload(filePath, '')
+          uploadedAttachments = await LarkSheet.upload(filePath)
           const text = qrcodeImageUrl
-          if (uploadedAttachments.data) {
+          if (uploadedAttachments.file_token) {
             try {
               await this.addScanRecord(uploadedAttachments, text)
               // fs.unlink(filePath, (err) => {
-              //   logger.info('二维码上传vika完成删除文件：', filePath, err)
+              //   logger.info('二维码上传Lark完成删除文件：', filePath, err)
               // })
             } catch (err) {
-              logger.error('二维码vika 写入失败：', err)
+              logger.error('二维码Lark 写入失败：', err)
             }
           }
         } catch {
           logger.info('二维码上传失败：', filePath)
           // fs.unlink(filePath, (err) => {
-          //   logger.info('二维码上传vika失败删除文件', filePath, err)
+          //   logger.info('二维码上传Lark失败删除文件', filePath, err)
           // })
         }
 
       } catch (e) {
-        logger.error('onScan,二维码vika 写入失败：', e)
+        logger.error('onScan,二维码Lark 写入失败：', e)
       }
 
     } else {
@@ -215,8 +139,10 @@ export class MessageChat extends BaseEntity {
     const curTime = getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
     const files: any = []
-    if (uploadedAttachments.data) {
-      files.push(uploadedAttachments.data)
+    if (uploadedAttachments.file_token) {
+      files.push({
+        file_token: uploadedAttachments.file_token,
+      })
     }
 
     const records = [
@@ -235,9 +161,9 @@ export class MessageChat extends BaseEntity {
     ]
 
     // logger.info('待写入登录二维码消息:', JSON.stringify(records))
-    const response = await this.db?.insert(records)
-    if (!response.success) {
-      logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
+    const response:any = await LarkSheet.insert(records)
+    if (!response || !response.data) {
+      logger.error('调用Lark写入接口成功，写入Lark失败：', JSON.stringify(response))
     }
     return response
   }
@@ -255,14 +181,15 @@ export class MessageChat extends BaseEntity {
 
     try {
       await file.toFile(filePath, true)
-      logger.info('保存文件到本地成功')
+      log.info('保存文件到本地成功')
     } catch (err) {
-      logger.error('保存文件到本地失败', err)
+      log.error('保存文件到本地失败', err)
       return ''
     }
 
     await delay(1000)
-    return await this.db?.upload(filePath, '')
+    const res = await LarkSheet.upload(filePath)
+    return res
   }
 
   static async addHeartbeatRecord (text: string) {
@@ -284,10 +211,11 @@ export class MessageChat extends BaseEntity {
       },
     }
     logger.info('心跳消息:', JSON.stringify(record))
-    MessageChat.msgStore.push(record)
+    LarkChat.msgStore.push(record)
   }
 
   static async onMessage (message: Message) {
+    log.info('消息存储到lark...')
     const room = message.room()
     const talker = message.talker()
     const files: any = []
@@ -425,16 +353,21 @@ export class MessageChat extends BaseEntity {
       }
 
       if (file) {
-        // logger.info('文件file:', file)
+        // log.info('文件file:', file)
         try {
           text = JSON.stringify(file.toJSON())
         } catch (e) {
           log.error('文件转换JSON失败：', e)
         }
-        uploadedAttachments = await MessageChat.handleFileMessage(file, message)
-        if (uploadedAttachments) {
-          files.push(uploadedAttachments.data)
+        try {
+          uploadedAttachments = await LarkChat.handleFileMessage(file, message)
+          files.push({
+            file_token: uploadedAttachments.file_token,
+          })
           // text = JSON.stringify(uploadedAttachments.data)
+          log.info('上传文件Lark成功：', JSON.stringify(uploadedAttachments)) // 上传成功后返回的数据
+        } catch (e) {
+          log.error('文件上传Lark失败：', e)
         }
       }
 
@@ -493,17 +426,16 @@ export class MessageChat extends BaseEntity {
             '接收人头像|listenerAvatar':listenerAvatar,
           },
         }
-        // logger.info('addChatRecord:', JSON.stringify(record))
+        log.info('addChatRecord:', JSON.stringify(record))
         if (message.type() !== types.Message.Unknown) {
           await this.addChatRecord(record)
         }
       } catch (e) {
-        logger.error('添加记录失败：', e)
-
+        log.error('添加记录失败：', e)
       }
 
     } catch (e) {
-      logger.error('onMessage消息转换失败：', e)
+      log.error('onMessage消息转换失败：', e)
     }
   }
 

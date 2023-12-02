@@ -1,115 +1,10 @@
 /* eslint-disable sort-keys */
 import { Contact, Message, Room, Sayable, log } from 'wechaty'
-import type { configTypes } from '../types/mod.js'
-import { EnvironmentVariables } from '../types/mod.js'
 import fs from 'fs'
 import { MessageChat } from './messageService.js'
 
-const config: configTypes.Config = {
-  botInfo: {},
-  functionOnStatus: {
-    autoQa: {
-      autoReply: process.env[EnvironmentVariables.AUTOQA_AUTOREPLY] === 'true',
-      atReply: false,
-    },
-    vika: {
-      useVika: process.env[EnvironmentVariables.VIKA_USEVIKA] === 'true',
-      uploadMessageToVika: process.env[EnvironmentVariables.VIKA_UPLOADMESSAGETOVIKA] === 'true',
-    },
-    webHook: {
-      webhookMessagePush: process.env[EnvironmentVariables.WEBHOOK_WEBHOOKMESSAGEPUSH] === 'true',
-    },
-    mqtt: {
-      mqttMessagePush: process.env[EnvironmentVariables.MQTT_MQTTMESSAGEPUSH] === 'true',
-      mqttControl: process.env[EnvironmentVariables.MQTT_MQTTCONTROL] === 'true' || true,
-    },
-  },
-  botConfig: {
-    base: {
-      welcomeMessageForJoinRoom: process.env[EnvironmentVariables.BASE_WELCOMEMESSAGEFORJOINROOM] || '',
-      welcomeMessageForAddFriend: process.env[EnvironmentVariables.BASE_WELCOMEMESSAGEFORADDFRIEND] || '',
-      botid:process.env[EnvironmentVariables.BASE_BOT_ID] || '',
-    },
-    wechaty: {
-      puppet: process.env[EnvironmentVariables.WECHATY_PUPPET] || 'wechaty-puppet-wechat',
-      token: process.env[EnvironmentVariables.WECHATY_TOKEN] || '',
-    },
-    vika: {
-      spaceName: process.env[EnvironmentVariables.VIKA_SPACE_NAME] || '',
-      token: process.env[EnvironmentVariables.VIKA_TOKEN] || '',
-    },
-    adminRoom: {
-      adminRoomId: process.env[EnvironmentVariables.ADMINROOM_ADMINROOMID] || '',
-      adminRoomTopic: process.env[EnvironmentVariables.ADMINROOM_ADMINROOMTOPIC] || '',
-    },
-    autoQa: {
-      type: '',
-    },
-    wxOpenAi: {
-      token: process.env[EnvironmentVariables.WXOPENAI_TOKEN] || '',
-      encodingAesKey: process.env[EnvironmentVariables.WXOPENAI_ENCODINGAESKEY] || '',
-    },
-    chatGpt: {
-      key: process.env[EnvironmentVariables.CHATGPT_KEY] || '',
-      endpoint: process.env[EnvironmentVariables.CHATGPT_ENDPOINT] || '',
-    },
-    mqtt: {
-      username: process.env[EnvironmentVariables.MQTT_USERNAME] || '',
-      password: process.env[EnvironmentVariables.MQTT_PASSWORD] || '',
-      endpoint: process.env[EnvironmentVariables.MQTT_ENDPOINT] || '',
-      port: parseInt(process.env[EnvironmentVariables.MQTT_PORT] || '1883', 10),
-    },
-    webHook: {
-      url: process.env[EnvironmentVariables.WEBHOOK_URL] || '',
-      token: process.env[EnvironmentVariables.WEBHOOK_TOKEN] || '',
-      username: process.env[EnvironmentVariables.WEBHOOK_USERNAME] || '',
-      password: process.env[EnvironmentVariables.WEBHOOK_PASSWORD] || '',
-    },
-    yuQue: {
-      token: process.env[EnvironmentVariables.YUQUE_TOKEN] || '',
-      nameSpace: process.env[EnvironmentVariables.YUQUE_NAMESPACE] || '',
-    },
-  },
-  apps: {
-    riding: {
-      config: {},
-      isOpen: true,
-    },
-  },
-  welcomeList: [],
-  contactConfig: {
-    tyutluyc: {
-      app: 'waiting',
-      apps: {
-        qa: {
-          config: {},
-          isOpen: true,
-        },
-        riding: {
-          config: {},
-          isOpen: true,
-        },
-      },
-    },
-    tyutluyc2: {
-      app: 'waiting',
-      apps: {
-        qa: {
-          config: {},
-          isOpen: true,
-        },
-        riding: {
-          config: {},
-          isOpen: true,
-        },
-      },
-    },
-  },
-  roomConfig: {},
-}
-
 // 配置机器人
-function getBotOps (puppet: string, token: string) {
+export function getBotOps (puppet: string, token: string) {
   const ops: any = {
     name: 'chatflow',
     puppet,
@@ -157,5 +52,3 @@ export function updateConfig (config: any) {
   fs.writeFileSync('data/config.json', JSON.stringify(config, null, '\t'))
   // log.info('配置有变更, updateConfig:', JSON.stringify(config))
 }
-
-export { config, getBotOps }

@@ -28,15 +28,6 @@ const skills:SkillInfoArray  = [
   },
 ]
 
-// 使用
-// const config: AIBotConfig = {
-//   encodingAESKey: process.env['ENCODING_AES_KEY'] || '',
-//   token: process.env['TOKEN'] || '',
-//   nonce: process.env['NONCE'] || '',
-//   appid: process.env['APP_ID'] || '',
-//   managerid: process.env['MANAGER_ID'] || '',
-// }
-
 const config: WxOpenaiBotConfig = {
   encodingAESKey: '',
   token: '',

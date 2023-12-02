@@ -89,21 +89,46 @@ const postVikaInitialization = async (bot: Wechaty) => {
 }
 
 export const onReadyOrLogin = async (bot: Wechaty) => {
-  log.info('初始化services服务...')
-  await initializeServicesAndEnv()
-  await delay(500)
-  const res = await EnvChat.findByField('key', 'BASE_BOT_ID')
-  // log.info('当前云端配置的BASE_BOT_ID:', JSON.stringify(res))
-  const BASE_BOT_ID:any = res[0]
-  await delay(500)
-  BASE_BOT_ID.fields.value = bot.currentUser.id
-  BASE_BOT_ID.fields.lastOperationTime = new Date().getTime()
-  BASE_BOT_ID.fields.syncStatus = '已同步'
-
-  await EnvChat.update(BASE_BOT_ID.recordId, BASE_BOT_ID.fields)
-
+  log.info('onReadyOrLogin,初始化services服务...')
+  const curTime = new Date().getTime()
   const user: Contact = bot.currentUser
   log.info('当前登录的账号信息:', user.name())
+
+  await initializeServicesAndEnv()
+  await delay(500)
+
+  const resBotId = await EnvChat.findByField('key', 'BASE_BOT_ID')
+  // log.info('当前云端配置的BASE_BOT_ID:', JSON.stringify(res))
+  const BASE_BOT_ID:any = resBotId[0]
+  await delay(500)
+
+  BASE_BOT_ID.fields.value = user.id
+  BASE_BOT_ID.fields.lastOperationTime = curTime
+  BASE_BOT_ID.fields.syncStatus = '已同步'
+  await EnvChat.update(BASE_BOT_ID.recordId, BASE_BOT_ID.fields)
+  await delay(500)
+
+  const resBotName = await EnvChat.findByField('key', 'BASE_BOT_NAME')
+  // log.info('当前云端配置的BASE_BOT_NAME:', JSON.stringify(resBotName))
+  if (resBotName.length > 0) {
+    const BASE_BOT_NAME:any = resBotName[0]
+    await delay(500)
+
+    BASE_BOT_NAME.fields.value = user.name()
+    BASE_BOT_NAME.fields.lastOperationTime = curTime
+    BASE_BOT_NAME.fields.syncStatus = '已同步'
+    await EnvChat.update(BASE_BOT_NAME.recordId, BASE_BOT_NAME.fields)
+  } else {
+    const fields  = {
+      value: user.name(),
+      lastOperationTime: curTime,
+      syncStatus: '已同步',
+      name:'基础配置-机器人微信昵称',
+      key:'BASE_BOT_NAME',
+      desc:'机器人微信昵称，登录成功后自动更新',
+    }
+    await EnvChat.create(fields as any)
+  }
 
   try {
     log.info('调用postVikaInitialization...')

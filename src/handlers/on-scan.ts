@@ -9,12 +9,10 @@ import {
   logForm,
 } from '../utils/mod.js'
 
-import {
-  MessageChat,
-} from '../services/mod.js'
+import { uploadQRCodeToCloud } from '../api/message.js'
 
 export async function onScan (qrcode: string, status: ScanStatus) {
-  await MessageChat.init()
+
   if (status !== ScanStatus.Waiting && status !== ScanStatus.Timeout) {
     logForm('机器人启动，获取登录二维码失败' + `onScan:\n ${ScanStatus[status]}(${status})`)
     return
@@ -27,8 +25,7 @@ export async function onScan (qrcode: string, status: ScanStatus) {
   qrcodeTerminal.generate(qrcode, { small: true })
 
   // 上传二维码到维格表，可通过扫码维格表中二维码登录
-  await MessageChat.uploadQRCodeToVika(qrcode, status)
-
+  await uploadQRCodeToCloud(qrcode, status)
 }
 
 export default onScan

@@ -64,59 +64,32 @@ export const onMessage = async (message:Message) => {
   // log.info('room', room)
 
   try {
-    // log.info('@me', await message.mentionSelf())
-    // log.info('message.text()', message.text())
-    // log.info('talker', contact)
-    // log.info('wxid', contact.id)
-    // log.info('gender', contact.gender())
-    // log.info('type', contact.type())
-    // log.info('name', contact.name())
-    // log.info('avatar', await contact.avatar())
-    // log.info('alias', await contact.alias())
-    // log.info('city', contact.city())
-    // log.info('friend', contact.friend())
-    // log.info('province', contact.province())
-    // log.info('roomid', room.id)
-    // log.info('room.topic()', await room.topic())
     if (room && room.id && room.owner()) {
-      log.info('room', '有roomowner信息')
-      try {
-        alias = await room.alias(message.talker()) || ''
-        member = await room.member(contact.name()) || undefined
-        const ownerid = room.owner()?.id || ''
-        roomInfo = {
-          ownerid,
-          roomid: room.id,
-          nick: await room.topic(),
-          announce: await room.announce(),
-          avatar: await (await room.avatar()).toJSON(),
-          alias: await room.alias(message.talker()) || '',
-          // member: await room.member(contact.name())
-          // qrcode: await room.qrCode()
-        }
-        // log.info('await room.memberAll()',await room.memberAll())
-      } catch {
-        roomInfo = {
-          ownerid: room.owner()?.id || '',
-          roomid: room.id,
-          nick: await room.topic(),
-          announce: await room.announce(),
-          alias: await room.alias(message.talker()) || '',
-          // member: await room.member(contact.name())
-          // qrcode: await room.qrCode()
-        }
-        // log.info('await room.memberAll()',await room.memberAll())
+      log.info('room有roomowner信息')
+      alias = await room.alias(message.talker()) || ''
+      member = await room.member(contact.name()) || undefined
+      const ownerid = room.owner()?.id || ''
+      roomInfo = {
+        ownerid,
+        roomid: room.id,
+        nick: await room.topic(),
+        announce: await room.announce(),
+        avatar: await (await room.avatar()).toJSON(),
+        alias: await room.alias(message.talker()) || '',
+        // member: await room.member(contact.name())
+        // qrcode: await room.qrCode()
       }
+      // log.info('await room.memberAll()',await room.memberAll())
 
     } else {
-      log.info('room', '没有roomowner信息')
+      log.info('room没有roomowner信息')
       roomInfo = {
         roomid: '',
         nick: (await room?.topic()) || '',
       }
     }
   } catch (err) {
-    console.error(err)
+    log.error('获取群信息失败：', err)
   }
 
   let payload: any = {

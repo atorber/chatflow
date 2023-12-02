@@ -6,17 +6,17 @@ import {
   Wechaty,
 } from 'wechaty'
 import { formatSentMessage, logger } from '../utils/utils.js'
-import type { ProcessEnv } from '../types/mod.js'
 import axios from 'axios'
+import { ChatFlowConfig } from '../chatflow.js'
 axios.defaults.timeout = 60000
 
-async function gpt (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
+async function gpt (bot: Wechaty, message: Message) {
   const text = extractKeyword(message, bot.currentUser.name())
   // const talker = message.talker()
   // const room = message.room()
   let answer: any = {}
   if (message.type() === types.Message.Text) {
-    answer = await aibot(sysConfig, text)
+    answer = await aibot(text)
   }
 
   logger.info('回复消息：', JSON.stringify(answer))
@@ -103,16 +103,16 @@ async function sendMiniProgram (answer: any, bot: Wechaty, message: Message) {
 }
 
 // aibot 函数基本保持不变
-async function aibot (sysConfig: ProcessEnv, query: any) {
+async function aibot (query: any) {
   const answer = {
     text:'',
   }
 
   try {
     const response = await axios.post(
-      `${sysConfig.CHATGPT_ENDPOINT}/v1/chat/completions`,
+      `${ChatFlowConfig.configEnv.CHATGPT_ENDPOINT}/v1/chat/completions`,
       {
-        model: sysConfig.CHATGPT_MODEL,  // 使用的模型
+        model: ChatFlowConfig.configEnv.CHATGPT_MODEL,  // 使用的模型
         messages: [
           // {role: 'system', content: 'You are a helpful assistant.'},
           { role: 'user', content: query },
@@ -122,7 +122,7 @@ async function aibot (sysConfig: ProcessEnv, query: any) {
       },
       {
         headers: {
-          Authorization: `Bearer ${sysConfig.CHATGPT_KEY}`,
+          Authorization: `Bearer ${ChatFlowConfig.configEnv.CHATGPT_KEY}`,
           'Content-Type': 'application/json',
         },
       },
@@ -148,7 +148,7 @@ async function aibot (sysConfig: ProcessEnv, query: any) {
 
 export function prepareChatGptBody (content: string) {
   return {
-    model: process.env['CHATGPT_MODEL'],
+    model: ChatFlowConfig.configEnv['CHATGPT_MODEL'],
     prompt: content,
     temperature: 0.7,
     // n: 1,

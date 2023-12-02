@@ -10,6 +10,7 @@ export enum EnvironmentVariables {
     VIKA_TOKEN = 'VIKA_TOKEN',
     ADMINROOM_ADMINROOMID = 'ADMINROOM_ADMINROOMID',
     ADMINROOM_ADMINROOMTOPIC = 'ADMINROOM_ADMINROOMTOPIC',
+    DATA_BASE_TYPE = 'DATA_BASE_TYPE',
     WXOPENAI_TOKEN = 'WXOPENAI_TOKEN',
     WXOPENAI_ENCODINGAESKEY = 'WXOPENAI_ENCODINGAESKEY',
     CHATGPT_KEY = 'CHATGPT_KEY',
@@ -33,6 +34,15 @@ export enum EnvironmentVariables {
     WEBHOOK_WEBHOOKMESSAGEPUSH = 'WEBHOOK_WEBHOOKMESSAGEPUSH',
     MQTT_MQTTMESSAGEPUSH = 'MQTT_MQTTMESSAGEPUSH',
     MQTT_MQTTCONTROL = 'MQTT_MQTTCONTROL',
+    LARK_APP_ID='LARK_APP_ID',
+    LARK_APP_SECRET='LARK_APP_SECRET',
+    LARK_BITABLE_APP_TOKEN='LARK_BITABLE_APP_TOKEN',
+    LARK_APP_USER_MOBILE='LARK_APP_USER_MOBILE',
+    accessKeyId = 'accessKeyId',
+    secretAccessKey = 'secretAccessKey',
+    region = 'region',
+    endpoint = 'endpoint',
+    bucketName = 'bucketName',
   }
 
 export interface ProcessEnv {
@@ -49,6 +59,13 @@ export interface ProcessEnv {
     ADMINROOM_ADMINROOMTOPIC: string;
     BASE_BOT_ID: string;
     BASE_WELCOME_MESSAGE_FOR_ADD_FRIEND: string;
+    DATA_BASE_TYPE?:'vika' | 'lark' | undefined ;
+
+    // 飞书多维表格配置
+    LARK_APP_ID: string;
+    LARK_APP_SECRET: string;
+    LARK_BITABLE_APP_TOKEN: string;
+    LARK_APP_USER_MOBILE: string;
 
     // 智能问答配置
     WXOPENAI_TOKEN: string;
@@ -97,4 +114,10 @@ export interface ProcessEnv {
 
     MQTT_MQTTMESSAGEPUSH: string | boolean;
     MQTT_MQTTCONTROL: string | boolean;
+
+    accessKeyId: string;
+    secretAccessKey: string;
+    region: string;
+    endpoint: string;
+    bucketName: string;
   }

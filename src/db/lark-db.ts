@@ -1,13 +1,37 @@
+/* eslint-disable no-console */
+/* eslint-disable camelcase */
 /* eslint-disable sort-keys */
-import { ICreateRecordsReqParams, Vika } from '@vikadata/vika'
-import type { Sheets, Field } from './vikaModel/Model.js'
+import type { Sheets, Record } from './vikaModel/Model.js'
 import { sheets } from './vikaModel/index.js'
 import { delay, logForm } from '../utils/utils.js'
 
-export type VikaConfig = {
-  spaceId?: string,
-  spaceName?: string,
-  token: string,
+import * as lark from '@larksuiteoapi/node-sdk'
+
+// const res = await client.request({
+//   method: 'GET',
+//   url: 'https://open.feishu.cn/open-apis/bitable/v1/apps/bascnPgZURujrdwZ9T4JkLUSUQc/tables/tblZgivmheQdZjDe/records',
+//   data: {},
+//   params: {},
+// })
+// console.log(JSON.stringify(res.data))
+
+type Field = {
+  id?:string,
+  field_name: string,
+  type: number,
+  property?: any,
+  description?: {
+    text?:string
+  },
+  editable?: boolean,
+  isPrimary?: boolean,
+};
+
+export type LarkConfig = {
+  appId:string,
+  appSecret:string,
+  appToken:string,
+  userMobile:string,
 }
 
 export interface DateBase {
@@ -52,22 +76,38 @@ export class KeyDisplaynameMap {
 
 }
 
-export class VikaDB {
+export class LarkDB {
 
   static spaceName: string
   static token: string
-  static vika: Vika
   static spaceId: string | undefined
   static dataBaseIds: DateBase
   static dataBaseNames: DateBase
+  static lark: lark.Client
+  static config: LarkConfig
+  static user_id:string | undefined
 
-  static async init (config:VikaConfig) {
+  static async init (config:LarkConfig) {
     logForm('初始化检查系统表...')
-    if (config.spaceName) this.spaceName = config.spaceName
-    if (config.spaceId) this.spaceId = config.spaceId
-    this.vika = new Vika({ token: config.token })
-    this.token = config.token
-    this.spaceId = ''
+    this.config = config
+
+    this.lark = new lark.Client({
+      appId:config.appId,
+      appSecret:config.appSecret,
+    })
+
+    const user = await this.lark.contact.user.batchGetId({
+      data:{ mobiles:[ config.userMobile ] },
+      params:{ user_id_type:'user_id' },
+    })
+    // console.log('\nuser:', JSON.stringify(user))
+
+    if (user.data && user.data.user_list && user.data.user_list.length) {
+      const user_id = user.data.user_list[0]?.user_id
+      this.user_id = user_id
+      // console.log('\nuser_id:', user_id)
+    }
+
     this.dataBaseIds = {
       messageSheet: '',
       keywordSheet: '',
@@ -82,17 +122,15 @@ export class VikaDB {
       groupNoticeSheet: '',
       qaSheet:'',
     }
+
     this.dataBaseNames = { ...this.dataBaseIds }
 
-    if (!this.spaceId && this.spaceName) this.spaceId = await this.getSpaceId()
-    // console.info('空间ID:', this.spaceId)
-
-    if (this.spaceId) {
+    if (config.appToken) {
 
       const tables = await this.getNodesList()
-      console.info('维格表文件列表：\n', JSON.stringify(tables, undefined, 2))
+      console.info('飞书多维表格文件列表：\n', JSON.stringify(tables, undefined, 2))
 
-      await delay(1000)
+      await delay(200)
 
       for (const k in sheets) {
         // console.info(this)
@@ -106,76 +144,78 @@ export class VikaDB {
           for (let j = 0; j < fields.length; j++) {
             const field = fields[j]
             const newField: Field = {
-              type: field?.type || '',
-              name: field?.name || '',
-              desc: field?.desc || '',
+              type: 1,
+              field_name: field?.name || '',
+              description: {
+                text:field?.desc || '',
+              },
             }
             // console.info('字段定义：', JSON.stringify(field))
             let options
             switch (field?.type) {
               case 'SingleText':
+                newField.type = 1
                 newField.property = field.property || {}
                 newFields.push(newField)
                 break
               case 'SingleSelect':
+                newField.type = 3
                 options = field.property.options
                 newField.property = {}
-                newField.property.defaultValue = field.property.defaultValue || options[0].name
                 newField.property.options = []
                 for (let z = 0; z < options.length; z++) {
                   const option = {
                     name: options[z].name,
-                    color: options[z].color.name,
+                    color: z,
                   }
                   newField.property.options.push(option)
                 }
                 newFields.push(newField)
                 break
               case 'MultiSelect':
+                newField.type = 4
                 options = field.property.options
                 newField.property = {}
-                newField.property.defaultValue = field.property.defaultValue || options[0].name
                 newField.property.options = []
                 for (let z = 0; z < options.length; z++) {
                   const option = {
                     name: options[z].name,
-                    color: options[z].color.name,
+                    color: z,
                   }
                   newField.property.options.push(option)
                 }
                 newFields.push(newField)
                 break
               case 'Text':
+                newField.type = 1
                 newFields.push(newField)
                 break
               case 'Number':
+                newField.type = 2
                 newField.property = {}
-                newField.property.defaultValue = field.property.defaultValue
-                newField.property.precision = field.property.precision
+                newField.property.formatter = '0'
                 newFields.push(newField)
                 break
               case 'DateTime':
+                newField.type = 5
                 newField.property = {}
-                newField.property.dateFormat = 'YYYY-MM-DD'
-                newField.property.includeTime = true
-                newField.property.timeFormat = 'HH:mm'
-                newField.property.autoFill = true
+                newField.property.date_formatter = 'yyyy-MM-dd HH:mm'
+                newField.property.auto_fill = true
                 newFields.push(newField)
                 break
               case 'Checkbox':
-                newField.property = {
-                  icon: 'white_check_mark',
-                }
+                newField.type = 7
                 newFields.push(newField)
                 break
               // case 'MagicLink':
               //   newField.property = {}
-              //   newField.property.foreignDatasheetId = this[field.desc as keyof VikaDB]
+              //   newField.property.foreignDatasheetId = this[field.desc as keyof LarkDB]
               //   if (field.desc) {
               //     newFields.push(newField)
               //   }
               //   break
               case 'Attachment':
+                newField.type = 17
                 newFields.push(newField)
                 break
               default:
@@ -184,11 +224,11 @@ export class VikaDB {
             }
           }
 
-          // console.info('创建表，表信息：', JSON.stringify(newFields, undefined, 2))
+          // console.info('创建表，表信息：', JSON.stringify(newFields))
 
           await this.createDataSheet(k, sheet.name, newFields)
-
-          await delay(1000)
+          console.info('当前表ID:', this.dataBaseIds[k as keyof DateBase])
+          await delay(200)
           const defaultRecords = sheet.defaultRecords
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           if (defaultRecords) {
@@ -197,8 +237,9 @@ export class VikaDB {
             for (let i = 0; i < count; i++) {
               const records = defaultRecords.splice(0, 10)
               console.info('写入：', records.length)
+              console.info('写入表ID:', this.dataBaseIds[k as keyof DateBase])
               await this.createRecord(this.dataBaseIds[k as keyof DateBase], records)
-              await delay(1000)
+              await delay(200)
             }
             logForm(sheet.name + '初始化数据写入完成...')
           }
@@ -217,46 +258,17 @@ export class VikaDB {
     }
   }
 
-  protected static async getAllSpaces () {
-    // 获取当前用户的空间站列表
-    const spaceListResp = await this.vika.spaces.list()
-    if (spaceListResp.success) {
-      // console.info(spaceListResp.data.spaces)
-      return spaceListResp.data.spaces
-    } else {
-      console.error('获取空间列表失败:', spaceListResp)
-      return spaceListResp
-    }
-  }
-
-  protected static async getSpaceId () {
-    const spaceList: any = await this.getAllSpaces()
-    for (const i in spaceList) {
-      if (spaceList[i].name === this.spaceName) {
-        this.spaceId = spaceList[i].id
-        break
-      }
-    }
-    if (this.spaceId) {
-      return this.spaceId
-    } else {
-      return undefined
-    }
-  }
-
   protected static async getNodesList () {
-    if (this.spaceId) {
+    if (this.config.appToken) {
       // 获取指定空间站的一级文件目录
-      const nodeListResp = await this.vika.nodes.list({ spaceId: this.spaceId })
+      const nodeListResp = await this.lark.bitable.appTable.list({ path:{ app_token:this.config.appToken } })
       const tables: any = {}
-      if (nodeListResp.success) {
+      if (nodeListResp.data && nodeListResp.data.items) {
         // console.info(nodeListResp.data.nodes);
-        const nodes = nodeListResp.data.nodes
+        const nodes = nodeListResp.data.items
         nodes.forEach((node: any) => {
           // 当节点是文件夹时，可以执行下列代码获取文件夹下的文件信息
-          if (node.type === 'Datasheet') {
-            tables[node.name] = node.id
-          }
+          tables[node.name] = node.table_id
         })
       } else {
         console.error('获取数据表失败:', nodeListResp)
@@ -271,42 +283,46 @@ export class VikaDB {
     return this.dataBaseIds
   }
 
-  protected static async getVikaSheet (datasheetId: string) {
-    const datasheet = await this.vika.datasheet(datasheetId)
-    return datasheet
-  }
-
   protected static async getSheetFields (datasheetId: string) {
-    const datasheet = await this.vika.datasheet(datasheetId)
-    const fieldsResp = await datasheet.fields.list()
-    let fields: any = []
-    if (fieldsResp.success) {
-      console.info('getSheetFields获取字段：', JSON.stringify(fieldsResp.data.fields))
-      fields = fieldsResp.data.fields
+    const fieldsResp = await this.lark.bitable.appTableField.list({ path:{ app_token:this.config.appToken, table_id:datasheetId } })
+    let fields: any[] = []
+    if (fieldsResp.data && fieldsResp.data.items) {
+      console.info('getSheetFields获取字段：', JSON.stringify(fieldsResp.data.items))
+      fields = fieldsResp.data.items
     } else {
       console.error('获取字段失败:', fieldsResp)
     }
     return fields
   }
 
-  static async createDataSheet (key: string, name: string, fields: { name: string; type: string }[]) {
-    // console.info('创建表...')
+  protected static async createDataSheet (key: string, name: string, fields: { field_name: string; type: number }[]) {
+    console.info('开始创建表...')
     const datasheetRo = {
       fields,
       name,
     }
 
-    if (this.spaceId) {
+    // console.info('创建表，表信息：', JSON.stringify(datasheetRo))
+
+    if (this.config.appToken) {
       try {
-        const res: any = await this.vika.space(this.spaceId).datasheets.create(datasheetRo)
+        const res = await this.lark.bitable.appTable.create({
+          path:{
+            app_token:this.config.appToken,
+          },
+          data:{
+            table:datasheetRo,
+          },
+        })
 
-        console.info(`系统表【${name}】创建结果:`, JSON.stringify(res))
+        console.info('创建表返回：', JSON.stringify(res))
+        console.info(`系统表【${name}】创建成功，表ID【${res.data?.table_id}】`)
 
-        this.dataBaseIds[key as keyof DateBase] = res.data.id
-        this.dataBaseNames[name as keyof DateBase] = res.data.id
-        // console.info('创建表成功：', JSON.stringify(this.dataBaseIds))
+        this.dataBaseIds[key as keyof DateBase] = res.data?.table_id || ''
+        this.dataBaseNames[name as keyof DateBase] = res.data?.table_id || ''
+        console.info('创建表成功：', JSON.stringify(this.dataBaseIds))
         // 删除空白行
-        await this.clearBlankLines(res.data.id)
+        // await this.clearBlankLines(res.data?.table_id)
         return res.data
       } catch (error) {
         console.error(name, error)
@@ -318,19 +334,27 @@ export class VikaDB {
     }
   }
 
-  protected static async createRecord (datasheetId: string, records: ICreateRecordsReqParams) {
-    // console.info('写入维格表:', records.length)
-    const datasheet = await this.vika.datasheet(datasheetId)
-
+  protected static async createRecord (datasheetId: string, records: Record[]) {
+    console.info('写入飞书多维表格ID:', datasheetId)
+    console.info('写入飞书多维表格记录:', records.length)
     try {
-      const res = await datasheet.records.create(records)
-      if (res.success) {
+      const res = await this.lark.bitable.appTableRecord.batchCreate({
+        data:{
+          records,
+        },
+        path:{
+          app_token:this.config.appToken,
+          table_id:datasheetId,
+        },
+      })
+
+      if (res.data?.records) {
         // console.info(res.data.records)
       } else {
-        console.error('记录写入维格表失败：', res)
+        console.error('记录写入飞书多维表格失败：', res)
       }
-    } catch (err) {
-      console.error('请求维格表写入失败：', err)
+    } catch (err:any) {
+      console.error('请求飞书多维表格写入失败：', err.code)
     }
 
   }
@@ -339,26 +363,38 @@ export class VikaDB {
     recordId: string
     fields: {[key:string]:any}
   }[]) {
-    console.info('更新维格表记录:', records.length)
-    const datasheet = await this.vika.datasheet(datasheetId)
+    console.info('更新飞书多维表格记录:', records.length)
 
     try {
-      const res = await datasheet.records.update(records)
-      if (!res.success) {
-        console.error('记录更新维格表失败：', res)
+      const res = await this.lark.bitable.appTableRecord.batchUpdate({
+        data:{ records },
+        path:{
+          app_token: this.config.appToken,
+          table_id: datasheetId,
+        },
+      })
+      if (!res.data) {
+        console.error('记录更新飞书多维表格失败：', res)
       }
     } catch (err) {
-      console.error('请求维格表更新失败：', err)
+      console.error('请求飞书多维表格更新失败：', err)
     }
 
   }
 
-  protected static async deleteRecords (datasheetId: string, recordsIds: string | any[]) {
+  protected static async deleteRecords (datasheetId: string, recordsIds: string[]) {
     // console.info('操作数据表ID：', datasheetId)
     // console.info('待删除记录IDs：', recordsIds)
-    const datasheet = this.vika.datasheet(datasheetId)
-    const response = await datasheet.records.delete(recordsIds)
-    if (response.success) {
+
+    const response = await this.lark.bitable.appTableRecord.batchDelete({
+      data:{ records: recordsIds },
+      path:{
+        app_token: this.config.appToken,
+        table_id: datasheetId,
+      },
+    })
+
+    if (response.data?.records) {
       console.info(`删除${recordsIds.length}条记录`)
     } else {
       console.error('删除记录失败：', response)
@@ -368,11 +404,18 @@ export class VikaDB {
   protected static async getRecords (datasheetId: string, query:any = {}) {
     let records: any = []
     query['pageSize'] = 1000
-    const datasheet = await this.vika.datasheet(datasheetId)
     // 分页获取记录，默认返回第一页
-    const response = await datasheet.records.query(query)
-    if (response.success) {
-      records = response.data.records
+    const response = await this.lark.bitable.appTableRecord.list({
+      params:{
+        filter:query,
+      },
+      path:{
+        app_token: this.config.appToken,
+        table_id: datasheetId,
+      },
+    })
+    if (response.data) {
+      records = response.data.items
       // console.info(records)
     } else {
       console.error('获取数据记录失败：', JSON.stringify(response))
@@ -383,17 +426,18 @@ export class VikaDB {
 
   static async getAllRecords (datasheetId: string) {
     let records: any = []
-    const datasheet = await this.vika.datasheet(datasheetId)
-    const response: any = await datasheet.records.queryAll()
+    const response = await this.lark.bitable.appTableRecord.list({
+      path:{
+        app_token: this.config.appToken,
+        table_id: datasheetId,
+      },
+    })
     // console.info('原始返回：',response)
-    if (response.next) {
-      for await (const eachPageRecords of response) {
-        // console.info('eachPageRecords:',eachPageRecords.length)
-        records.push(...eachPageRecords)
-      }
-      // console.info('records:',records.length)
+    if (response.data) {
+      records = response.data.items
+      // console.info(records)
     } else {
-      console.error(response)
+      console.error('获取数据记录失败：', JSON.stringify(response))
       records = response
     }
     return records

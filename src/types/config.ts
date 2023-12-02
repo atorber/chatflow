@@ -93,6 +93,7 @@ interface WechatyConfig {
 
 interface VikaConfig {
   spaceName?: string;
+  spaceId?: string;
   token: string;
 }
 
