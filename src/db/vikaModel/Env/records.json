@@ -310,7 +310,7 @@
                 "updatedAt": 1694516927000,
                 "fields": {
                     "标识|key": "MESSAGE_ENCRYPT",
-                    "配置项|name": "下发消息加密",
+                    "配置项|name": "消息加密-下发消息加密",
                     "值|value": "false"
                 }
             },
@@ -320,7 +320,7 @@
                 "updatedAt": 1694516937000,
                 "fields": {
                     "标识|key": "MESSAGE_ENCODINGAESKEY",
-                    "配置项|name": "消息加密密钥",
+                    "配置项|name": "消息加密-消息加密密钥",
                     "说明|desc": "消息加密密钥，vika推送地址https://3sewxanjdvsbp.cfc-execute.bj.baidubce.com/mqtt",
                     "值|value": "X00fcQHkvRkNUdJefu4FD6pym2oIvs63Y5NP3pnZ5po"
                 }

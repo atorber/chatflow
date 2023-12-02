@@ -39,6 +39,11 @@ export enum EnvironmentVariables {
     LARK_APP_SECRET='LARK_APP_SECRET',
     LARK_BITABLE_APP_TOKEN='LARK_BITABLE_APP_TOKEN',
     LARK_APP_USER_MOBILE='LARK_APP_USER_MOBILE',
+    accessKeyId = 'accessKeyId',
+    secretAccessKey = 'secretAccessKey',
+    region = 'region',
+    endpoint = 'endpoint',
+    bucketName = 'bucketName',
   }
 
 export interface ProcessEnv {
@@ -111,4 +116,10 @@ export interface ProcessEnv {
 
     MQTT_MQTTMESSAGEPUSH: string | boolean;
     MQTT_MQTTCONTROL: string | boolean;
+
+    accessKeyId: string;
+    secretAccessKey: string;
+    region: string;
+    endpoint: string;
+    bucketName: string;
   }

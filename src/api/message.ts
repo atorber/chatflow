@@ -358,6 +358,37 @@ export const formatMessageToMQTT = async (message: Message) => {
     roomJson = JSON.parse(JSON.stringify(room))
     delete roomJson.payload.memberIdList
   }
+  const messageType = types.Message[message.type()]
+  let url = ''
+  switch (message.type()) {
+    case types.Message.Image:{
+      const file = message.toImage()
+      const fileBox = await file.artwork()
+      const fileName = await fileBox.name
+      url = `${room ? 'room' : 'contact'}/${room ? room.id : talker.id}/${fileName}}`
+      break
+    }
+    case types.Message.Attachment:{
+      const file = await message.toFileBox()
+      const fileName = await file.name
+      url = `${room ? 'room' : 'contact'}/${room ? room.id : talker.id}/${fileName}}`
+      break
+    }
+    case types.Message.Video:{
+      const file = await message.toFileBox()
+      const fileName = await file.name
+      url = `${room ? 'room' : 'contact'}/${room ? room.id : talker.id}/${fileName}}`
+      break
+    }
+    case types.Message.Audio:{
+      const file = await message.toFileBox()
+      const fileName = await file.name
+      url = `${room ? 'room' : 'contact'}/${room ? room.id : talker.id}/${fileName}}`
+      break
+    }
+    default:
+      break
+  }
   const timestamp = message.payload?.timestamp ? (message.payload.timestamp * 1000) : new Date().getTime()
   const messageNew = {
     _id: message.id,
@@ -367,7 +398,10 @@ export const formatMessageToMQTT = async (message: Message) => {
     talker,
     time:getCurrentTime(timestamp),
     timestamp,
+    type: messageType,
+    url,
   }
+  // log.info('formatMessageToMQTT messageNew:', JSON.stringify(messageNew))
   return messageNew
 }
 
