@@ -425,11 +425,11 @@ export class MessageChat extends BaseEntity {
       }
 
       if (file) {
-        logger.info('文件file:', file)
-        if (room) {
-          text = `room/${room.id}_${file.name}`
-        } else {
-          text = `contact/${talker.id}_${file.name}`
+        // logger.info('文件file:', file)
+        try {
+          text = JSON.stringify(file.toJSON())
+        } catch (e) {
+          log.error('文件转换JSON失败：', e)
         }
         uploadedAttachments = await MessageChat.handleFileMessage(file, message)
         if (uploadedAttachments) {

@@ -14,6 +14,7 @@ import {
 } from '../utils/mod.js'
 
 import { MqttProxy, eventMessage } from '../proxy/mqtt-proxy.js'
+import { uploadMessage } from '../proxy/s3-proxy.js'
 
 import { adminAction } from '../api/admin.js'
 import { qa } from '../app/qa.js'
@@ -53,23 +54,49 @@ export async function onMessage (message: Message) {
   const room = message.room()
   const isSelf = message.self()
   if (room && room.id && !isSelf) {
-    // 活动管理
-    await handleActivityManagement(message, room)
+    try {
+      // 活动管理
+      await handleActivityManagement(message, room)
+    } catch (e) {
+      log.error('活动管理失败 error:', e)
+    }
 
-    // @机器人消息处理，当引用消息仅包含@机器人时，提取引用消息内容并回复
-    await extractAtContent(message)
+    try {
+      // @机器人消息处理，当引用消息仅包含@机器人时，提取引用消息内容并回复
+      await extractAtContent(message)
+    } catch (e) {
+      log.error('提取@消息失败 error:', e)
+    }
   }
 
   // 消息存储到云表格，维格表或者飞书多维表格
   if (ChatFlowConfig.configEnv.VIKA_UPLOADMESSAGETOVIKA) {
-    const messageToCloud = await formatMessageToCloud(message)
-    if (messageToCloud) await saveMessageToCloud(messageToCloud)
+    try {
+      const messageToCloud = await formatMessageToCloud(message)
+      if (messageToCloud) await saveMessageToCloud(messageToCloud)
+    } catch (e) {
+      log.error('消息写入云表格失败:\n', e)
+    }
   }
 
   // 消息通过MQTT上报
-  const mqttProxy = MqttProxy.getInstance()
-  if (mqttProxy && mqttProxy.isOk && ChatFlowConfig.configEnv.MQTT_MQTTMESSAGEPUSH) {
-    mqttProxy.pubEvent(eventMessage('onMessage', await formatMessageToMQTT(message)))
+  try {
+    const mqttProxy = MqttProxy.getInstance()
+    if (mqttProxy && mqttProxy.isOk && ChatFlowConfig.configEnv.MQTT_MQTTMESSAGEPUSH) {
+      mqttProxy.pubEvent(eventMessage('onMessage', await formatMessageToMQTT(message)))
+    }
+  } catch (e) {
+    log.error('消息MQTT上报失败:\n', e)
+  }
+
+  // 保存文件到S3
+  if (ChatFlowConfig.configEnv.secretAccessKey) {
+    try {
+      await uploadMessage(message)
+    } catch (e) {
+      log.error('消息S3上传失败:\n', e)
+    }
+
   }
 }
 

@@ -353,11 +353,11 @@ export class LarkChat {
       }
 
       if (file) {
-        log.info('文件file:', file)
-        if (room) {
-          text = `room/${room.id}_${file.name}`
-        } else {
-          text = `contact/${talker.id}_${file.name}`
+        // log.info('文件file:', file)
+        try {
+          text = JSON.stringify(file.toJSON())
+        } catch (e) {
+          log.error('文件转换JSON失败：', e)
         }
         try {
           uploadedAttachments = await LarkChat.handleFileMessage(file, message)
@@ -365,7 +365,7 @@ export class LarkChat {
             file_token: uploadedAttachments.file_token,
           })
           // text = JSON.stringify(uploadedAttachments.data)
-          log.info('上传文件Lark成功：', uploadedAttachments)
+          log.info('上传文件Lark成功：', JSON.stringify(uploadedAttachments)) // 上传成功后返回的数据
         } catch (e) {
           log.error('文件上传Lark失败：', e)
         }

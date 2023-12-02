@@ -17,6 +17,7 @@ import { LarkDB } from '../db/lark-db.js'
 import { ChatFlowConfig } from './base-config.js'
 import fs from 'fs'
 import path from 'path'
+
 const MEDIA_PATH = 'data/media/image'
 const MEDIA_PATH_QRCODE = path.join(MEDIA_PATH, 'qrcode')
 const MEDIA_PATH_CONTACT = path.join(MEDIA_PATH, 'contact')
@@ -224,11 +225,12 @@ export const formatMessageToCloud = async (message: Message) => {
     }
 
     if (file) {
-      log.info('文件file:', file)
-      if (room) {
-        text = `room/${room.id}_${file.name}`
-      } else {
-        text = `contact/${talker.id}_${file.name}`
+      // log.info('文件file:', file)
+      try {
+        text = JSON.stringify(file.toJSON())
+        log.info('文件text:', text)
+      } catch (e) {
+        log.error('文件转换JSON失败：', e)
       }
       try {
         if (ChatFlowConfig.dataBaseType === 'lark' && LarkDB.config.appToken) {
@@ -236,14 +238,15 @@ export const formatMessageToCloud = async (message: Message) => {
           files.push({
             file_token: uploadedAttachments.file_token,
           })
-          // text = JSON.stringify(uploadedAttachments.data)
+          log.info('上传文件Lark成功：', JSON.stringify(uploadedAttachments))
         } else {
           uploadedAttachments = await MessageChat.handleFileMessage(file, message)
           files.push(uploadedAttachments.data)
+          log.info('上传文件Vika成功：', JSON.stringify(uploadedAttachments))
+
         }
-        log.info('上传文件Lark成功：', uploadedAttachments)
       } catch (e) {
-        log.error('文件上传Lark失败：', e)
+        log.error('文件上传失败：', e)
       }
     }
 
@@ -359,36 +362,33 @@ export const formatMessageToMQTT = async (message: Message) => {
     delete roomJson.payload.memberIdList
   }
   const messageType = types.Message[message.type()]
-  let url = ''
+  let text = ''
   switch (message.type()) {
     case types.Message.Image:{
       const file = message.toImage()
       const fileBox = await file.artwork()
-      const fileName = await fileBox.name
-      url = `${room ? 'room' : 'contact'}/${room ? room.id : talker.id}/${fileName}}`
+      text = JSON.stringify(fileBox.toJSON())
       break
     }
     case types.Message.Attachment:{
       const file = await message.toFileBox()
-      const fileName = await file.name
-      url = `${room ? 'room' : 'contact'}/${room ? room.id : talker.id}/${fileName}}`
+      text = JSON.stringify(file.toJSON())
       break
     }
     case types.Message.Video:{
       const file = await message.toFileBox()
-      const fileName = await file.name
-      url = `${room ? 'room' : 'contact'}/${room ? room.id : talker.id}/${fileName}}`
+      text = JSON.stringify(file.toJSON())
       break
     }
     case types.Message.Audio:{
       const file = await message.toFileBox()
-      const fileName = await file.name
-      url = `${room ? 'room' : 'contact'}/${room ? room.id : talker.id}/${fileName}}`
+      text = JSON.stringify(file.toJSON())
       break
     }
     default:
       break
   }
+  log.info('formatMessageToMQTT text:', text)
   const timestamp = message.payload?.timestamp ? (message.payload.timestamp * 1000) : new Date().getTime()
   const messageNew = {
     _id: message.id,
@@ -399,7 +399,7 @@ export const formatMessageToMQTT = async (message: Message) => {
     time:getCurrentTime(timestamp),
     timestamp,
     type: messageType,
-    url,
+    text,
   }
   // log.info('formatMessageToMQTT messageNew:', JSON.stringify(messageNew))
   return messageNew
