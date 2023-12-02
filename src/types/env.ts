@@ -22,7 +22,6 @@ export enum EnvironmentVariables {
     MQTT_PASSWORD = 'MQTT_PASSWORD',
     MQTT_ENDPOINT = 'MQTT_ENDPOINT',
     MQTT_PORT = 'MQTT_PORT',
-    MQTT_PORT_SSL = 'MQTT_PORT_SSL',
     WEBHOOK_URL = 'WEBHOOK_URL',
     WEBHOOK_TOKEN = 'WEBHOOK_TOKEN',
     WEBHOOK_USERNAME = 'WEBHOOK_USERNAME',
@@ -88,7 +87,6 @@ export interface ProcessEnv {
     MQTT_PASSWORD: string;
     MQTT_ENDPOINT: string;
     MQTT_PORT: string;
-    MQTT_PORT_SSL: string;
 
     // 消息推送目的地配置
     WEBHOOK_URL: string;
