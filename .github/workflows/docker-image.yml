@@ -3,8 +3,8 @@ name: Publish Docker image   # workflow名称，可以在Github项目主页的�
 
 on:   # 配置触发workflow的事件
   push:
-    branches:  # 添加这一行来指定触发分支
-      - 'main'   # 两个星号代表任意分支
+    # branches:  # 添加这一行来指定触发分支
+    #  - 'main'   # 两个星号代表任意分支
     tags:       # tag更新时触发此workflow
       - '*'
 
