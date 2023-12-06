@@ -54,8 +54,8 @@ npm install
 
 ```.env
 # 维格表配置
-VIKA_SPACE_NAME="" # 维格表空间名称，注意是名称而不是ID
-VIKA_TOKEN="" #维格表token
+VIKA_SPACE_ID="替换为自己的维格表空间ID"
+VIKA_TOKEN="替换为自己的维格表token"
 
 # 基础配置
 ADMINROOM_ADMINROOMTOPIC="瓦力是群主" # 管理群名称，需尽量保持名称复杂，避免重名群干扰
