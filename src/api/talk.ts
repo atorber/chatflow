@@ -140,7 +140,7 @@ export const createTalk = (_params: {
     draft_text: '',
     msg_text: '',
     index_name: '',
-    created_at: 11111,
+    created_at: new Date().getTime(),
   }
   return data
 }
@@ -222,14 +222,7 @@ export const getTalkRecord = async (param: {
     const dispayname = alias || name
     const talk_type = roomid !== '--' ? 2 : 1
     let msg_type = 1
-    let extra = {
-      height: 6480,
-      name: '',
-      size: 0,
-      suffix: '',
-      url: 'https://im.gzydong.com/public/media/image/common/20231026/814423dea6ada99994ae87bb0fef545b_4480x6480.png',
-      width: 4480,
-    }
+    let extra = {}
     const receiver_id = roomid !== '--' ? roomid : listenerid
     if (file) {
       const file0 = file[0]

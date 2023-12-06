@@ -362,7 +362,7 @@ export const formatMessageToMQTT = async (message: Message) => {
     delete roomJson.payload.memberIdList
   }
   const messageType = types.Message[message.type()]
-  let text = ''
+  let text = message.text()
   switch (message.type()) {
     case types.Message.Image:{
       const file = message.toImage()
@@ -389,7 +389,7 @@ export const formatMessageToMQTT = async (message: Message) => {
       break
   }
   log.info('formatMessageToMQTT text:', text)
-  const timestamp = message.payload?.timestamp ? (message.payload.timestamp * 1000) : new Date().getTime()
+  const timestamp = message.payload?.timestamp ? message.payload.timestamp : new Date().getTime()
   const messageNew = {
     _id: message.id,
     data: message,
