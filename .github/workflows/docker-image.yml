@@ -58,6 +58,8 @@ jobs:  # workflow中的job
           context: .
           file: ./Dockerfile
           platforms: ${{ matrix.platform }}
-          tags: atorber/chatflow:${{ steps.package_version.outputs.VERSION }}-${{ matrix.tag_suffix }}
+          tags: |
+            atorber/chatflow:${{ steps.package_version.outputs.VERSION }}-${{ matrix.tag_suffix }}
+            atorber/chatflow:latest-${{ matrix.tag_suffix }}
           push: true
           labels: ${{ steps.meta.outputs.labels }}
