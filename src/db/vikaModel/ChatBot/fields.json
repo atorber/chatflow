@@ -1,0 +1,87 @@
+{
+    "code": 200,
+    "success": true,
+    "data": {
+        "fields": [
+            {
+                "id": "fldA47yx9L3bk",
+                "name": "机器人ID|id",
+                "type": "SingleText",
+                "property": {
+                    "defaultValue": ""
+                },
+                "editable": true,
+                "isPrimary": true
+            },
+            {
+                "id": "fldPrcQ5QfhxV",
+                "name": "昵称|botname",
+                "type": "SingleText",
+                "property": {},
+                "editable": true
+            },
+            {
+                "id": "fld6rYKTZ0zQV",
+                "name": "用户ID|wxid",
+                "type": "SingleText",
+                "property": {},
+                "editable": true
+            },
+            {
+                "id": "fldxD8wwu1hGy",
+                "name": "用户名称|name",
+                "type": "SingleText",
+                "property": {},
+                "editable": true
+            },
+            {
+                "id": "fld4P2sX0CHco",
+                "name": "用户提示词|prompt",
+                "type": "Text",
+                "editable": true
+            },
+            {
+                "id": "fldguMiluobGu",
+                "name": "配额|quota",
+                "type": "Number",
+                "property": {
+                    "precision": 0
+                },
+                "editable": true
+            },
+            {
+                "id": "fldUcpFFLyMo7",
+                "name": "启用状态|state",
+                "type": "SingleSelect",
+                "property": {
+                    "options": [
+                        {
+                            "id": "optMTJ3j2fMr4",
+                            "name": "启用",
+                            "color": {
+                                "name": "deepPurple_0",
+                                "value": "#E5E1FC"
+                            }
+                        },
+                        {
+                            "id": "opt4bTBzh2Mx6",
+                            "name": "禁用",
+                            "color": {
+                                "name": "indigo_0",
+                                "value": "#DDE7FF"
+                            }
+                        }
+                    ]
+                },
+                "editable": true
+            },
+            {
+                "id": "fldsG69W4KzJa",
+                "name": "备注|info",
+                "type": "Text",
+                "editable": true
+            }
+        ]
+    },
+    "message": "SUCCESS"
+}

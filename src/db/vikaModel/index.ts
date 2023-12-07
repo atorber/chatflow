@@ -16,6 +16,8 @@ import { sheet as noticeSheet } from './Notice/mod.js'
 import { sheet as whiteListSheet } from './WhiteList/mod.js'
 import { stockSheet } from './Stock/mod.js'
 import { sheet as groupNoticeSheet } from './GroupNotice/mod.js'
+import { sheet as chatBotSheet } from './ChatBot/mod.js'
+import { sheet as chatBotUserSheet } from './ChatBotUser/mod.js'
 
 const sheets: Sheets = {
   qaSheet,
@@ -29,6 +31,8 @@ const sheets: Sheets = {
   statisticSheet,
   groupNoticeSheet,
   messageSheet,
+  chatBotSheet,
+  chatBotUserSheet,
   // stockSheet,
   // groupSheet,
   // switchSheet,

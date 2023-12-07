@@ -253,7 +253,7 @@ export abstract class BaseEntity {
   /**
    * 根据字段查询多条记录
    */
-  static async findByField (fieldName: string, value: any): Promise<IRecord[]|undefined[]> {
+  static async findByField (fieldName: string, value: any, pageSize: number | undefined = 1000): Promise<IRecord[]|undefined[]> {
     const field = this.mappingOptions.fieldMapping[fieldName]
     let records: IRecord[] = []
     if (!field) {
@@ -262,7 +262,7 @@ export abstract class BaseEntity {
 
     const query = {
       filterByFormula:`{${field}}="${value}"`,
-      pageSize:1000,
+      pageSize,
     }
     log.info('query:', JSON.stringify(query))
     // 分页获取记录，默认返回第一页
@@ -280,10 +280,10 @@ export abstract class BaseEntity {
   /**
    * 根据字段查询多条记录
    */
-  static async findByQuery (filterByFormula: string): Promise<IRecord[]|undefined[]> {
+  static async findByQuery (filterByFormula: string, pageSize: number | undefined = 1000): Promise<IRecord[]|undefined[]> {
     const query = {
       filterByFormula,
-      pageSize:1000,
+      pageSize,
     }
     log.info('query:', JSON.stringify(query))
     // 分页获取记录，默认返回第一页
