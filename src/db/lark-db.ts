@@ -47,6 +47,8 @@ export interface DateBase {
   stockSheet: string
   groupNoticeSheet: string
   qaSheet:string
+  chatBotSheet: string
+  chatBotUserSheet:string
 }
 
 export class KeyDisplaynameMap {
@@ -121,6 +123,8 @@ export class LarkDB {
       stockSheet: '',
       groupNoticeSheet: '',
       qaSheet:'',
+      chatBotSheet: '',
+      chatBotUserSheet:'',
     }
 
     this.dataBaseNames = { ...this.dataBaseIds }
