@@ -47,6 +47,13 @@ const vikaFields = {
         editable: true,
       },
       {
+        id: 'fldxD8wwu1hGy2',
+        name: '好友备注(选填)|alias',
+        type: 'SingleText',
+        property: {},
+        editable: true,
+      },
+      {
         id: 'fld4P2sX0CHco',
         name: '用户提示词|prompt',
         type: 'Text',
