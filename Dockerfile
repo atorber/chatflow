@@ -12,8 +12,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # 安装依赖
-RUN npm install && \
-    npm install @swc/core@1.3.78
+RUN npm install
 
 # 复制所有文件到工作目录
 COPY . .
