@@ -6,6 +6,7 @@
     "target": "es2020", 
   },
   "exclude": [
+    "src/**/*.mjs",
     "node_modules/",
     "dist/",
     "tests/vika-orm-test.ts",

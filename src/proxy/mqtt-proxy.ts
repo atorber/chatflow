@@ -17,6 +17,7 @@ import {
   logger,
 } from '../utils/utils.js'
 import { formatMessageToMQTT } from '../api/message.js'
+import { getKeyByBasicString, encrypt, decrypt } from '../utils/crypto-use-crypto-js.js'
 
 // import { MQTTAgent } from './mqtt-agent.js'
 
@@ -545,6 +546,7 @@ class MqttProxy {
   eventApi: string
   commandApi: string
   isOk: boolean
+  private static key: string
 
   static getClientId (clientString:string) {
     // clientid加密
@@ -557,6 +559,7 @@ class MqttProxy {
     this.eventApi = `thing/chatbot/${config.clientId}/event/post`
     this.commandApi = `thing/chatbot/${config.clientId}/command/invoke`
     this.isOk = false
+    MqttProxy.key = getKeyByBasicString(config.clientId as string)
     // 重写clientID为随机id，防止重复
     config.clientId = v4()
     this.mqttClient = mqtt.connect(config)
@@ -606,6 +609,9 @@ class MqttProxy {
   }
 
   public publish (topic: string, message: string) {
+    // 加密
+    message = encrypt(message, MqttProxy.key)
+
     if (this.isConnected) {
       this.mqttClient.publish(topic, message, (error) => {
         if (error) {
@@ -627,18 +633,27 @@ class MqttProxy {
   }
 
   pubProperty (msg: any) {
+    // 加密
+    msg = encrypt(msg, MqttProxy.key)
+
     this.mqttClient.publish(this.propertyApi, msg)
     logger.info('mqtt消息发布:' + this.eventApi, msg)
   }
 
   pubEvent (msg: any) {
+    // 加密
+    msg = encrypt(msg, MqttProxy.key)
+
     this.mqttClient.publish(this.eventApi, msg)
     logger.info('mqtt消息发布:' + this.eventApi, msg)
   }
 
   async pubMessage (msg: any) {
     try {
-      const payload = await wechaty2mqtt(msg)
+      let payload = await wechaty2mqtt(msg)
+      // 加密
+      payload = encrypt(payload, MqttProxy.key)
+
       this.mqttClient.publish(this.eventApi, payload)
       logger.info('mqtt消息发布:' + this.eventApi, payload)
     } catch (err) {
@@ -656,7 +671,9 @@ class MqttProxy {
     logger.info('mqtt onMessage:' + message.toString())
     log.info('MqttProxy.chatbot', MqttProxy.chatbot)
     try {
-      // const content = JSON.parse(message.toString())
+      // 解密
+      message = decrypt(message.toString(), MqttProxy.key)
+
       message = JSON.parse(message)
       const name = message.name
       const params = message.params
@@ -815,6 +832,8 @@ class MqttProxy {
   }
 
   static onMessage2 = (topic: string, message: any) => {
+    // 解密
+    message = decrypt(message.toString(), MqttProxy.key)
     const logCommand = (name: string) => logger.info(`cmd name: ${name}`)
     const processCommand = (name: string, action: any) => {
       logCommand(name)
