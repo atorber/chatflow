@@ -21,6 +21,14 @@ import { getKeyByBasicString, encrypt, decrypt } from '../utils/crypto-use-crypt
 
 // import { MQTTAgent } from './mqtt-agent.js'
 
+async function getAvatarUrl (params:Contact|Room) {
+  try {
+    return JSON.parse(JSON.stringify(await params.avatar()))['url']
+  } catch (e) {
+    return ''
+  }
+}
+
 async function getAllContact (mqttProxy: MqttProxy, bot: Wechaty) {
   const contactList: Contact[] = await bot.Contact.findAll()
   let friends = []
@@ -545,6 +553,7 @@ class MqttProxy {
   propertyApi: string
   eventApi: string
   commandApi: string
+  responseApi: string
   isOk: boolean
   private static key: string
 
@@ -558,6 +567,7 @@ class MqttProxy {
     this.propertyApi = `thing/chatbot/${config.clientId}/property/post`
     this.eventApi = `thing/chatbot/${config.clientId}/event/post`
     this.commandApi = `thing/chatbot/${config.clientId}/command/invoke`
+    this.responseApi = `thing/chatbot/${config.clientId}/response/d2c`
     this.isOk = false
     MqttProxy.key = getKeyByBasicString(config.clientId as string)
     // 重写clientID为随机id，防止重复
@@ -590,7 +600,11 @@ class MqttProxy {
       this.isConnected = false
     })
 
-    this.mqttClient.on('message', MqttProxy.onMessage.bind(this))
+    this.mqttClient.on('message', (topic: string, message: Buffer) => {
+      MqttProxy.onMessage.bind(this)(topic, message).catch((error) => {
+        console.error('Error handling message:', error)
+      })
+    })
     this.subCommand()
     this.isOk = true
   }
@@ -666,7 +680,7 @@ class MqttProxy {
     return this.bot
   }
 
-  private static onMessage = (topic: string, message: any) => {
+  private static onMessage = async (topic: string, message: any) => {
     logger.info('mqtt onMessage:' + topic)
     logger.info('mqtt onMessage:' + message.toString())
     log.info('MqttProxy.chatbot', MqttProxy.chatbot)
@@ -781,9 +795,67 @@ class MqttProxy {
           })
 
         }
-        if (name === 'memberAllGet') {
-          logger.info('cmd name:' + name)
 
+        // 获取群成员列表
+        if (name === 'memberAllGet') {
+          log.info('cmd name:' + name)
+          const resData = {
+            reqId:'442c1da4-9d3a-4f9b-a6e9-bfe858e4ac43',
+            method:'thing.command.invoke',
+            version:'1.0',
+            timestamp:1610430718000,
+            code:200,
+            description:'获取机器人信息失败',
+            params:{
+              data:{} as any,
+              messsage:null as any,
+            },
+          }
+          try {
+            const roomid = params.roomid
+            const room = await MqttProxy.chatbot.Room.find({ id: roomid })
+            const members = await room?.memberAll()
+            if (members) {
+              const newMembers = await Promise.all(
+                members.map(async (member: Contact) => ({
+                  avatar: await getAvatarUrl(member) || 'https://im.gzydong.club/public/media/image/avatar/20230516/c5039ad4f29de2fd2c7f5a1789e155f5_200x200.png', // 设置群组头像
+                  id: member.id,
+                  user_id: member.id,
+                  nickname: member.name(),
+                  gender: member.gender(),
+                  motto: '',
+                  leader: room?.owner()?.id === member.id ? 2 : 0,
+                  is_mute: 0,
+                  user_card: '',
+                })),
+              )
+              log.info('memberAllGet res:', JSON.stringify(newMembers))
+              resData.reqId = message.reqId
+              resData.params.data = newMembers
+              resData.description = '获取群成员列表成功'
+              if (this.instance?.responseApi) {
+                this.instance.publish(this.instance.responseApi, JSON.stringify(resData))
+              }
+            } else {
+              resData.reqId = message.reqId
+              resData.params.data = []
+              resData.description = '获取群成员列表成功'
+              if (this.instance?.responseApi) {
+                this.instance.publish(this.instance.responseApi, JSON.stringify(resData))
+              }
+            }
+            return resData
+
+          } catch (err) {
+            log.error('memberAllGet err:', err)
+            resData.reqId = message.reqId
+            resData.params.messsage = err
+            resData.description = '获取群成员列表失败'
+            if (this.instance?.responseApi) {
+              this.instance.publish(this.instance.responseApi, JSON.stringify(resData))
+            }
+            return resData
+          }
         }
         if (name === 'contactAdd') {
           logger.info('cmd name:' + name)
@@ -826,8 +898,10 @@ class MqttProxy {
 
         }
       }
+      return null
     } catch (err) {
       logger.error('MQTT接收到消息错误：' + err)
+      return null
     }
   }
 
