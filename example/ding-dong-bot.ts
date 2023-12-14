@@ -16,6 +16,8 @@ import {
   // LarkDB,
   IClientOptions,
   MqttProxy,
+  GroupMaster,
+  GroupMasterConfig,
 } from '../src/chatflow.js'
 
 // import { spawn } from 'child_process'
@@ -72,6 +74,19 @@ const main = async () => {
       } catch (e) {
         log.error('MQTT代理启动失败，检查mqtt配置信息是否正确...', e)
       }
+    }
+
+    // 如果配置了群管理秘书，则启动群管理秘书，这是一个探索性功能，暂未开放，可以忽略
+    if (process.env['GROUP_MASTER_ENDPOINT']) {
+      const configGroupMaster: GroupMasterConfig = {
+        WX_KEY:process.env['GROUP_MASTER_WX_KEY'] || '',
+        MQTT_ENDPOINT:process.env['GROUP_MASTER_MQTT_ENDPOINT'] || '',
+        MQTT_USERNAME:process.env['GROUP_MASTER_MQTT_USERNAME'] || '',
+        MQTT_PASSWORD:process.env['GROUP_MASTER_MQTT_PASSWORD'] || '',
+        MQTT_PORT:Number(process.env['GROUP_MASTER_MQTT_PORT'] || '1883'),
+        HOST:process.env['GROUP_MASTER_ENDPOINT'] || '',
+      }
+      bot.use(GroupMaster(configGroupMaster))
     }
 
     bot.use(ChatFlow())

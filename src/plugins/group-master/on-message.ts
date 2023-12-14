@@ -31,22 +31,22 @@ export const onMessage = async (message:Message) => {
   const contact = message.talker()
   const text = message.text()
   const talker = message.talker()
+  const listener = message.listener()
+  const room: Room | undefined = message.room() || undefined
+  // log.info('room',room)
   let roomInfo = {}
   let alias = ''
   let member: Contact | undefined
   log.info('text', text)
   log.info('message.talker()', talker)
   // log.info('message.talker().id', message.talker().id)
-  const room: Room | undefined = message.room() || undefined
-  // log.info('room',room)
 
-  const avatar = await contact.avatar()
   let avatarUrl: any = ''
 
   try {
+    const avatar = await contact.avatar()
     avatarUrl = avatar.toJSON()
   } catch (e) {
-    console.error('头像', avatar)
     console.error('转换头像错误', e)
 
   }
@@ -66,16 +66,25 @@ export const onMessage = async (message:Message) => {
   try {
     if (room && room.id && room.owner()) {
       log.info('room有roomowner信息')
+      let avatarRoom:any = ''
+      try {
+        avatarRoom = await (await room.avatar()).toJSON()
+      } catch (e) {
+        log.error('room.avatar()', e)
+      }
       alias = await room.alias(message.talker()) || ''
       member = await room.member(contact.name()) || undefined
+      const topic = await room.topic()
       const ownerid = room.owner()?.id || ''
+      const announce = await room.announce()
+
       roomInfo = {
         ownerid,
         roomid: room.id,
-        nick: await room.topic(),
-        announce: await room.announce(),
-        avatar: await (await room.avatar()).toJSON(),
-        alias: await room.alias(message.talker()) || '',
+        nick: topic,
+        announce,
+        avatar: avatarRoom,
+        alias,
         // member: await room.member(contact.name())
         // qrcode: await room.qrCode()
       }
@@ -85,7 +94,7 @@ export const onMessage = async (message:Message) => {
       log.info('room没有roomowner信息')
       roomInfo = {
         roomid: '',
-        nick: (await room?.topic()) || '',
+        nick: '',
       }
     }
   } catch (err) {
@@ -94,8 +103,8 @@ export const onMessage = async (message:Message) => {
 
   let payload: any = {
     user,
-    from: message.talker(),
-    to: message.to(),
+    from: talker,
+    to: listener,
     type: message.type(),
     // message,
     text,
