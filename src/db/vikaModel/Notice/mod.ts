@@ -17,7 +17,36 @@ if (actionState[code]) {
   fields = replaceSyncStatus(fields)
 }
 
-const defaultRecords:any = { code:200, success:true, data:{ total:1, records:[ { recordId:'recpHWSXRDKlT', createdAt:1693750783000, updatedAt:1694055402000, fields:{ '内容|desc':'测试5分钟提醒', '时间|time':1692597600000, '周期|cycle':'每5分钟', '启用状态|state':'开启', '昵称/群名称|name':'luyuchao', '通知目标类型|type':'好友' } } ], pageNum:1, pageSize:1 }, message:'SUCCESS' }
+const defaultRecords:any
+
+= {
+  code: 200,
+  success: true,
+  message: 'Request successful',
+  data: {
+    total: 1,
+    pageNum: 1,
+    pageSize: 1,
+    records: [
+      {
+        recordId: 'recXOigqOCw0o',
+        fields: {
+          '内容|desc': '测试5分钟提醒',
+          '通知目标类型|type': '好友',
+          '昵称/群名称|name': '大师',
+          '好友ID/群ID(选填)|id': 'ledongmao',
+          '好友备注(选填)|alias': 'chatflow作者',
+          '时间|time': 1692597600000,
+          '周期|cycle': '每5分钟',
+          '启用状态|state': '开启',
+          '同步状态|syncStatus': '未同步',
+          '最后操作时间|lastOperationTime': 1702519566271,
+          '操作|action': '选择操作',
+        },
+      },
+    ],
+  },
+}
 
 export const sheet: Sheet = {
   fields,

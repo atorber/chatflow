@@ -17,7 +17,36 @@ if (actionState[code]) {
   fields = replaceSyncStatus(fields)
 }
 
-const defaultRecords:any = { code:200, success:true, data:{ total:1, records:[ { recordId:'rec5rHxqNeWNw', createdAt:1693750559000, updatedAt:1694055083000, fields:{ '状态|state':'待发送|waiting', '类型|type':'好友|contact', '发送时间|pubTime':1693750559067 } } ], pageNum:1, pageSize:1 }, message:'SUCCESS' }
+const defaultRecords:any
+
+= {
+  code: 200,
+  success: true,
+  message: 'Request successful',
+  data: {
+    total: 1,
+    pageNum: 1,
+    pageSize: 1,
+    records: [
+      {
+        recordId: 'recGovPlvkTWv',
+        fields: {
+          '内容|text': '示例消息',
+          '类型|type': '好友|contact',
+          '好友备注(选填)|alias': '张三',
+          '昵称/群名称|name': '我是张三',
+          '好友ID/群ID(选填)|id': 'zhangsan',
+          '状态|state': '待发送|waiting',
+          '发送时间|pubTime': 1693750559067,
+          '信息|info': '示例消息',
+          '同步状态|syncStatus': '未同步',
+          '最后操作时间|lastOperationTime': 1702519578331,
+          '操作|action': '选择操作',
+        },
+      },
+    ],
+  },
+}
 
 export const sheet: Sheet = {
   fields,

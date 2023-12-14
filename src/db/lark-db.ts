@@ -399,7 +399,7 @@ export class LarkDB {
     })
 
     if (response.data?.records) {
-      console.info(`删除${recordsIds.length}条记录`)
+      console.info('删除记录成功：', recordsIds.length || '0')
     } else {
       console.error('删除记录失败：', response)
     }
