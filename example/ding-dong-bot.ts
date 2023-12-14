@@ -36,6 +36,7 @@ const main = async () => {
   // 使用Vika
   await VikaDB.init({
     spaceName: process.env['VIKA_SPACE_NAME'],
+    spaceId: process.env['VIKA_SPACE_ID'],
     token: process.env['VIKA_TOKEN'],
   })
 

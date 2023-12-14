@@ -18,37 +18,67 @@ const vikaFields = {
       {
         id: 'fldA47yx9L3bk',
         name: '机器人ID|id',
-        type: 'SingleText',
-        property: {
-          defaultValue: '',
-        },
-        editable: true,
+        type: 'AutoNumber',
+        editable: false,
         isPrimary: true,
       },
       {
         id: 'fldPrcQ5QfhxV',
-        name: '昵称|botname',
+        name: '昵称|name',
         type: 'SingleText',
         property: {},
         editable: true,
       },
       {
         id: 'fld6rYKTZ0zQV',
-        name: '用户ID|wxid',
-        type: 'SingleText',
-        property: {},
+        name: '描述|desc',
+        type: 'Text',
         editable: true,
       },
       {
         id: 'fldxD8wwu1hGy',
-        name: '用户名称|name',
+        name: '类型|type',
+        type: 'SingleSelect',
+        property: {
+          options: [
+            {
+              id: 'opt1LUWhuInQB',
+              name: 'ChatGPT',
+              color: {
+                name: 'deepPurple_0',
+                value: '#E5E1FC',
+              },
+            },
+            {
+              id: 'optMmnD7Lx6dp',
+              name: '文心一言',
+              color: {
+                name: 'indigo_0',
+                value: '#DDE7FF',
+              },
+            },
+            {
+              id: 'optOyZnLw4AZJ',
+              name: 'ss',
+              color: {
+                name: 'blue_0',
+                value: '#DDF5FF',
+              },
+            },
+          ],
+        },
+        editable: true,
+      },
+      {
+        id: 'fldRVqJtsrH0H',
+        name: '模型|model',
         type: 'SingleText',
         property: {},
         editable: true,
       },
       {
         id: 'fld4P2sX0CHco',
-        name: '用户提示词|prompt',
+        name: '系统提示词|prompt',
         type: 'Text',
         editable: true,
       },
@@ -62,35 +92,17 @@ const vikaFields = {
         editable: true,
       },
       {
-        id: 'fldUcpFFLyMo7',
-        name: '启用状态|state',
-        type: 'SingleSelect',
-        property: {
-          options: [
-            {
-              id: 'optMTJ3j2fMr4',
-              name: '启用',
-              color: {
-                name: 'deepPurple_0',
-                value: '#E5E1FC',
-              },
-            },
-            {
-              id: 'opt4bTBzh2Mx6',
-              name: '禁用',
-              color: {
-                name: 'indigo_0',
-                value: '#DDE7FF',
-              },
-            },
-          ],
-        },
+        id: 'fld7aHIRIo4Sj',
+        name: '接入点|endpoint',
+        type: 'SingleText',
+        property: {},
         editable: true,
       },
       {
-        id: 'fldsG69W4KzJa',
-        name: '备注|info',
-        type: 'Text',
+        id: 'fldcZcmi2z6ZE',
+        name: '密钥|key',
+        type: 'SingleText',
+        property: {},
         editable: true,
       },
     ],
@@ -104,11 +116,31 @@ if (actionState[code]) {
   fields = replaceSyncStatus(fields)
 }
 
-const defaultRecords: any = {
+const defaultRecords: any
+= {
   code: 200,
   success: true,
-  data: { total: 0, records: [], pageNum: 1, pageSize: 0 },
-  message: 'SUCCESS',
+  message: 'Request successful',
+  data: {
+    total: 1,
+    pageNum: 1,
+    pageSize: 1,
+    records: [
+      {
+        recordId: 'rec4KyET4ALNJ',
+        fields: {
+          '昵称|name': '小G',
+          '描述|desc': '示例配置数据',
+          '类型|type': 'ChatGPT',
+          '模型|model': 'gpt-3.5-turbo',
+          '系统提示词|prompt': '你是智能助手小G',
+          '配额|quota': 99999999,
+          '接入点|endpoint': 'https://api.gptgod.online',
+          '密钥|key': 'sk-Glz4aVRaiXT7AyPH7E7xxxxxx7zQRXxxxxxkuycUi',
+        },
+      },
+    ],
+  },
 }
 
 export const sheet: Sheet = {

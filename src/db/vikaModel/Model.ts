@@ -21,7 +21,7 @@ type FieldText = Field & { type: FieldType.Text };
 
 type Record = {
     fields: {
-        [key: string]: string
+        [key: string]: string | number | boolean
     }
 }
 

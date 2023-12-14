@@ -65,11 +65,11 @@ export class VikaDB {
 
   static async init (config:VikaConfig) {
     logForm('初始化检查系统表...')
+    this.spaceId = ''
     if (config.spaceName) this.spaceName = config.spaceName
     if (config.spaceId) this.spaceId = config.spaceId
     this.vika = new Vika({ token: config.token })
     this.token = config.token
-    this.spaceId = ''
     this.dataBaseIds = {
       messageSheet: '',
       keywordSheet: '',
@@ -190,22 +190,26 @@ export class VikaDB {
 
           // console.info('创建表，表信息：', JSON.stringify(newFields, undefined, 2))
 
-          await this.createDataSheet(k, sheet.name, newFields)
-
-          await delay(1000)
-          const defaultRecords = sheet.defaultRecords
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (defaultRecords) {
-            // console.info(defaultRecords.length)
-            const count = Math.ceil(defaultRecords.length / 10)
-            for (let i = 0; i < count; i++) {
-              const records = defaultRecords.splice(0, 10)
-              console.info('写入：', records.length)
-              await this.createRecord(this.dataBaseIds[k as keyof DateBase], records)
-              await delay(1000)
+          const resCreate = await this.createDataSheet(k, sheet.name, newFields)
+          if (resCreate.success) {
+            await delay(1000)
+            const defaultRecords = sheet.defaultRecords
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (defaultRecords) {
+              // console.info(defaultRecords.length)
+              const count = Math.ceil(defaultRecords.length / 10)
+              for (let i = 0; i < count; i++) {
+                const records = defaultRecords.splice(0, 10)
+                console.info('写入：', records.length)
+                await this.createRecord(this.dataBaseIds[k as keyof DateBase], records)
+                await delay(1000)
+              }
+              logForm(sheet.name + '初始化数据写入完成...')
             }
-            logForm(sheet.name + '初始化数据写入完成...')
+          } else {
+            throw new Error(`创建表【${sheet.name}】失败,启动中止，需要重新运行...`)
           }
+
         } else if (sheet) {
           // logForm(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
           this.dataBaseIds[k as keyof DateBase] = tables[sheet.name]
@@ -234,6 +238,9 @@ export class VikaDB {
   }
 
   protected static async getSpaceId () {
+    if (this.spaceId) {
+      return this.spaceId
+    }
     const spaceList: any = await this.getAllSpaces()
     for (const i in spaceList) {
       if (spaceList[i].name === this.spaceName) {
@@ -304,14 +311,19 @@ export class VikaDB {
       try {
         const res: any = await this.vika.space(this.spaceId).datasheets.create(datasheetRo)
 
-        console.info(`系统表【${name}】创建结果:`, JSON.stringify(res))
+        console.info(`系统表【${name}】创建结果:`, res.message || 'fail')
 
-        this.dataBaseIds[key as keyof DateBase] = res.data.id
-        this.dataBaseNames[name as keyof DateBase] = res.data.id
-        // console.info('创建表成功：', JSON.stringify(this.dataBaseIds))
-        // 删除空白行
-        await this.clearBlankLines(res.data.id)
-        return res.data
+        if (res.data && res.data.id) {
+          this.dataBaseIds[key as keyof DateBase] = res.data.id
+          this.dataBaseNames[name as keyof DateBase] = res.data.id
+          // console.info('创建表成功：', JSON.stringify(this.dataBaseIds))
+          // 删除空白行
+          await this.clearBlankLines(res.data.id)
+          return res
+        } else {
+          return res
+        }
+
       } catch (error) {
         console.error(name, error)
         return error
@@ -363,7 +375,7 @@ export class VikaDB {
     const datasheet = this.vika.datasheet(datasheetId)
     const response = await datasheet.records.delete(recordsIds)
     if (response.success) {
-      console.info(`删除${recordsIds.length}条记录`)
+      console.info('删除记录成功：', recordsIds.length || '0')
     } else {
       console.error('删除记录失败：', response)
     }
