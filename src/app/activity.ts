@@ -73,14 +73,18 @@ const activityController = async (message: Message, room: Room) => {
 }
 
 export const handleActivityManagement = async (message: Message, room:Room) => {
-  const topic = await room.topic()
-  const isActInRoomWhiteList = await containsRoom(ChatFlowConfig.whiteList.roomWhiteList.act, room)
-  if (isActInRoomWhiteList) {
-    log.info('当前群在act白名单内，开始请求活动管理...')
-    try {
-      await activityController(message, room)
-    } catch (e) {
-      log.error('活动管理失败', topic, e)
+  try {
+    const topic = await room.topic()
+    const isActInRoomWhiteList = await containsRoom(ChatFlowConfig.whiteList.roomWhiteList.act, room)
+    if (isActInRoomWhiteList) {
+      log.info('当前群在act白名单内，开始请求活动管理...')
+      try {
+        await activityController(message, room)
+      } catch (e) {
+        log.error('活动管理失败', topic, e)
+      }
     }
+  } catch (e) {
+    log.error('handleActivityManagement error', e)
   }
 }
