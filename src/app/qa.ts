@@ -8,6 +8,7 @@ import {
   gpt,
 } from '../plugins/mod.js'
 
+// 回复好友消息
 async function handleAutoQAForContact (message: Message, keyWord: string) {
   const talker = message.talker()
   const text = message.text()
@@ -42,12 +43,15 @@ async function handleAutoQAForContact (message: Message, keyWord: string) {
   }
 }
 
+// 回复群消息
 async function handleAutoQA (message: Message, keyWord: string) {
   const room = message.room() as Room
   const topic = await room.topic()
   const text = message.text()
   log.info('群消息请求智能问答：' + JSON.stringify(text === keyWord))
   if (ChatFlowConfig.configEnv.AUTOQA_AUTOREPLY) {
+
+    // 判断是否在微信对话平台白名单内
     const isInRoomWhiteList = await containsRoom(ChatFlowConfig.whiteList.roomWhiteList.qa, room)
     if (isInRoomWhiteList) {
       log.info('当前群在qa白名单内，请求问答...')
@@ -58,6 +62,7 @@ async function handleAutoQA (message: Message, keyWord: string) {
       }
     }
 
+    // 判断是否在gpt白名单内
     const isInGptRoomWhiteList = await containsRoom(ChatFlowConfig.whiteList.roomWhiteList.gpt, room)
     if (isInGptRoomWhiteList) {
       log.info('当前群在qa白名单内，请求问答gpt...')
@@ -84,7 +89,6 @@ export const qa = async (message: Message) => {
   if ((!room || !room.id) && !isSelf) {
     await handleAutoQAForContact(message, keyWord)
   }
-
 }
 
 class EventRegistrationApp extends AppBase {

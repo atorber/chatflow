@@ -169,13 +169,24 @@ const defaultRecords: any
         },
       },
       {
-        recordId: 'rec5gMPYOQi1L',
+        recordId: 'rec5gMPYOQi12',
         createdAt: 1694149439000,
         updatedAt: 1694516688000,
         fields: {
           '标识|key': 'CHATGPT_ENDPOINT',
           '配置项|name': 'ChatGPT-Endpoint',
           '说明|desc': 'openai平台获取',
+        },
+      },
+      {
+        recordId: 'rec5gMPYOQi1L',
+        createdAt: 1694149439000,
+        updatedAt: 1694516688000,
+        fields: {
+          '标识|key': 'CHATGPT_MODEL',
+          '配置项|name': 'ChatGPT-Model',
+          '说明|desc': '默认模型gpt-3.5-turbo，可修改为chatgpt支持的其他模型',
+          '值|value': 'gpt-3.5-turbo',
         },
       },
       {
