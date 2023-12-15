@@ -23,7 +23,7 @@ import {
 } from '../../utils/utils.js'
 
 import { ChatGPTAPI } from 'chatgpt'
-import openai from 'openai-sdk'
+import * as openai from '../../utils/openai-sdk/index.js'
 const {
   init,
   chat,
