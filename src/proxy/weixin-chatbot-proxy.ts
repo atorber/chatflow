@@ -9,12 +9,7 @@ import {
 } from 'wechaty'
 import { formatSentMessage, logger } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/mod.js'
-import openai from 'openai-sdk'
-const {
-  init,
-  chat,
-  // nlp,
-} = openai
+import * as openai from '../utils/openai-sdk/index.js'
 
 async function wxai (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
   const text = extractKeyword(message, bot.currentUser.name())
@@ -127,13 +122,25 @@ async function aibot (sysConfig: ProcessEnv, talker: any, room: any, query: any)
     TOKEN: sysConfig.WXOPENAI_TOKEN,
   }
 
-  async function wxOpenAiRoutine () {
+  openai.init(ops)
+
+  // chat({
+  //   username: "uid",
+  //   msg: "你好吗"
+  // }).then(res => {
+  //     console.log('机器人返回:', res)
+  // }, res => {
+  //     console.log('reject res:', res)
+  // }).catch(e => {
+  //     console.log('error', e)
+  // })
+
+  async function wxOpenAiRoutine (openai: any) {
     logger.info('开始请求微信对话平台...')
-    init(ops)
     try {
       const queryData = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query)
 
-      const resMsg:any = await chat(queryData)
+      const resMsg:any = await openai.chat(queryData)
 
       logger.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
       logger.info(`回答内容： ${resMsg.msgtype}, ${resMsg.query}, ${resMsg.answer}`)
@@ -144,7 +151,7 @@ async function aibot (sysConfig: ProcessEnv, talker: any, room: any, query: any)
     }
   }
 
-  answer = await wxOpenAiRoutine()
+  answer = await wxOpenAiRoutine(openai)
 
   return answer
 }

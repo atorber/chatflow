@@ -12,25 +12,29 @@ async function handleAutoQAForContact (message: Message, keyWord: string) {
   const talker = message.talker()
   const text = message.text()
   log.info('联系人请求智能问答：', (text === keyWord))
+
   if (ChatFlowConfig.configEnv.AUTOQA_AUTOREPLY) {
+    // 判断是否在微信对话平台白名单内
     const isInContactWhiteList = await containsContact(ChatFlowConfig.whiteList.contactWhiteList.qa, talker)
     if (isInContactWhiteList) {
       log.info('当前好友在qa白名单内，请求问答...')
       try {
         await wxai(ChatFlowConfig.configEnv, ChatFlowConfig.bot, message)
       } catch (e) {
-        log.error('发起请求wxai失败', talker.name(), e)
+        log.error('当前好友在qa白名单内，发起请求wxai失败', e)
       }
     } else {
       log.info('当前好友不在qa白名单内，流程结束')
     }
+
+    // 判断是否在gpt白名单内
     const isInGptContactWhiteList = await containsContact(ChatFlowConfig.whiteList.contactWhiteList.gpt, talker)
     if (isInGptContactWhiteList) {
       log.info('当前好友在qa白名单内，请求问答gpt...')
       try {
         await gpt(ChatFlowConfig.bot, message)
       } catch (e) {
-        log.error('发起请求wxai失败', talker.name(), e)
+        log.error('发起请求gpt失败', e)
       }
     } else {
       log.info('当前好友不在gpt白名单内，gpt流程结束')
@@ -50,7 +54,7 @@ async function handleAutoQA (message: Message, keyWord: string) {
       try {
         await wxai(ChatFlowConfig.configEnv, ChatFlowConfig.bot, message)
       } catch (e) {
-        log.error('发起请求wxai失败', topic, e)
+        log.error('当前群在qa白名单内，发起请求wxai失败', e)
       }
     }
 
