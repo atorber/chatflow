@@ -15,14 +15,21 @@ async function gpt (bot: Wechaty, message: Message) {
   // const talker = message.talker()
   // const room = message.room()
   let answer: any = {}
-  if (message.type() === types.Message.Text) {
-    answer = await aibot(text)
-  }
 
-  logger.info('回复消息：', JSON.stringify(answer))
+  try {
+    if (message.type() === types.Message.Text) {
+      answer = await aibot(text)
+    }
 
-  if (isValidAnswer(answer)) {
-    await handleAnswer(answer, bot, message)
+    logger.info('回复消息：', JSON.stringify(answer))
+
+    if (isValidAnswer(answer)) {
+      await handleAnswer(answer, bot, message)
+    }
+  } catch (error) {
+    logger.error('请求gpt Error:', error)
+    logger.error(`查询内容，query: ${text}`)
+
   }
 }
 
@@ -112,7 +119,7 @@ async function aibot (query: any) {
     const response = await axios.post(
       `${ChatFlowConfig.configEnv.CHATGPT_ENDPOINT}/v1/chat/completions`,
       {
-        model: ChatFlowConfig.configEnv.CHATGPT_MODEL,  // 使用的模型
+        model: ChatFlowConfig.configEnv.CHATGPT_MODEL || 'gpt-3.5-turbo',  // 使用的模型
         messages: [
           // {role: 'system', content: 'You are a helpful assistant.'},
           { role: 'user', content: query },
@@ -148,7 +155,7 @@ async function aibot (query: any) {
 
 export function prepareChatGptBody (content: string) {
   return {
-    model: ChatFlowConfig.configEnv['CHATGPT_MODEL'],
+    model: ChatFlowConfig.configEnv['CHATGPT_MODEL'] || 'gpt-3.5-turbo',
     prompt: content,
     temperature: 0.7,
     // n: 1,
