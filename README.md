@@ -1,9 +1,7 @@
 <!-- markdownlint-disable MD013 MD033 -->
 # ChatFlow
 
-<img alt="GitHub stars badge" src="https://img.shields.io/github/stars/atorber/chatflow"> <img alt="GitHub forks badge" src="https://img.shields.io/github/forks/atorber/chatflow"> <img alt="GitHub license badge" src="https://img.shields.io/github/license/atorber/chatflow">
-
-[![NPM Version](https://img.shields.io/npm/v/@atorber/chatflow?color=brightgreen)](https://www.npmjs.com/package/@atorber/chatflow)
+<img alt="GitHub stars badge" src="https://img.shields.io/github/stars/atorber/chatflow"> <img alt="GitHub forks badge" src="https://img.shields.io/github/forks/atorber/chatflow"> <img alt="GitHub license badge" src="https://img.shields.io/github/license/atorber/chatflow"> [![NPM Version](https://img.shields.io/npm/v/@atorber/chatflow?color=brightgreen)](https://www.npmjs.com/package/@atorber/chatflow)
 
 wechat-qa-bot 更名为ChatFlow，[访问项目语雀文档了解更多信息](https://www.yuque.com/atorber/chatflow)
 
