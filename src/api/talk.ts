@@ -299,7 +299,7 @@ export const getTalkRecord = async (param: {
         break
     }
 
-    if (dispayname) {
+    if (dispayname && messageType !== 'Unknown') {
       const id = new Date(timeHms).getTime()
       return {
         id,

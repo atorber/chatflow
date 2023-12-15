@@ -291,6 +291,7 @@ export class MessageChat extends BaseEntity {
     const room = message.room()
     const talker = message.talker()
     const files: any = []
+    const type = message.type()
     try {
 
       let uploadedAttachments:any = ''
@@ -301,7 +302,7 @@ export class MessageChat extends BaseEntity {
       let urlLink
       let miniProgram
 
-      switch (message.type()) {
+      switch (type) {
         // 文本消息
         case types.Message.Text:
           text = message.text()
@@ -418,6 +419,7 @@ export class MessageChat extends BaseEntity {
         case types.Message.Unknown:
           // const location = await message.toLocation()
           // text = JSON.stringify(JSON.parse(JSON.stringify(location)).payload)
+          text = 'Unknown'
           break
         // 其他消息
         default:
@@ -494,7 +496,7 @@ export class MessageChat extends BaseEntity {
           },
         }
         // logger.info('addChatRecord:', JSON.stringify(record))
-        if (message.type() !== types.Message.Unknown) {
+        if (msgType !== 'Unknown') {
           await this.addChatRecord(record)
         }
       } catch (e) {
