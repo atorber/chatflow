@@ -1,12 +1,8 @@
 <!-- markdownlint-disable MD013 MD033 -->
 # ChatFlow
 
-<img alt="GitHub stars badge" src="https://img.shields.io/github/stars/atorber/chatflow"> <img alt="GitHub forks badge" src="https://img.shields.io/github/forks/atorber/chatflow"> <img alt="GitHub license badge" src="https://img.shields.io/github/license/atorber/chatflow"> 
-
-[![NPM Version](https://img.shields.io/npm/v/@atorber/chatflow?color=brightgreen)](https://www.npmjs.com/package/@atorber/chatflow)
-![npm downloads](https://img.shields.io/npm/dm/@atorber/chatflow.svg)
-
- ![Docker Pulls](https://img.shields.io/docker/pulls/atorber/chatflow)
+<img alt="GitHub stars badge" src="https://img.shields.io/github/stars/atorber/chatflow"> <img alt="GitHub forks badge" src="https://img.shields.io/github/forks/atorber/chatflow"> <img alt="GitHub license badge" src="https://img.shields.io/github/license/atorber/chatflow"> [![NPM Version](https://img.shields.io/npm/v/@atorber/chatflow?color=brightgreen)](https://www.npmjs.com/package/@atorber/chatflow)
+![npm downloads](https://img.shields.io/npm/dm/@atorber/chatflow.svg) ![Docker Pulls](https://img.shields.io/docker/pulls/atorber/chatflow)
  ![Docker Image Size](https://img.shields.io/docker/image-size/atorber/chatflow/latest) ![Docker Stars](https://img.shields.io/docker/stars/atorber/chatflow)
 
 ## 简介
