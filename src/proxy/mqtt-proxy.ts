@@ -835,6 +835,7 @@ class MqttProxy {
               resData.description = '获取群成员列表成功'
               if (this.instance?.responseApi) {
                 this.instance.publish(this.instance.responseApi, JSON.stringify(resData))
+                log.info('发送MQTT消息:', resData.reqId, resData.description)
               }
             } else {
               resData.reqId = message.reqId
@@ -842,6 +843,7 @@ class MqttProxy {
               resData.description = '获取群成员列表成功'
               if (this.instance?.responseApi) {
                 this.instance.publish(this.instance.responseApi, JSON.stringify(resData))
+                log.info('发送MQTT消息:', resData.reqId, resData.description)
               }
             }
             return resData
@@ -853,6 +855,7 @@ class MqttProxy {
             resData.description = '获取群成员列表失败'
             if (this.instance?.responseApi) {
               this.instance.publish(this.instance.responseApi, JSON.stringify(resData))
+              log.info('发送MQTT消息:', resData.reqId, resData.description)
             }
             return resData
           }

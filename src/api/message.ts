@@ -287,27 +287,31 @@ export const formatMessageToCloud = async (message: Message) => {
 
     try {
 
-      const record = {
-        fields: {
-          '时间|timeHms':timeHms,
-          '发送者|name': talker.name(),
-          '好友备注|alias': await talker.alias(),
-          '群名称|topic': topic || '--',
-          '消息内容|messagePayload': text,
-          '好友ID|wxid': talker.id !== 'null' ? talker.id : '--',
-          '群ID|roomid': room && room.id ? room.id : '--',
-          '消息类型|messageType': msgType,
-          '文件图片|file': files,
-          '消息ID|messageId': message.id,
-          '接收人|listener': topic ? '--' : (await listener?.alias() || listener?.name()),
-          '接收人ID|listenerid':topic ? '--' : listener?.id,
-          '发送者头像|wxAvatar': wxAvatar,
-          '群头像|roomAvatar':roomAvatar,
-          '接收人头像|listenerAvatar':listenerAvatar,
-        },
+      if (msgType !== 'Unknown') {
+        const record = {
+          fields: {
+            '时间|timeHms':timeHms,
+            '发送者|name': talker.name(),
+            '好友备注|alias': await talker.alias(),
+            '群名称|topic': topic || '--',
+            '消息内容|messagePayload': text,
+            '好友ID|wxid': talker.id !== 'null' ? talker.id : '--',
+            '群ID|roomid': room && room.id ? room.id : '--',
+            '消息类型|messageType': msgType,
+            '文件图片|file': files,
+            '消息ID|messageId': message.id,
+            '接收人|listener': topic ? '--' : (await listener?.alias() || listener?.name()),
+            '接收人ID|listenerid':topic ? '--' : listener?.id,
+            '发送者头像|wxAvatar': wxAvatar,
+            '群头像|roomAvatar':roomAvatar,
+            '接收人头像|listenerAvatar':listenerAvatar,
+          },
+        }
+        // logger.info('addChatRecord:', JSON.stringify(record))
+        return record
+      } else {
+        return undefined
       }
-      // logger.info('addChatRecord:', JSON.stringify(record))
-      return record
     } catch (e) {
       log.error('添加记录失败：', e)
       return undefined

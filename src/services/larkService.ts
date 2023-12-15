@@ -427,7 +427,8 @@ export class LarkChat {
           },
         }
         log.info('addChatRecord:', JSON.stringify(record))
-        if (message.type() !== types.Message.Unknown) {
+
+        if (msgType !== 'Unknown') {
           await this.addChatRecord(record)
         }
       } catch (e) {
