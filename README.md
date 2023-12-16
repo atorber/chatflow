@@ -1,11 +1,9 @@
 <!-- markdownlint-disable MD013 MD033 -->
 # ChatFlow
 
-<img alt="GitHub stars badge" src="https://img.shields.io/github/stars/atorber/chatflow"> <img alt="GitHub forks badge" src="https://img.shields.io/github/forks/atorber/chatflow"> <img alt="GitHub license badge" src="https://img.shields.io/github/license/atorber/chatflow">
-
-wechat-qa-bot 更名为ChatFlow，[访问项目语雀文档了解更多信息](https://www.yuque.com/atorber/chatflow)
-
-> 最新版本2.0.25是相对稳定的版本，数据表与之前版本不兼容，在运行时建议配置全新的维格表空间或删除原空间全部表
+<img alt="GitHub stars badge" src="https://img.shields.io/github/stars/atorber/chatflow"> <img alt="GitHub forks badge" src="https://img.shields.io/github/forks/atorber/chatflow"> <img alt="GitHub license badge" src="https://img.shields.io/github/license/atorber/chatflow"> [![NPM Version](https://img.shields.io/npm/v/@atorber/chatflow?color=brightgreen)](https://www.npmjs.com/package/@atorber/chatflow)
+![npm downloads](https://img.shields.io/npm/dm/@atorber/chatflow.svg) ![Docker Pulls](https://img.shields.io/docker/pulls/atorber/chatflow)
+ ![Docker Image Size](https://img.shields.io/docker/image-size/atorber/chatflow/latest) ![Docker Stars](https://img.shields.io/docker/stars/atorber/chatflow)
 
 ## 简介
 
@@ -19,9 +17,9 @@ ChatFlow是一个聊天机器人管理系统，可以帮助你实现一些原生
 
 已适配网页版微信，支持在Linux、Mac、Windows上运行。
 
-### 功能列表
+[访问项目语雀文档查看完整使用说明](https://www.yuque.com/atorber/chatflow)
 
-[详细功能查看](https://www.yuque.com/atorber/oegota/aialc7sbyb4ldmg4/edit)
+### 功能列表
 
 |功能|描述|
 |--|--|
@@ -34,9 +32,11 @@ ChatFlow是一个聊天机器人管理系统，可以帮助你实现一些原生
 |MQTT消息推送|支持配置一个MQTTQ消息队列，将消息推送到队列当中|
 |远程控制发消息|支持通过MQTT控制机器人向指定好友或群发消息|
 
-## 快速开始
+> 移步语雀文档查看 [详细功能查看](https://www.yuque.com/atorber/oegota/aialc7sbyb4ldmg4/edit)
 
-[手把手教程](https://www.yuque.com/atorber/oegota/zm4ulnwnqp9whmd6)
+## 快速开始 
+
+> 2.0.25+之后的版本，数据表不兼容，在运行时建议配置全新的维格表空间或删除原空间全部表
 
 1.下载源码并安装依赖
 
@@ -90,6 +90,8 @@ npm run start
 注意，因为wechaty-puppet-xp必须依赖Windows微信客户端，所以不能使用Docker，但使用wechaty-puppet-padlocal、wechaty-puppet-service则可以用Doker来部署，
 
 最新代码已经默认wechaty-puppet-wehcat为初始化puppet，mac、linux系统直接拉取镜像即可运行（mac M1需要自行打包镜像）
+
+> 移步语雀文档查看 [手把手教程](https://www.yuque.com/atorber/oegota/zm4ulnwnqp9whmd6)
 
 ### Wechaty-Puppet支持
 
