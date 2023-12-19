@@ -88,7 +88,7 @@ export interface MessageToCloud {
 }
 
 export const formatMessageToCloud = async (message: Message) => {
-  log.info('消息存储到lark...')
+  log.info('formatMessageToCloud 消息转换为存储到多维表格的格式...')
   const room = message.room()
   const talker = message.talker()
   try {
@@ -328,8 +328,10 @@ export const saveMessageToCloud = async (record:any) => {
   // log.info('saveMessageToCloud messageNew:', JSON.stringify(messageNew))
   try {
     if (ChatFlowConfig.dataBaseType === 'lark') {
+      log.info('消息写入到lark:', JSON.stringify(record))
       await LarkChat.addChatRecord(record)
     } else {
+      log.info('消息写入到vika:', JSON.stringify(record))
       await MessageChat.addChatRecord(record)
     }
     // log.info('消息写入数据库成功:', res._id)
