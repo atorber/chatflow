@@ -215,7 +215,7 @@ export class LarkChat {
   }
 
   static async onMessage (message: Message) {
-    log.info('消息存储到lark...')
+    log.info('调用onMessage消息存储到lark...')
     const room = message.room()
     const talker = message.talker()
     const files: any = []

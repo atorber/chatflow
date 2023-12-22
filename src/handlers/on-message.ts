@@ -21,7 +21,7 @@ import { qa } from '../app/qa.js'
 import { handleActivityManagement } from '../app/activity.js'
 import { extractAtContent } from '../app/extract-at.js'
 
-export async function onMessage (message: Message) {
+export async function onMessage(message: Message) {
 
   // 存储消息到db，如果写入失败则终止，用于检测是否是重复消息
   try {
@@ -33,8 +33,12 @@ export async function onMessage (message: Message) {
   }
 
   // 输出格式化消息log
-  const chatMessage = await formatMessageToLog(message)
-  logForm(JSON.stringify(chatMessage))
+  try {
+    const chatMessage = await formatMessageToLog(message)
+    logForm(JSON.stringify(chatMessage))
+  } catch (e) {
+    log.error('消息格式化失败:\n', e)
+  }
 
   // 请求管理员群操作
   try {

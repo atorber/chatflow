@@ -57,7 +57,7 @@ export const extractAtContent = async (message: Message): Promise<string | null>
 
       p = p + chatText
 
-      p = `微信群聊天记录:\n${chatText}\n\n指令:\n你是微信聊天群里的成员【${keyWord}】，你正在参与大家的群聊天，先在轮到你发言了，你的回复尽可能清晰、严谨，字数不超过150字，并且你需要使用${role}的风格回复。当前时间是${time}。`
+      p = `微信群聊天记录:\n${chatText}\n\n指令:\n你是微信聊天群里的成员【${keyWord}】，你正在参与大家的群聊天，现在轮到你发言了，你的回复尽可能清晰、严谨，字数不超过150字，并且你需要使用${role}的风格回复。当前时间是${time}。`
 
       p = p + `\n\n最新的对话:\n[${time} ${message.talker().name()}]：${newText}\n[${time} ${keyWord}]：`
       log.info('提示词：', p)
