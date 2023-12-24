@@ -579,7 +579,11 @@ class MqttProxy {
       this.isConnected = true
       // 发送所有排队的消息
       this.messageQueue.forEach(({ topic, message }) => {
-        this.mqttClient.publish(topic, message)
+        try {
+          this.mqttClient.publish(topic, message)
+        } catch (error) {
+          console.error(`Failed to publish message: ${error}`)
+        }
       })
       // 清空消息队列
       this.messageQueue = []
@@ -626,15 +630,19 @@ class MqttProxy {
     // 加密
     message = encrypt(message, MqttProxy.key)
 
-    if (this.isConnected) {
-      this.mqttClient.publish(topic, message, (error) => {
-        if (error) {
-          console.error(`Failed to publish message: ${error}`)
-        }
-      })
-    } else {
-      log.info('MQTT client not connected. Queueing message.')
-      this.messageQueue.push({ topic, message })
+    try {
+      if (this.isConnected) {
+        this.mqttClient.publish(topic, message, (error) => {
+          if (error) {
+            console.error(`Failed to publish message: ${error}`)
+          }
+        })
+      } else {
+        log.info('MQTT client not connected. Queueing message.')
+        this.messageQueue.push({ topic, message })
+      }
+    } catch (err) {
+      log.error('publish err:', err)
     }
   }
 
@@ -650,16 +658,25 @@ class MqttProxy {
     // 加密
     msg = encrypt(msg, MqttProxy.key)
 
-    this.mqttClient.publish(this.propertyApi, msg)
-    logger.info('mqtt消息发布:' + this.eventApi, msg)
+    try {
+      this.mqttClient.publish(this.propertyApi, msg)
+      logger.info('mqtt消息发布:' + this.eventApi, msg)
+    } catch (err) {
+      console.error('pubProperty err:', err)
+    }
   }
 
   pubEvent (msg: any) {
     // 加密
     msg = encrypt(msg, MqttProxy.key)
 
-    this.mqttClient.publish(this.eventApi, msg)
-    logger.info('mqtt消息发布:' + this.eventApi, msg)
+    try {
+      this.mqttClient.publish(this.eventApi, msg)
+      logger.info('mqtt消息发布:' + this.eventApi, msg)
+    } catch (err) {
+      console.error('pubEvent err:', err)
+    }
+
   }
 
   async pubMessage (msg: any) {
