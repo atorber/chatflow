@@ -21,7 +21,7 @@ import { qa } from '../app/qa.js'
 import { handleActivityManagement } from '../app/activity.js'
 import { extractAtContent } from '../app/extract-at.js'
 
-export async function onMessage(message: Message) {
+export async function onMessage (message: Message) {
 
   // 存储消息到db，如果写入失败则终止，用于检测是否是重复消息
   try {
@@ -87,7 +87,9 @@ export async function onMessage(message: Message) {
   try {
     const mqttProxy = MqttProxy.getInstance()
     if (mqttProxy && mqttProxy.isOk && ChatFlowConfig.configEnv.MQTT_MQTTMESSAGEPUSH) {
-      mqttProxy.pubEvent(eventMessage('onMessage', await formatMessageToMQTT(message)))
+      const messageToMQTT = await formatMessageToMQTT(message)
+      const eventMessagePayload = eventMessage('onMessage', messageToMQTT)
+      mqttProxy.pubEvent(eventMessagePayload)
     }
   } catch (e) {
     log.error('消息MQTT上报失败:\n', e)
