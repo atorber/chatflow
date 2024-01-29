@@ -36,7 +36,43 @@ function ChatFlow (): WechatyPlugin {
 
 }
 
+const init = async (options:{
+  spaceName?: string
+  spaceId?: string
+  token: string
+}, bot:Wechaty) => {
+  ChatFlowConfig.bot = bot
+  // 使用Vika
+  await VikaDB.init(options)
+  // 从配置文件中读取配置信息，包括wechaty配置、mqtt配置以及是否启用mqtt推送或控制
+  const config: {
+      mqttConfig: IClientOptions,
+      wechatyConfig: WechatyConfig,
+      mqttIsOn: boolean,
+    } | undefined = await ChatFlowConfig.init() // 默认使用vika，使用lark时，需要传入'lark'参数await ChatFlowConfig.init('lark')
+    // log.info('config', JSON.stringify(config, undefined, 2))
+  if (config) {
+    // 构建机器人
+    // 如果MQTT推送或MQTT控制打开，则启动MQTT代理
+    if (config.mqttIsOn) {
+      log.info('启动MQTT代理...', JSON.stringify(config.mqttConfig))
+      try {
+        const mqttProxy = MqttProxy.getInstance(config.mqttConfig)
+        if (mqttProxy) {
+          mqttProxy.setWechaty(ChatFlowConfig.bot)
+        }
+      } catch (e) {
+        log.error('MQTT代理启动失败，检查mqtt配置信息是否正确...', e)
+      }
+    }
+
+  } else {
+    logForm('维格表配置不全，缺少必要的配置信息')
+  }
+}
+
 export {
+  init,
   getBotOps,
   ChatFlowConfig,
   log,

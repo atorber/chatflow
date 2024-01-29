@@ -1,6 +1,6 @@
 {
   "name": "@atorber/chatflow",
-  "version": "2.0.71",
+  "version": "2.0.72",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
@@ -113,5 +113,10 @@
   ],
   "publishConfig": {
     "tag": "next"
+  },
+  "git": {
+    "scripts": {
+      "pre-push": "npx git-scripts-pre-push"
+    }
   }
 }
