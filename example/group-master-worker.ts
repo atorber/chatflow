@@ -11,6 +11,7 @@ const main = async () => {
 
   const puppet = process.env['WECHATY_PUPPET']
   const token = process.env['WECHATY_TOKEN']
+
   const config: GroupMasterConfig = {
     WX_KEY:process.env['GROUP_MASTER_WX_KEY'] || '',
     MQTT_ENDPOINT:process.env['GROUP_MASTER_MQTT_ENDPOINT'] || '',
