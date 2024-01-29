@@ -713,29 +713,49 @@ class MqttProxy {
       // MQTTAgent.handleMQTTMessage(name, params)
 
       if (MqttProxy.instance) {
-        if (name === 'start') {
+        if (name === 'start') { // 启动
           logger.info('cmd name:' + name)
+          try {
+            await this.chatbot.start()
+          } catch (err) {
+            logger.error('启动失败：', err)
+          }
         }
-        if (name === 'stop') {
+        if (name === 'stop') { // 停止
           logger.info('cmd name:' + name)
+          try {
+            await this.chatbot.stop()
+          } catch (err) {
+            logger.error('停止失败：', err)
+          }
         }
-        if (name === 'logout') {
+        if (name === 'logout') { // 登出
+          logger.info('cmd name:' + name)
+          try {
+            await this.chatbot.logout()
+          } catch (err) {
+            logger.error('登出失败：', err)
+          }
+
+        }
+        if (name === 'logonoff') { // 获取登录状态
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'logonoff') {
+        if (name === 'getUserSelf') { // 获取当前登录用户信息
+          logger.info('cmd name:' + name)
+          try {
+            const userSelf = await this.chatbot.currentUser
+            logger.info('userSelf:', userSelf)
+          } catch (err) {
+            logger.error('获取用户失败：', err)
+          }
+        }
+        if (name === 'say') { // 发送消息
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'userSelf') {
-          logger.info('cmd name:' + name)
-
-        }
-        if (name === 'say') {
-          logger.info('cmd name:' + name)
-
-        }
-        if (name === 'send') {
+        if (name === 'send') { // 发送消息
           send(params, MqttProxy.chatbot)
             .then(async res => {
               log.info('send res:', res)
@@ -745,7 +765,7 @@ class MqttProxy {
               log.error('send err:', err)
             })
         }
-        if (name === 'sendAt') {
+        if (name === 'sendAt') { // 发送@消息
           sendAt(params, MqttProxy.chatbot)
             .then(async res => {
               log.info('sendAt res:', res)
@@ -756,16 +776,15 @@ class MqttProxy {
               log.error('sendAt err:', err)
             })
         }
-
-        if (name === 'aliasGet') {
+        if (name === 'aliasGet') { // 获取好友备注
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'aliasSet') {
+        if (name === 'aliasSet') { // 设置好友备注
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'roomCreate') {
+        if (name === 'roomCreate') { // 创建群
           createRoom(params, MqttProxy.chatbot)
             .then(res => {
               log.info('roomCreate res:', res)
@@ -774,35 +793,35 @@ class MqttProxy {
               log.error('roomCreate err:', err)
             })
         }
-        if (name === 'roomAdd') {
+        if (name === 'roomAdd') { // 添加群成员
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'roomDel') {
+        if (name === 'roomDel') { // 删除群成员
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'roomAnnounceGet') {
+        if (name === 'roomAnnounceGet') { // 获取群公告
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'roomAnnounceSet') {
+        if (name === 'roomAnnounceSet') { // 设置群公告
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'roomQuit') {
+        if (name === 'roomQuit') { // 退出群
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'roomTopicGet') {
+        if (name === 'roomTopicGet') { // 获取群名称
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'roomTopicSet') {
+        if (name === 'roomTopicSet') { // 设置群名称
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'roomQrcodeGet') {
+        if (name === 'roomQrcodeGet') { // 获取群二维码
           getQrcod(params, MqttProxy.chatbot, MqttProxy.instance).then(res => {
             log.info('roomQrcodeGet res:', res)
             return res
@@ -812,9 +831,7 @@ class MqttProxy {
           })
 
         }
-
-        // 获取群成员列表
-        if (name === 'memberAllGet') {
+        if (name === 'memberAllGet') { // 获取群成员列表
           log.info('cmd name:' + name)
           const resData = {
             reqId:'442c1da4-9d3a-4f9b-a6e9-bfe858e4ac43',
@@ -877,15 +894,15 @@ class MqttProxy {
             return resData
           }
         }
-        if (name === 'contactAdd') {
+        if (name === 'contactAdd') { // 添加好友
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'contactAliasSet') {
+        if (name === 'contactAliasSet') { // 设置好友备注
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'contactFindAll') {
+        if (name === 'contactFindAll') { // 获取好友列表
           getAllContact(MqttProxy.instance, MqttProxy.chatbot).then(res => {
             log.info('contactFindAll res:', res)
             return res
@@ -894,11 +911,11 @@ class MqttProxy {
             log.error('contactFindAll err:', err)
           })
         }
-        if (name === 'contactFind') {
+        if (name === 'contactFind') { // 获取好友信息
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'roomFindAll') {
+        if (name === 'roomFindAll') { // 获取群列表
 
           getAllRoom(MqttProxy.instance, MqttProxy.chatbot).then(res => {
             log.info('roomFindAll res:', res)
@@ -909,11 +926,11 @@ class MqttProxy {
           })
 
         }
-        if (name === 'roomFind') {
+        if (name === 'roomFind') { // 获取群信息
           logger.info('cmd name:' + name)
 
         }
-        if (name === 'config') {
+        if (name === 'config') { // 获取配置信息
           logger.info('cmd name:' + name)
 
         }
