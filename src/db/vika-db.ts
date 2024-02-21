@@ -113,6 +113,7 @@ export class VikaDB {
               type: field?.type || '',
               name: field?.name || '',
               desc: field?.desc || '',
+              // property:{},
             }
             // console.info('字段定义：', JSON.stringify(field))
             let options
@@ -129,7 +130,7 @@ export class VikaDB {
                 for (let z = 0; z < options.length; z++) {
                   const option = {
                     name: options[z].name,
-                    color: options[z].color.name,
+                    // color: options[z].color.name,
                   }
                   newField.property.options.push(option)
                 }
@@ -188,7 +189,7 @@ export class VikaDB {
             }
           }
 
-          // console.info('创建表，表信息：', JSON.stringify(newFields, undefined, 2))
+          console.info('创建表，表信息：', JSON.stringify(newFields, undefined, 2))
 
           const resCreate = await this.createDataSheet(k, sheet.name, newFields)
           if (resCreate.success) {
@@ -207,6 +208,7 @@ export class VikaDB {
               logForm(sheet.name + '初始化数据写入完成...')
             }
           } else {
+            console.info('创建表失败：', resCreate)
             throw new Error(`创建表【${sheet.name}】失败,启动中止，需要重新运行...`)
           }
 
@@ -325,7 +327,7 @@ export class VikaDB {
         }
 
       } catch (error) {
-        console.error(name, error)
+        console.error(`系统表${name}创建失败:`, error)
         return error
         // TODO: handle error
       }
