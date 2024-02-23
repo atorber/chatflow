@@ -47,7 +47,8 @@ export enum EnvironmentVariables {
 
 export interface ProcessEnv {
     // 维格表配置
-    VIKA_SPACE_NAME: string;
+    VIKA_SPACE_NAME?: string;
+    VIKA_SPACE_ID?: string;
     VIKA_TOKEN: string;
 
     // Wechaty配置

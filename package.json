@@ -1,6 +1,6 @@
 {
   "name": "@atorber/chatflow",
-  "version": "2.0.73",
+  "version": "3.0.0",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
@@ -29,6 +29,7 @@
     "start:store": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/plugins/store-messages-locally.ts",
     "start:lark": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/lark.ts",
     "start:api": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/api.ts",
+    "start:auth": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/auth.ts",
     "rm-temp": "rm -r temp; mkdir temp",
     "rm-cache": "rm -r cache; mkdir cache",
     "test": "npm run lint",
@@ -55,7 +56,7 @@
     "@vikadata/vika": "^1.0.5",
     "@yuque/sdk": "^1.1.1",
     "api2d": "^0.1.23",
-    "axios": "^1.4.0",
+    "axios": "^1.6.7",
     "axios-retry": "^3.8.0",
     "boxen": "^7.1.1",
     "chatgpt": "^1.4.0",
