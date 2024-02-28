@@ -15,6 +15,7 @@ import type {
   IClientOptions,
 } from '../proxy/mqtt-proxy.js'
 import CryptoJS from 'crypto-js'
+import { ServeGetUserConfig } from '../api/user.js'
 
 export type WechatyConfig = {
   puppet: string,
@@ -88,6 +89,157 @@ export class BiDirectionalMap {
 }
 
 export class ChatFlowConfig {
+
+  static envsOnVika: any[]
+  static switchsOnVika: any[]
+  static reminderList: any[]
+  static statisticRecords: any
+  static configEnv : ProcessEnv
+  static dataBaseType: 'vika' | 'lark'
+
+  static whiteList:WhiteList = {
+    contactWhiteList: {
+      qa: [],
+      msg: [],
+      act: [],
+      gpt: [],
+    },
+    roomWhiteList: {
+      qa: [],
+      msg: [],
+      act: [],
+      gpt: [],
+    },
+  }
+
+  static bot:Wechaty
+
+  static async init (dataBaseType?:'vika' | 'lark') {
+    this.dataBaseType = dataBaseType || 'vika'
+    // log.info('初始化维格配置信息...,init()')
+    if (this.dataBaseType === 'vika' && VikaDB.spaceId) {
+      const vikaData: any = {}
+      // const vikaIdMap: any = {}
+      // const configRecords: any[] = await VikaDB.getAllRecords(VikaDB.dataBaseIds.envSheet)
+      // log.info('configRecords', JSON.stringify(configRecords))
+
+      const userConfig = await ServeGetUserConfig()
+      // log.info('userConfig', JSON.stringify(userConfig))
+
+      const configRecords = userConfig.data
+      for (let i = 0; i < configRecords.length; i++) {
+        const record = configRecords[i]
+        if (record['key']) {
+          if (record['value'] && [ 'false', 'true' ].includes(record['value'])) {
+            vikaData[record['key'] as string] = record['value'] === 'true'
+          } else {
+            vikaData[record['key'] as string] = record['value'] || ''
+          }
+        }
+      }
+
+      this.configEnv = vikaData
+      const wechatyConfig: WechatyConfig = {
+        puppet: this.configEnv.WECHATY_PUPPET,
+        token: this.configEnv.WECHATY_TOKEN,
+      }
+
+      // 计算clientid原始字符串
+      const clientString = VikaDB.token + VikaDB.spaceId
+      // clientid加密
+      const client = CryptoJS.SHA256(clientString).toString()
+
+      const mqttConfig:IClientOptions = {
+        username: this.configEnv.MQTT_USERNAME,
+        password: this.configEnv.MQTT_PASSWORD,
+        host: this.configEnv.MQTT_ENDPOINT,
+        protocol:'mqtts',
+        port: Number(this.configEnv.MQTT_PORT),
+        clientId: client,
+        clean: false,
+        reconnectPeriod: 1000,
+        connectTimeout: 30 * 1000,
+        keepalive: 60,
+        resubscribe: true,
+        protocolId: 'MQTT',
+        protocolVersion: 4,
+        rejectUnauthorized: false,
+      }
+
+      // log.info('mqttConfig', JSON.stringify(mqttConfig, undefined, 2))
+      const mqttIsOn = Boolean(this.configEnv.MQTT_MQTTMESSAGEPUSH || this.configEnv.MQTT_MQTTCONTROL)
+
+      // log.info('vikaBot配置信息：', JSON.stringify(configVika, undefined, 2))
+
+      return {
+        wechatyConfig,
+        mqttConfig,
+        mqttIsOn,
+      }
+    } else if (this.dataBaseType === 'lark' && LarkDB.config.appToken) {
+      const vikaIdMap: any = {}
+      const vikaData: any = {}
+      const configRecords: any[] = await LarkDB.getAllRecords(LarkDB.dataBaseIds.envSheet)
+      for (let i = 0; i < configRecords.length; i++) {
+        const record: IRecord = configRecords[i] as IRecord
+        const fields = record.fields
+        const recordId = record.recordId
+        if (fields['标识|key']) {
+          if (fields['值|value'] && [ 'false', 'true' ].includes(fields['值|value'])) {
+            vikaData[record.fields['标识|key'] as string] = fields['值|value'] === 'true'
+          } else {
+            vikaData[record.fields['标识|key'] as string] = fields['值|value'] || ''
+          }
+          vikaIdMap[record.fields['标识|key'] as string] = recordId
+        }
+      }
+
+      this.configEnv = vikaData
+      const wechatyConfig: WechatyConfig = {
+        puppet: this.configEnv.WECHATY_PUPPET,
+        token: this.configEnv.WECHATY_TOKEN,
+      }
+
+      // 计算clientid原始字符串
+      const clientString = LarkDB.config.appId + LarkDB.config.appSecret + LarkDB.config.appToken
+      // clientid加密
+      const client = CryptoJS.SHA256(clientString).toString()
+
+      const mqttConfig:IClientOptions = {
+        username: this.configEnv.MQTT_USERNAME,
+        password: this.configEnv.MQTT_PASSWORD,
+        host: this.configEnv.MQTT_ENDPOINT,
+        port: Number(this.configEnv.MQTT_PORT),
+        protocol:'mqtts',
+        clientId: client,
+        clean: false,
+        reconnectPeriod: 1000,
+        connectTimeout: 30 * 1000,
+        keepalive: 60,
+        resubscribe: true,
+        protocolId: 'MQTT',
+        protocolVersion: 4,
+        rejectUnauthorized: false,
+      }
+
+      const mqttIsOn = Boolean(this.configEnv.MQTT_MQTTMESSAGEPUSH || this.configEnv.MQTT_MQTTCONTROL)
+
+      // log.info('vikaBot配置信息：', JSON.stringify(configVika, undefined, 2))
+
+      return {
+        wechatyConfig,
+        mqttConfig,
+        mqttIsOn,
+      }
+    } else {
+      log.error('\n\n指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息\n\n================================================\n')
+      return undefined
+    }
+  }
+
+}
+
+export class ChatFlowConfig2 {
 
   static envsOnVika: any[]
   static switchsOnVika: any[]

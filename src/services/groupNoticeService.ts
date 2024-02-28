@@ -1,5 +1,4 @@
 /* eslint-disable sort-keys */
-/* eslint-disable sort-keys */
 import type { TaskConfig, Notifications } from '../api/base-config.js'
 import { VikaDB } from '../db/vika-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'

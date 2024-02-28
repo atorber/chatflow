@@ -5,6 +5,7 @@ import { Wechaty, log } from 'wechaty'
 
 import { VikaSheet, IRecord } from '../db/vika.js'
 import { logger } from '../utils/mod.js'
+import { ServeGetKeywords } from '../api/keyword.js'
 
 // 服务类
 export class KeywordChat {
@@ -36,21 +37,24 @@ export class KeywordChat {
   }
 
   static async getKeywordsText () {
-    const records = await this.getKeywords()
+    // const records = await this.getKeywords()
+    const res = await ServeGetKeywords()
+    const records = res.data.list
+
     let text :string = '【操作说明】\n'
-    for (const record of records) {
-      const fields = record.fields
-      text += `${fields['指令名称|name']}：${fields['说明|desc']}\n`
+    for (const fields of records) {
+      text += `${fields['name']}：${fields['desc']}\n`
     }
     return text
   }
 
   static async getSystemKeywordsText () {
-    const records = await this.getKeywords()
+    // const records = await this.getKeywords()
+    const res = await ServeGetKeywords()
+    const records = res.data.list
     let text :string = '【操作说明】\n'
-    for (const record of records) {
-      const fields = record.fields
-      if (fields['类型|type'] === '系统指令') text += `${fields['指令名称|name']} : ${fields['说明|desc']}\n`
+    for (const fields of records) {
+      if (fields['type'] === '系统指令') text += `${fields['name']} : ${fields['desc']}\n`
     }
     return text
   }

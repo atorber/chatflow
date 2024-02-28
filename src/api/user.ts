@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { EnvChat } from '../services/mod.js'
+import { post, get } from '../utils/request.js'
 
 // 查询用户信息接口
 export const getUserInfo = (_params: any) => {
@@ -16,32 +16,51 @@ export const getUserInfo = (_params: any) => {
   return data
 }
 
-// 获取用户相关设置信息接口
-export const getUserSetting = async (_params: any) => {
-  const res = await EnvChat.findByField('key', 'BASE_BOT_ID')
+// 修改密码服务接口
+export const ServeUpdatePassword = (data: {} | undefined) => {
+  return post('/api/v1/users/change/password', data)
+}
 
-  console.debug('ServeLoginVika:', res)
+// 修改手机号服务接口
+export const ServeUpdateMobile = (data: {} | undefined) => {
+  return post('/api/v1/users/change/mobile', data)
+}
 
-  const userInfo: any = {
-    setting: {
-      keyboard_event_notify: '',
-      notify_cue_tone: '',
-      theme_bag_img: '',
-      theme_color: '',
-      theme_mode: '',
-    },
-    user_info: {
-      avatar: '',
-      email: '',
-      gender: 0,
-      is_qiye: false,
-      mobile: '13800138000',
-      motto: '',
-      nickname: '超哥',
-      uid: res[0]?.fields['value'] || '',
-    },
-  }
+// 修改手机号服务接口
+export const ServeUpdateEmail = (data: {} | undefined) => {
+  return post('/api/v1/users/change/email', data)
+}
 
-  console.debug('userInfo:', userInfo)
-  return userInfo
+// 修改个人信息服务接口
+export const ServeUpdateUserDetail = (data: {} | undefined) => {
+  return post('/api/v1/users/change/detail', data)
+}
+
+// 查询用户信息服务接口
+export const ServeGetUserDetail = () => {
+  return get('/api/v1/users/detail')
+}
+
+// 获取用户相关设置信息
+export const ServeGetUserSetting = () => {
+  return get('/api/v1/users/setting')
+}
+
+// 获取用户相关系统配置信息
+export const ServeGetUserConfig = () => {
+  return get('/api/v1/users/config')
+}
+
+// 获取用户相关系统配置信息分组
+export const ServeGetUserConfigGroup = () => {
+  return get('/api/v1/users/config/group')
+}
+
+// 修改配置服务接口
+export const ServeUpdateConfig = (data: {} | undefined) => {
+  return post('/api/v1/users/config', data)
+}
+
+export const ServeGetUserConfigBykey = (data: {key:string;value:string}) => {
+  return post('/api/v1/users/config/bykey', data)
 }

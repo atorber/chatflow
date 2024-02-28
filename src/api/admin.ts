@@ -139,7 +139,6 @@ const adminCommands: AdminCommands = {
   上传配置: async () => {
     try {
       await EnvChat.updateConfigToVika(ChatFlowConfig.configEnv)
-
       return [ true, '上传配置信息成功~' ]
     } catch (e) {
       return [ false, '上传配置信息失败~' ]

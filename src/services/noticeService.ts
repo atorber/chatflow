@@ -16,7 +16,7 @@ import { ChatFlowConfig } from '../api/base-config.js'
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice
 
-function getRemainingTime (taskTime:number):string {
+function getRemainingTime (taskTime: number): string {
   const time = taskTime - new Date().getTime()
   const seconds = Math.floor((time / 1000) % 60)
   const minutes = Math.floor((time / (1000 * 60)) % 60)
@@ -39,13 +39,13 @@ type TaskFields = {
 // 服务类
 export class NoticeChat {
 
-  static db:VikaSheet
+  static db: VikaSheet
   static envsOnVika: any
   static roomWhiteList: any
   static contactWhiteList: any
   static reminderList: TaskConfig[] = []
-  static jobs: {[key:string]:any}
-  static bot:Wechaty
+  static jobs: { [key: string]: any }
+  static bot: Wechaty
 
   private constructor () {
   }
@@ -107,24 +107,57 @@ export class NoticeChat {
   }
 
   // 更新任务
-  static async updateJobs () {
+  static async updateJobs (jobs = []) {
     const that = this
     try {
-    // 结束所有任务
+      // 结束所有任务
       await schedule.gracefulShutdown()
       // logger.info('结束所有任务成功...')
     } catch (e) {
       log.error('结束所有任务失败：' + e)
     }
     try {
-      const tasks = await this.getTimedTask()
+      // const tasks = await this.getTimedTask()
+      const tasks = jobs
+        .map((task: any) => {
+          const {
+            desc,
+            time,
+            cycle,
+            type,
+            name,
+            id,
+            alias,
+            state,
+          } = task
+
+          const isActive = state === '开启'
+          const isContact = type === '好友'
+          const target = isContact
+            ? { name: name || '', id: id || '', alias: alias || '' }
+            : { topic: name || '', id: id || '' }
+
+          const taskConfig: TaskConfig = {
+            id: task.recordId,
+            msg: desc || '',
+            time: Number(time) || 0,
+            cycle: cycle || '无重复',
+            targetType: isContact ? 'contact' : 'room',
+            target,
+            active: isActive,
+          }
+
+          return isActive && desc && time && cycle && (name || id || alias) ? taskConfig : null
+        })
+        .filter(Boolean) as TaskConfig[]
+
       logger.info('获取到的定时提醒任务：' + tasks.length || '0')
       // logger.info('获取到的定时提醒任务：\n' + JSON.stringify(tasks))
       this.jobs = {}
       for (let i = 0; i < tasks.length; i++) {
         const task: TaskConfig = tasks[i] as TaskConfig
         if (task.active) {
-        // 格式化任务
+          // 格式化任务
           const curRule = getRule(task)
           // logger.info(`任务${i}原始信息:` + JSON.stringify(task))
           // logger.info('转换信息：' + curRule)

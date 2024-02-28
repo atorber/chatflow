@@ -16,7 +16,22 @@ import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
 import { VikaDB } from './db/vika-db.js'
 import { LarkDB } from './db/lark-db.js'
 
+import getAuthClient from '../src/utils/auth.js'
 import { GroupMaster, GroupMasterConfig } from './plugins/mod.js'
+
+import {
+  // MessageChat,
+  EnvChat,
+  // WhiteListChat,
+  // GroupNoticeChat,
+  // RoomChat,
+  // ContactChat,
+  // ActivityChat,
+  // NoticeChat,
+  // QaChat,
+  // KeywordChat,
+  // LarkChat,
+} from './services/mod.js'
 
 function ChatFlow (): WechatyPlugin {
   logForm('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...')
@@ -42,15 +57,28 @@ const init = async (options:{
   token: string
 }, bot:Wechaty) => {
   ChatFlowConfig.bot = bot
-  // 使用Vika
+
+  // 初始化数据库
   await VikaDB.init(options)
+
+  // 测试代码
+  await EnvChat.init()
+
+  // 远程加载配置信息，初始化api客户端
+  const authClient = getAuthClient()
+  await authClient.login(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
+
   // 从配置文件中读取配置信息，包括wechaty配置、mqtt配置以及是否启用mqtt推送或控制
+  const configAll = await ChatFlowConfig.init()
+  // log.info('configAll', JSON.stringify(configAll))
+
   const config: {
       mqttConfig: IClientOptions,
       wechatyConfig: WechatyConfig,
       mqttIsOn: boolean,
-    } | undefined = await ChatFlowConfig.init() // 默认使用vika，使用lark时，需要传入'lark'参数await ChatFlowConfig.init('lark')
-    // log.info('config', JSON.stringify(config, undefined, 2))
+    } | undefined = configAll // 默认使用vika，使用lark时，需要传入'lark'参数await ChatFlowConfig.init('lark')
+  // log.info('config', JSON.stringify(config, undefined, 2))
+
   if (config) {
     // 构建机器人
     // 如果MQTT推送或MQTT控制打开，则启动MQTT代理
