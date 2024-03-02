@@ -4,17 +4,19 @@
 import getAuthClient from '../src/utils/auth.js'
 import 'dotenv/config.js'  // 导入环境变量配置
 
-// import {
+import {
 //   ServeGetUserConfig,
 //   ServeGetUserDetail,
 //   ServeGetUserSetting,
 //   ServeGetUserConfigBykey,
-//   ServeGetUserConfigGroup,
-// } from '../src/api/user.js'
+  ServeGetUserConfigGroup,
+} from '../src/api/user.js'
 
 // import { ServeGetWhitelistWhite } from '../src/api/white-list.js'
 // import { ServeGetNotices } from '../src/api/notice.js'
-import { ServeGetKeywords } from '../src/api/keyword.js'
+// import { ServeGetKeywords } from '../src/api/keyword.js'
+// import { ServeGetStatistics } from '../src/api/statistic.js'
+// import { ServeGetGroupnotices } from '../src/api/group-notice.js'
 
 const authClient = getAuthClient()
 await authClient.login(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
@@ -37,5 +39,14 @@ await authClient.login(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
 // const jobs = await ServeGetNotices()
 // console.log('jobs:', JSON.stringify(jobs))
 
-const keywords = await ServeGetKeywords()
-console.log('keywords:', JSON.stringify(keywords))
+// const keywords = await ServeGetKeywords()
+// console.log('keywords:', JSON.stringify(keywords))
+
+// const statistics = await ServeGetStatistics()
+// console.log('statistics:', JSON.stringify(statistics))
+
+// const groupnotices = await ServeGetGroupnotices()
+// console.log('groupnotices:', JSON.stringify(groupnotices))
+
+const userConfigGroup = await ServeGetUserConfigGroup()
+console.log('userConfigGroup:', JSON.stringify(userConfigGroup))

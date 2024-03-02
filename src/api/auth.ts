@@ -1,3 +1,13 @@
+import {
+  post,
+  // get,
+} from '../utils/request.js'
+
+// 初始化创建表
+export const ServeUpdatePassword = (data: {} | undefined) => {
+  return post('/api/v1/auth/init', data)
+}
+
 // 用户登录
 export const login = async (
   param:{

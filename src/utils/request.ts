@@ -1,12 +1,15 @@
+/* eslint-disable no-console */
 import axios from 'axios'
 import getAuthClient from './auth.js'
+import 'dotenv/config.js'
+import { logForm } from './utils.js'
 
 const authClient = getAuthClient()
 
 // 创建 axios 实例
 const request = axios.create({
   // API 请求的默认前缀
-  baseURL: 'http://localhost:9503',
+  baseURL: process.env.ENDPOINT || 'http://127.0.0.1:9503',
 
   // 请求超时时间
   timeout: 120000,
@@ -17,11 +20,13 @@ const request = axios.create({
  *
  * @param {*} error
  */
-const errorHandler = (error: { response?: { status: number } }) => {
+const errorHandler = (error: { response?: { status: number, config:any } }) => {
+  logForm('请求异常' + JSON.stringify(error))
   // 判断是否是响应错误信息
   if (error.response) {
     if (error.response.status === 401) {
       authClient.delAccessToken()
+      return request(error.response.config)
     }
   }
 
@@ -40,7 +45,17 @@ request.interceptors.request.use(async (config) => {
 }, errorHandler)
 
 // 响应拦截器
-request.interceptors.response.use((response) => response.data, errorHandler)
+request.interceptors.response.use((response) => {
+  logForm(`${response.config.method} ${response.config.url}\n\n${JSON.stringify(response.data)}`)
+  if (response.data && response.data.message === 'Unauthorized' && response.data.statusCode === 401) {
+    authClient.delAccessToken()
+    return request(response.config)
+  } else {
+    return response.data
+  }
+}, errorHandler)
+
+// request.interceptors.response.use((response) => response.data, errorHandler)
 
 /**
  * GET 请求

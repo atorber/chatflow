@@ -3,9 +3,12 @@ import { Room, Contact, Message, Wechaty, log } from 'wechaty'
 import { v4 } from 'uuid'
 import { formatTimestamp, getCurTime, logger } from '../utils/utils.js'
 import moment from 'moment'
-import { VikaSheet } from '../db/vika.js'
-import { VikaDB } from '../db/vika-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'
+import {
+  ServeGetStatistics,
+  // ServeCreateStatistics,
+} from '../api/statistic.js'
+import { ServeCreateOrders } from '../api/order.js'
 
 import { db } from '../db/tables.js'
 const activityData = db.activity
@@ -45,16 +48,6 @@ export interface Order {
   act_decs: string;
 }
 
-export function transformKeys (obj: Record<string, any>): Record<string, any> {
-  const transformedObj: Record<string, any> = {}
-  for (const key in obj) {
-    const newKey = key.split('|')[1] as string // Extract the part after the slash
-    transformedObj[newKey] = obj[key]
-
-  }
-  return transformedObj
-}
-
 // 比较两个数组差异
 function findArrayDifferences (vika: Activity[], db: Activity[]): { addArray: Activity[], removeArray: Activity[] } {
   const removeArray: Activity[] = []
@@ -81,7 +74,6 @@ function findArrayDifferences (vika: Activity[], db: Activity[]): { addArray: Ac
 export class ActivityChat {
 
   static activities: Activity[] = []
-  static db:VikaSheet
   static bot:Wechaty
 
   private constructor () {
@@ -89,31 +81,22 @@ export class ActivityChat {
 
   // 初始化
   static async init () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.statisticSheet)
     await this.getStatistics()
     this.bot = ChatFlowConfig.bot
-
     log.info('初始化 ActivityChat 成功...')
   }
 
-  // 获取维格表中的活动
-  static async getAct () {
-    const records = await this.db.findAll()
-    // logger.info(JSON.stringify(this.chatflowConfig.dataBaseIds, undefined, 2))
-    // logger.info('维格表中的活动记录：' + JSON.stringify(records))
-    return records
-  }
-
-  // 获取统计打卡
+  // 获取统计打卡，从云端获取活动列表更新本地活动列表
   static async getStatistics () {
-    const statisticsRecords = await this.getAct()
+    const statisticsRes = await ServeGetStatistics()
+
+    // log.info('维格表中的统计：' + JSON.stringify(statisticsRes))
+    const statisticsRecords = statisticsRes.data.list
     const activitiesVika: Activity[] = []
 
-    for (const statistics of statisticsRecords) {
-      const fields = statistics.fields
-      const fieldsNew: any = transformKeys(fields)
-      if (fieldsNew._id && fieldsNew.type && fieldsNew.desc && (fieldsNew.topic || fieldsNew.roomid)) {
-        const activity: Activity = fieldsNew as Activity
+    for (const fields of statisticsRecords) {
+      if (fields._id && fields.type && fields.desc && (fields.topic || fields.roomid)) {
+        const activity: Activity = fields as Activity
         activity.active = activity.active === '开启'
         activity._id = String(activity._id)
         activity.shortCode = String(activity._id)
@@ -167,27 +150,32 @@ export class ActivityChat {
 
     const curTime = getCurTime()
     const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
+
     const records = [
       {
         fields: {
-          编号: String(curTime),
-          所属活动: 'system',
-          昵称: talker.name(),
-          好友备注: await talker.alias() || '',
-          群: await room?.topic() || '',
-          创建时间: timeHms,
+          serialNumber: curTime,
+          code: '4',
+          desc: '测试打卡',
+          name: talker.name(),
+          alias: await talker.alias() || '',
+          wxid: talker.id,
+          topic: await room?.topic() || '',
+          createdAt: timeHms,
+          info: '--',
         },
       },
     ]
 
     logger.info('订单消息:' + records)
-    const datasheet = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.orderSheet)
-    datasheet.records.create(records).then((response: { success: any }) => {
-      if (!response.success) {
-        logger.error('创建订单，写入vika失败：' + JSON.stringify(response))
-      }
-      return response
-    }).catch((err: any) => { logger.error('创建订单，vika写入接口失败：', err) })
+
+    try {
+      const res = await ServeCreateOrders(records)
+      return res
+    } catch (err) {
+      logger.error('创建订单，vika写入接口失败：', err)
+      return err
+    }
   }
 
   static getHelpText () {

@@ -1,26 +1,99 @@
 /* eslint-disable no-console */
 /* eslint-disable camelcase */
-import { ContactChat } from '../services/mod.js'
+import { post, get } from '../utils/request.js'
+
+// 获取好友列表服务接口
+export const ServeGetContacts = () => {
+  return get('/api/v1/contact/list')
+}
+
+// 解除好友关系服务接口
+export const ServeDeleteContact = (data: any | undefined) => {
+  return post('/api/v1/contact/delete', data)
+}
+
+// 解除好友关系服务接口批量
+export const ServeDeleteBatchContact = (data: any | undefined) => {
+  return post('/api/v1/contact/deleteBatch', data)
+}
+
+// 更新好友服务接口
+export const ServeUpdateContact = (data: {} | undefined) => {
+  return post('/api/v1/contact/update', data)
+}
+
+// 修改好友备注服务接口
+export const ServeEditContactRemark = (data: {} | undefined) => {
+  return post('/api/v1/contact/edit-remark', data)
+}
+
+// 搜索联系人
+export const ServeSearchContact = (data: {} | undefined) => {
+  return get('/api/v1/contact/search', data)
+}
+
+// 好友申请服务接口
+export const ServeCreateContact = (data: {} | undefined) => {
+  return post('/api/v1/contact/apply/create', data)
+}
+
+// 查询好友申请服务接口
+export const ServeGetContactApplyRecords = (data: {} | undefined) => {
+  return get('/api/v1/contact/apply/records', data)
+}
+
+// 处理好友申请服务接口
+export const ServeApplyAccept = (data: {} | undefined) => {
+  return post('/api/v1/contact/apply/accept', data)
+}
+
+export const ServeApplyDecline = (data: {} | undefined) => {
+  return post('/api/v1/contact/apply/decline', data)
+}
+
+// 查询好友申请未读数量服务接口
+export const ServeFindFriendApplyNum = () => {
+  return get('/api/v1/contact/apply/unread-num')
+}
+
+// 搜索用户信息服务接口
+export const ServeSearchUser = (data: {} | undefined) => {
+  return get('/api/v1/contact/detail', data)
+}
+
+// 搜索用户信息服务接口
+export const ServeContactGroupList = (data: {} | undefined) => {
+  return get('/api/v1/contact/group/list', data)
+}
+
+export const ServeContactMoveGroup = (data: {} | undefined) => {
+  return post('/api/v1/contact/move-group', data)
+}
+
+export const ServeContactGroupSave = (data: {} | undefined) => {
+  return post('/api/v1/contact/group/save', data)
+}
 
 // import { db } from '../db/tables.js'
 // const contactData = db.contact
 
 // 获取好友列表
 export async function getContactList () {
-  const contactListRaw:any = await ContactChat.findAll()
+  const res = await ServeGetContacts()
+  const contactListRaw:any = res.data.list
   // console.log('contactListRaw', JSON.stringify(contactListRaw))
-  const contactList: any = contactListRaw.map((value: { fields: { name: any; avatar: any; gender: any; id: any; alias: any }; recordId: any }) => {
-    if (value.fields.name) {
+  const contactList: any = contactListRaw.map((fields: { name: any; avatar: any; gender: any; id: any; alias: any ; recordId: any }) => {
+    if (fields.name) {
       return {
-        avatar: value.fields.avatar,
-        gender: value.fields.gender,
+        avatar: fields.avatar,
+        gender: fields.gender,
         group_id: 0,
-        id: value.fields.id,
+        id: fields.id,
         is_online: 0,
         motto: '',
-        nickname: value.fields.name,
-        remark: value.fields.alias,
-        recordId: value.recordId,
+        nickname: fields.name,
+        remark: fields.alias,
+        recordId: fields.recordId,
       }
     }
     return false

@@ -1,11 +1,10 @@
 /* eslint-disable sort-keys */
 import type { TaskConfig } from '../api/base-config.js'
-import { VikaSheet } from '../db/vika.js'
 import type { SkillInfoArray } from './wxopenaiService.js'
 import { logger } from '../utils/mod.js'
-import { VikaDB } from '../db/vika-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'
 import { Wechaty, log } from 'wechaty'
+import { ServeGetQas } from '../api/qa.js'
 
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice
@@ -14,8 +13,6 @@ import { Wechaty, log } from 'wechaty'
 // 服务类
 export class QaChat {
 
-  static db: VikaSheet
-  static envsOnVika: any
   static roomWhiteList: any
   static contactWhiteList: any
   static reminderList: TaskConfig[] = []
@@ -28,21 +25,15 @@ export class QaChat {
 
   // 初始化
   static async init () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.qaSheet)
-    const records = await this.getRecords()
+    const res = await ServeGetQas()
+    const records = await res.data.list
     this.records = records
     this.bot = ChatFlowConfig.bot
 
     log.info('初始化 QaChat 成功...')
   }
 
-  static async getRecords () {
-    const records = await this.db.findAll()
-    logger.info('维格表中的记录：', JSON.stringify(records))
-    return records
-  }
-
-  // 获取定时提醒
+  // 获取问答
   static async getQa (): Promise<SkillInfoArray> {
     await this.init()
     if (!this.records) {
@@ -51,21 +42,21 @@ export class QaChat {
     }
 
     const skills: SkillInfoArray = this.records
-      .filter((record: {recordId:string; fields:{[x: string]: any }}) => record.fields['启用状态|state'] === '启用' && record.fields['标准问题|title'] && record.fields['机器人回答|answer'])
-      .map((record: {recordId:string; fields:{[x: string]: any }}) => {
+      .filter((fields: { [x: string]: any ;recordId:string;}) => fields['state'] === '启用' && fields['title'] && fields['answer'])
+      .map((fields: {[x: string]: any;recordId:string; }) => {
         const question: string[] = []
         for (let i = 1; i <= 3; i++) {
-          const similarQuestion = record.fields[`相似问题${i}(选填)|question${i}`]
+          const similarQuestion = fields[`question${i}`]
           if (similarQuestion) {
             question.push(similarQuestion)
           }
         }
 
         return {
-          skillname: record.fields['分类|skillname'] || '通用问题',
-          title: record.fields['标准问题|title'],
+          skillname: fields['skillname'] || '通用问题',
+          title: fields['title'],
           question,
-          answer: [ record.fields['机器人回答|answer'] ],
+          answer: [ fields['answer'] ],
         }
       })
     logger.info('skills:', JSON.stringify(skills))

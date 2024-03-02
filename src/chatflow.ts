@@ -10,35 +10,30 @@ import onLogin from './handlers/on-login.js'
 import onReady from './handlers/on-ready.js'
 import onMessage from './handlers/on-message.js'
 import { getBotOps } from './services/configService.js'
-import { logForm } from './utils/utils.js'
+import delay, { logForm } from './utils/utils.js'
 import { ChatFlowConfig, WechatyConfig } from './api/base-config.js'
 import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
-import { VikaDB } from './db/vika-db.js'
 import { LarkDB } from './db/lark-db.js'
 
 import getAuthClient from '../src/utils/auth.js'
 import { GroupMaster, GroupMasterConfig } from './plugins/mod.js'
 
-import {
-  // MessageChat,
-  EnvChat,
-  // WhiteListChat,
-  // GroupNoticeChat,
-  // RoomChat,
-  // ContactChat,
-  // ActivityChat,
-  // NoticeChat,
-  // QaChat,
-  // KeywordChat,
-  // LarkChat,
-} from './services/mod.js'
-
-function ChatFlow (): WechatyPlugin {
+function ChatFlow (options?:{
+  spaceId: string
+  token: string
+  adminRoomTopic?: string
+  endpoint?: string
+}): WechatyPlugin {
   logForm('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...')
 
   return function ChatFlowPlugin (bot: Wechaty): void {
 
     ChatFlowConfig.bot = bot
+    ChatFlowConfig.spaceId = options?.spaceId || process.env.VIKA_SPACE_ID || ''
+    ChatFlowConfig.token = options?.token || process.env.VIKA_TOKEN || ''
+    ChatFlowConfig.adminRoomTopic = options?.adminRoomTopic || process.env.ADMINROOM_ADMINROOMTOPIC || ''
+    ChatFlowConfig.endpoint = options?.endpoint || process.env.ENDPOINT || ''
+
     bot.on('scan', onScan)
     bot.on('login', onLogin)
     bot.on('ready', onReady)
@@ -52,34 +47,56 @@ function ChatFlow (): WechatyPlugin {
 }
 
 const init = async (options:{
-  spaceName?: string
-  spaceId?: string
-  token: string
-}, bot:Wechaty) => {
-  ChatFlowConfig.bot = bot
-
-  // 初始化数据库
-  await VikaDB.init(options)
-
-  // 测试代码
-  await EnvChat.init()
+  spaceId: string
+  token: string,
+  endpoint?: string,
+}) => {
 
   // 远程加载配置信息，初始化api客户端
-  const authClient = getAuthClient()
-  await authClient.login(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
+  try {
+    const authClient = getAuthClient()
+    try {
+      // 初始化检查数据库表，如果不存在则创建
+      const initRes = await authClient.init(options.spaceId, options.token)
+      // logForm('初始化检查系统表结果：' + JSON.stringify(initRes.data))
+
+      if (initRes.data && initRes.data.message === 'success') {
+        logForm('初始化检查系统表成功...')
+      } else {
+        logForm('初始化检查系统表失败...' + JSON.stringify(initRes.data))
+        // 中止程序
+        // throw new Error('初始化检查系统表失败...', initRes)
+        process.exit(1)
+      }
+    } catch (e) {
+      log.error('请求初始化检查系统表失败...', e)
+      // throw e
+      process.exit(1)
+    }
+    await delay(1000)
+    try {
+      const loginRes = await authClient.login(options.spaceId, options.token)
+      logForm('登录客户端结果：' + JSON.stringify(loginRes))
+    } catch (e) {
+      log.error('登录客户端失败...', e)
+      throw e
+    }
+  } catch (e) {
+    log.error('登录客户端失败...', e)
+  }
 
   // 从配置文件中读取配置信息，包括wechaty配置、mqtt配置以及是否启用mqtt推送或控制
-  const configAll = await ChatFlowConfig.init()
-  // log.info('configAll', JSON.stringify(configAll))
+  try {
+    const configAll = await ChatFlowConfig.init(options)
+    // log.info('configAll', JSON.stringify(configAll))
 
-  const config: {
-      mqttConfig: IClientOptions,
-      wechatyConfig: WechatyConfig,
-      mqttIsOn: boolean,
-    } | undefined = configAll // 默认使用vika，使用lark时，需要传入'lark'参数await ChatFlowConfig.init('lark')
-  // log.info('config', JSON.stringify(config, undefined, 2))
+    const config: {
+        mqttConfig: IClientOptions,
+        wechatyConfig: WechatyConfig,
+        mqttIsOn: boolean,
+      } | undefined = configAll // 默认使用vika，使用lark时，需要传入'lark'参数await ChatFlowConfig.init('lark')
+    // log.info('config', JSON.stringify(config, undefined, 2))
 
-  if (config) {
     // 构建机器人
     // 如果MQTT推送或MQTT控制打开，则启动MQTT代理
     if (config.mqttIsOn) {
@@ -93,10 +110,10 @@ const init = async (options:{
         log.error('MQTT代理启动失败，检查mqtt配置信息是否正确...', e)
       }
     }
-
-  } else {
-    logForm('维格表配置不全，缺少必要的配置信息')
+  } catch (e) {
+    log.error('初始化ChatFlowConfig失败...', e)
   }
+
 }
 
 export {
@@ -105,7 +122,6 @@ export {
   ChatFlowConfig,
   log,
   logForm,
-  VikaDB,
   LarkDB,
   type IClientOptions,
   MqttProxy,

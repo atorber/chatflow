@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys */
-import type { IRecord } from '../db/vika.js'
+// import type { IRecord } from '../db/vika.js'
 import { log } from 'wechaty'
 import { delay } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/env.js'
@@ -15,25 +15,16 @@ import {
 // 服务类
 export class EnvChat {
 
-  static envIdMap: any
-  static records: IRecord[]
+  // static records: IRecord[]
   static envData: ProcessEnv | undefined
-  static vikaIdMap: any
   static vikaData: any
 
   // 初始化
   static async init () {
     EnvChat.getConfigFromEnv()
-    this.records = await this.getAll()
-    log.info('初始化 EnvChat 成功...', JSON.stringify(this.records))
-  }
-
-  static async getAll () {
-    // const records = await this.db.findAll()
-    // log.info('维格表中的记录：', JSON.stringify(records))
-    const configRes = await ServeGetUserConfig()
-    this.records = configRes.data.list
-    return this.records
+    // const configRes = await ServeGetUserConfig()
+    // this.records = configRes.data.list
+    // log.info('初始化 EnvChat 成功...', JSON.stringify(this.records))
   }
 
   // 更新环境变量配置到云端
@@ -52,7 +43,8 @@ export class EnvChat {
     log.info('从维格表中获取环境变量配置,getConfigFromVika ()')
     const vikaData: any = {}
 
-    const configRecords = await EnvChat.getAll()
+    const configRes = await ServeGetUserConfig()
+    const configRecords = configRes.data.list
 
     await delay(500)
     // log.info(configRecords)

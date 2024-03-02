@@ -1,95 +1,53 @@
 /* eslint-disable sort-keys */
-import { VikaSheet, IRecord } from '../db/vika.js'
 import { Room, Wechaty, log } from 'wechaty'
 import { delay, logger } from '../utils/utils.js'
-import { VikaDB } from '../db/vika-db.js'
-import { BaseEntity, MappingOptions } from '../db/vika-orm.js'
 
 import { ChatFlowConfig } from '../api/base-config.js'
+import {
+  ServeGetGroups,
+  ServeUpdateGroups,
+  ServeDeleteBatchGroups,
+} from '../api/room.js'
 
 // import { db } from '../db/tables.js'
 // const roomData = db.room
 
-const mappingOptions: MappingOptions = {  // 定义字段映射选项
-  fieldMapping: {  // 字段映射
-    id: '群ID|id',
-    topic: '群名称|topic',
-    ownerId: '群主ID|ownerId',
-    updated: '更新时间|updated',
-    avatar: '头像|avatar',
-    file: '头像图片|file',
-
-  },
-  tableName: '群列表|Room',  // 表名
-}
-
 // 服务类
-export class RoomChat extends BaseEntity {
+export class RoomChat {
 
-  static db:VikaSheet
   static rooms: any[]
   static bot:Wechaty
 
-  topic?: string  // 定义名字属性，可选
-
-  id?: string
-
-  alias?: string
-
-  updated?: string
-
-  avatar?: string
-
-  file?: string
-
-  // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
-
-  protected static override mappingOptions: MappingOptions = mappingOptions  // 设置映射选项为上面定义的 mappingOptions
-
-  protected static override getMappingOptions (): MappingOptions {  // 获取映射选项的方法
-    return this.mappingOptions  // 返回当前类的映射选项
-  }
-
-  static override setMappingOptions (options: MappingOptions) {  // 设置映射选项的方法
-    this.mappingOptions = options  // 更新当前类的映射选项
-  }
-
   // 初始化
   static async init () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.roomSheet)
-    RoomChat.setVikaOptions({
-      apiKey: VikaDB.token,
-      baseId: VikaDB.dataBaseIds.roomSheet, // 设置 base ID
-    })
-    const rooms = await this.getRoom()
+    const res = await ServeGetGroups()
+    const rooms = res.data.list
     this.rooms = rooms
     this.bot = ChatFlowConfig.bot
 
     log.info('初始化 RoomChat 成功...')
   }
 
-  static async getRoom () {
-    const records = await this.db.findAll()
-    // logger.info('维格表中的记录：', JSON.stringify(records))
-    return records
-  }
-
   // 上传群列表
   static async updateRooms (puppet:string) {
     let updateCount = 0
     try {
+      // 获取最新的群列表
       const rooms: Room[] = await this.bot.Room.findAll()
       log.info('最新微信群数量：', rooms.length)
       const recordsAll: any = []
-      const recordExisting = await this.db.findAll()
+
+      // 从云端获取已有的群列表
+      const roomsRes = await ServeGetGroups()
+      const recordExisting = roomsRes.data.list
       logger.info('云端群数量：' + recordExisting.length || '0')
       let wxids: string[] = []
       const recordIds: string[] = []
       if (recordExisting.length) {
-        recordExisting.forEach((record: IRecord) => {
-          if (record.fields['群ID|id']) {
-            wxids.push(record.fields['群ID|id'] as string)
-            recordIds.push(record.recordId)
+        recordExisting.forEach((fields: any) => {
+          if (fields['id']) {
+            wxids.push(fields['id'] as string)
+            recordIds.push(fields.recordId)
           }
         })
       }
@@ -99,7 +57,7 @@ export class RoomChat extends BaseEntity {
         for (let i = 0; i < count; i++) {
           const records = recordIds.splice(0, 10)
           logger.info('删除：', records.length)
-          await this.db.remove(records)
+          await ServeDeleteBatchGroups(records)
           await delay(1000)
         }
         wxids = []
@@ -121,11 +79,11 @@ export class RoomChat extends BaseEntity {
           const ownerId = await item.owner()?.id
           //   logger.info('第一个群成员：' + ownerId)
           const fields = {
-            '头像|avatar':avatar,
-            '群ID|id': item.id,
-            '群主ID|ownerId': ownerId || '',
-            '群名称|topic': await item.topic() || '',
-            '更新时间|updated': new Date().toLocaleString(),
+            avatar,
+            id: item.id,
+            ownerId: ownerId || '',
+            topic: await item.topic() || '',
+            updated: new Date().toLocaleString(),
           }
           const record = {
             fields,
@@ -137,7 +95,7 @@ export class RoomChat extends BaseEntity {
       for (let i = 0; i < recordsAll.length; i = i + 10) {
         const records = recordsAll.slice(i, i + 10)
         try {
-          await this.db.insert(records)
+          await ServeUpdateGroups(records)
           logger.info('群列表同步完成...' + i + records.length)
           updateCount = updateCount + records.length
           void await delay(1000)

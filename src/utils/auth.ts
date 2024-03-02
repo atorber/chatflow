@@ -1,4 +1,7 @@
+/* eslint-disable no-console */
 import axios, { AxiosInstance } from 'axios'
+import { logForm } from './utils.js'
+import 'dotenv/config.js'
 
 interface TokenResponse {
   code: number;
@@ -18,7 +21,7 @@ class AuthClient {
   private tokenExpirationDate: Date | null = null
   private username: string = ''
   private password: string = ''
-  private endpoint: string = 'http://localhost:9503/api/v1'
+  private endpoint: string = `${process.env.ENDPOINT || 'http://127.0.0.1:9503'}/api/v1`
 
   private constructor () { // 步骤2：私有构造函数
     this.axiosInstance = axios.create({
@@ -41,17 +44,42 @@ class AuthClient {
         mobile: this.username,
         password: this.password,
       })
-      this.token = response.data.data.access_token
-      this.tokenExpirationDate = new Date(new Date().getTime() + response.data.data.expires_in * 1000)
+      if (response.data.data.access_token) {
+        logForm('登录成功' + JSON.stringify(response.data))
+        this.token = response.data.data.access_token
+        this.tokenExpirationDate = new Date(new Date().getTime() + response.data.data.expires_in * 1000)
+      } else {
+        logForm('登录失败' + JSON.stringify(response.data))
+        throw new Error(JSON.stringify(response.data))
+      }
     } catch (error) {
-      console.error('登录失败', error)
+      logForm('登录失败' + JSON.stringify(error))
       throw error
+    }
+  }
+
+  async init (username?: string, password?: string):Promise<any> {
+    this.username = username || this.username
+    this.password = password || this.password
+    try {
+      const response:{data:{message:string}} = await this.axiosInstance.post<TokenResponse>('/auth/init', {
+        mobile: this.username,
+        password: this.password,
+      })
+      // logForm('系统初始化完成' + JSON.stringify(response.data))
+      return response
+    } catch (error) {
+      logForm('系统初始化失败' + JSON.stringify(error))
+      return error
     }
   }
 
   private async refreshTokenIfNeeded (): Promise<void> {
     if (!this.token || !this.tokenExpirationDate || new Date() >= this.tokenExpirationDate) {
+      logForm('token已过期，刷新token:\n' + this.token)
       await this.login()
+    } else {
+      logForm('token未过期，无需刷新:\n' + this.token)
     }
   }
 

@@ -1,7 +1,6 @@
 /* eslint-disable sort-keys */
 import { Wechaty, log } from 'wechaty'
 import type { TaskConfig } from '../api/base-config.js'
-import { VikaSheet, IRecord } from '../db/vika.js'
 import schedule from 'node-schedule'
 import { getRule, delay, logger } from '../utils/mod.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/mod.js'
@@ -10,8 +9,8 @@ import {
   getRoom,
 } from '../plugins/mod.js'
 import { sendMsg } from './configService.js'
-import { VikaDB } from '../db/vika-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'
+import { ServeGetNotices } from '../api/notice.js'
 
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice
@@ -26,21 +25,21 @@ function getRemainingTime (taskTime: number): string {
 }
 
 type TaskFields = {
-  '内容|desc'?: string;
-  '时间|time'?: string;
-  '周期|cycle'?: string;
-  '通知目标类型|type'?: string;
-  '昵称/群名称|name'?: string;
-  '好友ID/群ID(选填)|id'?: string;
-  '好友备注(选填)|alias'?: string;
-  '启用状态|state'?: string;
+  'desc'?: string;
+  'time'?: string;
+  'cycle'?: string;
+  'type'?: string;
+  'name'?: string;
+  'id'?: string;
+  'alias'?: string;
+  'state'?: string;
+  'recordId': string;
 };
 
 // 服务类
 export class NoticeChat {
 
-  static db: VikaSheet
-  static envsOnVika: any
+  // static db: VikaSheet
   static roomWhiteList: any
   static contactWhiteList: any
   static reminderList: TaskConfig[] = []
@@ -52,35 +51,29 @@ export class NoticeChat {
 
   // 初始化
   static async init () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.noticeSheet)
-    await this.getRecords()
     this.bot = ChatFlowConfig.bot
 
     log.info('初始化 NoticeChat 成功...')
   }
 
-  static async getRecords () {
-    const records = await this.db.findAll()
-    // logger.info('维格表中的记录：', JSON.stringify(records))
-    return records
-  }
-
   // 获取定时提醒
   static async getTimedTask (): Promise<TaskConfig[]> {
-    const taskRecords: IRecord[] = await this.db.findAll()
+    const res = await ServeGetNotices()
+    const taskRecords = res.data.list
 
     const timedTasks: TaskConfig[] = taskRecords
-      .map((task: IRecord) => {
+      .map((fields: any) => {
         const {
-          '内容|desc': desc,
-          '时间|time': time,
-          '周期|cycle': cycle,
-          '通知目标类型|type': type,
-          '昵称/群名称|name': name,
-          '好友ID/群ID(选填)|id': id,
-          '好友备注(选填)|alias': alias,
-          '启用状态|state': state,
-        } = task.fields as TaskFields
+          desc,
+          time,
+          cycle,
+          type,
+          name,
+          id,
+          alias,
+          state,
+          recordId,
+        } = fields as TaskFields
 
         const isActive = state === '开启'
         const isContact = type === '好友'
@@ -89,7 +82,7 @@ export class NoticeChat {
           : { topic: name || '', id: id || '' }
 
         const taskConfig: TaskConfig = {
-          id: task.recordId,
+          id: recordId,
           msg: desc || '',
           time: Number(time) || 0,
           cycle: cycle || '无重复',

@@ -1,11 +1,10 @@
 /* eslint-disable sort-keys */
 import type { TaskConfig } from '../api/base-config.js'
-import { VikaSheet } from '../db/vika.js'
 import type { SkillInfoArray } from './wxopenaiService.js'
 import { logger } from '../utils/mod.js'
-import { VikaDB } from '../db/vika-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'
 import { Wechaty, log } from 'wechaty'
+import { ServeGetStatistics } from '../api/statistic.js'
 
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice
@@ -14,8 +13,6 @@ import { Wechaty, log } from 'wechaty'
 // 服务类
 export class StatisticChat {
 
-  static db: VikaSheet
-  static envsOnVika: any
   static roomWhiteList: any
   static contactWhiteList: any
   static reminderList: TaskConfig[] = []
@@ -28,18 +25,12 @@ export class StatisticChat {
 
   // 初始化
   static async init () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.qaSheet)
-    const records = await this.getRecords()
+    const res = await ServeGetStatistics()
+    const records = await res.data.list
     this.records = records
     this.bot = ChatFlowConfig.bot
 
     log.info('初始化 QaChat 成功...')
-  }
-
-  static async getRecords () {
-    const records = await this.db.findAll()
-    logger.info('维格表中的记录：', JSON.stringify(records))
-    return records
   }
 
   // 获取定时提醒

@@ -3,12 +3,18 @@
 import { Contact, Wechaty, log, Message, Room, Sayable } from 'wechaty'
 import { delay, logger } from '../utils/utils.js'
 import { ChatFlowConfig } from '../api/base-config.js'
-import { initializeServicesAndEnv } from '../proxy/initializeServicesAndEnv.js'
 import {
-  // EnvChat,
-  // KeywordChat,
-  // WhiteListChat,
+  MessageChat,
+  EnvChat,
+  WhiteListChat,
+  GroupNoticeChat,
+  RoomChat,
+  ContactChat,
+  ActivityChat,
   NoticeChat,
+  QaChat,
+  KeywordChat,
+  LarkChat,
 } from '../services/mod.js'
 import { logForm } from '../utils/mod.js'
 import {
@@ -38,15 +44,14 @@ async function getWhiteList () {
   const whiteListRecords: any[] = listRes.data.list
   await delay(1000)
   for (let i = 0; i < whiteListRecords.length; i++) {
-    const record = whiteListRecords[i]
-    const fields = record.fields
+    const fields = whiteListRecords[i]
     const app: 'qa' | 'msg' | 'act' | 'gpt' = fields['app']?.split('|')[1]
     // logger.info('当前app:' + app)
     if (fields['name'] || fields['id'] || fields['alias']) {
-      if (record.fields['type'] === '群') {
+      if (fields['type'] === '群') {
         const room: BusinessRoom = {
-          topic: record.fields['name'],
-          id: record.fields['id'],
+          topic: fields['name'],
+          id: fields['id'],
         }
         whiteList.roomWhiteList[app].push(room)
 
@@ -153,6 +158,57 @@ const postVikaInitialization = async (bot: Wechaty) => {
   }
 }
 
+const initializeServicesAndEnv = async () => {
+  logger.info('初始化服务开始...')
+
+  // 环境变量配置
+  await EnvChat.init()
+  await delay(500)
+
+  // 消息上传
+  if (ChatFlowConfig.dataBaseType === 'lark') {
+    await LarkChat.init()
+    await delay(500)
+  } else {
+    await MessageChat.init()
+    await delay(500)
+  }
+
+  // 活动消息
+  await ActivityChat.init()
+  await delay(500)
+
+  // 联系人消息
+  await ContactChat.init()
+  await delay(500)
+
+  // 群通知
+  await GroupNoticeChat.init()
+  await delay(500)
+
+  // 关键字服务
+  await KeywordChat.init()
+  await delay(500)
+
+  // 定时任务
+  await NoticeChat.init()
+  await delay(500)
+
+  // 群聊
+  await RoomChat.init()
+  await delay(500)
+
+  // 白名单
+  await WhiteListChat.init()
+  await delay(500)
+
+  // 问答
+  await QaChat.init()
+  // logger.info('services:' + JSON.stringify(services))
+
+  log.info('初始化服务完成...')
+}
+
 export const onReadyOrLogin = async (bot: Wechaty) => {
   log.info('onReadyOrLogin,初始化services服务...')
   const curTime = new Date().getTime()
@@ -166,14 +222,19 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
   // 更新当前登录的bot信息到云端
   let baseInfo = []
   const resConfig:any = await ServeGetUserConfigGroup()
-  const BASE_BOT:{
+  const configGgroup = resConfig.data
+  const baseConfig:{
     id?:string;
+    name:string;
     value:any;
     key:string;
     lastOperationTime:number;
     syncStatus:string;
-  }[] = resConfig['基础配置']
-  const BASE_BOT_ID = BASE_BOT.find((item) => item.key === 'BASE_BOT_ID')
+  }[] = configGgroup['基础配置']
+
+  // 从baseConfig中找出key为BASE_BOT_ID的配置项，更新value为当前登录的bot的id
+  const BASE_BOT_ID = baseConfig.find((item) => item.key === 'BASE_BOT_ID')
+
   if (BASE_BOT_ID) {
     BASE_BOT_ID.value = user.id
     BASE_BOT_ID.lastOperationTime = curTime
@@ -181,7 +242,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
     baseInfo.push(BASE_BOT_ID)
   }
 
-  const BASE_BOT_NAME = BASE_BOT.find((item) => item.key === 'BASE_BOT_NAME')
+  const BASE_BOT_NAME = baseConfig.find((item) => item.key === 'BASE_BOT_NAME')
   if (BASE_BOT_NAME) {
     BASE_BOT_NAME.value = user.name()
     BASE_BOT_NAME.lastOperationTime = curTime

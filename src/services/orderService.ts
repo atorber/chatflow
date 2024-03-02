@@ -1,11 +1,10 @@
 /* eslint-disable sort-keys */
-import { VikaSheet } from '../db/vika.js'
 import { delay, logger } from '../utils/utils.js'
 import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
 import type { BusinessRoom, BusinessUser } from '../api/contact-room-finder.js'
-import { VikaDB } from '../db/vika-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'
 import { Wechaty, log } from 'wechaty'
+import { ServeGetOrders } from '../api/order.js'
 
 // import { db } from '../db/tables.js'
 // const whiteListData = db.whiteList
@@ -15,8 +14,6 @@ export type WhiteList = { contactWhiteList: ContactWhiteList; roomWhiteList: Roo
 // 服务类
 export class OrderChat {
 
-  static db:VikaSheet
-  static envsOnVika: any
   static roomWhiteList: any
   static contactWhiteList: any
   static bot:Wechaty
@@ -27,7 +24,6 @@ export class OrderChat {
 
   // 初始化
   static async init () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.whiteListSheet)
     this.contactWhiteList = {
       qa: [],
       msg: [],
@@ -47,7 +43,8 @@ export class OrderChat {
   }
 
   static async getRecords () {
-    const records = await this.db.findAll()
+    const res = await ServeGetOrders()
+    const records = res.data.list
     logger.info('维格表中的记录：' + JSON.stringify(records))
     return records
   }

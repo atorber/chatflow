@@ -65,9 +65,7 @@ export class VikaDB {
 
   static async init (config:VikaConfig) {
     logForm('初始化检查系统表...')
-    this.spaceId = ''
-    if (config.spaceName) this.spaceName = config.spaceName
-    if (config.spaceId) this.spaceId = config.spaceId
+    this.spaceId = config.spaceId
     this.vika = new Vika({ token: config.token })
     this.token = config.token
     this.dataBaseIds = {
@@ -94,9 +92,9 @@ export class VikaDB {
     if (this.spaceId) {
 
       const tables = await this.getNodesList()
-      console.info('维格表文件列表：\n', JSON.stringify(tables, undefined, 2))
+      // console.info('维格表文件列表：\n', JSON.stringify(tables, undefined, 2))
 
-      await delay(1000)
+      await delay(500)
 
       for (const k in sheets) {
         // console.info(this)
@@ -173,13 +171,6 @@ export class VikaDB {
                 }
                 newFields.push(newField)
                 break
-              // case 'MagicLink':
-              //   newField.property = {}
-              //   newField.property.foreignDatasheetId = this[field.desc as keyof VikaDB]
-              //   if (field.desc) {
-              //     newFields.push(newField)
-              //   }
-              //   break
               case 'Attachment':
                 newFields.push(newField)
                 break
@@ -189,7 +180,7 @@ export class VikaDB {
             }
           }
 
-          console.info('创建表，表信息：', JSON.stringify(newFields, undefined, 2))
+          console.info('创建表，表信息：', JSON.stringify(newFields))
 
           const resCreate = await this.createDataSheet(k, sheet.name, newFields)
           if (resCreate.success) {

@@ -1,87 +1,29 @@
 /* eslint-disable sort-keys */
-import { VikaSheet, IRecord } from '../db/vika.js'
 import { Contact, Wechaty, log } from 'wechaty'
 import { delay, logger } from '../utils/utils.js'
-import { VikaDB } from '../db/vika-db.js'
-import { BaseEntity, MappingOptions } from '../db/vika-orm.js'
 
 import { ChatFlowConfig } from '../api/base-config.js'
+import {
+  ServeUpdateContact,
+  ServeGetContacts,
+  ServeDeleteBatchContact,
+} from '../api/contact.js'
 
 // import { db } from '../db/tables.js'
 // const contactData = db.contact
 // logger.info(JSON.stringify(contactData))
 
-const mappingOptions: MappingOptions = {  // 定义字段映射选项
-  fieldMapping: {  // 字段映射
-    alias: '备注名称|alias',
-    id: '好友ID|id',
-    name: '好友昵称|name',
-    gender: '性别|gender',
-    updated: '更新时间|updated',
-    friend: '是否好友|friend',
-    type: '类型|type',
-    avatar: '头像|avatar',
-    phone: '手机号|phone',
-    file: '头像图片|file',
-
-  },
-  tableName: '好友列表|Contact',  // 表名
-}
-
 // 服务类
-export class ContactChat extends BaseEntity {
+export class ContactChat {
 
-  static db:VikaSheet
   static bot:Wechaty
-
-  name?: string  // 定义名字属性，可选
-
-  id?: string
-
-  alias?: string
-
-  gender?: string
-
-  updated?: string
-
-  friend?: string
-
-  type?: string
-
-  avatar?: string
-
-  phone?: string
-
-  file?: string
 
   // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
 
-  protected static override mappingOptions: MappingOptions = mappingOptions  // 设置映射选项为上面定义的 mappingOptions
-
-  protected static override getMappingOptions (): MappingOptions {  // 获取映射选项的方法
-    return this.mappingOptions  // 返回当前类的映射选项
-  }
-
-  static override setMappingOptions (options: MappingOptions) {  // 设置映射选项的方法
-    this.mappingOptions = options  // 更新当前类的映射选项
-  }
-
   // 初始化
   static async init () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.contactSheet)
-    ContactChat.setVikaOptions({
-      apiKey: VikaDB.token,
-      baseId: VikaDB.dataBaseIds.contactSheet, // 设置 base ID
-    })
-    await this.getContact()
     this.bot = ChatFlowConfig.bot
     log.info('初始化 ContactChat 成功...')
-  }
-
-  static async getContact () {
-    const records:IRecord[] = await this.db.findAll()
-    // logger.info('维格表中的记录：' + JSON.stringify(records))
-    return records
   }
 
   // 上传联系人列表
@@ -92,16 +34,18 @@ export class ContactChat extends BaseEntity {
       log.info('最新联系人数量(包含公众号)：', contacts.length)
       logger.info('最新联系人数量(包含公众号)：' + contacts.length)
       const recordsAll: any = []
-      const recordExisting = await this.db.findAll()
+      const recordRes = await ServeGetContacts()
+      const recordExisting = recordRes.data.list
+
       log.info('云端好友数量（不包含公众号）：', recordExisting.length || '0')
       logger.info('云端好友数量（不包含公众号）：' + recordExisting.length || '0')
 
       let wxids: string[] = []
       const recordIds: string[] = []
       if (recordExisting.length) {
-        recordExisting.forEach((record: IRecord) => {
-          wxids.push(record.fields['好友ID|id'] as string)
-          recordIds.push(record.recordId)
+        recordExisting.forEach((fields:any) => {
+          wxids.push(fields['id'] as string)
+          recordIds.push(fields.recordId)
         })
       }
       logger.info('当前bot使用的puppet:' + puppet)
@@ -112,7 +56,7 @@ export class ContactChat extends BaseEntity {
         for (let i = 0; i < count; i++) {
           const records = recordIds.splice(0, 10)
           log.info('删除：', records.length)
-          await this.db.remove(records)
+          await ServeDeleteBatchContact(records)
           await delay(1000)
         }
         wxids = []
@@ -141,15 +85,15 @@ export class ContactChat extends BaseEntity {
             logger.error('获取好友备注失败：' + err)
           }
           const fields = {
-            '备注名称|alias':alias,
-            '头像|avatar':avatar,
-            '是否好友|friend': item.friend(),
-            '性别|gender': String(item.gender() || ''),
-            '更新时间|updated': new Date().toLocaleString(),
-            '好友ID|id': item.id,
-            '好友昵称|name': item.name(),
-            '手机号|phone': String(await item.phone()),
-            '类型|type': String(item.type()),
+            alias,
+            avatar,
+            friend: item.friend(),
+            gender: String(item.gender() || ''),
+            updated: new Date().toLocaleString(),
+            id: item.id,
+            name: item.name(),
+            phone: String(await item.phone()),
+            type: String(item.type()),
           }
           const record = {
             fields,
@@ -160,7 +104,7 @@ export class ContactChat extends BaseEntity {
       logger.info('好友数量：' + recordsAll.length || '0')
       for (let i = 0; i < recordsAll.length; i = i + 10) {
         const records = recordsAll.slice(i, i + 10)
-        await this.db.insert(records)
+        await ServeUpdateContact(records)
         logger.info('好友列表同步中...' + i + records.length)
         updateCount = updateCount + records.length
         void await delay(1000)

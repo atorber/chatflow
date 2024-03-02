@@ -1,9 +1,8 @@
-import { WhiteListChat } from '../services/mod.js'
 import { get, post } from '../utils/request.js'
 
 // 获取黑白名单
 export const getWhiteList = async () => {
-  const res = await WhiteListChat.db.findAll()
+  const res = await ServeGetWhitelistWhite()
   return res
 }
 

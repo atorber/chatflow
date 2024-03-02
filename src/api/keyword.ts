@@ -1,8 +1,7 @@
 import { get, post } from '../utils/request.js'
-import { KeywordChat } from '../services/mod.js'
 // 获取关键词列表
 export const getKeywordList = async (_params: any) => {
-  const res = await KeywordChat.db.findAll()
+  const res = await ServeGetKeywords()
   return res
 }
 

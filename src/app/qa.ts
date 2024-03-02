@@ -13,9 +13,9 @@ async function handleAutoQAForContact (message: Message, keyWord: string) {
   const talker = message.talker()
   const text = message.text()
   const includesKeyWord = text.indexOf(keyWord) !== -1
-  log.info('消息中包含关键字：', includesKeyWord)
+  log.info('消息中包含关键字：', includesKeyWord ? '是' : '否')
   const AUTOQA_AUTOREPLY = ChatFlowConfig.configEnv.AUTOQA_AUTOREPLY
-  log.info('自动问答开关开启：', AUTOQA_AUTOREPLY || false)
+  log.info('自动问答开关开启状态：', AUTOQA_AUTOREPLY ? '开启' : '关闭')
   // 问答开关开启，且消息中包含关键字
   if (AUTOQA_AUTOREPLY && includesKeyWord) {
     // 判断是否在微信对话平台白名单内
@@ -52,9 +52,9 @@ async function handleAutoQA (message: Message, keyWord: string) {
   const topic = await room.topic()
   const text = message.text()
   const includesKeyWord = text.indexOf(keyWord) !== -1
-  log.info('消息中包含关键字：', includesKeyWord)
+  log.info('消息中包含关键字：', includesKeyWord ? '是' : '否')
   const AUTOQA_AUTOREPLY = ChatFlowConfig.configEnv.AUTOQA_AUTOREPLY
-  log.info('自动问答开关开启：', AUTOQA_AUTOREPLY || false)
+  log.info('自动问答开关开启：', AUTOQA_AUTOREPLY ? '开启' : '关闭')
 
   // 问答开关开启，且消息中包含关键字
   if (AUTOQA_AUTOREPLY && includesKeyWord) {
