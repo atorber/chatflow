@@ -133,7 +133,7 @@ export class MessageChat {
             },
           }
           uploadedAttachments = await ServeCreateTalkRecordsUpload(form, config)
-
+          log.info('上传二维码到vika结果：', JSON.stringify(uploadedAttachments))
           const text = qrcodeImageUrl
           if (uploadedAttachments.data) {
             try {
@@ -228,7 +228,7 @@ export class MessageChat {
       },
     }
     const uploadedAttachments = await ServeCreateTalkRecordsUpload(form, config)
-
+    log.info('上传文件到vika结果：', JSON.stringify(uploadedAttachments))
     return uploadedAttachments
   }
 

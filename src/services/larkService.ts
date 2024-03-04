@@ -1,10 +1,11 @@
 /* eslint-disable sort-keys */
+/* eslint-disable sort-keys */
 import { LarkSheet } from '../db/lark.js'
 import { Message, ScanStatus, types, Wechaty, log } from 'wechaty'
 import { getCurTime, delay, logger } from '../utils/utils.js'
 import moment from 'moment'
 import { FileBox } from 'file-box'
-import { LarkDB } from '../db/lark-db.js'
+import { BiTable } from '../db/lark-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'
 import type { ChatMessage } from '../types/mod.js'
 
@@ -31,15 +32,17 @@ export class LarkChat {
   static msgStore: any[] = []
   static messageData: any
   static bot:Wechaty
+  larkDB: BiTable
+  static larkDB: BiTable
 
   private constructor () {
-
+    this.larkDB = new BiTable()
   }
 
   // 初始化
-  static async init () {
+  static async init (config: any) {
     const that = this
-    LarkSheet.init(LarkDB.lark, LarkDB.dataBaseIds.messageSheet)
+    this.db = new LarkSheet(config)
     this.msgStore = []
 
     // 启动定时任务，每秒钟写入一次，每次写入10条
@@ -51,7 +54,7 @@ export class LarkChat {
         const records = that.msgStore.splice(0, end)
         // logger.info('写入Lark的消息：', JSON.stringify(records))
         try {
-          LarkSheet.insert(records).then((response:any) => {
+          this.db?.insert(records).then((response:any) => {
             if (!response.data) {
               log.error('调用Lark写入接口成功，写入Lark失败：', JSON.stringify(response))
             }
@@ -106,7 +109,7 @@ export class LarkChat {
           // await file.pipe(writeStream)
           await file.toFile(filePath, true)
           await delay(1000)
-          uploadedAttachments = await LarkSheet.upload(filePath)
+          uploadedAttachments = await this.db?.upload(filePath)
           const text = qrcodeImageUrl
           if (uploadedAttachments.file_token) {
             try {
@@ -161,7 +164,7 @@ export class LarkChat {
     ]
 
     // logger.info('待写入登录二维码消息:', JSON.stringify(records))
-    const response:any = await LarkSheet.insert(records)
+    const response:any = await this.db?.insert(records)
     if (!response || !response.data) {
       logger.error('调用Lark写入接口成功，写入Lark失败：', JSON.stringify(response))
     }
@@ -188,7 +191,7 @@ export class LarkChat {
     }
 
     await delay(1000)
-    const res = await LarkSheet.upload(filePath)
+    const res = await this.db?.upload(filePath)
     return res
   }
 

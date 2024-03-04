@@ -14,7 +14,6 @@ import {
   NoticeChat,
   QaChat,
   KeywordChat,
-  LarkChat,
 } from '../services/mod.js'
 import { logForm } from '../utils/mod.js'
 import {
@@ -166,13 +165,8 @@ const initializeServicesAndEnv = async () => {
   await delay(500)
 
   // 消息上传
-  if (ChatFlowConfig.dataBaseType === 'lark') {
-    await LarkChat.init()
-    await delay(500)
-  } else {
-    await MessageChat.init()
-    await delay(500)
-  }
+  await MessageChat.init()
+  await delay(500)
 
   // 活动消息
   await ActivityChat.init()
@@ -232,6 +226,8 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
     syncStatus:string;
   }[] = configGgroup['基础配置']
 
+  log.info('获取的基础配置信息:', JSON.stringify(baseConfig))
+
   // 从baseConfig中找出key为BASE_BOT_ID的配置项，更新value为当前登录的bot的id
   const BASE_BOT_ID = baseConfig.find((item) => item.key === 'BASE_BOT_ID')
 
@@ -250,6 +246,14 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
     baseInfo.push(BASE_BOT_NAME)
   }
 
+  const ADMINROOM_ADMINROOMTOPIC = baseConfig.find((item) => item.key === 'ADMINROOM_ADMINROOMTOPIC')
+  if (ADMINROOM_ADMINROOMTOPIC) {
+    ADMINROOM_ADMINROOMTOPIC.value = ChatFlowConfig.adminRoomTopic || process.env.ADMINROOM_ADMINROOMTOPIC || ''
+    ADMINROOM_ADMINROOMTOPIC.lastOperationTime = curTime
+    ADMINROOM_ADMINROOMTOPIC.syncStatus = '已同步'
+    baseInfo.push(ADMINROOM_ADMINROOMTOPIC)
+  }
+
   if (baseInfo.length > 0) {
     baseInfo = baseInfo.map((item) => {
       const raw:any = {
@@ -261,6 +265,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
       raw.fields = item
       return raw
     })
+    log.info('更新基础配置信息:', JSON.stringify(baseInfo))
     await ServeUpdateConfig(baseInfo)
     await delay(500)
   }

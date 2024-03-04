@@ -9,9 +9,7 @@
   "exclude": [
     "src/**/*.mjs",
     "node_modules/",
-    "dist/",
-    "tests/vika-orm-test.ts",
-    "tests/lark.ts"
+    "dist/"
   ],
   "include": [
     "./*.ts",
@@ -21,6 +19,6 @@
     "src/plugins/*.cjs",
     "example/*.ts",
     ".eslintrc.cjs", 
-    "tests/*.ts"  
-, "src/proxy/weixin-chatbot-proxy.ts"  ]
+    "tests/*.ts",
+    "src/proxy/weixin-chatbot-proxy.ts"  ]
 }

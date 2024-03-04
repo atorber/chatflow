@@ -3,23 +3,15 @@
 import 'dotenv/config.js'
 import * as lark from '@larksuiteoapi/node-sdk'
 
-const appId = process.env['LARK_APP_ID']
-const appSecret = process.env['LARK_APP_SECRET']
-const app_token = process.env['LARK_BITABLE_APP_TOKEN'] || ''
-const user_mobile = process.env['LARK_APP_USER_MOBILE'] || '13800000000'
+const appId = process.env.LARK_APP_ID || ''
+const appSecret = process.env.LARK_APP_SECRET || ''
+const app_token = process.env.LARK_BITABLE_APP_TOKEN || ''
+const user_mobile = process.env.LARK_APP_USER_MOBILE || '13800000000'
 
 const client = new lark.Client({
   appId,
   appSecret,
 })
-
-// const res = await client.request({
-//   method: 'GET',
-//   url: 'https://open.feishu.cn/open-apis/bitable/v1/apps/bascnPgZURujrdwZ9T4JkLUSUQc/tables/tblZgivmheQdZjDe/records',
-//   data: {},
-//   params: {},
-// })
-// console.log(JSON.stringify(res.data))
 
 const user = await client.contact.user.batchGetId({
   data:{ mobiles:[ user_mobile ] },

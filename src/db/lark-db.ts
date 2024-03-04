@@ -3,7 +3,8 @@
 /* eslint-disable sort-keys */
 import type { Sheets, Record } from './vikaModel/Model.js'
 import { sheets } from './vikaModel/index.js'
-import { delay, logForm } from '../utils/utils.js'
+import { delay } from '../utils/utils.js'
+import CryptoJS from 'crypto-js'
 
 import * as lark from '@larksuiteoapi/node-sdk'
 
@@ -16,39 +17,43 @@ import * as lark from '@larksuiteoapi/node-sdk'
 // console.log(JSON.stringify(res.data))
 
 type Field = {
-  id?:string,
-  field_name: string,
-  type: number,
-  property?: any,
+  id?: string;
+  field_name: string;
+  type: number;
+  property?: any;
   description?: {
-    text?:string
-  },
-  editable?: boolean,
-  isPrimary?: boolean,
+    text?: string;
+  };
+  editable?: boolean;
+  isPrimary?: boolean;
 };
 
 export type LarkConfig = {
-  appId:string,
-  appSecret:string,
-  appToken:string,
-  userMobile:string,
-}
+  appId: string;
+  appSecret: string;
+  appToken: string;
+};
+
+export type BiTableConfig = {
+  spaceId: string;
+  token: string;
+};
 
 export interface DateBase {
-  messageSheet: string
-  keywordSheet: string
-  contactSheet: string
-  roomSheet: string
-  envSheet: string
-  whiteListSheet: string
-  noticeSheet: string
-  statisticSheet: string
-  orderSheet: string
-  stockSheet: string
-  groupNoticeSheet: string
-  qaSheet:string
-  chatBotSheet: string
-  chatBotUserSheet:string
+  messageSheet: string;
+  keywordSheet: string;
+  contactSheet: string;
+  roomSheet: string;
+  envSheet: string;
+  whiteListSheet: string;
+  noticeSheet: string;
+  statisticSheet: string;
+  orderSheet: string;
+  stockSheet: string;
+  groupNoticeSheet: string;
+  qaSheet: string;
+  chatBotSheet: string;
+  chatBotUserSheet: string;
 }
 
 export class KeyDisplaynameMap {
@@ -57,7 +62,7 @@ export class KeyDisplaynameMap {
   private reverseMap: Map<string, string>
 
   constructor (fields: any[]) {
-    const initPairs:[string, string][] = fields.map((fields:any) => {
+    const initPairs: [string, string][] = fields.map((fields: any) => {
       return this.transformKey(fields.name)
     })
     this.reverseMap = new Map(initPairs)
@@ -78,37 +83,67 @@ export class KeyDisplaynameMap {
 
 }
 
-export class LarkDB {
+export class BiTable {
 
-  static spaceName: string
-  static token: string
-  static spaceId: string | undefined
-  static dataBaseIds: DateBase
-  static dataBaseNames: DateBase
-  static lark: lark.Client
-  static config: LarkConfig
-  static user_id:string | undefined
+  spaceName!: string
+  token!: string
+  spaceId: string | undefined
+  userId!: string
+  username!: string
+  password!: string
+  isReady: boolean = true
+  dataBaseIds!: DateBase
+  dataBaseNames!: DateBase
+  lark!: lark.Client
+  larkConfig!: LarkConfig
+  user_id: string | undefined
+  hash!: string
+  static dataBaseIds: any
+  config!: {
+    [key: string]: any
+    accessKeyId?: string
+    secretAccessKey?: string
+    region?: string
+    endpoint?: string
+    bucketName?: string
+    CHATGPT_KEY?: string
+    CHATGPT_ENDPOINT?: string
+    CHATGPT_MODEL?: string
+  }
 
-  static async init (config:LarkConfig) {
-    logForm('初始化检查系统表...')
+  async init (config: BiTableConfig) {
+    console.debug('初始化检查系统表...')
     this.config = config
+    this.spaceId = config.spaceId
+    this.userId = this.spaceId
+    this.username = this.spaceId
+
+    this.token = config.token
+    this.password = config.token
+
+    this.larkConfig = {
+      appId: config.token.split('/')[0] as string,
+      appSecret: config.token.split('/')[1] as string,
+      appToken: config.spaceId,
+    }
 
     this.lark = new lark.Client({
-      appId:config.appId,
-      appSecret:config.appSecret,
+      appId: this.larkConfig.appId,
+      appSecret: this.larkConfig.appSecret,
     })
 
-    const user = await this.lark.contact.user.batchGetId({
-      data:{ mobiles:[ config.userMobile ] },
-      params:{ user_id_type:'user_id' },
-    })
+    // const user = await this.lark.contact.user.batchGetId({
+    //   data: { mobiles: [ config.userMobile ] },
+    //   params: { user_id_type: 'user_id' },
+    // })
     // console.log('\nuser:', JSON.stringify(user))
 
-    if (user.data && user.data.user_list && user.data.user_list.length) {
-      const user_id = user.data.user_list[0]?.user_id
-      this.user_id = user_id
-      // console.log('\nuser_id:', user_id)
-    }
+    // if (user.data && user.data.user_list && user.data.user_list.length) {
+    //   const user_id = user.data.user_list[0]?.user_id
+    //   // this.user_id = user_id
+    //   this.config.user_id = user_id
+    //   console.log('\nuser_id:', user_id)
+    // }
 
     this.dataBaseIds = {
       messageSheet: '',
@@ -122,26 +157,124 @@ export class LarkDB {
       orderSheet: '',
       stockSheet: '',
       groupNoticeSheet: '',
-      qaSheet:'',
+      qaSheet: '',
       chatBotSheet: '',
-      chatBotUserSheet:'',
+      chatBotUserSheet: '',
     }
-
     this.dataBaseNames = { ...this.dataBaseIds }
 
-    if (config.appToken) {
-
+    try {
       const tables = await this.getNodesList()
-      console.info('飞书多维表格文件列表：\n', JSON.stringify(tables, undefined, 2))
-
+      console.info(
+        '飞书多维表格文件列表：\n',
+        JSON.stringify(tables, undefined, 2),
+      )
       await delay(200)
+
+      if (tables) {
+        const client = config.token + config.spaceId
+        console.debug(client)
+        this.hash = CryptoJS.SHA256(client).toString()
+        await delay(1000)
+
+        for (const k in sheets) {
+          // console.info(this)
+          const sheet = sheets[k as keyof Sheets]
+          // console.info('数据模型：', k, sheet)
+          if (sheet && !tables[sheet.name]) {
+            console.info(`缺少数据表...\n${k}/${sheet.name}`)
+            this.isReady = false
+            return { success: false, code: 400, data: '' }
+          } else if (sheet) {
+            // console.debug('sheet...', sheet)
+            console.log(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
+            this.dataBaseIds[k as keyof DateBase] = tables[sheet.name]
+            this.dataBaseNames[k as keyof DateBase] = sheet.name
+          }
+        }
+        console.debug('初始化表完成...')
+        const data = JSON.parse(JSON.stringify(this))
+        delete data.lark
+        return { success: true, code: 200, data: JSON.stringify(data) }
+      } else {
+        return { success: false, code: 400, data: '' }
+      }
+    } catch (error) {
+      console.error('初始化表失败：', error)
+      return { success: false, code: 400, data: '' }
+    }
+  }
+
+  async createSheet (config: BiTableConfig) {
+    console.debug('初始化创建或检查系统表...')
+    this.config = config
+    this.spaceId = config.spaceId
+    this.userId = this.spaceId
+    this.username = this.spaceId
+
+    this.token = config.token
+    this.password = config.token
+
+    this.larkConfig = {
+      appId: config.token.split('/')[0] as string,
+      appSecret: config.token.split('/')[1] as string,
+      appToken: config.spaceId,
+    }
+
+    this.lark = new lark.Client({
+      appId: this.larkConfig.appId,
+      appSecret: this.larkConfig.appSecret,
+    })
+
+    // const user = await this.lark.contact.user.batchGetId({
+    //   data: { mobiles: [ config.userMobile ] },
+    //   params: { user_id_type: 'user_id' },
+    // })
+    // console.log('\nuser:', JSON.stringify(user))
+
+    // if (user.data && user.data.user_list && user.data.user_list.length) {
+    //   const user_id = user.data.user_list[0]?.user_id
+    //   this.user_id = user_id
+    //   console.log('\nuser_id:', user_id)
+    // }
+
+    this.dataBaseIds = {
+      messageSheet: '',
+      keywordSheet: '',
+      contactSheet: '',
+      roomSheet: '',
+      envSheet: '',
+      whiteListSheet: '',
+      noticeSheet: '',
+      statisticSheet: '',
+      orderSheet: '',
+      stockSheet: '',
+      groupNoticeSheet: '',
+      qaSheet: '',
+      chatBotSheet: '',
+      chatBotUserSheet: '',
+    }
+    this.dataBaseNames = { ...this.dataBaseIds }
+
+    const tables = await this.getNodesList()
+    console.info(
+      '飞书多维表格文件列表：',
+      JSON.stringify(tables, undefined, 2),
+    )
+    await delay(200)
+
+    if (tables) {
+      const client = config.token + config.spaceId
+      console.debug('client字符串:', client)
+      this.hash = CryptoJS.SHA256(client).toString()
+      await delay(1000)
 
       for (const k in sheets) {
         // console.info(this)
         const sheet = sheets[k as keyof Sheets]
         // console.info('数据模型：', k, sheet)
         if (sheet && !tables[sheet.name]) {
-          logForm(`表不存在，创建表并初始化数据...\n${k}/${sheet.name}`)
+          console.debug(`表不存在，创建表并初始化数据...\n${k}/${sheet.name}`)
           const fields = sheet.fields
           // console.info('fields:', JSON.stringify(fields))
           const newFields: Field[] = []
@@ -151,7 +284,7 @@ export class LarkDB {
               type: 1,
               field_name: field?.name || '',
               description: {
-                text:field?.desc || '',
+                text: field?.desc || '',
               },
             }
             // console.info('字段定义：', JSON.stringify(field))
@@ -211,13 +344,13 @@ export class LarkDB {
                 newField.type = 7
                 newFields.push(newField)
                 break
-              // case 'MagicLink':
-              //   newField.property = {}
-              //   newField.property.foreignDatasheetId = this[field.desc as keyof LarkDB]
-              //   if (field.desc) {
-              //     newFields.push(newField)
-              //   }
-              //   break
+                // case 'MagicLink':
+                //   newField.property = {}
+                //   newField.property.foreignDatasheetId = this[field.desc as keyof LarkDB]
+                //   if (field.desc) {
+                //     newFields.push(newField)
+                //   }
+                //   break
               case 'Attachment':
                 newField.type = 17
                 newFields.push(newField)
@@ -228,7 +361,7 @@ export class LarkDB {
             }
           }
 
-          // console.info('创建表，表信息：', JSON.stringify(newFields))
+          console.info('创建表，表信息：', JSON.stringify(newFields))
 
           await this.createDataSheet(k, sheet.name, newFields)
           console.info('当前表ID:', this.dataBaseIds[k as keyof DateBase])
@@ -237,35 +370,43 @@ export class LarkDB {
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           if (defaultRecords) {
             // console.info(defaultRecords.length)
-            const count = Math.ceil(defaultRecords.length / 10)
+            const count = Math.ceil(defaultRecords.length / 50)
             for (let i = 0; i < count; i++) {
-              const records = defaultRecords.splice(0, 10)
+              const records = defaultRecords.splice(0, 50)
               console.info('写入：', records.length)
               console.info('写入表ID:', this.dataBaseIds[k as keyof DateBase])
-              await this.createRecord(this.dataBaseIds[k as keyof DateBase], records)
+              await this.createRecord(
+                this.dataBaseIds[k as keyof DateBase],
+                records,
+              )
               await delay(200)
             }
-            logForm(sheet.name + '初始化数据写入完成...')
+            console.debug(sheet.name + '初始化数据写入完成...')
           }
         } else if (sheet) {
-          // logForm(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
+          // console.debug('sheet...', sheet)
+          console.log(`表已存在：\n${k}/${sheet.name}/${tables[sheet.name]}`)
           this.dataBaseIds[k as keyof DateBase] = tables[sheet.name]
-          this.dataBaseNames[sheet.name as keyof DateBase] = tables[sheet.name]
-        } else { /* empty */ }
+          this.dataBaseNames[k as keyof DateBase] = sheet.name
+        } else {
+          /* empty */
+        }
       }
-      logForm('初始化表完成...')
-
-      return true
+      console.debug('初始化表完成...')
+      const data = JSON.parse(JSON.stringify(this))
+      delete data.lark
+      return { success: true, code: 200, data: JSON.stringify(data) }
     } else {
-      logForm('\n\n指定空间不存在，请先创建空间，并在.env文件或环境变量中配置vika信息\n\n')
-      return false
+      return { success: false, code: 400, data: '' }
     }
   }
 
-  protected static async getNodesList () {
-    if (this.config.appToken) {
+  protected async getNodesList () {
+    if (this.larkConfig.appToken) {
       // 获取指定空间站的一级文件目录
-      const nodeListResp = await this.lark.bitable.appTable.list({ path:{ app_token:this.config.appToken } })
+      const nodeListResp = await this.lark.bitable.appTable.list({
+        path: { app_token: this.larkConfig.appToken },
+      })
       const tables: any = {}
       if (nodeListResp.data && nodeListResp.data.items) {
         // console.info(nodeListResp.data.nodes);
@@ -283,15 +424,20 @@ export class LarkDB {
     }
   }
 
-  protected static async getDataBases () {
+  protected async getDataBases () {
     return this.dataBaseIds
   }
 
-  protected static async getSheetFields (datasheetId: string) {
-    const fieldsResp = await this.lark.bitable.appTableField.list({ path:{ app_token:this.config.appToken, table_id:datasheetId } })
+  protected async getSheetFields (datasheetId: string) {
+    const fieldsResp = await this.lark.bitable.appTableField.list({
+      path: { app_token: this.larkConfig.appToken, table_id: datasheetId },
+    })
     let fields: any[] = []
     if (fieldsResp.data && fieldsResp.data.items) {
-      console.info('getSheetFields获取字段：', JSON.stringify(fieldsResp.data.items))
+      console.info(
+        'getSheetFields获取字段：',
+        JSON.stringify(fieldsResp.data.items),
+      )
       fields = fieldsResp.data.items
     } else {
       console.error('获取字段失败:', fieldsResp)
@@ -299,7 +445,11 @@ export class LarkDB {
     return fields
   }
 
-  protected static async createDataSheet (key: string, name: string, fields: { field_name: string; type: number }[]) {
+  protected async createDataSheet (
+    key: string,
+    name: string,
+    fields: { field_name: string; type: number }[],
+  ) {
     console.info('开始创建表...')
     const datasheetRo = {
       fields,
@@ -308,19 +458,21 @@ export class LarkDB {
 
     // console.info('创建表，表信息：', JSON.stringify(datasheetRo))
 
-    if (this.config.appToken) {
+    if (this.larkConfig.appToken) {
       try {
         const res = await this.lark.bitable.appTable.create({
-          path:{
-            app_token:this.config.appToken,
+          path: {
+            app_token: this.larkConfig.appToken,
           },
-          data:{
-            table:datasheetRo,
+          data: {
+            table: datasheetRo,
           },
         })
 
         console.info('创建表返回：', JSON.stringify(res))
-        console.info(`系统表【${name}】创建成功，表ID【${res.data?.table_id}】`)
+        console.info(
+          `系统表【${name}】创建成功，表ID【${res.data?.table_id}】`,
+        )
 
         this.dataBaseIds[key as keyof DateBase] = res.data?.table_id || ''
         this.dataBaseNames[name as keyof DateBase] = res.data?.table_id || ''
@@ -338,17 +490,17 @@ export class LarkDB {
     }
   }
 
-  protected static async createRecord (datasheetId: string, records: Record[]) {
+  protected async createRecord (datasheetId: string, records: Record[]) {
     console.info('写入飞书多维表格ID:', datasheetId)
     console.info('写入飞书多维表格记录:', records.length)
     try {
       const res = await this.lark.bitable.appTableRecord.batchCreate({
-        data:{
+        data: {
           records,
         },
-        path:{
-          app_token:this.config.appToken,
-          table_id:datasheetId,
+        path: {
+          app_token: this.larkConfig.appToken,
+          table_id: datasheetId,
         },
       })
 
@@ -357,23 +509,25 @@ export class LarkDB {
       } else {
         console.error('记录写入飞书多维表格失败：', res)
       }
-    } catch (err:any) {
+    } catch (err: any) {
       console.error('请求飞书多维表格写入失败：', err.code)
     }
-
   }
 
-  protected static async updateRecord (datasheetId: string, records: {
-    recordId: string
-    fields: {[key:string]:any}
-  }[]) {
+  protected async updateRecord (
+    datasheetId: string,
+    records: {
+      recordId: string;
+      fields: { [key: string]: any };
+    }[],
+  ) {
     console.info('更新飞书多维表格记录:', records.length)
 
     try {
       const res = await this.lark.bitable.appTableRecord.batchUpdate({
-        data:{ records },
-        path:{
-          app_token: this.config.appToken,
+        data: { records },
+        path: {
+          app_token: this.larkConfig.appToken,
           table_id: datasheetId,
         },
       })
@@ -383,17 +537,19 @@ export class LarkDB {
     } catch (err) {
       console.error('请求飞书多维表格更新失败：', err)
     }
-
   }
 
-  protected static async deleteRecords (datasheetId: string, recordsIds: string[]) {
+  protected async deleteRecords (
+    datasheetId: string,
+    recordsIds: string[],
+  ) {
     // console.info('操作数据表ID：', datasheetId)
     // console.info('待删除记录IDs：', recordsIds)
 
     const response = await this.lark.bitable.appTableRecord.batchDelete({
-      data:{ records: recordsIds },
-      path:{
-        app_token: this.config.appToken,
+      data: { records: recordsIds },
+      path: {
+        app_token: this.larkConfig.appToken,
         table_id: datasheetId,
       },
     })
@@ -405,16 +561,16 @@ export class LarkDB {
     }
   }
 
-  protected static async getRecords (datasheetId: string, query:any = {}) {
+  protected async getRecords (datasheetId: string, query: any = {}) {
     let records: any = []
     query['pageSize'] = 1000
     // 分页获取记录，默认返回第一页
     const response = await this.lark.bitable.appTableRecord.list({
-      params:{
-        filter:query,
+      params: {
+        filter: query,
       },
-      path:{
-        app_token: this.config.appToken,
+      path: {
+        app_token: this.larkConfig.appToken,
         table_id: datasheetId,
       },
     })
@@ -428,11 +584,11 @@ export class LarkDB {
     return records
   }
 
-  static async getAllRecords (datasheetId: string) {
+  async getAllRecords (datasheetId: string) {
     let records: any = []
     const response = await this.lark.bitable.appTableRecord.list({
-      path:{
-        app_token: this.config.appToken,
+      path: {
+        app_token: this.larkConfig.appToken,
         table_id: datasheetId,
       },
     })
@@ -447,7 +603,7 @@ export class LarkDB {
     return records
   }
 
-  protected static async clearBlankLines (datasheetId: any) {
+  protected async clearBlankLines (datasheetId: any) {
     const records = await this.getRecords(datasheetId, {})
     // console.info(records)
     const recordsIds: any = []

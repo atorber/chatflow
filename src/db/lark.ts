@@ -4,7 +4,6 @@ import type * as lark from '@larksuiteoapi/node-sdk'
 import { log } from 'wechaty'
 import fs from 'fs'
 import { FileBox } from 'file-box'
-import { LarkDB } from './lark-db.js'
 
 interface IField {
   [key:string]: string | '';
@@ -39,35 +38,48 @@ type Record = {
   }
 }
 
+export type LarkConfig = {
+  appId: string;
+  appSecret: string;
+  appToken: string;
+  userMobile: string;
+  datasheetId: string;
+};
+
 export class LarkSheet {
 
-  static client: lark.Client
-  static datasheetId: string
-  static offsetValue: number
-  static limitValue: number
-  static orderby: any
-  static fields: any[] = []
-  static records: any
+  client!: lark.Client
+  datasheetId!: string
+  offsetValue!: number
+  limitValue!: number
+  orderby: any
+  fields: any[] = []
+  records: any
+  config: LarkConfig
 
-  static init (client:lark.Client, datasheetId: string) {
-    LarkSheet.client = client
-    LarkSheet.datasheetId = datasheetId
-    LarkSheet.offsetValue = 0
-    LarkSheet.limitValue = 15
+  constructor (config: LarkConfig) {
+    this.config = config
   }
 
-  static limit (offset: number, limit: number)  {
+  init (client:lark.Client, datasheetId: string) {
+    this.client = client
+    this.datasheetId = datasheetId
+    this.offsetValue = 0
+    this.limitValue = 15
+  }
+
+  limit (offset: number, limit: number)  {
     this.offsetValue = offset || 0
     this.limitValue = limit || 15
     return this
   }
 
-  static sort (orderby: any) {
+  sort (orderby: any) {
     this.orderby = orderby
     return this
   }
 
-  static async insert (records:Record[]) {
+  async insert (records:Record[]) {
     // log.info('写入维格表:', records.length)
 
     try {
@@ -76,7 +88,7 @@ export class LarkSheet {
           records,
         },
         path:{
-          app_token:LarkDB.config.appToken,
+          app_token:this.config.appToken,
           table_id:this.datasheetId,
         },
       })
@@ -93,7 +105,7 @@ export class LarkSheet {
 
   }
 
-  static async upload (path:string) {
+  async upload (path:string) {
     log.info('文件本地路径：', path)
     const file = fs.createReadStream(path)
     const fileBox = FileBox.fromFile(path)
@@ -103,13 +115,15 @@ export class LarkSheet {
         data:{
           file_name:fileBox.name,
           parent_type: fileBox.mediaType !== 'image/jpeg' ? 'bitable_file' : 'bitable_image',
-          parent_node: LarkDB.config.appToken,
+          parent_node: this.config.appToken,
           size: fileBox.size,
           file,
         },
       })
       if (!resp || !resp.file_token) {
-        log.info('文件上传请求成功，上传失败', JSON.stringify(resp))
+        log.info('文件，上传失败', JSON.stringify(resp))
+      } else {
+        log.info('文件上传成功', JSON.stringify(resp))
       }
       return resp
     } catch (error) {
@@ -119,7 +133,7 @@ export class LarkSheet {
 
   }
 
-  static async update (records: {
+  async update (records: {
     recordId: string
     fields: {[key:string]:any}
   }[]) {
@@ -131,7 +145,7 @@ export class LarkSheet {
           records,
         },
         path:{
-          app_token:LarkDB.config.appToken,
+          app_token:this.config.appToken,
           table_id:this.datasheetId,
         },
       })
@@ -146,7 +160,7 @@ export class LarkSheet {
 
   }
 
-  static async updateOne (recordId: string, fields: {[key:string]:any}) {
+  async updateOne (recordId: string, fields: {[key:string]:any}) {
 
     try {
       const res = await this.client.bitable.appTableRecord.update({
@@ -154,7 +168,7 @@ export class LarkSheet {
           fields,
         },
         path:{
-          app_token:LarkDB.config.appToken,
+          app_token:this.config.appToken,
           table_id:this.datasheetId,
           record_id:recordId,
         },
@@ -170,7 +184,7 @@ export class LarkSheet {
 
   }
 
-  static async remove (recordsIds: string[]) {
+  async remove (recordsIds: string[]) {
     // log.info('操作数据表ID：', datasheetId)
     // log.info('待删除记录IDs：', recordsIds)
     const response = await this.client.bitable.appTableRecord.batchDelete({
@@ -178,7 +192,7 @@ export class LarkSheet {
         records:recordsIds,
       },
       path:{
-        app_token:LarkDB.config.appToken,
+        app_token:this.config.appToken,
         table_id:this.datasheetId,
       },
     })
@@ -188,12 +202,12 @@ export class LarkSheet {
     return response
   }
 
-  static async removeOne (recordsId: string) {
+  async removeOne (recordsId: string) {
     // log.info('操作数据表ID：', datasheetId)
     // log.info('待删除记录IDs：', recordsIds)
     const response = await this.client.bitable.appTableRecord.delete({
       path:{
-        app_token:LarkDB.config.appToken,
+        app_token:this.config.appToken,
         table_id:this.datasheetId,
         record_id:recordsId,
       },
@@ -204,7 +218,7 @@ export class LarkSheet {
     return response
   }
 
-  static async find (query:any = {}) {
+  async find (query:any = {}) {
     let records: any[] = []
     query['pageSize'] = 1000
     // 分页获取记录，默认返回第一页
@@ -213,7 +227,7 @@ export class LarkSheet {
         filter:query,
       },
       path:{
-        app_token:LarkDB.config.appToken,
+        app_token:this.config.appToken,
         table_id:this.datasheetId,
       },
     })
@@ -227,7 +241,7 @@ export class LarkSheet {
     }
   }
 
-  static async findOne (query:any = {}) {
+  async findOne (query:any = {}) {
     let records: any[] = []
     query['pageSize'] = 1
     // 分页获取记录，默认返回第一页
@@ -236,7 +250,7 @@ export class LarkSheet {
         filter:query,
       },
       path:{
-        app_token:LarkDB.config.appToken,
+        app_token:this.config.appToken,
         table_id:this.datasheetId,
       },
     })
@@ -251,7 +265,7 @@ export class LarkSheet {
     }
   }
 
-  static async getFields () {
+  async getFields () {
     if (this.fields.length) return this.fields
     const fieldsResp = await this.client.bitable.appTableField.list()
 
@@ -264,7 +278,7 @@ export class LarkSheet {
     return this.fields
   }
 
-  static async findAll (): Promise<any[]> {
+  async findAll (): Promise<any[]> {
     try {
       // Automatically handle pagination and iterate through all records.
       const res = await this.client.bitable.appTableRecord.list()
@@ -293,7 +307,7 @@ export class LarkSheet {
     })
   }
 
-  static async nameConversion (records: any[]) {
+  async nameConversion (records: any[]) {
     const fields = await this.getFields()
     // 创建一个映射表
     const fieldMap: { [key: string]: string } = {}

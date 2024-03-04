@@ -11,10 +11,7 @@ import { formatTimestamp, getCurrentTime, delay, logger, getCurTime } from '../u
 import type { ChatMessage } from '../types/interface.js'
 import {
   MessageChat,
-  LarkChat,
 } from '../services/mod.js'
-import { LarkDB } from '../db/lark-db.js'
-import { ChatFlowConfig } from './base-config.js'
 import fs from 'fs'
 import path from 'path'
 
@@ -233,20 +230,12 @@ export const formatMessageToCloud = async (message: Message) => {
         log.error('message 文件转换JSON失败：', e)
       }
       try {
-        if (ChatFlowConfig.dataBaseType === 'lark' && LarkDB.config.appToken) {
-          uploadedAttachments = await LarkChat.handleFileMessage(file, message)
-          files.push({
-            file_token: uploadedAttachments.file_token,
-          })
-          log.info('上传文件Lark成功：', JSON.stringify(uploadedAttachments))
-        } else {
-          uploadedAttachments = await MessageChat.handleFileMessage(file, message)
-          const fileToken = uploadedAttachments.data
-          text = JSON.stringify(fileToken)
-          files.push(fileToken)
-          log.info('上传文件Vika成功：', JSON.stringify(uploadedAttachments))
+        uploadedAttachments = await MessageChat.handleFileMessage(file, message)
+        const fileToken = uploadedAttachments.data
+        text = JSON.stringify(fileToken)
+        files.push(fileToken)
+        log.info('上传文件Vika成功：', JSON.stringify(uploadedAttachments))
 
-        }
       } catch (e) {
         log.error('文件上传失败：', e)
       }
@@ -327,13 +316,8 @@ export const formatMessageToCloud = async (message: Message) => {
 export const saveMessageToCloud = async (record:any) => {
   // log.info('saveMessageToCloud messageNew:', JSON.stringify(messageNew))
   try {
-    if (ChatFlowConfig.dataBaseType === 'lark') {
-      log.info('消息添加到lark队列:', JSON.stringify(record))
-      await LarkChat.addChatRecord(record)
-    } else {
-      log.info('消息添加到vika队列:', JSON.stringify(record))
-      await MessageChat.addChatRecord(record)
-    }
+    log.info('消息添加到vika队列:', JSON.stringify(record))
+    await MessageChat.addChatRecord(record)
     // log.info('消息写入数据库成功:', res._id)
     return true
   } catch (e) {
@@ -345,11 +329,7 @@ export const saveMessageToCloud = async (record:any) => {
 
 // 处理二维码上传
 export const uploadQRCodeToCloud = async (qrcode: string, status: ScanStatus) => {
-  if (ChatFlowConfig.dataBaseType === 'lark') {
-    await LarkChat.uploadQRCodeToVika(qrcode, status)
-  } else {
-    await MessageChat.uploadQRCodeToVika(qrcode, status)
-  }
+  await MessageChat.uploadQRCodeToVika(qrcode, status)
 }
 
 // 上传图片/文件到云

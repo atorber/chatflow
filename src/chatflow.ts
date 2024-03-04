@@ -13,7 +13,7 @@ import { getBotOps } from './services/configService.js'
 import delay, { logForm } from './utils/utils.js'
 import { ChatFlowConfig, WechatyConfig } from './api/base-config.js'
 import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
-import { LarkDB } from './db/lark-db.js'
+import { BiTable } from './db/lark-db.js'
 
 import getAuthClient from '../src/utils/auth.js'
 import { GroupMaster, GroupMasterConfig } from './plugins/mod.js'
@@ -122,7 +122,7 @@ export {
   ChatFlowConfig,
   log,
   logForm,
-  LarkDB,
+  BiTable,
   type IClientOptions,
   MqttProxy,
   ChatFlow,

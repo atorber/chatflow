@@ -1,6 +1,6 @@
 {
   "name": "@atorber/chatflow",
-  "version": "3.0.0-3",
+  "version": "3.0.0-5",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
@@ -29,9 +29,10 @@
     "start:index": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
     "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true WECHATY_PUPPET_SERVICE_AUTHORITY=\"token-service-discovery-test.juzibot.com\" NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/ding-dong-bot.ts",
     "start:store": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/plugins/store-messages-locally.ts",
-    "start:lark": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/lark.ts",
-    "start:api": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/api.ts",
-    "start:auth": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/auth.ts",
+    "test:lark-api": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/lark.ts",
+    "test:auth": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/auth.ts",
+    "test:lark-orm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/lark-orm-test.ts",
+    "test:vika-orm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/vika-orm-test.ts",
     "rm-temp": "rm -r temp; mkdir temp",
     "rm-cache": "rm -r cache; mkdir cache",
     "test": "npm run lint",
