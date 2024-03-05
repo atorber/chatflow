@@ -1,5 +1,4 @@
 import { MessageChat } from './messageService.js'
-import { LarkChat } from './larkService.js'
 import { EnvChat } from './envService.js'
 import { WhiteListChat, WhiteList } from './whiteListService.js'
 import { GroupNoticeChat } from './groupNoticeService.js'
@@ -22,7 +21,6 @@ export type ActivityChatType = ActivityChat
 export type KeywordChatType = KeywordChat
 export type NoticeChatType = NoticeChat
 export type QaChatType = QaChat
-export type LarkChatType = LarkChat
 export type OrderChatType = OrderChat
 export type StatisticChatType = StatisticChat
 
@@ -37,7 +35,6 @@ export {
   KeywordChat,
   NoticeChat,
   QaChat,
-  LarkChat,
   OrderChat,
   StatisticChat,
 }

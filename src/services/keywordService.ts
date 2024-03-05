@@ -22,7 +22,7 @@ export class KeywordChat {
   static async getKeywordsText () {
     // const records = await this.getKeywords()
     const res = await ServeGetKeywords()
-    const records = res.data.list
+    const records = res.data.items
 
     let text :string = '【操作说明】\n'
     for (const fields of records) {
@@ -34,7 +34,7 @@ export class KeywordChat {
   static async getSystemKeywordsText () {
     // const records = await this.getKeywords()
     const res = await ServeGetKeywords()
-    const records = res.data.list
+    const records = res.data.items
     let text :string = '【操作说明】\n'
     for (const fields of records) {
       if (fields['type'] === '系统指令') text += `${fields['name']} : ${fields['desc']}\n`

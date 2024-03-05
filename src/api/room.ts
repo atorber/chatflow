@@ -8,6 +8,11 @@ export const ServeGetGroups = () => {
   return get('/api/v1/group/list')
 }
 
+// 获取群聊列表服务接口
+export const ServeGetGroupsRaw = () => {
+  return get('/api/v1/group/list/raw')
+}
+
 // 更新用户群聊服务接口
 export const ServeUpdateGroups = (data: any | undefined) => {
   return post('/api/v1/group/update', data)
@@ -35,6 +40,11 @@ export const ServeGroupDetail = (data: {} | undefined) => {
 // 创建群聊服务接口
 export const ServeCreateGroup = (data: {} | undefined) => {
   return post('/api/v1/group/create', data)
+}
+
+// 创建群聊服务接口
+export const ServeCreateGroupBatch = (data: {} | undefined) => {
+  return post('/api/v1/group/create/batch', data)
 }
 
 //  修改群信息
@@ -203,7 +213,7 @@ export async function getRoomRecordContent (rooName:any, day:any): Promise<any> 
 // 查询用户群聊列表接口
 export async function getRoomList (): Promise<any> {
   const res = await ServeGetGroups()
-  const roomListRaw:any = res.data.list
+  const roomListRaw:any = res.data.items
   // console.log('roomListRaw', JSON.stringify(roomListRaw))
   const roomList = roomListRaw.map((value: { fields: { topic: any; avatar: any; ownerId: any; id: any }; recordId: any }) => {
     if (value.fields.topic) {

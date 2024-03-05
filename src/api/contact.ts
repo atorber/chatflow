@@ -7,6 +7,16 @@ export const ServeGetContacts = () => {
   return get('/api/v1/contact/list')
 }
 
+// 获取好友列表服务接口
+export const ServeGetContactsRaw = () => {
+  return get('/api/v1/contact/list/raw')
+}
+
+// 好友更新
+export const ServeCreateContactBatch = (data: {} | undefined) => {
+  return post('/api/v1/contact/create/batch', data)
+}
+
 // 解除好友关系服务接口
 export const ServeDeleteContact = (data: any | undefined) => {
   return post('/api/v1/contact/delete', data)
@@ -80,7 +90,7 @@ export const ServeContactGroupSave = (data: {} | undefined) => {
 // 获取好友列表
 export async function getContactList () {
   const res = await ServeGetContacts()
-  const contactListRaw:any = res.data.list
+  const contactListRaw:any = res.data.items
   // console.log('contactListRaw', JSON.stringify(contactListRaw))
   const contactList: any = contactListRaw.map((fields: { name: any; avatar: any; gender: any; id: any; alias: any ; recordId: any }) => {
     if (fields.name) {

@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys */
-import type { TaskConfig, Notifications } from '../api/base-config.js'
+import type { Notifications } from '../api/base-config.js'
 import { ChatFlowConfig } from '../api/base-config.js'
 import { Wechaty, log } from 'wechaty'
 import type { BusinessRoom, BusinessUser } from '../plugins/mod.js'
@@ -23,7 +23,6 @@ export class GroupNoticeChat {
 
   static roomWhiteList: any
   static contactWhiteList: any
-  static reminderList: TaskConfig[] = []
   static bot:Wechaty
 
   private constructor () {
@@ -46,7 +45,7 @@ export class GroupNoticeChat {
     const groupNotifications: Notifications[] = []
     try {
       const statisticsRes = await ServeGetGroupnotices()
-      const records = statisticsRes.data.list
+      const records = statisticsRes.data.items
       // logger.info('群发通知列表（原始）：\n', JSON.stringify(records))
 
       for (const fields of records) {

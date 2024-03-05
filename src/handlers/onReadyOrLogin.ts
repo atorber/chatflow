@@ -19,60 +19,28 @@ import { logForm } from '../utils/mod.js'
 import {
   getRoom,
 } from '../plugins/mod.js'
-import type { WhiteList } from '../services/mod.js'
-import type { BusinessRoom, BusinessUser } from '../api/contact-room-finder.js'
 import { onMessage } from './on-message.js'
 
 import {
   ServeGetUserConfigGroup,
-  ServeGetUserConfig,
   ServeUpdateConfig,
 } from '../api/user.js'
-import { ServeGetWhitelistWhite } from '../api/white-list.js'
-import { ServeGetNotices } from '../api/notice.js'
+import {
+  ServeGetWhitelistWhiteObject,
+} from '../api/white-list.js'
+// import { ServeGetNotices } from '../api/notice.js'
 import { ServeGetKeywords } from '../api/keyword.js'
+import { ServeGetChatbotUsersDetail } from '../api/chatbot.js'
 
 export const handleSay = async (talker: Room | Contact | Message, sayable: Sayable) => {
   const message: Message | void = await talker.say(sayable)
   if (message) await onMessage(message)
 }
 
-async function getWhiteList () {
-  const listRes = await ServeGetWhitelistWhite()
-  const whiteList: WhiteList = { contactWhiteList: { qa: [], msg: [], act: [], gpt: [] }, roomWhiteList: { qa: [], msg: [], act: [], gpt: [] } }
-  const whiteListRecords: any[] = listRes.data.list
-  await delay(1000)
-  for (let i = 0; i < whiteListRecords.length; i++) {
-    const fields = whiteListRecords[i]
-    const app: 'qa' | 'msg' | 'act' | 'gpt' = fields['app']?.split('|')[1]
-    // logger.info('当前app:' + app)
-    if (fields['name'] || fields['id'] || fields['alias']) {
-      if (fields['type'] === '群') {
-        const room: BusinessRoom = {
-          topic: fields['name'],
-          id: fields['id'],
-        }
-        whiteList.roomWhiteList[app].push(room)
-
-      } else {
-        const contact: BusinessUser = {
-          name: fields['name'],
-          alias: fields['alias'],
-          id: fields['id'],
-        }
-        whiteList.contactWhiteList[app].push(contact)
-      }
-    }
-  }
-
-  log.info('获取的最新白名单:' + JSON.stringify(whiteList))
-  return whiteList
-}
-
 async function getSystemKeywordsText () {
   // const records = await this.getKeywords()
   const res = await ServeGetKeywords()
-  const records = res.data.list
+  const records = res.data.items
   let text :string = '【操作说明】\n'
   for (const fields of records) {
     if (fields['type'] === '系统指令') text += `${fields['name']} : ${fields['desc']}\n`
@@ -98,23 +66,12 @@ const postVikaInitialization = async (bot: Wechaty) => {
 
   try {
     log.info('开始请求维格表中的环境变量配置信息...')
-    // const vikaConfig = await EnvChat.getConfigFromVika()
+    const res = await EnvChat.getConfigFromVika()
+    logger.info('ServeGetUserConfig res:' + JSON.stringify(res))
 
-    // 从维格表中获取环境变量配置
-    const vikaConfigList = await ServeGetUserConfig() as any
-    const vikaConfig:any = {}
-    for (let i = 0; i < vikaConfigList.length; i++) {
-      const record:any = vikaConfigList[i]
-      const fields = record.fields
+    const vikaConfig:any = res.data
+    // logger.info('获取的维格表中的环境变量配置信息vikaConfig：' + JSON.stringify(vikaConfig))
 
-      if (fields['key']) {
-        if (fields['value'] && [ 'false', 'true' ].includes(fields['value'])) {
-          vikaConfig[record.fields['key'] as string] = fields['value'] === 'true'
-        } else {
-          vikaConfig[record.fields['key'] as string] = fields['value'] || ''
-        }
-      }
-    }
     // 合并配置信息，如果维格表中有对应配置则覆盖环境变量中的配置
     ChatFlowConfig.configEnv = { ...vikaConfig, ...(ChatFlowConfig.configEnv) }
     logger.info('合并后的环境变量信息：' + JSON.stringify(ChatFlowConfig.configEnv))
@@ -122,17 +79,13 @@ const postVikaInitialization = async (bot: Wechaty) => {
     try {
       log.info('开始请求获取白名单...')
       // 获取白名单列表
-      // ChatFlowConfig.whiteList = await WhiteListChat.getWhiteList()
-      ChatFlowConfig.whiteList = await getWhiteList()
-      log.info('获取白名单成功...', JSON.stringify(ChatFlowConfig.whiteList))
+      const listRes = await ServeGetWhitelistWhiteObject()
+      ChatFlowConfig.whiteList = listRes.data
+      logger.info('获取白名单成功...' + JSON.stringify(ChatFlowConfig.whiteList))
 
       try {
-        // 获取定时任务列表
-        const jobsRes = await ServeGetNotices()
-        const jobs = jobsRes.data.list
         // 更新定时任务
-        await NoticeChat.updateJobs(jobs)
-
+        await NoticeChat.updateJobs()
         // 获取关键字列表
         const helpText = await getSystemKeywordsText()
         logForm(`启动成功，系统准备就绪\n\n当前登录用户：${bot.currentUser.name()}\nID:${bot.currentUser.id}\n\n在当前群（管理员群）回复对应指令进行操作\n${helpText}`)
@@ -148,10 +101,23 @@ const postVikaInitialization = async (bot: Wechaty) => {
   }
 
   try {
+    // 获取ChatFlowConfig类的所有属性，赋值给ChatFlowConfigInfo
+    // const ChatFlowConfigInfo = Object.keys(ChatFlowConfig).map((key) => {
+    //   return {
+    //     key,
+    //     value: ChatFlowConfig[key as keyof typeof ChatFlowConfig],
+    //   }
+    // })
+    // logger.info('ChatFlowConfig配置信息:' + JSON.stringify(ChatFlowConfigInfo))
     // 向管理员群推送消息
     await notifyAdminRoom(bot)
     log.info('向管理群推送消息成功...')
-
+    const ChatFlowConfigInfo = {
+      configEnv: ChatFlowConfig.configEnv,
+      whiteList: ChatFlowConfig.whiteList,
+      chatBotUsers: ChatFlowConfig.chatBotUsers,
+    }
+    logger.info('ChatFlowConfigInfo配置信息：' + JSON.stringify(ChatFlowConfigInfo))
   } catch (err) {
     log.error('向管理群推送消息失败...', err)
   }
@@ -226,12 +192,13 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
     syncStatus:string;
   }[] = configGgroup['基础配置']
 
-  log.info('获取的基础配置信息:', JSON.stringify(baseConfig))
+  logger.info('获取的基础配置信息:' + JSON.stringify(baseConfig))
 
   // 从baseConfig中找出key为BASE_BOT_ID的配置项，更新value为当前登录的bot的id
   const BASE_BOT_ID = baseConfig.find((item) => item.key === 'BASE_BOT_ID')
 
   if (BASE_BOT_ID) {
+    BASE_BOT_ID.name = `基础配置-${BASE_BOT_ID.name}`
     BASE_BOT_ID.value = user.id
     BASE_BOT_ID.lastOperationTime = curTime
     BASE_BOT_ID.syncStatus = '已同步'
@@ -240,6 +207,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
 
   const BASE_BOT_NAME = baseConfig.find((item) => item.key === 'BASE_BOT_NAME')
   if (BASE_BOT_NAME) {
+    BASE_BOT_NAME.name = `基础配置-${BASE_BOT_NAME.name}`
     BASE_BOT_NAME.value = user.name()
     BASE_BOT_NAME.lastOperationTime = curTime
     BASE_BOT_NAME.syncStatus = '已同步'
@@ -247,11 +215,25 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
   }
 
   const ADMINROOM_ADMINROOMTOPIC = baseConfig.find((item) => item.key === 'ADMINROOM_ADMINROOMTOPIC')
-  if (ADMINROOM_ADMINROOMTOPIC) {
-    ADMINROOM_ADMINROOMTOPIC.value = ChatFlowConfig.adminRoomTopic || process.env.ADMINROOM_ADMINROOMTOPIC || ''
+  const topic = ChatFlowConfig.adminRoomTopic || process.env.ADMINROOM_ADMINROOMTOPIC || ''
+  if (ADMINROOM_ADMINROOMTOPIC && topic) {
+    ADMINROOM_ADMINROOMTOPIC.name = `基础配置-${ADMINROOM_ADMINROOMTOPIC.name}`
+    ADMINROOM_ADMINROOMTOPIC.value = topic
     ADMINROOM_ADMINROOMTOPIC.lastOperationTime = curTime
     ADMINROOM_ADMINROOMTOPIC.syncStatus = '已同步'
     baseInfo.push(ADMINROOM_ADMINROOMTOPIC)
+
+    const adminRoom = await bot.Room.find({ topic })
+    if (adminRoom) {
+      const ADMINROOM_ADMINROOMID = baseConfig.find((item) => item.key === 'ADMINROOM_ADMINROOMID')
+      if (ADMINROOM_ADMINROOMID) {
+        ADMINROOM_ADMINROOMID.name = `基础配置-${ADMINROOM_ADMINROOMID.name}`
+        ADMINROOM_ADMINROOMID.value = adminRoom.id
+        ADMINROOM_ADMINROOMID.lastOperationTime = curTime
+        ADMINROOM_ADMINROOMID.syncStatus = '已同步'
+        baseInfo.push(ADMINROOM_ADMINROOMID)
+      }
+    }
   }
 
   if (baseInfo.length > 0) {
@@ -265,9 +247,17 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
       raw.fields = item
       return raw
     })
-    log.info('更新基础配置信息:', JSON.stringify(baseInfo))
+    logger.info('更新基础配置信息:' + JSON.stringify(baseInfo))
     await ServeUpdateConfig(baseInfo)
     await delay(500)
+  }
+
+  try {
+    const chatBotUsers = await ServeGetChatbotUsersDetail()
+    ChatFlowConfig.chatBotUsers = chatBotUsers.data.items
+    logger.info('获取chatBotUsers:' + JSON.stringify(ChatFlowConfig.chatBotUsers))
+  } catch (err) {
+    log.error('获取chatBotUsers失败', err)
   }
 
   try {

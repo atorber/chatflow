@@ -4,9 +4,9 @@ import { delay, logger } from '../utils/utils.js'
 
 import { ChatFlowConfig } from '../api/base-config.js'
 import {
-  ServeGetGroups,
-  ServeUpdateGroups,
+  ServeGetGroupsRaw,
   ServeDeleteBatchGroups,
+  ServeCreateGroupBatch,
 } from '../api/room.js'
 
 // import { db } from '../db/tables.js'
@@ -20,8 +20,8 @@ export class RoomChat {
 
   // 初始化
   static async init () {
-    const res = await ServeGetGroups()
-    const rooms = res.data.list
+    const res = await ServeGetGroupsRaw()
+    const rooms = res.data.items
     this.rooms = rooms
     this.bot = ChatFlowConfig.bot
 
@@ -31,6 +31,9 @@ export class RoomChat {
   // 上传群列表
   static async updateRooms (puppet:string) {
     let updateCount = 0
+    // 根据多维表格类型设置批量操作的数量和延迟时间
+    const batchCount = ChatFlowConfig.token.indexOf('/') === -1 ? 10 : 100
+    const delayTime = ChatFlowConfig.token.indexOf('/') === -1 ? 1000 : 500
     try {
       // 获取最新的群列表
       const rooms: Room[] = await this.bot.Room.findAll()
@@ -38,9 +41,10 @@ export class RoomChat {
       const recordsAll: any = []
 
       // 从云端获取已有的群列表
-      const roomsRes = await ServeGetGroups()
-      const recordExisting = roomsRes.data.list
+      const roomsRes = await ServeGetGroupsRaw()
+      const recordExisting = roomsRes.data.items
       logger.info('云端群数量：' + recordExisting.length || '0')
+
       let wxids: string[] = []
       const recordIds: string[] = []
       if (recordExisting.length) {
@@ -53,12 +57,12 @@ export class RoomChat {
       }
 
       if (puppet === 'wechaty-puppet-wechat' || puppet === 'wechaty-puppet-wechat4u') {
-        const count = Math.ceil(recordIds.length / 10)
+        const count = Math.ceil(recordIds.length / batchCount)
         for (let i = 0; i < count; i++) {
-          const records = recordIds.splice(0, 10)
+          const records = recordIds.splice(0, batchCount)
           logger.info('删除：', records.length)
-          await ServeDeleteBatchGroups(records)
-          await delay(1000)
+          await ServeDeleteBatchGroups({ recordIds:records })
+          await delay(delayTime)
         }
         wxids = []
       }
@@ -85,23 +89,21 @@ export class RoomChat {
             topic: await item.topic() || '',
             updated: new Date().toLocaleString(),
           }
-          const record = {
-            fields,
-          }
+          const record = fields
           recordsAll.push(record)
         }
       }
 
-      for (let i = 0; i < recordsAll.length; i = i + 10) {
-        const records = recordsAll.slice(i, i + 10)
+      for (let i = 0; i < recordsAll.length; i = i + batchCount) {
+        const records = recordsAll.slice(i, i + batchCount)
         try {
-          await ServeUpdateGroups(records)
+          await ServeCreateGroupBatch(records)
           logger.info('群列表同步完成...' + i + records.length)
           updateCount = updateCount + records.length
-          void await delay(1000)
+          void await delay(delayTime)
         } catch (err) {
-          logger.error('群列表同步失败,待系统就绪后再管理群发送【更新通讯录】可手动更新...' + i + 10)
-          void await delay(1000)
+          logger.error('群列表同步失败,待系统就绪后再管理群发送【更新通讯录】可手动更新...' + i + batchCount)
+          void await delay(delayTime)
         }
       }
 

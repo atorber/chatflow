@@ -316,7 +316,8 @@ export const formatMessageToCloud = async (message: Message) => {
 export const saveMessageToCloud = async (record:any) => {
   // log.info('saveMessageToCloud messageNew:', JSON.stringify(messageNew))
   try {
-    log.info('消息添加到vika队列:', JSON.stringify(record))
+    // log.info('消息添加到队列:', JSON.stringify(record))
+    log.info('消息添加到队列...', record.id)
     await MessageChat.addChatRecord(record)
     // log.info('消息写入数据库成功:', res._id)
     return true

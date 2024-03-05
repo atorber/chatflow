@@ -2,7 +2,10 @@
 import axios from 'axios'
 import getAuthClient from './auth.js'
 import 'dotenv/config.js'
-import { logForm } from './utils.js'
+import {
+  // logForm,
+  logger,
+} from './utils.js'
 
 const authClient = getAuthClient()
 
@@ -21,7 +24,7 @@ const request = axios.create({
  * @param {*} error
  */
 const errorHandler = (error: { response?: { status: number, config:any } }) => {
-  logForm('请求异常' + JSON.stringify(error))
+  logger.error('请求异常' + JSON.stringify(error) + '\n')
   // 判断是否是响应错误信息
   if (error.response) {
     if (error.response.status === 401) {
@@ -46,7 +49,7 @@ request.interceptors.request.use(async (config) => {
 
 // 响应拦截器
 request.interceptors.response.use((response) => {
-  logForm(`${response.config.method} ${response.config.url}\n\n${JSON.stringify(response.data)}`)
+  logger.info(`${response.config.method} ${response.config.url}\n${JSON.stringify(response.data)}\n`)
   if (response.data && response.data.message === 'Unauthorized' && response.data.statusCode === 401) {
     authClient.delAccessToken()
     return request(response.config)

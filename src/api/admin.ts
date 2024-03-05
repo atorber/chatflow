@@ -18,7 +18,6 @@ import {
   ContactChat,
   RoomChat,
   ActivityChat,
-  WhiteListChat,
   GroupNoticeChat,
   QaChat,
   KeywordChat,
@@ -30,7 +29,8 @@ import {
 } from '../utils/mod.js'
 
 import { WxOpenaiBot, type WxOpenaiBotConfig, type SkillInfoArray } from '../services/wxopenaiService.js'
-
+import { ServeGetChatbotUsersDetail } from '../api/chatbot.js'
+import { ServeGetWhitelistWhiteObject } from '../api/white-list.js'
 interface CommandActions {
     [key: string]: (bot: Wechaty, message: Message) => Promise<FileBox>
   }
@@ -40,10 +40,27 @@ interface AdminCommands {
   }
 // 使用一个对象来存储命令和对应的处理函数
 const adminCommands: AdminCommands = {
+  更新智聊用户: async () => {
+    try {
+      const chatBotUsers = await ServeGetChatbotUsersDetail()
+      ChatFlowConfig.chatBotUsers = chatBotUsers.data.items
+      logger.info('获取到智聊用户信息:' + JSON.stringify(ChatFlowConfig.chatBotUsers))
+      return [ true, '智聊用户列表更新成功~' ]
+    } catch (e) {
+      return [ false, '智聊用户列表配置更新失败~' ]
+    }
+  },
   更新配置: async () => {
     try {
-      const botConfig = await EnvChat.downConfigFromVika()
-      log.info('获取到新配信息:', JSON.stringify(botConfig))
+      const res = await EnvChat.getConfigFromVika()
+      logger.info('ServeGetUserConfig res:' + JSON.stringify(res))
+
+      const vikaConfig:any = res.data
+      // logger.info('获取的维格表中的环境变量配置信息vikaConfig：' + JSON.stringify(vikaConfig))
+
+      // 合并配置信息，如果维格表中有对应配置则覆盖环境变量中的配置
+      ChatFlowConfig.configEnv = { ...vikaConfig, ...(ChatFlowConfig.configEnv) }
+      logger.info('合并后的环境变量信息：' + JSON.stringify(ChatFlowConfig.configEnv))
       return [ true, '配置更新成功~' ]
     } catch (e) {
       return [ false, '配置更新失败~' ]
@@ -68,7 +85,9 @@ const adminCommands: AdminCommands = {
   },
   更新白名单: async () => {
     try {
-      ChatFlowConfig.whiteList = await WhiteListChat.getWhiteList()
+      const res = await ServeGetWhitelistWhiteObject()
+      ChatFlowConfig.whiteList = res.data
+      logger.info('获取到白名单信息:' + JSON.stringify(ChatFlowConfig.whiteList))
       return [ true, '热更新白名单~' ]
     } catch (e) {
       return [ false, '白名单更新失败~' ]
@@ -142,15 +161,6 @@ const adminCommands: AdminCommands = {
       return [ true, '上传配置信息成功~' ]
     } catch (e) {
       return [ false, '上传配置信息失败~' ]
-    }
-  },
-  下载配置: async () => {
-    try {
-      const botConfig = await EnvChat.downConfigFromVika()
-      log.info('botConfig:', JSON.stringify(botConfig))
-      return [ true, '下载配置信息成功~' ]
-    } catch (e) {
-      return [ false, '下载配置信息失败~' ]
     }
   },
 }

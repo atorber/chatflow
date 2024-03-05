@@ -12,7 +12,7 @@ import type {
   IClientOptions,
 } from '../proxy/mqtt-proxy.js'
 import CryptoJS from 'crypto-js'
-import { ServeGetUserConfig } from '../api/user.js'
+import { ServeGetUserConfigObj } from '../api/user.js'
 
 export type WechatyConfig = {
   puppet: string,
@@ -41,6 +41,7 @@ export interface TaskConfig {
   targetType: 'contact' | 'room';
   target: BusinessRoom | BusinessUser;
   active: boolean;
+  rule: string;
 }
 
 export interface DateBase {
@@ -91,9 +92,9 @@ export class ChatFlowConfig {
   static reminderList: any[]
   static statisticRecords: any
   static configEnv : ProcessEnv
-  static dataBaseType: 'vika' | 'lark'
+  static dataBaseType: 'vika'
   static spaceId: string
-  static token: string
+  static token: string = ''
   static adminRoomTopic?: string
   static endpoint?: string
   static bot:Wechaty
@@ -114,32 +115,19 @@ export class ChatFlowConfig {
     },
   }
 
+  static chatBotUsers: any[] = []
+
   static async init (options:{
-    dataBaseType?:'vika' | 'lark',
-    spaceId:string,
-    token:string,
+    spaceId?:string,
+    token?:string,
   }) {
     this.dataBaseType = 'vika'
-    ChatFlowConfig.spaceId = options.spaceId
-    ChatFlowConfig.token = options.token
+    ChatFlowConfig.spaceId = options.spaceId || ChatFlowConfig.spaceId
+    ChatFlowConfig.token = options.token || ChatFlowConfig.token
     // log.info('初始化维格配置信息...,init()')
-    const vikaData: any = {}
-    const userConfig = await ServeGetUserConfig()
+    const userConfig = await ServeGetUserConfigObj()
     // log.info('userConfig', JSON.stringify(userConfig))
-
-    const configRecords = userConfig.data
-    for (let i = 0; i < configRecords.length; i++) {
-      const record = configRecords[i]
-      if (record['key']) {
-        if (record['value'] && [ 'false', 'true' ].includes(record['value'])) {
-          vikaData[record['key'] as string] = record['value'] === 'true'
-        } else {
-          vikaData[record['key'] as string] = record['value'] || ''
-        }
-      }
-    }
-
-    this.configEnv = vikaData
+    this.configEnv = userConfig.data
     const wechatyConfig: WechatyConfig = {
       puppet: this.configEnv.WECHATY_PUPPET,
       token: this.configEnv.WECHATY_TOKEN,

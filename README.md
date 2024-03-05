@@ -172,6 +172,12 @@ atorber/chatflow:latest
 
 ## 更新日志
 
+### 3.0.0-6
+
+- 全部接口切换到chatfow-admin，更加稳定可靠
+- 修复微信对话开放平台bug
+- 增加ChatGPT支持
+
 ### 3.0.0-5
 
 - 适配飞书多维表格，初步测试通过

@@ -45,7 +45,7 @@ export class WhiteListChat {
   static async getWhiteList () {
     const whiteList: WhiteList = { contactWhiteList: this.contactWhiteList, roomWhiteList: this.roomWhiteList }
     const res = await ServeGetWhitelistWhite()
-    const whiteListRecords: any[] = res.data.list
+    const whiteListRecords: any[] = res.data.items
     await delay(1000)
     for (let i = 0; i < whiteListRecords.length; i++) {
       const fields = whiteListRecords[i]

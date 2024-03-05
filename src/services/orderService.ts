@@ -44,7 +44,7 @@ export class OrderChat {
 
   static async getRecords () {
     const res = await ServeGetOrders()
-    const records = res.data.list
+    const records = res.data.items
     logger.info('维格表中的记录：' + JSON.stringify(records))
     return records
   }

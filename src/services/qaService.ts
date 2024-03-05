@@ -1,5 +1,4 @@
 /* eslint-disable sort-keys */
-import type { TaskConfig } from '../api/base-config.js'
 import type { SkillInfoArray } from './wxopenaiService.js'
 import { logger } from '../utils/mod.js'
 import { ChatFlowConfig } from '../api/base-config.js'
@@ -15,7 +14,6 @@ export class QaChat {
 
   static roomWhiteList: any
   static contactWhiteList: any
-  static reminderList: TaskConfig[] = []
   static records: any
   static bot:Wechaty
 
@@ -26,7 +24,7 @@ export class QaChat {
   // 初始化
   static async init () {
     const res = await ServeGetQas()
-    const records = await res.data.list
+    const records = res.data.items
     this.records = records
     this.bot = ChatFlowConfig.bot
 

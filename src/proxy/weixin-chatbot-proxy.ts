@@ -135,23 +135,20 @@ async function aibot (sysConfig: ProcessEnv, talker: any, room: any, query: any)
   //     console.log('error', e)
   // })
 
-  async function wxOpenAiRoutine (openai: any) {
-    logger.info('开始请求微信对话平台...')
-    try {
-      const queryData = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query)
+  logger.info('开始请求微信对话平台...')
+  try {
+    const queryData = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query)
 
-      const resMsg:any = await openai.chat(queryData)
+    const resMsg:any = await openai.chat(queryData)
 
-      logger.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
-      logger.info(`回答内容： ${resMsg.msgtype}, ${resMsg.query}, ${resMsg.answer}`)
-      return handleWxOpenAiResponse(resMsg)
-    } catch (err) {
-      logger.error(`请求微信对话平台错误： ${err}`)
-      return {}
-    }
+    logger.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
+    log.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
+    log.info(`回答内容： ${resMsg.msgtype}, ${resMsg.title || 'NO_MATCH'}, ${resMsg.msg[0].content || 'NO_MATCH'}`)
+    answer = handleWxOpenAiResponse(resMsg)
+  } catch (err) {
+    logger.error(`请求微信对话平台错误： ${err}`)
+    answer = {}
   }
-
-  answer = await wxOpenAiRoutine(openai)
 
   return answer
 }
@@ -169,41 +166,49 @@ function prepareWxOpenAiParams (room:Room|undefined, topic:string, nickName:stri
 function handleWxOpenAiResponse (resMsg: any) {
   let answer = {}
   // 置信度大于0.8时回复，低于0.8时不回复
-  if (resMsg.msgtype && resMsg.confidence > 0.8) {
-    answer = prepareAnswerBasedOnMsgType(resMsg)
-  }
-  return answer
-}
+  if (resMsg.msgtype) {
+    switch (resMsg.msgtype) {
+      case 'text':{
+        let text = resMsg.msg[0].content
+        if (resMsg.msg[0].ans_node_name === 'NO_MATCH') {
+          text = 'hi，我还没有掌握这个问题...'
+        }
 
-function prepareAnswerBasedOnMsgType (resMsg: any) {
-  let answer = {}
-  switch (resMsg.msgtype) {
-    case 'text':
-      answer = {
-        messageType: types.Message.Text,
-        text: resMsg.answer || resMsg.msg[0].content,
+        if (resMsg.msg[0].ans_node_name === '问题推荐') {
+          const options = resMsg.msg[0].options
+          options.forEach((option: any) => {
+            text += `\n${option.title}`
+          })
+        }
+
+        answer = {
+          messageType: types.Message.Text,
+          text,
+        }
+        break
       }
-      break
-    case 'miniprogrampage':{
-      const answerJsonMini = JSON.parse(resMsg.answer)
-      answer = {
-        messageType: types.Message.MiniProgram,
-        text: answerJsonMini.miniprogrampage,
+      case 'miniprogrampage':{
+        const answerJsonMini = JSON.parse(resMsg.answer)
+        answer = {
+          messageType: types.Message.MiniProgram,
+          text: answerJsonMini.miniprogrampage,
+        }
+        break
       }
-      break
+      case 'image':{
+        const answerJsonImage = JSON.parse(resMsg.answer)
+        answer = {
+          messageType: types.Message.Image,
+          text: answerJsonImage.image,
+        }
+        break
+      }
+      // Add other cases here as needed
+      default:
+        logger.info(JSON.stringify({ msg: '没有命中关键字' }))
     }
-    case 'image':{
-      const answerJsonImage = JSON.parse(resMsg.answer)
-      answer = {
-        messageType: types.Message.Image,
-        text: answerJsonImage.image,
-      }
-      break
-    }
-    // Add other cases here as needed
-    default:
-      logger.info(JSON.stringify({ msg: '没有命中关键字' }))
   }
+  log.info('回答内容：', JSON.stringify(answer))
   return answer
 }
 

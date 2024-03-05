@@ -4,13 +4,13 @@
 import getAuthClient from '../src/utils/auth.js'
 import 'dotenv/config.js'  // 导入环境变量配置
 
-import {
+// import {
 //   ServeGetUserConfig,
 //   ServeGetUserDetail,
 //   ServeGetUserSetting,
 //   ServeGetUserConfigBykey,
-  ServeGetUserConfigGroup,
-} from '../src/api/user.js'
+//   ServeGetUserConfigGroup,
+// } from '../src/api/user.js'
 
 // import { ServeGetWhitelistWhite } from '../src/api/white-list.js'
 // import { ServeGetNotices } from '../src/api/notice.js'
@@ -18,8 +18,32 @@ import {
 // import { ServeGetStatistics } from '../src/api/statistic.js'
 // import { ServeGetGroupnotices } from '../src/api/group-notice.js'
 
+// import {
+//   ServeGetChatbots,
+//   ServeGetChatbotUsers,
+//   ServeGetChatbotUsersGroup,
+//   ServeGetChatbotUsersDetail,
+// } from '../src/api/chatbot.js'
+
+import { ServeGetNoticesTask } from '../src/api/notice.js'
+
 const authClient = getAuthClient()
 await authClient.login(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
+
+const task = await ServeGetNoticesTask()
+console.log('task:', JSON.stringify(task, null, 2))
+
+// const chatbots = await ServeGetChatbots()
+// console.log('chatbots:', JSON.stringify(chatbots, null, 2))
+
+// const chatbotUsers = await ServeGetChatbotUsers({ id:1 })
+// console.log('chatbotUsers:', JSON.stringify(chatbotUsers, null, 2))
+
+// const chatbotUsersGroup = await ServeGetChatbotUsersGroup()
+// console.log('chatbotUsersGroup:', JSON.stringify(chatbotUsersGroup, null, 2))
+
+// const chatbotUsersDetail = await ServeGetChatbotUsersDetail()
+// console.log('chatbotUsersDetail:', JSON.stringify(chatbotUsersDetail, null, 2))
 
 // const userInfo = await ServeGetUserDetail()
 // console.log('userInfo:', userInfo)
@@ -48,5 +72,5 @@ await authClient.login(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
 // const groupnotices = await ServeGetGroupnotices()
 // console.log('groupnotices:', JSON.stringify(groupnotices))
 
-const userConfigGroup = await ServeGetUserConfigGroup()
-console.log('userConfigGroup:', JSON.stringify(userConfigGroup))
+// const userConfigGroup = await ServeGetUserConfigGroup()
+// console.log('userConfigGroup:', JSON.stringify(userConfigGroup))

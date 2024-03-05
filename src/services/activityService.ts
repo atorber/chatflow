@@ -91,7 +91,7 @@ export class ActivityChat {
     const statisticsRes = await ServeGetStatistics()
 
     // log.info('维格表中的统计：' + JSON.stringify(statisticsRes))
-    const statisticsRecords = statisticsRes.data.list
+    const statisticsRecords = statisticsRes.data.items
     const activitiesVika: Activity[] = []
 
     for (const fields of statisticsRecords) {

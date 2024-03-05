@@ -65,8 +65,8 @@ export async function onMessage (message: Message) {
       log.error('活动管理失败 error:', e)
     }
 
+    // @机器人消息处理，当引用消息仅包含@机器人时，提取引用消息内容并回复
     try {
-      // @机器人消息处理，当引用消息仅包含@机器人时，提取引用消息内容并回复
       await extractAtContent(message)
     } catch (e) {
       log.error('提取@消息失败 error:', e)

@@ -56,6 +56,11 @@ export const ServeGetUserConfigGroup = () => {
   return get('/api/v1/users/config/group')
 }
 
+// 获取用户相关系统配置信息
+export const ServeGetUserConfigObj = () => {
+  return get('/api/v1/users/config/keys')
+}
+
 // 修改配置服务接口
 export const ServeUpdateConfig = (data: {} | undefined) => {
   return post('/api/v1/users/config', data)

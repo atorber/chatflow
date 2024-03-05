@@ -36,7 +36,7 @@ class AuthClient {
     return AuthClient.instance
   }
 
-  async login (username?: string, password?: string): Promise<void> {
+  async login (username?: string, password?: string): Promise<any> {
     this.username = username || this.username
     this.password = password || this.password
     try {
@@ -48,6 +48,7 @@ class AuthClient {
         logForm('登录成功' + JSON.stringify(response.data))
         this.token = response.data.data.access_token
         this.tokenExpirationDate = new Date(new Date().getTime() + response.data.data.expires_in * 1000)
+        return response.data
       } else {
         logForm('登录失败' + JSON.stringify(response.data))
         throw new Error(JSON.stringify(response.data))
@@ -76,10 +77,10 @@ class AuthClient {
 
   private async refreshTokenIfNeeded (): Promise<void> {
     if (!this.token || !this.tokenExpirationDate || new Date() >= this.tokenExpirationDate) {
-      logForm('token已过期，刷新token:\n' + this.token)
+      // logForm('token已过期，刷新token:\n' + this.token)
       await this.login()
     } else {
-      logForm('token未过期，无需刷新:\n' + this.token)
+      // logForm('token未过期，无需刷新:\n' + this.token)
     }
   }
 

@@ -37,8 +37,14 @@ export class MessageChat {
   static msgStore: any[]
   static messageData: any
   static bot:Wechaty
+  static batchCount: number = 10
+  static delayTime: number = 1000
 
   // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
+  constructor () {
+    MessageChat.batchCount = ChatFlowConfig.token.indexOf('/') === -1 ? 10 : 100
+    MessageChat.delayTime = ChatFlowConfig.token.indexOf('/') === -1 ? 1000 : 500
+  }
 
   // 初始化
   static async init () {
@@ -52,22 +58,24 @@ export class MessageChat {
         // logger.info('待处理消息池长度：', that.msgStore.length || '0')
 
         if (that.msgStore.length) {
-          const end = that.msgStore.length < 10 ? that.msgStore.length : 10
+          const end = that.msgStore.length < this.batchCount ? that.msgStore.length : this.batchCount
           const records = that.msgStore.splice(0, end)
           // logger.info('写入vika的消息：', JSON.stringify(records))
           try {
             ServeCreateTalkRecords({ records }).then((response: any) => {
               if (response.message !== 'success') {
-                log.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
+                log.error('调用消息写入接口成功，写入失败：', JSON.stringify(response))
               } else {
-                log.info('调用vika写入接口成功，写入vika成功：', response.data.length)
+                log.info('调用消息写入接口成功，写入成功：', response.data.length)
               }
               return response
-            }).catch((err: any) => { log.error('调用vika写入接口失败：', err) })
+            }).catch((err: any) => { log.error('调用消息写入接口失败：', err) })
 
           } catch (err) {
             logger.error('调用datasheet.records.create失败：', err)
           }
+        } else {
+          // log.info('待处理消息池为空...', new Date().toLocaleString())
         }
         return null
       }, 1000)
@@ -118,7 +126,7 @@ export class MessageChat {
           // const writeStream = fs.createWriteStream(filePath)
           // await file.pipe(writeStream)
           await file.toFile(filePath, true)
-          await delay(1000)
+          await delay(this.delayTime)
           // uploadedAttachments = await MessageChat.db?.upload(filePath, '')
 
           // 创建一个新的FormData实例
@@ -207,13 +215,13 @@ export class MessageChat {
 
     try {
       await file.toFile(filePath, true)
-      logger.info('保存文件到本地成功')
+      logger.info('保存文件到本地成功', filePath)
     } catch (err) {
       logger.error('保存文件到本地失败', err)
       return ''
     }
 
-    await delay(1000)
+    await delay(this.delayTime)
     // return await this.db?.upload(filePath, '')
 
     // 创建一个新的FormData实例
