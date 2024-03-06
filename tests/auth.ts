@@ -18,20 +18,20 @@ import 'dotenv/config.js'  // 导入环境变量配置
 // import { ServeGetStatistics } from '../src/api/statistic.js'
 // import { ServeGetGroupnotices } from '../src/api/group-notice.js'
 
-// import {
-//   ServeGetChatbots,
-//   ServeGetChatbotUsers,
-//   ServeGetChatbotUsersGroup,
-//   ServeGetChatbotUsersDetail,
-// } from '../src/api/chatbot.js'
+import {
+  ServeGetChatbots,
+  ServeGetChatbotUsers,
+  ServeGetChatbotUsersGroup,
+  ServeGetChatbotUsersDetail,
+} from '../src/api/chatbot.js'
 
 import { ServeGetNoticesTask } from '../src/api/notice.js'
 
 const authClient = getAuthClient()
 await authClient.login(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
 
-const task = await ServeGetNoticesTask()
-console.log('task:', JSON.stringify(task, null, 2))
+// const task = await ServeGetNoticesTask()
+// console.log('task:', JSON.stringify(task, null, 2))
 
 // const chatbots = await ServeGetChatbots()
 // console.log('chatbots:', JSON.stringify(chatbots, null, 2))
@@ -42,8 +42,8 @@ console.log('task:', JSON.stringify(task, null, 2))
 // const chatbotUsersGroup = await ServeGetChatbotUsersGroup()
 // console.log('chatbotUsersGroup:', JSON.stringify(chatbotUsersGroup, null, 2))
 
-// const chatbotUsersDetail = await ServeGetChatbotUsersDetail()
-// console.log('chatbotUsersDetail:', JSON.stringify(chatbotUsersDetail, null, 2))
+const chatbotUsersDetail = await ServeGetChatbotUsersDetail()
+console.log('chatbotUsersDetail:', JSON.stringify(chatbotUsersDetail, null, 2))
 
 // const userInfo = await ServeGetUserDetail()
 // console.log('userInfo:', userInfo)

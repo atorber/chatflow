@@ -14,6 +14,44 @@ import type {
 import CryptoJS from 'crypto-js'
 import { ServeGetUserConfigObj } from '../api/user.js'
 
+export interface ChatBotUser {
+  id: string;
+  botname: string;
+  wxid: string;
+  name: string;
+  alias: string;
+  quota: number;
+  state: string;
+  info: string;
+  recordId: string;
+  contact?: Contact;
+  room?:Room;
+  chatbot: ChatBot;
+}
+
+interface ChatBot {
+  id: string;
+  name: string;
+  desc: string;
+  type: string;
+  model: string;
+  prompt: string;
+  quota: string;
+  endpoint: string;
+  key: string;
+}
+
+interface Room {
+  topic: string;
+  id: string;
+}
+
+interface Contact {
+  name: string;
+  alias: string;
+  id: string;
+}
+
 export type WechatyConfig = {
   puppet: string,
   token: string,
@@ -115,7 +153,7 @@ export class ChatFlowConfig {
     },
   }
 
-  static chatBotUsers: any[] = []
+  static chatBotUsers: ChatBotUser[] = []
 
   static async init (options:{
     spaceId?:string,

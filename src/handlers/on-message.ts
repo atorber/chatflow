@@ -18,6 +18,7 @@ import { uploadMessage } from '../proxy/s3-proxy.js'
 
 import { adminAction } from '../api/admin.js'
 import { qa } from '../app/qa.js'
+import { chatbot } from '../app/chatbot.js'
 import { handleActivityManagement } from '../app/activity.js'
 import { extractAtContent } from '../app/extract-at.js'
 
@@ -52,6 +53,14 @@ export async function onMessage (message: Message) {
     await qa(message)
   } catch (e) {
     log.error('自动问答失败 error:', e)
+  }
+
+  // 请求智聊服务
+  try {
+    log.info('智聊服务开始...')
+    await chatbot(message)
+  } catch (e) {
+    log.error('智聊服务失败 error:', e)
   }
 
   // 群消息处理，判断非机器人自己发的消息
