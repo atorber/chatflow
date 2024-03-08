@@ -9,7 +9,7 @@ import {
 import { formatSentMessage, logger } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/mod.js'
 import axios from 'axios'
-import { ChatFlowConfig } from '../chatflow.js'
+import { ChatFlowConfig } from '../index.js'
 
 /**
  * 使用 AK，SK 生成鉴权签名（Access Token）

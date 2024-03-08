@@ -10,12 +10,12 @@ import onLogin from './handlers/on-login.js'
 import onReady from './handlers/on-ready.js'
 import onMessage from './handlers/on-message.js'
 import { getBotOps } from './services/configService.js'
-import delay, { logForm } from './utils/utils.js'
+import delay, { logForm, logger } from './utils/utils.js'
 import { ChatFlowConfig, WechatyConfig } from './api/base-config.js'
 import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
 import { BiTable } from './db/lark-db.js'
 
-import getAuthClient from '../src/utils/auth.js'
+import getAuthClient from './utils/auth.js'
 import { GroupMaster, GroupMasterConfig } from './plugins/mod.js'
 
 function ChatFlow (options?:{
@@ -58,10 +58,12 @@ const init = async (options:{
     try {
       // 初始化检查数据库表，如果不存在则创建
       const initRes = await authClient.init(options.spaceId, options.token)
-      // logForm('初始化检查系统表结果：' + JSON.stringify(initRes.data))
+      logForm('初始化检查系统表结果：' + JSON.stringify(initRes.data))
+      logger.info('初始化检查系统表结果：' + JSON.stringify(initRes.data))
 
       if (initRes.data && initRes.data.message === 'success') {
         logForm('初始化检查系统表成功...')
+        ChatFlowConfig.db = initRes.data.data
       } else {
         logForm('初始化检查系统表失败...' + JSON.stringify(initRes.data))
         // 中止程序
@@ -77,6 +79,7 @@ const init = async (options:{
     try {
       const loginRes = await authClient.login(options.spaceId, options.token)
       logForm('登录客户端结果：' + JSON.stringify(loginRes))
+      ChatFlowConfig.isLogin = true
     } catch (e) {
       log.error('登录客户端失败...', e)
       throw e

@@ -4,7 +4,7 @@ import 'dotenv/config.js'
 import {
   logForm,
   init,
-} from '../src/chatflow.js'
+} from '../src/index.js'
 
 const main = async () => {
 

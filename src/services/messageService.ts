@@ -34,7 +34,7 @@ paths.forEach((p) => {
 // 服务类
 export class MessageChat {
 
-  static msgStore: any[]
+  static msgStore: any[] = []
   static messageData: any
   static bot:Wechaty
   static batchCount: number = 10
@@ -42,8 +42,9 @@ export class MessageChat {
 
   // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
   constructor () {
-    MessageChat.batchCount = ChatFlowConfig.token.indexOf('/') === -1 ? 10 : 100
-    MessageChat.delayTime = ChatFlowConfig.token.indexOf('/') === -1 ? 1000 : 500
+    const isVika = ChatFlowConfig.token.indexOf('/') === -1
+    MessageChat.batchCount = isVika ? 10 : 100
+    MessageChat.delayTime = isVika ? 1000 : 500
   }
 
   // 初始化
@@ -57,7 +58,7 @@ export class MessageChat {
       setInterval(() => {
         // logger.info('待处理消息池长度：', that.msgStore.length || '0')
 
-        if (that.msgStore.length) {
+        if (that.msgStore.length && ChatFlowConfig.isReady) {
           const end = that.msgStore.length < this.batchCount ? that.msgStore.length : this.batchCount
           const records = that.msgStore.splice(0, end)
           // logger.info('写入vika的消息：', JSON.stringify(records))
@@ -74,11 +75,13 @@ export class MessageChat {
           } catch (err) {
             logger.error('调用datasheet.records.create失败：', err)
           }
+        } else if (!ChatFlowConfig.isReady) {
+          log.info('机器人未初始化完成，待处理消息池等待中...')
         } else {
           // log.info('待处理消息池为空...', new Date().toLocaleString())
         }
         return null
-      }, 1000)
+      }, 1500)
 
       log.info('初始化 MessageChat 成功...')
     } catch (e) {
@@ -88,7 +91,7 @@ export class MessageChat {
   }
 
   static addRecord (record: any) {
-    logger.info('消息入列:', JSON.stringify(record))
+    logger.info('addRecord消息入列:', JSON.stringify(record))
     if (record.fields) {
       MessageChat.msgStore.push(record)
       // logger.info('最新消息池长度：', this.msgStore.length)
@@ -101,8 +104,7 @@ export class MessageChat {
       MessageChat.msgStore.push(record)
       // logger.info('最新消息池长度：', this.msgStore.length)
     } catch (e) {
-      logger.error('添加记录失败：', e)
-
+      logger.error('addChatRecord添加记录失败：', e)
     }
 
   }
@@ -471,7 +473,7 @@ export class MessageChat {
           await this.addChatRecord(record)
         }
       } catch (e) {
-        logger.error('添加记录失败：', e)
+        logger.error('onMessage添加记录失败：', e)
 
       }
 

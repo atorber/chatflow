@@ -5,7 +5,7 @@ import {
   WechatyBuilder,
 } from 'wechaty'
 
-import { getBotOps, log, logForm, GroupMaster, GroupMasterConfig } from '../src/chatflow.js'
+import { getBotOps, log, logForm, GroupMaster, GroupMasterConfig } from '../src/index.js'
 
 const main = async () => {
 

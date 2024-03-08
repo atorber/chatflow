@@ -26,8 +26,8 @@ export enum EnvironmentVariables {
     WEBHOOK_TOKEN = 'WEBHOOK_TOKEN',
     WEBHOOK_USERNAME = 'WEBHOOK_USERNAME',
     WEBHOOK_PASSWORD = 'WEBHOOK_PASSWORD',
-    YUQUE_TOKEN = 'YUQUE_TOKEN',
-    YUQUE_NAMESPACE = 'YUQUE_NAMESPACE',
+    // YUQUE_TOKEN = 'YUQUE_TOKEN',
+    // YUQUE_NAMESPACE = 'YUQUE_NAMESPACE',
     AUTOQA_AUTOREPLY = 'AUTOQA_AUTOREPLY',
     VIKA_USEVIKA = 'VIKA_USEVIKA',
     VIKA_UPLOADMESSAGETOVIKA = 'VIKA_UPLOADMESSAGETOVIKA',
@@ -96,8 +96,8 @@ export interface ProcessEnv {
     WEBHOOK_PASSWORD: string;
 
     // 语雀配置
-    YUQUE_TOKEN: string;
-    YUQUE_NAMESPACE: string;
+    // YUQUE_TOKEN: string;
+    // YUQUE_NAMESPACE: string;
 
     // 系统消息推送
     MESSAGE_ENCRYPT: string | boolean;

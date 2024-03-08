@@ -8,21 +8,22 @@ import {
 } from 'wechaty'
 import { formatSentMessage, logger } from '../utils/utils.js'
 import axios from 'axios'
-import { ChatFlowConfig } from '../chatflow.js'
+import { ChatFlowConfig } from '../index.js'
 import type { ChatBotUser } from '../api/base-config.js'
 
 axios.defaults.timeout = 60000
 
 async function chatbot (message: Message) {
   const bot: Wechaty = ChatFlowConfig.bot
-  const text = extractKeyword(message, bot.currentUser.name())
+  const keyword = '@' + bot.currentUser.name()
+  const text = extractKeyword(message, keyword)
   const talker = message.talker()
   const room = message.room()
   let answer: any = {}
   let chatBotUser:ChatBotUser | undefined
 
   try {
-    if (room && message.text().indexOf(bot.currentUser.name()) !== -1 && !message.self()) {
+    if (room && message.text().indexOf(keyword) !== -1 && !message.self()) {
       log.info('当前群:' + JSON.stringify(room))
       const topic = await room.topic()
       chatBotUser = ChatFlowConfig.chatBotUsers.find((user:ChatBotUser) => {
@@ -54,7 +55,7 @@ async function chatbot (message: Message) {
       answer = await callGptbot(text, chatBotUser)
       log.info('智聊回复消息：' + JSON.stringify(answer))
     } else {
-      log.info('智聊回复消息：' + 'chatBotUser 为空')
+      log.info('chatBotUser 为空，不调用callGptbot智聊服务...')
       return
     }
 
@@ -79,9 +80,9 @@ async function chatbot (message: Message) {
 
 function extractKeyword (message: Message, keyword: string): string {
   const text = message.text()
-  if (text.indexOf(keyword) !== -1 && text.length > 4) {
-    const index = text.lastIndexOf(keyword) + keyword.length - 1
-    return text.substring(index + 1, text.length)
+  // 如果text以keyword开头或结尾，去除text开头或结尾的keyword，返回剩余的text
+  if (text.startsWith(keyword) || text.endsWith(keyword)) {
+    return text.replace(keyword, '').trim()
   }
   return text
 }

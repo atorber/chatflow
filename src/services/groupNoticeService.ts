@@ -25,9 +25,7 @@ export class GroupNoticeChat {
   static contactWhiteList: any
   static bot:Wechaty
 
-  private constructor () {
-
-  }
+  private constructor () {}
 
   // 初始化
   static async init () {

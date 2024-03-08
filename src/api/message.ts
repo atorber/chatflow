@@ -302,11 +302,11 @@ export const formatMessageToCloud = async (message: Message) => {
         return undefined
       }
     } catch (e) {
-      log.error('添加记录失败：', e)
+      log.error('formatMessageToCloud添加记录失败：', e)
       return undefined
     }
   } catch (e) {
-    log.error('存储消息消息转换失败：', e)
+    log.error('formatMessageToCloud存储消息消息转换失败：', e)
     return undefined
   }
 

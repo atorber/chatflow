@@ -13,7 +13,7 @@ import {
   GroupMaster,
   GroupMasterConfig,
   init,
-} from '../src/chatflow.js'
+} from '../src/index.js'
 
 const main = async () => {
 

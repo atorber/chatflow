@@ -18,17 +18,23 @@ import 'dotenv/config.js'  // 导入环境变量配置
 // import { ServeGetStatistics } from '../src/api/statistic.js'
 // import { ServeGetGroupnotices } from '../src/api/group-notice.js'
 
-import {
-  ServeGetChatbots,
-  ServeGetChatbotUsers,
-  ServeGetChatbotUsersGroup,
-  ServeGetChatbotUsersDetail,
-} from '../src/api/chatbot.js'
+// import {
+//   ServeGetChatbots,
+//   ServeGetChatbotUsers,
+//   ServeGetChatbotUsersGroup,
+//   ServeGetChatbotUsersDetail,
+// } from '../src/api/chatbot.js'
 
-import { ServeGetNoticesTask } from '../src/api/notice.js'
+// import { ServeGetNoticesTask } from '../src/api/notice.js'
+// import { ServeGetWelcomes } from '../src/api/welcome.js'
+// import { ServeGetQas } from '../src/api/qa.js'
+
+// import { ServeGetMedias } from '../src/api/media.js'
 
 const authClient = getAuthClient()
 await authClient.login(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
+const res = await authClient.init(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
+console.log('res:', JSON.stringify(res.data, null, 2))
 
 // const task = await ServeGetNoticesTask()
 // console.log('task:', JSON.stringify(task, null, 2))
@@ -42,8 +48,14 @@ await authClient.login(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
 // const chatbotUsersGroup = await ServeGetChatbotUsersGroup()
 // console.log('chatbotUsersGroup:', JSON.stringify(chatbotUsersGroup, null, 2))
 
-const chatbotUsersDetail = await ServeGetChatbotUsersDetail()
-console.log('chatbotUsersDetail:', JSON.stringify(chatbotUsersDetail, null, 2))
+// const chatbotUsersDetail = await ServeGetChatbotUsersDetail()
+// console.log('chatbotUsersDetail:', JSON.stringify(chatbotUsersDetail, null, 2))
+
+// const welcomes = await ServeGetWelcomes()
+// console.log('welcomes:', JSON.stringify(welcomes, null, 2))
+
+// const qas = await ServeGetQas()
+// console.log('qas:', JSON.stringify(qas, null, 2))
 
 // const userInfo = await ServeGetUserDetail()
 // console.log('userInfo:', userInfo)
@@ -74,3 +86,34 @@ console.log('chatbotUsersDetail:', JSON.stringify(chatbotUsersDetail, null, 2))
 
 // const userConfigGroup = await ServeGetUserConfigGroup()
 // console.log('userConfigGroup:', JSON.stringify(userConfigGroup))
+
+// const medias = await ServeGetMedias({ name:'程序开发' })
+// console.log('medias:', JSON.stringify(medias, null, 2))
+
+/* 链接检测 */
+// const text = 'https://oou2hscgt2.feishu.cn/base/bascnPgZURujrdwZ9T4JkLUSUQc?table=tbl90nnja6sqMuCT&view=vewmgp68n9'
+// const text = 'https://vika.cn/workbench/dstagAfWtNuTqHQizP/viw7KwjQyCjbP?spaceId=spcj6bgt12WoZ'
+
+// const VIKA_BASE_STRING = 'https://vika.cn/workbench/'
+// const LARK_BASE_STRING = '.feishu.cn/base/'
+// if (text.includes(VIKA_BASE_STRING) || text.includes(LARK_BASE_STRING)) {
+//   const config: {
+//     spaceId: string | undefined,
+//     table: string | undefined,
+//     view: string | undefined,
+//   } = { spaceId: '', table: '', view: '' }
+//   const vikaConfig = text.match(/https:\/\/vika.cn\/workbench\/(.*?)\/(.*)\?spaceId=(.*)/)
+//   console.info('vikaConfig:', vikaConfig)
+//   const larkConfig = text.match(/.feishu.cn\/base\/(.*?)\?table=(.*)&view=(.*)/)
+//   console.info('larkConfig:', larkConfig)
+//   if (vikaConfig && vikaConfig.length === 4) {
+//     config.spaceId = vikaConfig[3]
+//     config.table = vikaConfig[1]
+//     config.view = vikaConfig[2]
+//   } else if (larkConfig && larkConfig.length === 4) {
+//     config.spaceId = larkConfig[1]
+//     config.table = larkConfig[2]
+//     config.view = larkConfig[3]
+//   }
+//   console.info('多维表格配置信息：', JSON.stringify(config))
+// }

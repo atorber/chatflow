@@ -8,12 +8,9 @@ import {
   EnvChat,
   WhiteListChat,
   GroupNoticeChat,
-  RoomChat,
-  ContactChat,
   ActivityChat,
   NoticeChat,
   QaChat,
-  KeywordChat,
 } from '../services/mod.js'
 import { logForm } from '../utils/mod.js'
 import {
@@ -28,39 +25,29 @@ import {
 import {
   ServeGetWhitelistWhiteObject,
 } from '../api/white-list.js'
-// import { ServeGetNotices } from '../api/notice.js'
-import { ServeGetKeywords } from '../api/keyword.js'
 import { ServeGetChatbotUsersDetail } from '../api/chatbot.js'
+import { ServeGetWelcomes } from '../api/welcome.js'
 
 export const handleSay = async (talker: Room | Contact | Message, sayable: Sayable) => {
   const message: Message | void = await talker.say(sayable)
   if (message) await onMessage(message)
 }
 
-async function getSystemKeywordsText () {
-  // const records = await this.getKeywords()
-  const res = await ServeGetKeywords()
-  const records = res.data.items
-  let text :string = '【操作说明】\n'
-  for (const fields of records) {
-    if (fields['type'] === '系统指令') text += `${fields['name']} : ${fields['desc']}\n`
-  }
-  return text
-}
-
+// 处理管理员群消息
 const notifyAdminRoom = async (bot: Wechaty) => {
   // log.info('notifyAdminRoom,初始化vika配置信息', bot)
 
   if (ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMID || ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMTOPIC) {
     const adminRoom = await getRoom(bot, { topic: ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMTOPIC, id: ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMID })
 
-    const helpText = await getSystemKeywordsText()
+    const helpText = await ChatFlowConfig.getSystemKeywordsText()
     const text = `${new Date().toLocaleString()}\nchatflow启动成功!\n当前登录用户${bot.currentUser.name()}\n可在管理员群回复对应指令进行操作\n${helpText}\n`
     if (adminRoom) await handleSay(adminRoom, text)
     // await adminRoom?.say(text)
   }
 }
 
+// 从云端加载配置信息
 const postVikaInitialization = async (bot: Wechaty) => {
   // log.info('初始化vika配置信息：', bot)
 
@@ -76,6 +63,15 @@ const postVikaInitialization = async (bot: Wechaty) => {
     ChatFlowConfig.configEnv = { ...vikaConfig, ...(ChatFlowConfig.configEnv) }
     logger.info('合并后的环境变量信息：' + JSON.stringify(ChatFlowConfig.configEnv))
 
+    // 下载进群欢迎语
+    try {
+      const welcomes = await ServeGetWelcomes()
+      ChatFlowConfig.welcomeList = welcomes.data.items
+      logger.info('获取的进群欢迎语：' + JSON.stringify(ChatFlowConfig.welcomeList))
+    } catch (err) {
+      log.error('获取进群欢迎语失败', err)
+    }
+
     try {
       log.info('开始请求获取白名单...')
       // 获取白名单列表
@@ -87,7 +83,7 @@ const postVikaInitialization = async (bot: Wechaty) => {
         // 更新定时任务
         await NoticeChat.updateJobs()
         // 获取关键字列表
-        const helpText = await getSystemKeywordsText()
+        const helpText = await ChatFlowConfig.getSystemKeywordsText()
         logForm(`启动成功，系统准备就绪\n\n当前登录用户：${bot.currentUser.name()}\nID:${bot.currentUser.id}\n\n在当前群（管理员群）回复对应指令进行操作\n${helpText}`)
       } catch (err) {
         log.error('获取帮助文案失败', err)
@@ -101,14 +97,6 @@ const postVikaInitialization = async (bot: Wechaty) => {
   }
 
   try {
-    // 获取ChatFlowConfig类的所有属性，赋值给ChatFlowConfigInfo
-    // const ChatFlowConfigInfo = Object.keys(ChatFlowConfig).map((key) => {
-    //   return {
-    //     key,
-    //     value: ChatFlowConfig[key as keyof typeof ChatFlowConfig],
-    //   }
-    // })
-    // logger.info('ChatFlowConfig配置信息:' + JSON.stringify(ChatFlowConfigInfo))
     // 向管理员群推送消息
     await notifyAdminRoom(bot)
     log.info('向管理群推送消息成功...')
@@ -123,61 +111,46 @@ const postVikaInitialization = async (bot: Wechaty) => {
   }
 }
 
-const initializeServicesAndEnv = async () => {
-  logger.info('初始化服务开始...')
-
-  // 环境变量配置
-  await EnvChat.init()
-  await delay(500)
-
-  // 消息上传
-  await MessageChat.init()
-  await delay(500)
-
-  // 活动消息
-  await ActivityChat.init()
-  await delay(500)
-
-  // 联系人消息
-  await ContactChat.init()
-  await delay(500)
-
-  // 群通知
-  await GroupNoticeChat.init()
-  await delay(500)
-
-  // 关键字服务
-  await KeywordChat.init()
-  await delay(500)
-
-  // 定时任务
-  await NoticeChat.init()
-  await delay(500)
-
-  // 群聊
-  await RoomChat.init()
-  await delay(500)
-
-  // 白名单
-  await WhiteListChat.init()
-  await delay(500)
-
-  // 问答
-  await QaChat.init()
-  // logger.info('services:' + JSON.stringify(services))
-
-  log.info('初始化服务完成...')
-}
-
+// bot就绪或登录事件操作
 export const onReadyOrLogin = async (bot: Wechaty) => {
-  log.info('onReadyOrLogin,初始化services服务...')
   const curTime = new Date().getTime()
   const user: Contact = bot.currentUser
   log.info('当前登录的账号信息:', user.name())
 
   // 初始化服务
-  await initializeServicesAndEnv()
-  await delay(500)
+  try {
+    log.info('onReadyOrLogin,初始化services服务...')
+    logger.info('初始化服务开始...')
+
+    // 消息上传服务初始化
+    await MessageChat.init()
+    await delay(500)
+
+    // 活动管理服务初始化
+    await ActivityChat.init()
+    await delay(500)
+
+    // 群通知管理服务初始化
+    await GroupNoticeChat.init()
+    await delay(500)
+
+    // 定时任务服务初始化
+    await NoticeChat.init()
+    await delay(500)
+
+    // 白名单服务初始化
+    await WhiteListChat.init()
+    await delay(500)
+
+    // 智能问答服务初始化
+    await QaChat.init()
+    // logger.info('services:' + JSON.stringify(services))
+    ChatFlowConfig.isReady = true
+    log.info('初始化服务完成...')
+    await delay(500)
+  } catch (err) {
+    log.error('初始化服务失败', err)
+  }
 
   // 更新当前登录的bot信息到云端
   let baseInfo = []

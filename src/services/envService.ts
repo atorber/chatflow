@@ -2,9 +2,7 @@
 // import type { IRecord } from '../db/vika.js'
 import { log } from 'wechaty'
 import { logger } from '../utils/utils.js'
-import type { ProcessEnv } from '../types/env.js'
 import {
-  // ServeUpdateConfig,
   ServeGetUserConfigObj,
 } from '../api/user.js'
 
@@ -14,18 +12,6 @@ import {
 
 // 服务类
 export class EnvChat {
-
-  // static records: IRecord[]
-  static envData: ProcessEnv | undefined
-  static vikaData: any
-
-  // 初始化
-  static async init () {
-    EnvChat.getConfigFromEnv()
-    // const configRes = await ServeGetUserConfig()
-    // this.records = configRes.data.items
-    // log.info('初始化 EnvChat 成功...', JSON.stringify(this.records))
-  }
 
   // 更新环境变量配置到云端
   static async updateConfigToVika (config: any) {
@@ -38,12 +24,12 @@ export class EnvChat {
     log.info('从维格表中获取环境变量配置,getConfigFromVika ()')
     const res: any = await ServeGetUserConfigObj()
     logger.info('从维格表中获取环境变量配置,ServeGetUserConfigObj res:' + JSON.stringify(res))
-    const vikaData: any = res.data
-    this.vikaData = vikaData
+
+    const vikaData = res.data
     logger.info('vikaData:' + JSON.stringify(vikaData))
     // log.info('sysConfig:', JSON.stringify(sysConfig, null, '\t'))
 
-    return this.vikaData
+    return vikaData
   }
 
   // 从环境变量中获取环境变量配置
@@ -64,8 +50,6 @@ export class EnvChat {
         }
       }
     }
-
-    this.envData = envData
 
     // log.info('sysConfig:', JSON.stringify(sysConfig, null, '\t'))
 

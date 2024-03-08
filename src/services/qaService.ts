@@ -23,12 +23,15 @@ export class QaChat {
 
   // 初始化
   static async init () {
-    const res = await ServeGetQas()
-    const records = res.data.items
-    this.records = records
-    this.bot = ChatFlowConfig.bot
-
-    log.info('初始化 QaChat 成功...')
+    try {
+      const res = await ServeGetQas()
+      const records = res.data.items
+      this.records = records
+      this.bot = ChatFlowConfig.bot
+      log.info('初始化 QaChat 成功...')
+    } catch (e) {
+      log.info('初始化 QaChat 失败...', e)
+    }
   }
 
   // 获取问答

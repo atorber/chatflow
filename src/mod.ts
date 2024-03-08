@@ -9,7 +9,7 @@ import {
   ChatFlow,
   GroupMaster,
   GroupMasterConfig,
-} from './chatflow.js'
+} from './index.js'
 
 export {
   getBotOps,
