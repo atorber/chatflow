@@ -1,15 +1,15 @@
 {
   "name": "@atorber/chatflow",
-  "version": "3.0.0-Beta-12",
+  "version": "3.0.0-Beta-13",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/esm/src/chatflow.js",
-      "require": "./dist/cjs/src/chatflow.js"
+      "import": "./dist/esm/src/index.js",
+      "require": "./dist/cjs/src/.js"
     }
   },
-  "typings": "./dist/esm/src/chatflow.d.ts",
+  "typings": "./dist/esm/src/index.d.ts",
   "engines": {
     "node": ">=16",
     "npm": ">=7"

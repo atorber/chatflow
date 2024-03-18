@@ -42,9 +42,8 @@ export class MessageChat {
 
   // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
   constructor () {
-    const isVika = ChatFlowConfig.token.indexOf('/') === -1
-    MessageChat.batchCount = isVika ? 10 : 100
-    MessageChat.delayTime = isVika ? 1000 : 500
+    MessageChat.batchCount = ChatFlowConfig.batchCount
+    MessageChat.delayTime = ChatFlowConfig.delayTime
   }
 
   // 初始化
@@ -143,6 +142,7 @@ export class MessageChat {
             },
           }
           uploadedAttachments = await ServeCreateTalkRecordsUpload(form, config)
+          await delay(this.delayTime)
           log.info('上传二维码到vika结果：', JSON.stringify(uploadedAttachments))
           const text = qrcodeImageUrl
           if (uploadedAttachments.data) {
@@ -238,6 +238,7 @@ export class MessageChat {
       },
     }
     const uploadedAttachments = await ServeCreateTalkRecordsUpload(form, config)
+    await delay(this.delayTime)
     log.info('上传文件到vika结果：', JSON.stringify(uploadedAttachments))
     return uploadedAttachments
   }
