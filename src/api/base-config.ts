@@ -153,6 +153,8 @@ export class ChatFlowConfig {
 
   static isLogin: boolean = false
   static isReady: boolean = false
+  static delayTime: number = 1000
+  static batchCount: number = 10
   static switchsOnVika: any[]
   static reminderList: any[]
   static statisticRecords: any
@@ -219,6 +221,8 @@ export class ChatFlowConfig {
     ChatFlowConfig.spaceId = options.spaceId || ChatFlowConfig.spaceId
     ChatFlowConfig.token = options.token || ChatFlowConfig.token
     ChatFlowConfig.endpoint = options.endpoint || ChatFlowConfig.token || 'http://127.0.0.1:9503'
+    ChatFlowConfig.batchCount = options.token.indexOf('/') === -1 ? 10 : 100
+    ChatFlowConfig.delayTime = options.token.indexOf('/') === -1 ? 1000 : 500
   }
 
   static async init (options: {
@@ -300,8 +304,8 @@ export class ChatFlowConfig {
       log.info('当前bot使用的puppet:', puppet)
 
       // 根据多维表格类型设置批量操作的数量和延迟时间
-      const batchCount = ChatFlowConfig.token.indexOf('/') === -1 ? 10 : 100
-      const delayTime = ChatFlowConfig.token.indexOf('/') === -1 ? 1000 : 500
+      const batchCount = ChatFlowConfig.batchCount
+      const delayTime = ChatFlowConfig.delayTime
 
       // 如果是wechaty-puppet-wechat或wechaty-puppet-wechat4u，每次登录好友ID会变化，需要分批删除好友
       if (puppet === 'wechaty-puppet-wechat' || puppet === 'wechaty-puppet-wechat4u') {
@@ -373,8 +377,8 @@ export class ChatFlowConfig {
   static async updateRooms (puppet: string) {
     let updateCount = 0
     // 根据多维表格类型设置批量操作的数量和延迟时间
-    const batchCount = ChatFlowConfig.token.indexOf('/') === -1 ? 10 : 100
-    const delayTime = ChatFlowConfig.token.indexOf('/') === -1 ? 1000 : 500
+    const batchCount = ChatFlowConfig.batchCount
+    const delayTime = ChatFlowConfig.delayTime
     try {
       // 获取最新的群列表
       const rooms: Room[] = await this.bot.Room.findAll()
