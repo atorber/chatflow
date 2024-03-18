@@ -1,18 +1,19 @@
 /* eslint-disable no-console */
 /* eslint-disable sort-keys */
-import { VikaSheet } from '../db/vika.js'
 import { Message, ScanStatus, types, Wechaty, log } from 'wechaty'
 import { getCurTime, delay, logger } from '../utils/utils.js'
 import moment from 'moment'
 import { FileBox } from 'file-box'
-import { VikaDB } from '../db/vika-db.js'
-import { BaseEntity, MappingOptions } from '../db/vika-orm.js'
 
 import { ChatFlowConfig } from '../api/base-config.js'
 import type { ChatMessage } from '../types/mod.js'
-
+import {
+  ServeCreateTalkRecords,
+  ServeCreateTalkRecordsUpload,
+} from '../api/chat.js'
 import fs from 'fs'
 import path from 'path'
+import FormData from 'form-data'
 
 import { db } from '../db/tables.js'
 const messageData = db.message
@@ -30,120 +31,67 @@ paths.forEach((p) => {
   }
 })
 
-const mappingOptions: MappingOptions = {  // 定义字段映射选项
-  fieldMapping: {  // 字段映射
-    timeHms: '时间|timeHms',
-    name: '发送者|name',
-    alias: '好友备注|alias',
-    topic: '群名称|topic',
-    listener: '接收人|listener',
-    messagePayload: '消息内容|messagePayload',
-    file: '文件图片|file',
-    messageType: '消息类型|messageType',
-    wxid: '好友ID|wxid',
-    listenerid: '接收人ID|listenerid',
-    roomid: '群ID|roomid',
-    messageId: '消息ID|messageId',
-    wxAvatar: '发送者头像|wxAvatar',
-    roomAvatar: '群头像|roomAvatar',
-    listenerAvatar: '接收人头像|listenerAvatar',
-  },
-  tableName: '消息记录|Message',  // 表名
-}
-
 // 服务类
-export class MessageChat extends BaseEntity {
+export class MessageChat {
 
-  static db:VikaSheet | undefined
-  static msgStore: any[]
+  static msgStore: any[] = []
   static messageData: any
   static bot:Wechaty
-
-  timeHms?: string
-
-  name?: string
-
-  alias?: string
-
-  topic?: string
-
-  listener?: string
-
-  messagePayload?: string
-
-  file?: any
-
-  messageType?: string
-
-  wxid?: string
-
-  roomid?: string
-
-  messageId?: string
-
-  wxAvatar?: string
-
-  roomAvatar?: string
-
-  listenerAvatar?: string
+  static batchCount: number = 10
+  static delayTime: number = 1000
 
   // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
-
-  protected static override mappingOptions: MappingOptions = mappingOptions  // 设置映射选项为上面定义的 mappingOptions
-
-  protected static override getMappingOptions (): MappingOptions {  // 获取映射选项的方法
-    return this.mappingOptions  // 返回当前类的映射选项
-  }
-
-  static override setMappingOptions (options: MappingOptions) {  // 设置映射选项的方法
-    this.mappingOptions = options  // 更新当前类的映射选项
+  constructor () {
+    const isVika = ChatFlowConfig.token.indexOf('/') === -1
+    MessageChat.batchCount = isVika ? 10 : 100
+    MessageChat.delayTime = isVika ? 1000 : 500
   }
 
   // 初始化
   static async init () {
-    if (!MessageChat.db) {
-      const that = this
-      try {
-        // console.debug(VikaDB)
-        MessageChat.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.messageSheet)
-        MessageChat.setVikaOptions({
-          apiKey: VikaDB.token,
-          baseId: VikaDB.dataBaseIds.messageSheet, // 设置 base ID
-        })
-        this.msgStore = []
-        this.messageData = messageData
+    const that = this
+    try {
+      this.msgStore = []
+      this.messageData = messageData
 
-        // 启动定时任务，每秒钟写入一次，每次写入10条
-        setInterval(() => {
+      // 启动定时任务，每秒钟写入一次，每次写入10条
+      setInterval(() => {
         // logger.info('待处理消息池长度：', that.msgStore.length || '0')
 
-          if (that.msgStore.length) {
-            const end = that.msgStore.length < 10 ? that.msgStore.length : 10
-            const records = that.msgStore.splice(0, end)
-            // logger.info('写入vika的消息：', JSON.stringify(records))
-            try {
-              MessageChat.db?.insert(records).then((response: { success: any }) => {
-                if (!response.success) {
-                  logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
-                }
-                return response
-              }).catch((err: any) => { logger.error('调用vika写入接口失败：', err) })
-            } catch (err) {
-              logger.error('调用datasheet.records.create失败：', err)
-            }
-          }
-        }, 1000)
+        if (that.msgStore.length && ChatFlowConfig.isReady) {
+          const end = that.msgStore.length < this.batchCount ? that.msgStore.length : this.batchCount
+          const records = that.msgStore.splice(0, end)
+          // logger.info('写入vika的消息：', JSON.stringify(records))
+          try {
+            ServeCreateTalkRecords({ records }).then((response: any) => {
+              if (response.message !== 'success') {
+                log.error('调用消息写入接口成功，写入失败：', JSON.stringify(response))
+              } else {
+                log.info('调用消息写入接口成功，写入成功：', response.data.length)
+              }
+              return response
+            }).catch((err: any) => { log.error('调用消息写入接口失败：', err) })
 
-        log.info('初始化 MessageChat 成功...')
-      } catch (e) {
-        log.error('初始化 MessageChat 失败：', e)
-      }
+          } catch (err) {
+            logger.error('调用datasheet.records.create失败：', err)
+          }
+        } else if (!ChatFlowConfig.isReady) {
+          log.info('机器人未初始化完成，待处理消息池等待中...')
+        } else {
+          // log.info('待处理消息池为空...', new Date().toLocaleString())
+        }
+        return null
+      }, 1500)
+
+      log.info('初始化 MessageChat 成功...')
+    } catch (e) {
+      log.error('初始化 MessageChat 失败：', e)
     }
     this.bot = ChatFlowConfig.bot
   }
 
   static addRecord (record: any) {
-    logger.info('消息入列:', JSON.stringify(record))
+    logger.info('addRecord消息入列:', JSON.stringify(record))
     if (record.fields) {
       MessageChat.msgStore.push(record)
       // logger.info('最新消息池长度：', this.msgStore.length)
@@ -156,8 +104,7 @@ export class MessageChat extends BaseEntity {
       MessageChat.msgStore.push(record)
       // logger.info('最新消息池长度：', this.msgStore.length)
     } catch (e) {
-      logger.error('添加记录失败：', e)
-
+      logger.error('addChatRecord添加记录失败：', e)
     }
 
   }
@@ -181,8 +128,22 @@ export class MessageChat extends BaseEntity {
           // const writeStream = fs.createWriteStream(filePath)
           // await file.pipe(writeStream)
           await file.toFile(filePath, true)
-          await delay(1000)
-          uploadedAttachments = await MessageChat.db?.upload(filePath, '')
+          await delay(this.delayTime)
+          // uploadedAttachments = await MessageChat.db?.upload(filePath, '')
+
+          // 创建一个新的FormData实例
+          const form = new FormData()
+          // 添加文件到form实例。第一个参数是API期待的字段名
+          form.append('file', fs.createReadStream(filePath))
+          // 如果API需要特定的头部（如认证），可以在这里添加
+          const config = {
+            headers: {
+              ...form.getHeaders(),
+              // 'Authorization': 'Bearer yourToken' // 示例：如何添加认证头部
+            },
+          }
+          uploadedAttachments = await ServeCreateTalkRecordsUpload(form, config)
+          log.info('上传二维码到vika结果：', JSON.stringify(uploadedAttachments))
           const text = qrcodeImageUrl
           if (uploadedAttachments.data) {
             try {
@@ -221,24 +182,25 @@ export class MessageChat extends BaseEntity {
 
     const records = [
       {
-        fields: {
-          '时间|timeHms':timeHms,
-          '发送者|name': 'system',
-          '群名称|topic': '--',
-          '消息内容|messagePayload': text,
-          '好友ID|wxid': 'system',
-          '群ID|roomid': '--',
-          '消息类型|messageType': 'qrcode',
-          '文件图片|file': files,
-        },
+        timeHms,
+        name: 'system',
+        topic: '--',
+        messagePayload: text,
+        wxid: 'system',
+        roomid: '--',
+        messageType: 'qrcode',
+        file: files,
       },
     ]
 
     // logger.info('待写入登录二维码消息:', JSON.stringify(records))
-    const response = await this.db?.insert(records)
-    if (!response.success) {
-      logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
-    }
+    const response:any = await ServeCreateTalkRecords({ records })
+    log.info('调用vika写入接口成功，写入vika结果：', JSON.stringify(response))
+
+    // if (!response.message.success) {
+    //   logger.error('调用vika写入接口成功，写入vika失败：', JSON.stringify(response))
+    // }
+
     return response
   }
 
@@ -255,14 +217,29 @@ export class MessageChat extends BaseEntity {
 
     try {
       await file.toFile(filePath, true)
-      logger.info('保存文件到本地成功')
+      logger.info('保存文件到本地成功', filePath)
     } catch (err) {
       logger.error('保存文件到本地失败', err)
       return ''
     }
 
-    await delay(1000)
-    return await this.db?.upload(filePath, '')
+    await delay(this.delayTime)
+    // return await this.db?.upload(filePath, '')
+
+    // 创建一个新的FormData实例
+    const form = new FormData()
+    // 添加文件到form实例。第一个参数是API期待的字段名
+    form.append('file', fs.createReadStream(filePath))
+    // 如果API需要特定的头部（如认证），可以在这里添加
+    const config = {
+      headers: {
+        ...form.getHeaders(),
+        // 'Authorization': 'Bearer yourToken' // 示例：如何添加认证头部
+      },
+    }
+    const uploadedAttachments = await ServeCreateTalkRecordsUpload(form, config)
+    log.info('上传文件到vika结果：', JSON.stringify(uploadedAttachments))
+    return uploadedAttachments
   }
 
   static async addHeartbeatRecord (text: string) {
@@ -272,16 +249,14 @@ export class MessageChat extends BaseEntity {
     const files: any = []
 
     const record = {
-      fields: {
-        '时间|timeHms':timeHms,
-        '发送者|name': 'system',
-        '群名称|topic': '--',
-        '消息内容|messagePayload': text,
-        '好友ID|wxid': 'system',
-        '群ID|roomid': '--',
-        '消息类型|messageType': 'heartbeat',
-        '文件图片|file': files,
-      },
+      timeHms,
+      name: 'system',
+      topic: '--',
+      messagePayload: text,
+      wxid: 'system',
+      roomid: '--',
+      messageType: 'heartbeat',
+      file: files,
     }
     logger.info('心跳消息:', JSON.stringify(record))
     MessageChat.msgStore.push(record)
@@ -431,7 +406,7 @@ export class MessageChat extends BaseEntity {
         try {
           text = JSON.stringify(file.toJSON())
         } catch (e) {
-          log.error('文件转换JSON失败：', e)
+          log.error('messageService 文件转换JSON失败：', e)
         }
         uploadedAttachments = await MessageChat.handleFileMessage(file, message)
         if (uploadedAttachments) {
@@ -476,31 +451,29 @@ export class MessageChat extends BaseEntity {
       }
 
       try {
-        const record = {
-          fields: {
-            '时间|timeHms':timeHms,
-            '发送者|name': talker.name(),
-            '好友备注|alias': await talker.alias(),
-            '群名称|topic': topic || '--',
-            '消息内容|messagePayload': text,
-            '好友ID|wxid': talker.id !== 'null' ? talker.id : '--',
-            '群ID|roomid': room && room.id ? room.id : '--',
-            '消息类型|messageType': msgType,
-            '文件图片|file': files,
-            '消息ID|messageId': message.id,
-            '接收人|listener': topic ? '--' : (await listener?.alias() || listener?.name()),
-            '接收人ID|listenerid':topic ? '--' : listener?.id,
-            '发送者头像|wxAvatar': wxAvatar,
-            '群头像|roomAvatar':roomAvatar,
-            '接收人头像|listenerAvatar':listenerAvatar,
-          },
+        const record:any = {
+          timeHms,
+          name: talker.name(),
+          alias: await talker.alias(),
+          topic: topic || '--',
+          messagePayload: text,
+          wxid: talker.id !== 'null' ? talker.id : '--',
+          roomid: room && room.id ? room.id : '--',
+          messageType: msgType,
+          messageId: message.id,
+          listener: topic ? '--' : (await listener?.alias() || listener?.name()),
+          listenerid:topic ? '--' : listener?.id,
+          wxAvatar,
+          roomAvatar,
+          listenerAvatar,
         }
+        if (files.length) record['file'] = files
         // logger.info('addChatRecord:', JSON.stringify(record))
         if (msgType !== 'Unknown') {
           await this.addChatRecord(record)
         }
       } catch (e) {
-        logger.error('添加记录失败：', e)
+        logger.error('onMessage添加记录失败：', e)
 
       }
 

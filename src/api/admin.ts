@@ -15,13 +15,9 @@ import {
 import {
   EnvChat,
   NoticeChat,
-  ContactChat,
-  RoomChat,
   ActivityChat,
-  WhiteListChat,
   GroupNoticeChat,
   QaChat,
-  KeywordChat,
 } from '../services/mod.js'
 
 import {
@@ -30,7 +26,8 @@ import {
 } from '../utils/mod.js'
 
 import { WxOpenaiBot, type WxOpenaiBotConfig, type SkillInfoArray } from '../services/wxopenaiService.js'
-
+import { ServeGetChatbotUsersDetail } from '../api/chatbot.js'
+import { ServeGetWhitelistWhiteObject } from '../api/white-list.js'
 interface CommandActions {
     [key: string]: (bot: Wechaty, message: Message) => Promise<FileBox>
   }
@@ -40,10 +37,27 @@ interface AdminCommands {
   }
 // 使用一个对象来存储命令和对应的处理函数
 const adminCommands: AdminCommands = {
+  更新智聊用户: async () => {
+    try {
+      const chatBotUsers = await ServeGetChatbotUsersDetail()
+      ChatFlowConfig.chatBotUsers = chatBotUsers.data.items
+      logger.info('获取到智聊用户信息:' + JSON.stringify(ChatFlowConfig.chatBotUsers))
+      return [ true, '智聊用户列表更新成功~' ]
+    } catch (e) {
+      return [ false, '智聊用户列表配置更新失败~' ]
+    }
+  },
   更新配置: async () => {
     try {
-      const botConfig = await EnvChat.downConfigFromVika()
-      log.info('获取到新配信息:', JSON.stringify(botConfig))
+      const res = await EnvChat.getConfigFromVika()
+      logger.info('ServeGetUserConfig res:' + JSON.stringify(res))
+
+      const vikaConfig:any = res.data
+      // logger.info('获取的维格表中的环境变量配置信息vikaConfig：' + JSON.stringify(vikaConfig))
+
+      // 合并配置信息，如果维格表中有对应配置则覆盖环境变量中的配置
+      ChatFlowConfig.configEnv = { ...vikaConfig, ...(ChatFlowConfig.configEnv) }
+      logger.info('合并后的环境变量信息：' + JSON.stringify(ChatFlowConfig.configEnv))
       return [ true, '配置更新成功~' ]
     } catch (e) {
       return [ false, '配置更新失败~' ]
@@ -59,8 +73,8 @@ const adminCommands: AdminCommands = {
   },
   更新通讯录: async () => {
     try {
-      await ContactChat.updateContacts(ChatFlowConfig.configEnv.WECHATY_PUPPET)
-      await RoomChat.updateRooms(ChatFlowConfig.configEnv.WECHATY_PUPPET)
+      await ChatFlowConfig.updateContacts(ChatFlowConfig.configEnv.WECHATY_PUPPET)
+      await ChatFlowConfig.updateRooms(ChatFlowConfig.configEnv.WECHATY_PUPPET)
       return [ true, '通讯录更新成功~' ]
     } catch (e) {
       return [ false, '通讯录更新失败~' ]
@@ -68,7 +82,9 @@ const adminCommands: AdminCommands = {
   },
   更新白名单: async () => {
     try {
-      ChatFlowConfig.whiteList = await WhiteListChat.getWhiteList()
+      const res = await ServeGetWhitelistWhiteObject()
+      ChatFlowConfig.whiteList = res.data
+      logger.info('获取到白名单信息:' + JSON.stringify(ChatFlowConfig.whiteList))
       return [ true, '热更新白名单~' ]
     } catch (e) {
       return [ false, '白名单更新失败~' ]
@@ -139,19 +155,9 @@ const adminCommands: AdminCommands = {
   上传配置: async () => {
     try {
       await EnvChat.updateConfigToVika(ChatFlowConfig.configEnv)
-
       return [ true, '上传配置信息成功~' ]
     } catch (e) {
       return [ false, '上传配置信息失败~' ]
-    }
-  },
-  下载配置: async () => {
-    try {
-      const botConfig = await EnvChat.downConfigFromVika()
-      log.info('botConfig:', JSON.stringify(botConfig))
-      return [ true, '下载配置信息成功~' ]
-    } catch (e) {
-      return [ false, '下载配置信息失败~' ]
     }
   },
 }
@@ -189,7 +195,7 @@ export const adminAction = async (message:Message) => {
     }
 
     if (text === '帮助') {
-      const replyText = await KeywordChat.getSystemKeywordsText()
+      const replyText = await ChatFlowConfig.getSystemKeywordsText()
       await sendMsg(message, replyText)
     } else if (Object.prototype.hasOwnProperty.call(adminCommands, text)) {
       const command = adminCommands[text as keyof typeof adminCommands]
@@ -216,6 +222,114 @@ export const adminAction = async (message:Message) => {
           await sendMsg(message, '下载失败，请重试~')
         }
       }
+    }
+
+    // 检测链接进行管理操作
+    try {
+      // 处理多维表格设置,如果text中包含https://oou2hscgt2.feishu.cn/或https://vika.cn/则从text中提取多维表格的配置信息
+    // 维格表配置信息格式：https://vika.cn/workbench/dstZmz6jDv4H2Ym3qd/viwlGB2EZh1W7?spaceId=spcj6bgt12WoZ，提取结果为：{spaceId: 'spcj6bgt12WoZ', table: 'dstZmz6jDv4H2Ym3qd', view: 'viwlGB2EZh1W7'}
+    // 飞书多维表格配置信息格式：https://oou2hscgt2.feishu.cn/base/bascnPgZURujrdwZ9T4JkLUSUQc?table=tbl90nnja6sqMuCT&view=vewmgp68n9，提取结果为：{spaceId: 'bascnPgZURujrdwZ9T4JkLUSUQc', table: 'tbl90nnja6sqMuCT', view: 'vewmgp68n9'}
+      const VIKA_BASE_STRING = 'https://vika.cn/workbench/'
+      const LARK_BASE_STRING = '.feishu.cn/base/'
+      if (text.includes(VIKA_BASE_STRING) || text.includes(LARK_BASE_STRING)) {
+        const config: {
+        url: string;
+        spaceId: string | undefined;
+        table: string | undefined;
+        view: string | undefined;
+      } = { url:'', spaceId: '', table: '', view: '' }
+        const vikaConfigWithSpaceId = text.match(/https:\/\/vika.cn\/workbench\/(.*?)\/(.*)\?spaceId=(.*)/)
+        log.info('vikaConfig:', vikaConfigWithSpaceId || '不是维格表链接')
+
+        const vikaConfigNoSpaceId = text.match(/https:\/\/vika.cn\/workbench\/(.*?)\/(.*)/)
+        log.info('vikaConfig:', vikaConfigNoSpaceId || '不是维格表链接')
+
+        const larkConfig = text.match(/.feishu.cn\/base\/(.*?)\?table=(.*)&view=(.*)/)
+        log.info('larkConfig:', larkConfig || '不是飞书多维表格链接')
+        if (vikaConfigWithSpaceId && vikaConfigWithSpaceId.length === 4) {
+          config.url = text
+          config.spaceId = vikaConfigWithSpaceId[3]
+          config.table = vikaConfigWithSpaceId[1]
+          config.view = vikaConfigWithSpaceId[2]
+        } else if (vikaConfigNoSpaceId && vikaConfigNoSpaceId.length === 3) {
+          config.url = text
+          config.table = vikaConfigNoSpaceId[1]
+          config.view = vikaConfigNoSpaceId[2]
+
+        } else if (larkConfig && larkConfig.length === 4) {
+          config.url = text
+          config.spaceId = larkConfig[1]
+          config.table = larkConfig[2]
+          config.view = larkConfig[3]
+        }
+
+        logger.info('多维表格配置信息：' + JSON.stringify(config))
+        log.info('多维表格配置信息：', JSON.stringify(config))
+        if (config.table && config.view) {
+          log.info('多维表格配置信息匹配，开始处理...')
+          // 处理多维表格配置信息
+          // 检查config.talbe是否是ChatFlowConfig.db.dataBaseIds中某个key的value，如果存在则查询ChatFlowConfig.db.dataBaseNames找出对应的表名称
+          const tableId = config.table
+          const tableCode = ChatFlowConfig.db.dataBaseIdsMap[tableId]
+          log.info('数据表标识：', tableCode)
+          if (tableCode) {
+            const tableName = ChatFlowConfig.db.dataBaseNames[tableCode as keyof typeof ChatFlowConfig.db.dataBaseNames]
+            log.info('数据表名称：', tableName)
+            await message.say(`检测到多维表格链接，表格名称：【${tableName}】，\n是否需要处理？\n配置信息:\n${JSON.stringify(config, null, 2)}`)
+
+            switch (tableCode) {
+              case 'mediaSheet':
+                await ChatFlowConfig.updateMediaList()
+                break
+              case 'envSheet':
+                await ChatFlowConfig.updateEnv()
+                break
+              case 'groupSheet':
+                await ChatFlowConfig.updateGroup()
+                break
+              case 'chatBotUserSheet':
+                await ChatFlowConfig.updateChatBotUser()
+                break
+              case 'chatBotSheet':
+                await ChatFlowConfig.updateChatBot()
+                break
+              case 'whiteListSheet':
+                await ChatFlowConfig.updateWhiteList()
+                break
+              case 'groupNoticeSheet':
+                await ChatFlowConfig.updateGroupNotifications()
+                break
+              case 'statisticSheet':
+                await ChatFlowConfig.updateStatistics()
+                break
+              case 'noticeSheet':
+                await ChatFlowConfig.updateReminder()
+                break
+              case 'qaSheet':
+                await ChatFlowConfig.updateQaList()
+                break
+              case 'keywordSheet':
+                await ChatFlowConfig.updateKeywords()
+                break
+              case 'welcomeSheet':
+                await ChatFlowConfig.updateWelcomes()
+                break
+              default:
+                log.info('多维表格配置信息不需要处理...')
+            }
+
+          } else {
+            log.info('多维表格配置信息不匹配，不处理...')
+            await message.say(`检测到多维表格链接，但不是当前系统的多维表格链接，不处理~\n配置信息:\n${JSON.stringify(config, null, 2)}`)
+          }
+
+        } else {
+          log.info('多维表格配置信息不全，不处理...')
+          await message.say('检测到多维表格链接，但配置信息不全，不处理~')
+        }
+      }
+    } catch (e) {
+      log.error('处理多维表格配置信息失败：', e)
     }
   }
 

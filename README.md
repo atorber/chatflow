@@ -36,14 +36,30 @@ ChatFlow是一个聊天机器人管理系统，可以帮助你实现一些原生
 
 ## 快速开始
 
-> 2.0.25+之后的版本，数据表不兼容，在运行时建议配置全新的维格表空间或删除原空间全部表
+> 升级代码后建议配置全新的维格表空间或删除原空间全部表，请使用nodejs16或18，最新的nodejs20可能无法运行
 
-1.下载源码并安装依赖
+最新部署方法参考：[ChatFlow3.0Beta部署运行](https://www.yuque.com/atorber/chatflow/gbpvgf01cw0nlxu4)
+
+1.下载代码及安装启动
+
+1.1 下载并运行chatflow-admin
 
 ```Shell
-git clone <https://github.com/atorber/chatflow.git>
-cd ./chatflow
-npm install
+git clone https://github.com/atorber/chatflow-admin.git
+cd chatflow-admin
+
+# 安装依赖
+npm i
+
+# 启动api服务
+npm run start:dev
+```
+
+1.2 下载并运行chatflow
+
+```Shell
+git clone https://github.com/atorber/chatflow.git
+cd chatflow
 ```
 
 2.分别登陆[微信对话开放平台](https://openai.weixin.qq.com/)和[vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973)官网注册账号并获取token
@@ -53,12 +69,17 @@ npm install
 > 快速开始仅需要修改VIKA_TOKEN、VIKA_SPACE_NAME、ADMINROOM_ADMINROOMTOPIC配置项,其他配置项暂时无需修改，使用微信对话开放平台时配置WXOPENAI_TOKEN、WXOPENAI_ENCODINGAESKEY
 
 ```.env
-# 维格表配置
-VIKA_SPACE_ID="替换为自己的维格表空间ID"
-VIKA_TOKEN="替换为自己的维格表token"
+# Wechaty
+WECHATY_PUPPET="wechaty-puppet-wechat4u" # 可选值：wechaty-puppet-wechat4u、wechaty-puppet-wechat、wechaty-puppet-xp、wechaty-puppet-engine、wechaty-puppet-padlocal、wechaty-puppet-service
+WECHATY_TOKEN="" # 使用wechaty-puppet-padlocal、wechaty-puppet-service时需配置此token
 
 # 基础配置
-ADMINROOM_ADMINROOMTOPIC="瓦力是群主" # 管理群名称，需尽量保持名称复杂，避免重名群干扰
+ADMINROOM_ADMINROOMTOPIC="替换为你的管理员群名称" # 管理群名称，需尽量保持名称复杂，避免重名群干扰
+
+# 维格表配置
+VIKA_SPACE_ID="替换为你的维格表空间ID" # 维格表空间ID或飞书多维表格的appToken
+VIKA_TOKEN="替换为你的维格表token" # 维格表token或飞书多维表格信息拼接（使用'/'拼接三个参数：appId/appSecret/appToken）
+ENDPOINT="http://127.0.0.1:9503" # 后端管理服务API地址，默认http://127.0.0.1:9503
 ```
 
 4.启动程序
@@ -169,6 +190,28 @@ atorber/chatflow:latest
 - [vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973)
 
   将过去复杂的IT数据库技术，做得像表格一样简单(如果要注册，通过这个链接，或者使用邀请码 55152973 )
+
+## 更新日志
+
+### 3.0.0-Beta-11
+
+- 移除环境变量依赖
+
+### 3.0.0-Beta-10
+
+- 新增媒体资源接口
+- 新增进群欢迎语接口
+- 新增顺风车接口
+
+### 3.0.0-6
+
+- 全部接口切换到chatfow-admin，更加稳定可靠
+- 修复微信对话开放平台bug
+- 增加ChatGPT支持
+
+### 3.0.0-5
+
+- 适配飞书多维表格，初步测试通过
 
 ## Star History
 

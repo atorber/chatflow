@@ -1,89 +1,86 @@
-import { log } from 'wechaty' // 导入 wechaty 的 log 模块
-import { BaseEntity, VikaOptions, MappingOptions } from '../src/db/vika-orm.js' // 导入 BaseEntity, VikaOptions, 和 MappingOptions 类型/类
-import 'dotenv/config.js'  // 导入环境变量配置
-import { delay } from '../src/utils/utils.js'  // 导入 delay 功能
-import { v4 as uuidv4 } from 'uuid'
+/* eslint-disable no-console */
+import 'dotenv/config.js'
+import { BiTable } from '../src/db/vika-db.js'
+import { BaseEntity, MappingOptions } from '../src/db/vika-orm.js'
 
-const vikaOptions: VikaOptions = {  // 定义 Vika API 的选项
-  apiKey: process.env.VIKA_TOKEN || '',  // 从环境变量获取 API 密钥
-  baseId: 'dstv5YCjy3PUtN882p',  // 设置 base ID
-}
+const db = new BiTable()
+const dbInit = await db.init({
+  token: process.env.VIKA_TOKEN || '',
+  spaceId: process.env.VIKA_SPACE_ID || '',
+})
 
-const mappingOptions: MappingOptions = {  // 定义字段映射选项
-  fieldMapping: {  // 字段映射
-    email: 'Email',
-    id: 'ID',
-    name: 'Name',
-  },
-  tableName: 'users',  // 表名
-}
+console.log('dbInit:', dbInit)
 
-/**
- * 用户实体
- */
-class User extends BaseEntity {  // 用户类继承 BaseEntity
+export class Env extends BaseEntity {
 
-  name?: string  // 定义名字属性，可选
-  email?: string  // 定义电子邮件属性，可选
-  id?:string
+  name?: string
+
+  key?: string
+
+  value?: string
+
+  desc?: string
+
+  syncStatus?: string
+
+  lastOperationTime?: string
+
+  action?: string
 
   // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
 
-  protected static override mappingOptions: MappingOptions = mappingOptions  // 设置映射选项为上面定义的 mappingOptions
+  protected override mappingOptions: MappingOptions = {
+    // 定义字段映射选项
+    fieldMapping: {
+      // 字段映射
+      name: '配置项|name',
+      key: '标识|key',
+      value: '值|value',
+      desc: '说明|desc',
+      syncStatus: '同步状态|syncStatus',
+      lastOperationTime: '最后操作时间|lastOperationTime',
+      action: '操作|action',
+    },
+    tableName: '环境变量|Env', // 表名
+  } // 设置映射选项为上面定义的 mappingOptions
 
-  protected static override getMappingOptions (): MappingOptions {  // 获取映射选项的方法
-    return this.mappingOptions  // 返回当前类的映射选项
+  protected override getMappingOptions (): MappingOptions {
+    // 获取映射选项的方法
+    return this.mappingOptions // 返回当前类的映射选项
   }
 
-  static override setMappingOptions (options: MappingOptions) {  // 设置映射选项的方法
-    this.mappingOptions = options  // 更新当前类的映射选项
+  override setMappingOptions (options: MappingOptions) {
+    // 设置映射选项的方法
+    this.mappingOptions = options // 更新当前类的映射选项
   }
 
 }
 
-User.setVikaOptions(vikaOptions)  // 设置 Vika API 选项
-
-// 使用示例
-
-// 增
-const newUser1 = new User()  // 创建一个新的用户实例
-newUser1.name = 'Bob'  // 设置用户名为 Bob
-newUser1.email = 'bob@example.com'  // 设置用户电子邮件为 bob@example.com
-newUser1.id = uuidv4()
-const res = await newUser1.save()  // 保存用户实例
-log.info('保存newUser1:', JSON.stringify(res))  // 输出新用户的信息
-await delay(500)  // 等待 500 毫秒
-
-// 增
-const newUser2 = await User.create<User>({  // 创建一个新的用户
-  email: 'test@example.com',  // 用户电子邮件为 test@example.com
-  id:uuidv4(),
-  name: 'Test',  // 用户名为 Test
+// 测试
+const env = new Env()
+await env.setVikaOptions({
+  apiKey: db.token,
+  baseId: db.dataBaseIds.envSheet, // 设置 base ID
 })
 
-log.info('保存newUser2:', JSON.stringify(newUser2))  // 输出新用户的信息
-await delay(500)  // 等待 500 毫秒
+const envData = await env.findAll()
+console.log('envData:', JSON.stringify(envData, null, 2))
 
-// 改
-const updateRes = await User.update(newUser2.recordId, { email: 'newalice@example.com' } as Partial<User>)  // 更新新用户的电子邮件
-log.info('更新newUser2:', JSON.stringify(updateRes))  // 输出更新后的新用户信息
-await delay(500)  // 等待 500 毫秒
+const demo = [
+  {
+    recordId: 'rec0ofQXMfryc',
+    createdAt: 1694860633000,
+    updatedAt: 1697695907000,
+    fields: {
+      name: 'Wechaty-Puppet',
+      key: 'WECHATY_PUPPET',
+      value: 'wechaty-puppet-padlocal',
+      desc: '可选值：\nwechaty-puppet-wechat4u\nwechaty-puppet-wechat\nwechaty-puppet-xp\nwechaty-puppet-engine\u0000\nwechaty-puppet-padlocal\nwechaty-puppet-service',
+      syncStatus: '未同步',
+      lastOperationTime: 1694860632945,
+      action: '选择操作',
+    },
+  },
+]
 
-// 查
-const queryRes = await User.findById(newUser2.recordId)
-log.info('查询findById:', JSON.stringify(queryRes))  // 输出更新后的新用户信息
-await delay(500)  // 等待 500 毫秒
-
-const query2Res = await User.findByField('email', 'bob@example.com')
-log.info('查询findByField:', JSON.stringify(query2Res))  // 输出更新后的新用户信息
-await delay(500)  // 等待 500 毫秒
-
-// 删
-const deleteRes = await User.delete(newUser2.recordId)  // 删除新用户
-log.info('删除newUser2:', JSON.stringify(deleteRes))  // 输出更新后的新用户信息
-await delay(500)  // 等待 500 毫秒
-
-// 查
-const users = await User.findAll()  // 查找所有用户（当前被注释掉）
-log.info('查询users:', JSON.stringify(users))  // 输出新用户的信息
-await delay(500)  // 等待 500 毫秒
+console.log('demo:', JSON.stringify(demo))

@@ -1,16 +1,21 @@
-import { GroupNoticeChat } from '../services/mod.js'
-// 获取群发通知列表
-export const getGroupNoticeList = async (_data: any) => {
-  const res = await GroupNoticeChat.db.findAll()
-  return res
+import { get, post } from '../utils/request.js'
+
+// 获取群发列表服务接口
+export const ServeGetGroupnotices = () => {
+  return get('/api/v1/groupnotice/list')
 }
 
-// 创建群发通知
-export const createGroupNotice = (data: any) => {
-  return data
+// 创建群发任务列表服务接口
+export const ServeCreateGroupnotices = (data: {} | undefined) => {
+  return post('/api/v1/groupnotice/create', data)
 }
 
-// 删除群发通知
-export const deleteGroupNotice = (data: any) => {
-  return data
+// 创建群发任务列表服务接口
+export const ServeUpdateGroupnotices = (data: any[] | undefined) => {
+  return post('/api/v1/groupnotice/update', data)
+}
+
+// 删除群发任务列表服务接口
+export const ServeDeleteGroupnotices = (data: {} | undefined) => {
+  return post('/api/v1/groupnotice/delete', data)
 }

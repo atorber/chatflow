@@ -1,22 +1,23 @@
 /* eslint-disable sort-keys */
 import { Wechaty, log } from 'wechaty'
 import type { TaskConfig } from '../api/base-config.js'
-import { VikaSheet, IRecord } from '../db/vika.js'
 import schedule from 'node-schedule'
-import { getRule, delay, logger } from '../utils/mod.js'
+import { delay, logger } from '../utils/mod.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/mod.js'
 import {
   getContact,
   getRoom,
 } from '../plugins/mod.js'
 import { sendMsg } from './configService.js'
-import { VikaDB } from '../db/vika-db.js'
 import { ChatFlowConfig } from '../api/base-config.js'
+import {
+  ServeGetNoticesTask,
+} from '../api/notice.js'
 
 // import { db } from '../db/tables.js'
 // const noticeData = db.notice
 
-function getRemainingTime (taskTime:number):string {
+function getRemainingTime (taskTime: number): string {
   const time = taskTime - new Date().getTime()
   const seconds = Math.floor((time / 1000) % 60)
   const minutes = Math.floor((time / (1000 * 60)) % 60)
@@ -25,112 +26,47 @@ function getRemainingTime (taskTime:number):string {
   return `${days}天${hours}小时${minutes}分钟${seconds}秒`
 }
 
-type TaskFields = {
-  '内容|desc'?: string;
-  '时间|time'?: string;
-  '周期|cycle'?: string;
-  '通知目标类型|type'?: string;
-  '昵称/群名称|name'?: string;
-  '好友ID/群ID(选填)|id'?: string;
-  '好友备注(选填)|alias'?: string;
-  '启用状态|state'?: string;
-};
-
 // 服务类
 export class NoticeChat {
 
-  static db:VikaSheet
-  static envsOnVika: any
   static roomWhiteList: any
   static contactWhiteList: any
-  static reminderList: TaskConfig[] = []
-  static jobs: {[key:string]:any}
-  static bot:Wechaty
+  static jobs: { [key: string]: any }
+  static bot: Wechaty
 
-  private constructor () {
-  }
+  private constructor () {}
 
   // 初始化
   static async init () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.noticeSheet)
-    await this.getRecords()
     this.bot = ChatFlowConfig.bot
-
     log.info('初始化 NoticeChat 成功...')
-  }
-
-  static async getRecords () {
-    const records = await this.db.findAll()
-    // logger.info('维格表中的记录：', JSON.stringify(records))
-    return records
-  }
-
-  // 获取定时提醒
-  static async getTimedTask (): Promise<TaskConfig[]> {
-    const taskRecords: IRecord[] = await this.db.findAll()
-
-    const timedTasks: TaskConfig[] = taskRecords
-      .map((task: IRecord) => {
-        const {
-          '内容|desc': desc,
-          '时间|time': time,
-          '周期|cycle': cycle,
-          '通知目标类型|type': type,
-          '昵称/群名称|name': name,
-          '好友ID/群ID(选填)|id': id,
-          '好友备注(选填)|alias': alias,
-          '启用状态|state': state,
-        } = task.fields as TaskFields
-
-        const isActive = state === '开启'
-        const isContact = type === '好友'
-        const target = isContact
-          ? { name: name || '', id: id || '', alias: alias || '' }
-          : { topic: name || '', id: id || '' }
-
-        const taskConfig: TaskConfig = {
-          id: task.recordId,
-          msg: desc || '',
-          time: Number(time) || 0,
-          cycle: cycle || '无重复',
-          targetType: isContact ? 'contact' : 'room',
-          target,
-          active: isActive,
-        }
-
-        return isActive && desc && time && cycle && (name || id || alias) ? taskConfig : null
-      })
-      .filter(Boolean) as TaskConfig[]
-
-    this.reminderList = timedTasks
-    return this.reminderList
   }
 
   // 更新任务
   static async updateJobs () {
     const that = this
     try {
-    // 结束所有任务
+      // 结束所有任务
       await schedule.gracefulShutdown()
       // logger.info('结束所有任务成功...')
     } catch (e) {
       log.error('结束所有任务失败：' + e)
     }
     try {
-      const tasks = await this.getTimedTask()
-      logger.info('获取到的定时提醒任务：' + tasks.length || '0')
-      // logger.info('获取到的定时提醒任务：\n' + JSON.stringify(tasks))
+      const res = await ServeGetNoticesTask()
+      const tasks: TaskConfig[] = res.data.items
+      log.info('获取到的定时提醒任务：' + tasks.length || '0')
+      logger.info('获取到的定时提醒任务：\n' + JSON.stringify(tasks))
+
       this.jobs = {}
       for (let i = 0; i < tasks.length; i++) {
         const task: TaskConfig = tasks[i] as TaskConfig
         if (task.active) {
-        // 格式化任务
-          const curRule = getRule(task)
           // logger.info(`任务${i}原始信息:` + JSON.stringify(task))
           // logger.info('转换信息：' + curRule)
 
           try {
-            await schedule.scheduleJob(task.id, curRule, async () => {
+            await schedule.scheduleJob(task.id, task.rule, async () => {
               let text = task.msg
               // 如果task.msg中包含“d%”将其替换为task.time减去当前时间得到的剩余时间（精确到秒）赋值给task.msg，示例消息：距离高考还有：d%
               if (task.msg.includes('d%')) {

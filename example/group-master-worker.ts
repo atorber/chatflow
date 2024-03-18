@@ -5,20 +5,26 @@ import {
   WechatyBuilder,
 } from 'wechaty'
 
-import { getBotOps, log, logForm, GroupMaster, GroupMasterConfig } from '../src/chatflow.js'
+import { getBotOps, log, logForm, GroupMaster, GroupMasterConfig } from '../src/index.js'
 
 const main = async () => {
 
   const puppet = process.env['WECHATY_PUPPET']
   const token = process.env['WECHATY_TOKEN']
+  const WX_KEY = process.env['GROUP_MASTER_WX_KEY'] || ''
+  const MQTT_ENDPOINT = process.env['GROUP_MASTER_MQTT_ENDPOINT'] || ''
+  const MQTT_USERNAME = process.env['GROUP_MASTER_MQTT_USERNAME'] || ''
+  const MQTT_PASSWORD = process.env['GROUP_MASTER_MQTT_PASSWORD'] || ''
+  const MQTT_PORT = Number(process.env['GROUP_MASTER_MQTT_PORT'] || '1883')
+  const HOST = process.env['GROUP_MASTER_ENDPOINT'] || ''
 
   const config: GroupMasterConfig = {
-    WX_KEY:process.env['GROUP_MASTER_WX_KEY'] || '',
-    MQTT_ENDPOINT:process.env['GROUP_MASTER_MQTT_ENDPOINT'] || '',
-    MQTT_USERNAME:process.env['GROUP_MASTER_MQTT_USERNAME'] || '',
-    MQTT_PASSWORD:process.env['GROUP_MASTER_MQTT_PASSWORD'] || '',
-    MQTT_PORT:Number(process.env['GROUP_MASTER_MQTT_PORT'] || '1883'),
-    HOST:process.env['GROUP_MASTER_ENDPOINT'] || '',
+    WX_KEY,
+    MQTT_ENDPOINT,
+    MQTT_USERNAME,
+    MQTT_PASSWORD,
+    MQTT_PORT,
+    HOST,
   }
   // 构建机器人
   const ops = getBotOps(puppet, token)

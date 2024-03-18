@@ -4,7 +4,7 @@ import { wxai } from '../proxy/weixin-chatbot-proxy.js'
 import { sendNotice } from '../app/group-notice.js'
 
 import { MqttProxy } from '../proxy/mqtt-proxy.js'
-import { getFormattedRideInfo } from '../app/riding.js'
+import { getFormattedRideInfo } from '../app/carpooling.js'
 
 import {
   exportContactsAndRoomsToCSV,

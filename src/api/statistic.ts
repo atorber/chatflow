@@ -1,21 +1,16 @@
-import { StatisticChat } from '../services/mod.js'
-// 获取统计打卡列表
-export const getStatisticList = async (_params: any) => {
-  const res = await StatisticChat.db.findAll()
-  return res
+import { get, post } from '../utils/request.js'
+
+// 获取好友列表服务接口
+export const ServeGetStatistics = () => {
+  return get('/api/v1/statistic/list')
 }
 
-// 创建统计打卡
-export const createStatistic = (data: any) => {
-  return data
+// 创建好友服务接口
+export const ServeCreateStatistics = (data: {} | undefined) => {
+  return post('/api/v1/statistic/create', data)
 }
 
-// 删除统计打卡
-export const deleteStatistic = (data: any) => {
-  return data
-}
-
-// 更新统计打卡
-export const updateStatistic = (data: any) => {
-  return data
+// 删除好友服务接口
+export const ServeDeleteStatistics = (data: {} | undefined) => {
+  return post('/api/v1/statistic/delete', data)
 }

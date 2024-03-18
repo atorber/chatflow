@@ -1,26 +1,16 @@
-import { QaChat } from '../services/mod.js'
-// 获取问答列表
-export const getQaList = async (_params: any) => {
-  const res = await QaChat.db.findAll()
-  return res
+import { get, post } from '../utils/request.js'
+
+// 获取问答列表服务接口
+export const ServeGetQas = () => {
+  return get('/api/v1/qa/list')
 }
 
-// 添加问题
-export const addQa = (data: any) => {
-  return data
+// 创建问答服务接口
+export const ServeCreateQas = (data: {} | undefined) => {
+  return post('/api/v1/qa/create', data)
 }
 
-// 删除问题
-export const deleteQa = (data: any) => {
-  return data
-}
-
-// 更新问题
-export const updateQa = (data: any) => {
-  return data
-}
-
-// 发布问题
-export const publishQa = (data: any) => {
-  return data
+// 删除问答服务接口
+export const ServeDeleteQas = (data: {} | undefined) => {
+  return post('/api/v1/qa/delete', data)
 }

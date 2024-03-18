@@ -91,7 +91,7 @@ interface WechatyConfig {
   token: string | '';
 }
 
-interface VikaConfig {
+interface BiTableConfig {
   spaceName?: string;
   spaceId?: string;
   token: string;
@@ -153,7 +153,7 @@ interface BaseConfig {
 interface BotConfig {
   base: BaseConfig;
   wechaty: WechatyConfig;
-  vika: VikaConfig;
+  vika: BiTableConfig;
   adminRoom: AdminRoomConfig;
   autoQa: AutoQaConfig;
   wxOpenAi: WxOpenAiConfig;
@@ -201,7 +201,7 @@ interface Config {
 }
 
 export type {
-  VikaConfig,
+  BiTableConfig,
   BotInfo,
   BotConfig,
   ContactConfig,

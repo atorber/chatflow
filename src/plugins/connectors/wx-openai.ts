@@ -216,7 +216,6 @@ async function aibot (sysConfig: any, talker: any, room: any, query: any) {
         // console.debug(resMsg)
         log.info('对话返回原始：', resMsg)
         // log.info('对话返回：', JSON.stringify(resMsg).replace(/[\r\n]/g, "").replace(/\ +/g, ""))
-        log.info('回答内容：', resMsg.msgtype, resMsg.query, resMsg.answer)
         // console.debug(resMsg.query)
         // console.debug(resMsg.answer)
 

@@ -11,10 +11,7 @@ import { formatTimestamp, getCurrentTime, delay, logger, getCurTime } from '../u
 import type { ChatMessage } from '../types/interface.js'
 import {
   MessageChat,
-  LarkChat,
 } from '../services/mod.js'
-import { LarkDB } from '../db/lark-db.js'
-import { ChatFlowConfig } from './base-config.js'
 import fs from 'fs'
 import path from 'path'
 
@@ -88,7 +85,7 @@ export interface MessageToCloud {
 }
 
 export const formatMessageToCloud = async (message: Message) => {
-  log.info('formatMessageToCloud 消息转换为存储到多维表格的格式...')
+  // log.info('formatMessageToCloud 消息转换为存储到多维表格的格式...')
   const room = message.room()
   const talker = message.talker()
   try {
@@ -230,21 +227,15 @@ export const formatMessageToCloud = async (message: Message) => {
         text = JSON.stringify(file.toJSON())
         log.info('文件text:', text)
       } catch (e) {
-        log.error('文件转换JSON失败：', e)
+        log.error('message 文件转换JSON失败：', e)
       }
       try {
-        if (ChatFlowConfig.dataBaseType === 'lark' && LarkDB.config.appToken) {
-          uploadedAttachments = await LarkChat.handleFileMessage(file, message)
-          files.push({
-            file_token: uploadedAttachments.file_token,
-          })
-          log.info('上传文件Lark成功：', JSON.stringify(uploadedAttachments))
-        } else {
-          uploadedAttachments = await MessageChat.handleFileMessage(file, message)
-          files.push(uploadedAttachments.data)
-          log.info('上传文件Vika成功：', JSON.stringify(uploadedAttachments))
+        uploadedAttachments = await MessageChat.handleFileMessage(file, message)
+        const fileToken = uploadedAttachments.data
+        text = JSON.stringify(fileToken)
+        files.push(fileToken)
+        log.info('上传文件Vika成功：', JSON.stringify(uploadedAttachments))
 
-        }
       } catch (e) {
         log.error('文件上传失败：', e)
       }
@@ -288,36 +279,34 @@ export const formatMessageToCloud = async (message: Message) => {
     try {
 
       if (msgType !== 'Unknown') {
-        const record = {
-          fields: {
-            '时间|timeHms':timeHms,
-            '发送者|name': talker.name(),
-            '好友备注|alias': await talker.alias(),
-            '群名称|topic': topic || '--',
-            '消息内容|messagePayload': text,
-            '好友ID|wxid': talker.id !== 'null' ? talker.id : '--',
-            '群ID|roomid': room && room.id ? room.id : '--',
-            '消息类型|messageType': msgType,
-            '文件图片|file': files,
-            '消息ID|messageId': message.id,
-            '接收人|listener': topic ? '--' : (await listener?.alias() || listener?.name()),
-            '接收人ID|listenerid':topic ? '--' : listener?.id,
-            '发送者头像|wxAvatar': wxAvatar,
-            '群头像|roomAvatar':roomAvatar,
-            '接收人头像|listenerAvatar':listenerAvatar,
-          },
+        const record:any = {
+          timeHms,
+          name: talker.name(),
+          alias: await talker.alias(),
+          topic: topic || '--',
+          messagePayload: text,
+          wxid: talker.id !== 'null' ? talker.id : '--',
+          roomid: room && room.id ? room.id : '--',
+          messageType: msgType,
+          messageId: message.id,
+          listener: topic ? '--' : (await listener?.alias() || listener?.name()),
+          listenerid:topic ? '--' : listener?.id,
+          wxAvatar,
+          roomAvatar,
+          listenerAvatar,
         }
+        if (files.length) record['file'] = files
         // logger.info('addChatRecord:', JSON.stringify(record))
         return record
       } else {
         return undefined
       }
     } catch (e) {
-      log.error('添加记录失败：', e)
+      log.error('formatMessageToCloud添加记录失败：', e)
       return undefined
     }
   } catch (e) {
-    log.error('存储消息消息转换失败：', e)
+    log.error('formatMessageToCloud存储消息消息转换失败：', e)
     return undefined
   }
 
@@ -327,13 +316,9 @@ export const formatMessageToCloud = async (message: Message) => {
 export const saveMessageToCloud = async (record:any) => {
   // log.info('saveMessageToCloud messageNew:', JSON.stringify(messageNew))
   try {
-    if (ChatFlowConfig.dataBaseType === 'lark') {
-      log.info('消息写入到lark:', JSON.stringify(record))
-      await LarkChat.addChatRecord(record)
-    } else {
-      log.info('消息写入到vika:', JSON.stringify(record))
-      await MessageChat.addChatRecord(record)
-    }
+    // log.info('消息添加到队列:', JSON.stringify(record))
+    log.info('消息添加到队列...', record.id)
+    await MessageChat.addChatRecord(record)
     // log.info('消息写入数据库成功:', res._id)
     return true
   } catch (e) {
@@ -345,11 +330,7 @@ export const saveMessageToCloud = async (record:any) => {
 
 // 处理二维码上传
 export const uploadQRCodeToCloud = async (qrcode: string, status: ScanStatus) => {
-  if (ChatFlowConfig.dataBaseType === 'lark') {
-    await LarkChat.uploadQRCodeToVika(qrcode, status)
-  } else {
-    await MessageChat.uploadQRCodeToVika(qrcode, status)
-  }
+  await MessageChat.uploadQRCodeToVika(qrcode, status)
 }
 
 // 上传图片/文件到云

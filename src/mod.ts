@@ -3,22 +3,20 @@ import {
   ChatFlowConfig,
   log,
   logForm,
-  VikaDB,
-  LarkDB,
+  BiTable,
   type IClientOptions,
   MqttProxy,
   ChatFlow,
   GroupMaster,
   GroupMasterConfig,
-} from './chatflow.js'
+} from './index.js'
 
 export {
   getBotOps,
   ChatFlowConfig,
   log,
   logForm,
-  VikaDB,
-  LarkDB,
+  BiTable,
   type IClientOptions,
   MqttProxy,
   ChatFlow,

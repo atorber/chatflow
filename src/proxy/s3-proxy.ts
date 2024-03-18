@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { log, Message, types } from 'wechaty'
 import { Client } from 'minio'
-import { ChatFlowConfig } from '../chatflow.js'
+import { ChatFlowConfig } from '../index.js'
 
 function upload (file_payload: { cloudPath?: any; fileContent?: any }) {
   // Instantiate the minio client with the endpoint

@@ -5,7 +5,7 @@ import type {
   RoomConfig,
   Config,
   SysConfig,
-  VikaConfig,
+  BiTableConfig,
   ContactWhiteList,
   RoomWhiteList,
 } from './config.js'
@@ -17,7 +17,7 @@ export type { ProcessEnv } from './env.js'
 export * as configTypes from './config.js'
 
 export {
-  type VikaConfig,
+  type BiTableConfig,
   type BotInfo,
   type BotConfig,
   type ContactConfig,

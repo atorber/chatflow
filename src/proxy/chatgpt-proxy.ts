@@ -7,7 +7,7 @@ import {
 } from 'wechaty'
 import { formatSentMessage, logger } from '../utils/utils.js'
 import axios from 'axios'
-import { ChatFlowConfig } from '../chatflow.js'
+import { ChatFlowConfig } from '../index.js'
 axios.defaults.timeout = 60000
 
 async function gpt (bot: Wechaty, message: Message) {

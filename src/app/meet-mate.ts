@@ -16,13 +16,12 @@ import qrcodeTerminal from 'qrcode-terminal'
 
 // 导入语雀相关模块
 import Yuque from '@yuque/sdk'
-import { ChatFlowConfig } from '../api/base-config.js'
 
 // 创建一个语雀客户端对象，使用环境变量中的token和repoId（需要提前设置）
 const yuqueClient = new Yuque({
-  token:ChatFlowConfig.configEnv.YUQUE_TOKEN || 'xxx',
+  token: 'xxx',
 })
-const repoId = ChatFlowConfig.configEnv.YUQUE_NAMESPACE || 'xxx'
+const repoId = 'xxx'
 
 // 创建一个Wechaty实例
 // const bot = WechatyBuilder.build({

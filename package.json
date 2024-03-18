@@ -1,6 +1,6 @@
 {
   "name": "@atorber/chatflow",
-  "version": "2.0.73",
+  "version": "3.0.0-Beta-11",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
@@ -21,14 +21,18 @@
     "clean": "shx rm -fr dist/*",
     "dist": "npm-run-all clean build dist:commonjs",
     "dist:commonjs": "jq -n \"{ type: \\\"commonjs\\\" }\" > dist/cjs/package.json",
+    "init-db": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/init-db.ts",
     "test-vika-orm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/vika-orm-test.ts",
     "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/ding-dong-bot.ts",
+    "start:verbose": "cross-env WECHATY_LOG=verbose NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/ding-dong-bot.ts",
     "start:gm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/group-master-worker.ts",
     "start:index": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
     "start:notls": "cross-env WECHATY_PUPPET_SERVICE_NO_TLS_INSECURE_CLIENT=true WECHATY_PUPPET_SERVICE_AUTHORITY=\"token-service-discovery-test.juzibot.com\" NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/ding-dong-bot.ts",
     "start:store": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/plugins/store-messages-locally.ts",
-    "start:lark": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/lark.ts",
-    "start:api": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/api.ts",
+    "test:lark-api": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/lark.ts",
+    "test:auth": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/auth.ts",
+    "test:lark-orm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/lark-orm-test.ts",
+    "test:vika-orm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/vika-orm-test.ts",
     "rm-temp": "rm -r temp; mkdir temp",
     "rm-cache": "rm -r cache; mkdir cache",
     "test": "npm run lint",
@@ -55,7 +59,7 @@
     "@vikadata/vika": "^1.0.5",
     "@yuque/sdk": "^1.1.1",
     "api2d": "^0.1.23",
-    "axios": "^1.4.0",
+    "axios": "^1.6.7",
     "axios-retry": "^3.8.0",
     "boxen": "^7.1.1",
     "chatgpt": "^1.4.0",
@@ -104,7 +108,8 @@
     "typescript": "^4.9.3",
     "wechaty": "^1.20.2",
     "wechaty-puppet-padlocal": "^1.20.1",
-    "wechaty-puppet-wechat4u": "^1.14.12"
+    "wechaty-puppet-wechat4u": "^1.14.12",
+    "wechaty-puppet-xp": "^1.13.8"
   },
   "files": [
     "bin/",
@@ -113,10 +118,5 @@
   ],
   "publishConfig": {
     "tag": "next"
-  },
-  "git": {
-    "scripts": {
-      "pre-push": "npx git-scripts-pre-push"
-    }
   }
 }

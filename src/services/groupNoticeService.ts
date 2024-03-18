@@ -1,12 +1,7 @@
 /* eslint-disable sort-keys */
-/* eslint-disable sort-keys */
-import type { TaskConfig, Notifications } from '../api/base-config.js'
-import { VikaDB } from '../db/vika-db.js'
+import type { Notifications } from '../api/base-config.js'
 import { ChatFlowConfig } from '../api/base-config.js'
-
-import { VikaSheet } from '../db/vika.js'
 import { Wechaty, log } from 'wechaty'
-import { transformKeys } from './activityService.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/mod.js'
 import { generateRandomNumber, delay, logger } from '../utils/mod.js'
 import {
@@ -14,6 +9,10 @@ import {
   getRoom,
 } from '../plugins/mod.js'
 import { sendMsg } from './configService.js'
+import {
+  ServeGetGroupnotices,
+  ServeUpdateGroupnotices,
+} from '../api/group-notice.js'
 
 // import { db } from '../db/tables.js'
 // const groupNoticeData = db.groupNotice
@@ -22,30 +21,17 @@ import { sendMsg } from './configService.js'
 // 服务类
 export class GroupNoticeChat {
 
-  static db:VikaSheet
-  static envsOnVika: any
   static roomWhiteList: any
   static contactWhiteList: any
-  static reminderList: TaskConfig[] = []
   static bot:Wechaty
 
-  private constructor () {
-
-  }
+  private constructor () {}
 
   // 初始化
   static async init () {
-    this.db = new VikaSheet(VikaDB.vika, VikaDB.dataBaseIds.groupNoticeSheet)
-    await this.getRecords()
     this.bot = ChatFlowConfig.bot
 
     log.info('初始化 GroupNoticeChat 成功...')
-  }
-
-  static async getRecords () {
-    const records = await this.db.findAll()
-    // logger.info('维格表中的记录：', JSON.stringify(records))
-    return records
   }
 
   // 获取群发通知
@@ -56,31 +42,30 @@ export class GroupNoticeChat {
     // logger.info('query:', JSON.stringify(query))
     const groupNotifications: Notifications[] = []
     try {
-      const records = await this.db.findAll()
+      const statisticsRes = await ServeGetGroupnotices()
+      const records = statisticsRes.data.items
       // logger.info('群发通知列表（原始）：\n', JSON.stringify(records))
 
-      for (const record of records) {
-        const fields = record.fields
-        const recordId = record.recordId
-        const fieldsNew: Notifications = transformKeys(fields) as Notifications
-        // logger.info('群发通知列表(格式化key)：\n', JSON.stringify(fieldsNew))
+      for (const fields of records) {
+        const recordId = fields.recordId
+        // logger.info('群发通知列表(格式化key)：\n', JSON.stringify(fields))
 
-        if (fieldsNew.text && fieldsNew.type && (fieldsNew.id || fieldsNew.alias || fieldsNew.name) && fieldsNew.state === '待发送|waiting') {
-          fieldsNew.recordId = recordId
-          fieldsNew.type = fieldsNew.type.split('|')[1] || 'contact'
-          if (fieldsNew.type === 'room') {
-            fieldsNew.room = {
-              id: fieldsNew.id,
-              topic: fieldsNew.name,
+        if (fields.text && fields.type && (fields.id || fields.alias || fields.name) && fields.state === '待发送|waiting') {
+          fields.recordId = recordId
+          fields.type = fields.type.split('|')[1] || 'contact'
+          if (fields.type === 'room') {
+            fields.room = {
+              id: fields.id,
+              topic: fields.name,
             }
           } else {
-            fieldsNew.contact = {
-              id: fieldsNew.id,
-              name: fieldsNew.name,
-              alias: fieldsNew.alias,
+            fields.contact = {
+              id: fields.id,
+              name: fields.name,
+              alias: fields.alias,
             }
           }
-          groupNotifications.push(fieldsNew)
+          groupNotifications.push(fields)
         }
       }
       logger.info('待发送的群发通知列表（添加接收人）：\n', JSON.stringify(groupNotifications))
@@ -110,38 +95,24 @@ export class GroupNoticeChat {
           try {
             await sendMsg(room, notice.text)
             await delay(generateRandomNumber(200))
-            resPub.push({
-              recordId: notice.recordId,
-              fields: {
-                // '昵称/群名称|name':await room.topic(),
-                // '好友ID/群ID|id':room.id,
-                '状态|state': '发送成功|success',
-                '发送时间|pubTime': timestamp,
-              },
-            })
+            notice.state = '发送成功|success'
+            notice.pubTime = timestamp
+            resPub.push(notice)
             successRoom.push(notice)
             logger.info('发送成功：群-', await room.topic())
           } catch (e) {
-            resPub.push({
-              recordId: notice.recordId,
-              fields: {
-                '状态|state': '发送失败|fail',
-                '发送时间|pubTime': timestamp,
-                '信息|info':JSON.stringify(e),
-              },
-            })
+            notice.state = '发送失败|fail'
+            notice.pubTime = timestamp
+            notice.info = JSON.stringify(e)
+            resPub.push(notice)
             failRoom.push(notice)
             logger.error('发送失败：', e)
           }
         } else {
-          resPub.push({
-            recordId: notice.recordId,
-            fields: {
-              '状态|state': '发送失败|fail',
-              '发送时间|pubTime': timestamp,
-              '信息|info':'群不存在',
-            },
-          })
+          notice.state = '发送失败|fail'
+          notice.pubTime = timestamp
+          notice.info = '群不存在'
+          resPub.push(notice)
           failRoom.push(notice)
           logger.error('发送失败：群不存在', JSON.stringify(notice))
         }
@@ -151,39 +122,24 @@ export class GroupNoticeChat {
           try {
             await sendMsg(contact, notice.text)
             await delay(generateRandomNumber(200))
-            resPub.push({
-              recordId: notice.recordId,
-              fields: {
-                // '昵称/群名称|name':contact.name,
-                // '好友ID/群ID|id':contact.id,
-                // '好友备注|alias':await contact.alias(),
-                '状态|state': '发送成功|success',
-                '发送时间|pubTime': timestamp,
-              },
-            })
+            notice.state = '发送成功|success'
+            notice.pubTime = timestamp
+            resPub.push(notice)
             successContact.push(notice)
             logger.info('发送成功：\n好友-', contact.name())
           } catch (e) {
-            resPub.push({
-              recordId: notice.recordId,
-              fields: {
-                '状态|state': '发送失败|fail',
-                '发送时间|pubTime': timestamp,
-                '信息|info':JSON.stringify(e),
-              },
-            })
+            notice.state = '发送失败|fail'
+            notice.pubTime = timestamp
+            notice.info = JSON.stringify(e)
+            resPub.push(notice)
             failContact.push(notice)
             logger.error('发送失败：', e)
           }
         } else {
-          resPub.push({
-            recordId: notice.recordId,
-            fields: {
-              '状态|state': '发送失败|fail',
-              '发送时间|pubTime': timestamp,
-              '信息|info':'好友不存在',
-            },
-          })
+          notice.state = '发送失败|fail'
+          notice.pubTime = timestamp
+          notice.info = '好友不存在'
+          resPub.push(notice)
           failContact.push(notice)
           logger.error('发送失败：好友不存在', JSON.stringify(notice))
         }
@@ -191,7 +147,7 @@ export class GroupNoticeChat {
     }
     for (let i = 0; i < resPub.length; i = i + 10) {
       const records = resPub.slice(i, i + 10)
-      await this.db.update(records)
+      await ServeUpdateGroupnotices(records)
       logger.info('群发消息同步中...', i + 10)
       void await delay(1000)
     }
