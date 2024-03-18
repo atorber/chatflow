@@ -31,68 +31,68 @@ import 'dotenv/config.js'  // 导入环境变量配置
 
 // import { ServeGetMedias } from '../src/api/media.js'
 
-const authClient = getAuthClient()
-const res = await authClient.init(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
-console.log('res:', JSON.stringify(res.data, null, 2))
-await authClient.login()
+const main = async () => {
+  const authClient = getAuthClient()
+  const res = await authClient.init(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
+  console.log('res:', JSON.stringify(res.data, null, 2))
+  await authClient.login()
+  // const task = await ServeGetNoticesTask()
+  // console.log('task:', JSON.stringify(task, null, 2))
 
-// const task = await ServeGetNoticesTask()
-// console.log('task:', JSON.stringify(task, null, 2))
+  // const chatbots = await ServeGetChatbots()
+  // console.log('chatbots:', JSON.stringify(chatbots, null, 2))
 
-// const chatbots = await ServeGetChatbots()
-// console.log('chatbots:', JSON.stringify(chatbots, null, 2))
+  // const chatbotUsers = await ServeGetChatbotUsers({ id:1 })
+  // console.log('chatbotUsers:', JSON.stringify(chatbotUsers, null, 2))
 
-// const chatbotUsers = await ServeGetChatbotUsers({ id:1 })
-// console.log('chatbotUsers:', JSON.stringify(chatbotUsers, null, 2))
+  // const chatbotUsersGroup = await ServeGetChatbotUsersGroup()
+  // console.log('chatbotUsersGroup:', JSON.stringify(chatbotUsersGroup, null, 2))
 
-// const chatbotUsersGroup = await ServeGetChatbotUsersGroup()
-// console.log('chatbotUsersGroup:', JSON.stringify(chatbotUsersGroup, null, 2))
+  // const chatbotUsersDetail = await ServeGetChatbotUsersDetail()
+  // console.log('chatbotUsersDetail:', JSON.stringify(chatbotUsersDetail, null, 2))
 
-// const chatbotUsersDetail = await ServeGetChatbotUsersDetail()
-// console.log('chatbotUsersDetail:', JSON.stringify(chatbotUsersDetail, null, 2))
+  // const welcomes = await ServeGetWelcomes()
+  // console.log('welcomes:', JSON.stringify(welcomes, null, 2))
 
-// const welcomes = await ServeGetWelcomes()
-// console.log('welcomes:', JSON.stringify(welcomes, null, 2))
+  // const qas = await ServeGetQas()
+  // console.log('qas:', JSON.stringify(qas, null, 2))
 
-// const qas = await ServeGetQas()
-// console.log('qas:', JSON.stringify(qas, null, 2))
+  // const userInfo = await ServeGetUserDetail()
+  // console.log('userInfo:', userInfo)
 
-// const userInfo = await ServeGetUserDetail()
-// console.log('userInfo:', userInfo)
+  // const userSetting = await ServeGetUserSetting()
+  // console.log('userSetting:', userSetting)
 
-// const userSetting = await ServeGetUserSetting()
-// console.log('userSetting:', userSetting)
+  // const userConfig = await ServeGetUserConfigBykey({ key:'BASE_BOT_NAME', value:'config333' })
+  // console.log('userConfig:', userConfig)
 
-// const userConfig = await ServeGetUserConfigBykey({ key:'BASE_BOT_NAME', value:'config333' })
-// console.log('userConfig:', userConfig)
+  // const userConfigGroup = await ServeGetUserConfigGroup()
+  // console.log('userConfigGroup:', JSON.stringify(userConfigGroup))
 
-// const userConfigGroup = await ServeGetUserConfigGroup()
-// console.log('userConfigGroup:', JSON.stringify(userConfigGroup))
+  // const whiteList = await ServeGetWhitelistWhite()
+  // console.log('whiteList:', JSON.stringify(whiteList))
 
-// const whiteList = await ServeGetWhitelistWhite()
-// console.log('whiteList:', JSON.stringify(whiteList))
+  // const jobs = await ServeGetNotices()
+  // console.log('jobs:', JSON.stringify(jobs))
 
-// const jobs = await ServeGetNotices()
-// console.log('jobs:', JSON.stringify(jobs))
+  // const keywords = await ServeGetKeywords()
+  // console.log('keywords:', JSON.stringify(keywords))
 
-// const keywords = await ServeGetKeywords()
-// console.log('keywords:', JSON.stringify(keywords))
+  // const statistics = await ServeGetStatistics()
+  // console.log('statistics:', JSON.stringify(statistics))
 
-// const statistics = await ServeGetStatistics()
-// console.log('statistics:', JSON.stringify(statistics))
+  // const groupnotices = await ServeGetGroupnotices()
+  // console.log('groupnotices:', JSON.stringify(groupnotices))
 
-// const groupnotices = await ServeGetGroupnotices()
-// console.log('groupnotices:', JSON.stringify(groupnotices))
+  // const userConfigGroup = await ServeGetUserConfigGroup()
+  // console.log('userConfigGroup:', JSON.stringify(userConfigGroup))
 
-// const userConfigGroup = await ServeGetUserConfigGroup()
-// console.log('userConfigGroup:', JSON.stringify(userConfigGroup))
+  // const medias = await ServeGetMedias({ name:'程序开发' })
+  // console.log('medias:', JSON.stringify(medias, null, 2))
 
-// const medias = await ServeGetMedias({ name:'程序开发' })
-// console.log('medias:', JSON.stringify(medias, null, 2))
-
-/* 链接检测 */
-// const text = 'https://oou2hscgt2.feishu.cn/base/bascnPgZURujrdwZ9T4JkLUSUQc?table=tbl90nnja6sqMuCT&view=vewmgp68n9'
-// const text = 'https://vika.cn/workbench/dstagAfWtNuTqHQizP/viw7KwjQyCjbP?spaceId=spcj6bgt12WoZ'
+  /* 链接检测 */
+  // const text = 'https://oou2hscgt2.feishu.cn/base/bascnPgZURujrdwZ9T4JkLUSUQc?table=tbl90nnja6sqMuCT&view=vewmgp68n9'
+  // const text = 'https://vika.cn/workbench/dstagAfWtNuTqHQizP/viw7KwjQyCjbP?spaceId=spcj6bgt12WoZ'
 
 // const VIKA_BASE_STRING = 'https://vika.cn/workbench/'
 // const LARK_BASE_STRING = '.feishu.cn/base/'
@@ -117,3 +117,6 @@ await authClient.login()
 //   }
 //   console.info('多维表格配置信息：', JSON.stringify(config))
 // }
+}
+
+void main()
