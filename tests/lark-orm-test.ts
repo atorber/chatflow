@@ -3,16 +3,6 @@ import 'dotenv/config.js'
 import { BiTable } from '../src/db/lark-db.js'
 import { BaseEntity, MappingOptions, IRecord } from '../src/db/lark-orm.js'
 
-const db = new BiTable()
-const dbInit = await db.createSheet({
-  token: process.env.LARK_APP_ID + '/' + process.env.LARK_APP_SECRET + '/' + process.env.LARK_BITABLE_APP_TOKEN,
-  spaceId: process.env.LARK_BITABLE_APP_TOKEN,
-})
-
-console.log('dbInit:', JSON.stringify(dbInit))
-
-await db.createSheet
-
 export class Env extends BaseEntity {
 
   name?: string
@@ -57,99 +47,6 @@ export class Env extends BaseEntity {
   }
 
 }
-
-// 测试
-const env = new Env()
-await env.setVikaOptions({
-  apiKey: process.env.LARK_APP_ID + '/' + process.env.LARK_APP_SECRET + '/' + process.env.LARK_BITABLE_APP_TOKEN,
-  baseId: db.dataBaseIds.envSheet, // 设置 base ID
-})
-
-console.log('env:', JSON.stringify(env.config, null, 2))
-
-const recordsAll = await env.findAll()
-console.log('查询全部记录envData:', JSON.stringify(recordsAll))
-
-const records:any[] = [
-  {
-    name: '测试sssss22222',
-    key: 'MESSAGE_ENCODINGAESKEY',
-    value: 'X00fcQHkvRkNUdJefu4FD6pym2oIvs63Y5NP3pnZ5po',
-    syncStatus:'已同步',
-    desc: '消息加密密钥，vika推送地址https://3sewxanjdvsbp.cfc-execute.bj.baidubce.com/mqtt',
-    lastOperationTime: 1700326172112,
-  },
-  {
-
-    name: '测试sssss11111',
-    key: 'MESSAGE_ENCODINGAESKEY',
-    value: 'X00fcQHkvRkNUdJefu4FD6pym2oIvs63Y5NP3pnZ5po',
-    syncStatus:'已同步',
-    desc: '消息加密密钥，vika推送地址https://3sewxanjdvsbp.cfc-execute.bj.baidubce.com/mqtt',
-    lastOperationTime: 1700326172112,
-
-  },
-]
-const record = records[0] as any
-const res1 = await env.create(record)
-console.log('创建单条记录res1:', JSON.stringify(res1, null, 2))
-
-const res2 = await env.createBatch(records)
-console.log('批量创建记录res2:', JSON.stringify(res2, null, 2))
-
-// const recordsAll2 = recordsAll.filter((item: { fields: { name: string } }) => (item.fields.name === '测试sssss11111' || item.fields.name === '测试sssss22222'))
-// console.log('筛选记录recordsAll2:', JSON.stringify(recordsAll2, null, 2))
-
-// if (recordsAll2.length) {
-//   recordsAll2.forEach(async (item: IRecord) => {
-//     const res3 = await env.delete(item.recordId as string)
-//     console.log('删除单条记录res3:', JSON.stringify(res3, null, 2))
-//   })
-// }
-
-const recordsAll3 = await env.findAll()
-console.log('获取全部记录recordsAll3:', JSON.stringify(recordsAll3))
-
-const recordsAll41:IRecord[] = recordsAll3.data as IRecord[]
-
-const recordsAll4 = recordsAll41.filter((item) => (item.fields['name'] === '测试sssss11111' || item.fields['name'] === '测试sssss22222'))
-console.log('筛选符合条件的记录recordsAll4:', JSON.stringify(recordsAll4))
-
-// const ids = recordsAll4.map((item: IRecord) => item.recordId as string)
-// console.log('获取recordsAll4记录ID数组ids:', JSON.stringify(ids))
-
-// if (ids.length) {
-//   const res4 = await env.deleteBatch(ids)
-//   console.log('批量删除记录res4:', JSON.stringify(res4))
-// } else {
-//   console.log('没有记录需要删除...')
-// }
-
-const newRecord0 = recordsAll4[0] as IRecord
-const newRecord1 = recordsAll4[1] as IRecord
-
-newRecord0.fields['name'] = '测试sssss11111-修改' + new Date().toLocaleString()
-newRecord1.fields['name'] = '测试sssss22222-修改' + new Date().toLocaleString()
-
-const recordsAll5 = await env.updatEmultiple(recordsAll4)
-console.log('批量更新记录recordsAll5:', JSON.stringify(recordsAll5))
-
-const newRecord2 = recordsAll4[2] as IRecord
-newRecord2.fields['name'] = '测试sssss333333-修改' + new Date().toLocaleString()
-
-const recordsAll6 = await env.update(newRecord2.record_id as string, newRecord2.fields)
-console.log('更新单条记录recordsAll6:', JSON.stringify(recordsAll6))
-
-// 删除测试数据
-const ids = recordsAll4.map((item: IRecord) => item.recordId as string)
-console.log('获取recordsAll4记录ID数组ids:', JSON.stringify(ids))
-if (ids.length) {
-  const res4 = await env.deleteBatch(ids)
-  console.log('批量删除记录res4:', JSON.stringify(res4))
-}
-
-const recordsAll7 = await env.findByField('name', 'Wechaty-Puppet')
-console.log('根据字段查询recordsAll7:', JSON.stringify(recordsAll7))
 
 export class Messages extends BaseEntity {
 
@@ -218,25 +115,132 @@ export class Messages extends BaseEntity {
 
 }
 
-const messages = new Messages()
-await messages.setVikaOptions({
-  apiKey: process.env.LARK_APP_ID + '/' + process.env.LARK_APP_SECRET + '/' + process.env.LARK_BITABLE_APP_TOKEN,
-  baseId: db.dataBaseIds.messageSheet, // 设置 base ID
-})
+const main = async () => {
+  const db = new BiTable()
+  const dbInit = await db.createSheet({
+    token: process.env.LARK_APP_ID + '/' + process.env.LARK_APP_SECRET + '/' + process.env.LARK_BITABLE_APP_TOKEN,
+    spaceId: process.env.LARK_BITABLE_APP_TOKEN,
+  })
 
-// const file = await messages.upload('/Users/luyuchao/Documents/GitHub/chatflow/tools/order_20_47_20.xlsx')
-// console.log('上传文件recordsAll8:', JSON.stringify(file))
+  console.log('dbInit:', JSON.stringify(dbInit))
 
-const file = await messages.upload('/Users/luyuchao/Documents/GitHub/chatflow/data/media/image/qrcode/qrcode.png')
-console.log('上传文件recordsAll8:', JSON.stringify(file))
+  await db.createSheet
 
-const record9 = {
-  timeHms: new Date().toLocaleString(),
-  name: 'Wechaty-Puppet',
-  alias: 'Wechaty-Puppet',
-  topic: 'Wechaty-Puppet',
-  listener: 'Wechaty-Puppet',
-  file :[ file.data ],
+  // 测试
+  const env = new Env()
+  await env.setVikaOptions({
+    apiKey: process.env.LARK_APP_ID + '/' + process.env.LARK_APP_SECRET + '/' + process.env.LARK_BITABLE_APP_TOKEN,
+    baseId: db.dataBaseIds.envSheet, // 设置 base ID
+  })
+
+  console.log('env:', JSON.stringify(env.config, null, 2))
+
+  const recordsAll = await env.findAll()
+  console.log('查询全部记录envData:', JSON.stringify(recordsAll))
+
+  const records:any[] = [
+    {
+      name: '测试sssss22222',
+      key: 'MESSAGE_ENCODINGAESKEY',
+      value: 'X00fcQHkvRkNUdJefu4FD6pym2oIvs63Y5NP3pnZ5po',
+      syncStatus:'已同步',
+      desc: '消息加密密钥，vika推送地址https://3sewxanjdvsbp.cfc-execute.bj.baidubce.com/mqtt',
+      lastOperationTime: 1700326172112,
+    },
+    {
+
+      name: '测试sssss11111',
+      key: 'MESSAGE_ENCODINGAESKEY',
+      value: 'X00fcQHkvRkNUdJefu4FD6pym2oIvs63Y5NP3pnZ5po',
+      syncStatus:'已同步',
+      desc: '消息加密密钥，vika推送地址https://3sewxanjdvsbp.cfc-execute.bj.baidubce.com/mqtt',
+      lastOperationTime: 1700326172112,
+
+    },
+  ]
+  const record = records[0] as any
+  const res1 = await env.create(record)
+  console.log('创建单条记录res1:', JSON.stringify(res1, null, 2))
+
+  const res2 = await env.createBatch(records)
+  console.log('批量创建记录res2:', JSON.stringify(res2, null, 2))
+
+  // const recordsAll2 = recordsAll.filter((item: { fields: { name: string } }) => (item.fields.name === '测试sssss11111' || item.fields.name === '测试sssss22222'))
+  // console.log('筛选记录recordsAll2:', JSON.stringify(recordsAll2, null, 2))
+
+  // if (recordsAll2.length) {
+  //   recordsAll2.forEach(async (item: IRecord) => {
+  //     const res3 = await env.delete(item.recordId as string)
+  //     console.log('删除单条记录res3:', JSON.stringify(res3, null, 2))
+  //   })
+  // }
+
+  const recordsAll3 = await env.findAll()
+  console.log('获取全部记录recordsAll3:', JSON.stringify(recordsAll3))
+
+  const recordsAll41:IRecord[] = recordsAll3.data as IRecord[]
+
+  const recordsAll4 = recordsAll41.filter((item) => (item.fields['name'] === '测试sssss11111' || item.fields['name'] === '测试sssss22222'))
+  console.log('筛选符合条件的记录recordsAll4:', JSON.stringify(recordsAll4))
+
+  // const ids = recordsAll4.map((item: IRecord) => item.recordId as string)
+  // console.log('获取recordsAll4记录ID数组ids:', JSON.stringify(ids))
+
+  // if (ids.length) {
+  //   const res4 = await env.deleteBatch(ids)
+  //   console.log('批量删除记录res4:', JSON.stringify(res4))
+  // } else {
+  //   console.log('没有记录需要删除...')
+  // }
+
+  const newRecord0 = recordsAll4[0] as IRecord
+  const newRecord1 = recordsAll4[1] as IRecord
+
+  newRecord0.fields['name'] = '测试sssss11111-修改' + new Date().toLocaleString()
+  newRecord1.fields['name'] = '测试sssss22222-修改' + new Date().toLocaleString()
+
+  const recordsAll5 = await env.updatEmultiple(recordsAll4)
+  console.log('批量更新记录recordsAll5:', JSON.stringify(recordsAll5))
+
+  const newRecord2 = recordsAll4[2] as IRecord
+  newRecord2.fields['name'] = '测试sssss333333-修改' + new Date().toLocaleString()
+
+  const recordsAll6 = await env.update(newRecord2.record_id as string, newRecord2.fields)
+  console.log('更新单条记录recordsAll6:', JSON.stringify(recordsAll6))
+
+  // 删除测试数据
+  const ids = recordsAll4.map((item: IRecord) => item.recordId as string)
+  console.log('获取recordsAll4记录ID数组ids:', JSON.stringify(ids))
+  if (ids.length) {
+    const res4 = await env.deleteBatch(ids)
+    console.log('批量删除记录res4:', JSON.stringify(res4))
+  }
+
+  const recordsAll7 = await env.findByField('name', 'Wechaty-Puppet')
+  console.log('根据字段查询recordsAll7:', JSON.stringify(recordsAll7))
+
+  const messages = new Messages()
+  await messages.setVikaOptions({
+    apiKey: process.env.LARK_APP_ID + '/' + process.env.LARK_APP_SECRET + '/' + process.env.LARK_BITABLE_APP_TOKEN,
+    baseId: db.dataBaseIds.messageSheet, // 设置 base ID
+  })
+
+  // const file = await messages.upload('/Users/luyuchao/Documents/GitHub/chatflow/tools/order_20_47_20.xlsx')
+  // console.log('上传文件recordsAll8:', JSON.stringify(file))
+
+  const file = await messages.upload('/Users/luyuchao/Documents/GitHub/chatflow/data/media/image/qrcode/qrcode.png')
+  console.log('上传文件recordsAll8:', JSON.stringify(file))
+
+  const record9 = {
+    timeHms: new Date().toLocaleString(),
+    name: 'Wechaty-Puppet',
+    alias: 'Wechaty-Puppet',
+    topic: 'Wechaty-Puppet',
+    listener: 'Wechaty-Puppet',
+    file :[ file.data ],
+  }
+  const recordsAll9 = await messages.create(record9)
+  console.log('创建单条记录recordsAll9:', JSON.stringify(recordsAll9))
 }
-const recordsAll9 = await messages.create(record9)
-console.log('创建单条记录recordsAll9:', JSON.stringify(recordsAll9))
+
+void main()

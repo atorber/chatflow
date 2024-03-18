@@ -3,14 +3,6 @@ import 'dotenv/config.js'
 import { BiTable } from '../src/db/vika-db.js'
 import { BaseEntity, MappingOptions } from '../src/db/vika-orm.js'
 
-const db = new BiTable()
-const dbInit = await db.init({
-  token: process.env.VIKA_TOKEN || '',
-  spaceId: process.env.VIKA_SPACE_ID || '',
-})
-
-console.log('dbInit:', dbInit)
-
 export class Env extends BaseEntity {
 
   name?: string
@@ -56,31 +48,43 @@ export class Env extends BaseEntity {
 
 }
 
-// 测试
-const env = new Env()
-await env.setVikaOptions({
-  apiKey: db.token,
-  baseId: db.dataBaseIds.envSheet, // 设置 base ID
-})
+const main = async () => {
+  const db = new BiTable()
+  const dbInit = await db.init({
+    token: process.env.VIKA_TOKEN || '',
+    spaceId: process.env.VIKA_SPACE_ID || '',
+  })
 
-const envData = await env.findAll()
-console.log('envData:', JSON.stringify(envData, null, 2))
+  console.log('dbInit:', dbInit)
 
-const demo = [
-  {
-    recordId: 'rec0ofQXMfryc',
-    createdAt: 1694860633000,
-    updatedAt: 1697695907000,
-    fields: {
-      name: 'Wechaty-Puppet',
-      key: 'WECHATY_PUPPET',
-      value: 'wechaty-puppet-padlocal',
-      desc: '可选值：\nwechaty-puppet-wechat4u\nwechaty-puppet-wechat\nwechaty-puppet-xp\nwechaty-puppet-engine\u0000\nwechaty-puppet-padlocal\nwechaty-puppet-service',
-      syncStatus: '未同步',
-      lastOperationTime: 1694860632945,
-      action: '选择操作',
+  // 测试
+  const env = new Env()
+  await env.setVikaOptions({
+    apiKey: db.token,
+    baseId: db.dataBaseIds.envSheet, // 设置 base ID
+  })
+
+  const envData = await env.findAll()
+  console.log('envData:', JSON.stringify(envData, null, 2))
+
+  const demo = [
+    {
+      recordId: 'rec0ofQXMfryc',
+      createdAt: 1694860633000,
+      updatedAt: 1697695907000,
+      fields: {
+        name: 'Wechaty-Puppet',
+        key: 'WECHATY_PUPPET',
+        value: 'wechaty-puppet-padlocal',
+        desc: '可选值：\nwechaty-puppet-wechat4u\nwechaty-puppet-wechat\nwechaty-puppet-xp\nwechaty-puppet-engine\u0000\nwechaty-puppet-padlocal\nwechaty-puppet-service',
+        syncStatus: '未同步',
+        lastOperationTime: 1694860632945,
+        action: '选择操作',
+      },
     },
-  },
-]
+  ]
 
-console.log('demo:', JSON.stringify(demo))
+  console.log('demo:', JSON.stringify(demo))
+}
+
+void main()
