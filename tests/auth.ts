@@ -32,9 +32,9 @@ import 'dotenv/config.js'  // 导入环境变量配置
 // import { ServeGetMedias } from '../src/api/media.js'
 
 const authClient = getAuthClient()
-await authClient.login(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
 const res = await authClient.init(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
 console.log('res:', JSON.stringify(res.data, null, 2))
+await authClient.login()
 
 // const task = await ServeGetNoticesTask()
 // console.log('task:', JSON.stringify(task, null, 2))

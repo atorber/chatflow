@@ -13,13 +13,17 @@ import type {
   IClientOptions,
 } from '../proxy/mqtt-proxy.js'
 import CryptoJS from 'crypto-js'
-import { ServeGetUserConfigObj } from '../api/user.js'
+import {
+  ServeGetUserConfigObj,
+  // ServeGetUserConfig,
+} from '../api/user.js'
 
 import { delay, logger } from '../utils/utils.js'
 import {
   ServeGetContactsRaw,
   ServeDeleteBatchContact,
   ServeCreateContactBatch,
+  ServeContactGroupList,
 } from '../api/contact.js'
 
 import {
@@ -29,6 +33,17 @@ import {
 } from '../api/room.js'
 
 import { ServeGetKeywords } from '../api/keyword.js'
+import { ServeGetMedias } from '../api/media.js'
+import { ServeGetWhitelistWhiteObject } from '../api/white-list.js'
+import { ServeGetGroupnotices } from '../api/group-notice.js'
+import { ServeGetStatistics } from '../api/statistic.js'
+import { ServeGetNotices } from '../api/notice.js'
+import {
+  ServeGetChatbots,
+  ServeGetChatbotUsers,
+} from '../api/chatbot.js'
+import { ServeGetWelcomes } from '../api/welcome.js'
+import { ServeGetQas } from '../api/qa.js'
 
 export interface ChatBotUser {
   id: string;
@@ -41,7 +56,7 @@ export interface ChatBotUser {
   info: string;
   recordId: string;
   contact?: BusinessUser;
-  room?:BusinessRoom;
+  room?: BusinessRoom;
   chatbot: ChatBot;
 }
 
@@ -99,7 +114,7 @@ export interface DateBase {
   orderSheet: string
   stockSheet: string
   groupNoticeSheet: string
-  qaSheet:string
+  qaSheet: string
   chatBotSheet: string
   chatBotUserSheet: string
   groupSheet: string
@@ -113,7 +128,7 @@ export class BiDirectionalMap {
   private reverseMap: Map<string, string>
 
   constructor (fields: any[]) {
-    const initPairs:[string, string][] = fields.map((fields:any) => {
+    const initPairs: [string, string][] = fields.map((fields: any) => {
       return this.transformKey(fields.name)
     })
     this.reverseMap = new Map(initPairs)
@@ -141,13 +156,14 @@ export class ChatFlowConfig {
   static switchsOnVika: any[]
   static reminderList: any[]
   static statisticRecords: any
-  static configEnv : ProcessEnv
+  static configEnv: ProcessEnv
   static spaceId: string
   static token: string = ''
   static adminRoomTopic?: string
   static endpoint?: string
-  static bot:Wechaty
-  static db:{
+  static bot: Wechaty
+  static adminRoom: Room | undefined
+  static db: {
     dataBaseIds: DateBase,
     dataBaseNames: DateBase,
     dataBaseIdsMap: {
@@ -157,7 +173,7 @@ export class ChatFlowConfig {
     token: string,
   }
 
-  static whiteList:WhiteList = {
+  static whiteList: WhiteList = {
     contactWhiteList: {
       qa: [],
       msg: [],
@@ -195,12 +211,24 @@ export class ChatFlowConfig {
     state: string,
   }[] = []
 
-  static async init (options:{
-    spaceId?:string,
-    token?:string,
+  static setOptions (options: {
+    spaceId: string,
+    token: string,
+    endpoint?: string,
   }) {
     ChatFlowConfig.spaceId = options.spaceId || ChatFlowConfig.spaceId
     ChatFlowConfig.token = options.token || ChatFlowConfig.token
+    ChatFlowConfig.endpoint = options.endpoint || ChatFlowConfig.token || 'http://127.0.0.1:9503'
+  }
+
+  static async init (options: {
+    spaceId?: string,
+    token?: string,
+    endpoint?: string,
+  }) {
+    ChatFlowConfig.spaceId = options.spaceId || ChatFlowConfig.spaceId
+    ChatFlowConfig.token = options.token || ChatFlowConfig.token
+    ChatFlowConfig.endpoint = options.endpoint || ChatFlowConfig.token || 'http://127.0.0.1:9503'
     // log.info('初始化维格配置信息...,init()')
     const userConfig = await ServeGetUserConfigObj()
     // log.info('userConfig', JSON.stringify(userConfig))
@@ -215,11 +243,11 @@ export class ChatFlowConfig {
     // clientid加密
     const client = CryptoJS.SHA256(clientString).toString()
 
-    const mqttConfig:IClientOptions = {
+    const mqttConfig: IClientOptions = {
       username: this.configEnv.MQTT_USERNAME,
       password: this.configEnv.MQTT_PASSWORD,
       host: this.configEnv.MQTT_ENDPOINT,
-      protocol:'mqtts',
+      protocol: 'mqtts',
       port: Number(this.configEnv.MQTT_PORT),
       clientId: client,
       clean: false,
@@ -246,7 +274,7 @@ export class ChatFlowConfig {
   }
 
   // 上传联系人列表
-  static async updateContacts (puppet:string) {
+  static async updateContacts (puppet: string) {
     let updateCount = 0
     try {
       const contacts: Contact[] = await this.bot.Contact.findAll()
@@ -263,7 +291,7 @@ export class ChatFlowConfig {
       let wxids: string[] = []
       const recordIds: string[] = []
       if (recordExisting.length) {
-        recordExisting.forEach((fields:any) => {
+        recordExisting.forEach((fields: any) => {
           wxids.push(fields['id'] as string)
           recordIds.push(fields.recordId)
         })
@@ -281,7 +309,7 @@ export class ChatFlowConfig {
         for (let i = 0; i < count; i++) {
           const records = recordIds.splice(0, batchCount)
           log.info('删除：', records.length)
-          await ServeDeleteBatchContact({ recordIds:records })
+          await ServeDeleteBatchContact({ recordIds: records })
           await delay(delayTime)
         }
         wxids = []
@@ -297,7 +325,7 @@ export class ChatFlowConfig {
         // if(item) log.info('头像信息：', (JSON.stringify((await item?.avatar()).toJSON())))
         if (item && isFriend && !wxids.includes(item.id)) {
           // logger.info('云端不存在：' + item.name())
-          let avatar:any = ''
+          let avatar: any = ''
           let alias = ''
           try {
             avatar = (await item.avatar()).toJSON()
@@ -342,7 +370,7 @@ export class ChatFlowConfig {
   }
 
   // 上传群列表
-  static async updateRooms (puppet:string) {
+  static async updateRooms (puppet: string) {
     let updateCount = 0
     // 根据多维表格类型设置批量操作的数量和延迟时间
     const batchCount = ChatFlowConfig.token.indexOf('/') === -1 ? 10 : 100
@@ -374,7 +402,7 @@ export class ChatFlowConfig {
         for (let i = 0; i < count; i++) {
           const records = recordIds.splice(0, batchCount)
           logger.info('删除：', records.length)
-          await ServeDeleteBatchGroups({ recordIds:records })
+          await ServeDeleteBatchGroups({ recordIds: records })
           await delay(delayTime)
         }
         wxids = []
@@ -434,7 +462,7 @@ export class ChatFlowConfig {
     const res = await ServeGetKeywords()
     const records = res.data.items
 
-    let text :string = '【操作说明】\n'
+    let text: string = '【操作说明】\n'
     for (const fields of records) {
       text += `${fields['name']}：${fields['desc']}\n`
     }
@@ -447,11 +475,95 @@ export class ChatFlowConfig {
     const res = await ServeGetKeywords()
     const records = res.data.items
     ChatFlowConfig.keywordList = records
-    let text :string = '【操作说明】\n'
+    let text: string = '【操作说明】\n'
     for (const fields of records) {
       if (fields['type'] === '系统指令') text += `${fields['name']} : ${fields['desc']}\n`
     }
     return text
+  }
+
+  // 更新媒体资源库
+  static async updateMediaList () {
+    const res = await ServeGetMedias({})
+    const mediaList = res.data.items
+    log.info('获取的媒体资源库：' + JSON.stringify(mediaList))
+  }
+
+  // 更新环境变量
+  static async updateEnv () {
+    const res = await ServeGetUserConfigObj()
+    const env = res.data
+    log.info('获取的环境变量：' + JSON.stringify(env))
+  }
+
+  // 更新分组
+  static async updateGroup () {
+    const res = await ServeContactGroupList()
+    const groups = res.data.items
+    log.info('获取的分组：' + JSON.stringify(groups))
+  }
+
+  // 更新智聊用户名单
+  static async updateChatBotUser () {
+    const res = await ServeGetChatbotUsers()
+    const chatBotUsers = res.data
+    log.info('获取的智聊用户名单：' + JSON.stringify(chatBotUsers))
+  }
+
+  // 更新智聊ChatBot
+  static async updateChatBot () {
+    const res = await ServeGetChatbots()
+    const chatBots = res.data
+    log.info('获取的智聊ChatBot：' + JSON.stringify(chatBots))
+  }
+
+  // 更新白名单
+  static async updateWhiteList () {
+    const res = await ServeGetWhitelistWhiteObject()
+    const whiteList = res.data
+    log.info('获取的白名单：' + JSON.stringify(whiteList))
+  }
+
+  // 更新群发通知
+  static async updateGroupNotifications () {
+    const res = await ServeGetGroupnotices()
+    const groupNotifications = res.data
+    log.info('获取的群发通知：' + JSON.stringify(groupNotifications))
+  }
+
+  // 更新统计打卡
+  static async updateStatistics () {
+    const res = await ServeGetStatistics()
+    const statistics = res.data.items
+    log.info('获取的统计打卡：' + JSON.stringify(statistics))
+  }
+
+  // 更新定时提醒
+  static async updateReminder () {
+    const res = await ServeGetNotices()
+    const reminders = res.data.items
+    log.info('获取的定时提醒：' + JSON.stringify(reminders))
+  }
+
+  // 更新问答列表
+  static async updateQaList () {
+    const res = await ServeGetQas()
+    const qaList = res.data.items
+    log.info('获取的问答列表：' + JSON.stringify(qaList))
+  }
+
+  // 更新关键字
+  static async updateKeywords () {
+    const res = await ServeGetKeywords()
+    const keywords = res.data.items
+    log.info('获取的关键字：' + JSON.stringify(keywords))
+  }
+
+  // 更新进群欢迎语
+  static async updateWelcomes () {
+    const res = await ServeGetWelcomes()
+    const welcomes = res.data.items
+    log.info('获取的进群欢迎语：' + JSON.stringify(welcomes))
   }
 
 }

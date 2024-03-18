@@ -28,6 +28,9 @@ import { getFormattedRideInfo } from '../plugins/mod.js'
 
 export async function onMessage (message: Message) {
   const text = message.text()
+  const isSelf = message.self()
+  const talker = message.talker()
+  const room = message.room()
   // 存储消息到db，如果写入失败则终止，用于检测是否是重复消息
   try {
     const messageToDB = await formatMessageToDB(message)
@@ -45,7 +48,7 @@ export async function onMessage (message: Message) {
     log.error('消息格式化失败:\n', e)
   }
 
-  if (ChatFlowConfig.isReady) {
+  if (ChatFlowConfig.isReady && !isSelf) {
   // 请求管理员群操作
     try {
       await adminAction(message)
@@ -71,9 +74,10 @@ export async function onMessage (message: Message) {
     // 关键字回复
     try {
       if (text && ChatFlowConfig.keywordList.length > 0) {
-        log.info('触发关键字回复...')
+        log.info('检测关键字回复...')
         const keywordItem = ChatFlowConfig.keywordList.find((item) => item.name === text && item.type === '等于关键字')
         if (keywordItem) {
+          log.info('触发关键字回复，关键字是:', keywordItem.name)
           await message.say(keywordItem.desc)
         }
       }
@@ -115,9 +119,7 @@ export async function onMessage (message: Message) {
     }
 
     // 群消息处理，判断非机器人自己发的消息
-    const room = message.room()
-    const isSelf = message.self()
-    if (room && room.id && !isSelf) {
+    if (room && room.id) {
       try {
       // 活动管理
         await handleActivityManagement(message, room)
@@ -132,8 +134,8 @@ export async function onMessage (message: Message) {
         log.error('提取@消息失败 error:', e)
       }
 
-      // 检测顺风车信息，如果text中包含车找人或人找车关键字，则提取信息并回复
-      if (text.includes('车找人') || text.includes('人找车')) {
+      // 检测顺风车信息，如果text中包含车找人、人找车、车找n人、n人找车(其中n是一个数字)关键字，则提取信息并回复
+      if (text.includes('车找') || text.includes('找车')) {
         try {
           const rideInfo = await getFormattedRideInfo(message)
           // log.info('rideInfo信息:', JSON.stringify(rideInfo, null, 2))
@@ -143,6 +145,38 @@ export async function onMessage (message: Message) {
         } catch (e) {
           log.error('检测顺风车信息失败 error:', e)
         }
+      }
+
+      // 检测text中是否存在微信ID以及回复内容，提取出nickName、wxid和text，例如text="瓦力：[luyuchao@ledongmao]\n 你在干嘛」\n- - - - - - - - - - - - - - -\n好的，我知道了",则提取出luyuchao、ledongmao和你在干嘛
+      try {
+        const atContent = text.match(/\[(.+)@(.+)\]\n(.+)」\n(.+)\n(.+)/)
+        log.info('atContent:', atContent)
+        if (atContent) {
+          const nickName = atContent[1]
+          const wxid = atContent[2]
+          log.info('nickName:', nickName, 'wxid:', wxid)
+
+          // 如果wxid不是weixin或者gh_开头的公众号ID，则提取出回复内容并回复
+          if (wxid) {
+            const contact = await ChatFlowConfig.bot.Contact.find({ id: wxid })
+            const content = text.split('- - -\n')[1]
+            if (contact && content) {
+              await contact.say(content)
+            }
+          }
+        } else {
+          log.info('没有找到微信ID')
+        }
+      } catch (e) {
+        log.error('提取微信ID失败 error:', e)
+      }
+
+    } else {
+      // 转发到adminRoom
+      const wxid = talker.id
+      if (ChatFlowConfig.adminRoom  && ![ 'weixin' ].includes(wxid) && wxid.includes('gh_') === false) {
+        const adminRoom = ChatFlowConfig.adminRoom
+        await adminRoom.say(`[${talker.name()}@${talker.id}]\n ${message.text()}`)
       }
     }
 

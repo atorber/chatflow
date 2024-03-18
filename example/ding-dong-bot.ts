@@ -9,9 +9,6 @@ import {
   ChatFlow,
   getBotOps,
   logForm,
-  // LarkDB,
-  GroupMaster,
-  GroupMasterConfig,
   init,
 } from '../src/index.js'
 
@@ -36,27 +33,6 @@ const main = async () => {
     })
   } catch (e) {
     logForm('初始化检查失败：' + JSON.stringify(e))
-  }
-
-  // 使用Lark
-  // await LarkDB.init({
-  //   appId: process.env['LARK_APP_ID'],
-  //   appSecret: process.env['LARK_APP_SECRET'],
-  //   appToken: process.env['LARK_BITABLE_APP_TOKEN'],
-  //   userMobile: process.env['LARK_APP_USER_MOBILE'],
-  // })
-
-  // 如果配置了群管理秘书，则启动群管理秘书，这是一个探索性功能，暂未开放，可以忽略
-  if (process.env['GROUP_MASTER_ENDPOINT']) {
-    const configGroupMaster: GroupMasterConfig = {
-      WX_KEY:process.env['GROUP_MASTER_WX_KEY'] || '',
-      MQTT_ENDPOINT:process.env['GROUP_MASTER_MQTT_ENDPOINT'] || '',
-      MQTT_USERNAME:process.env['GROUP_MASTER_MQTT_USERNAME'] || '',
-      MQTT_PASSWORD:process.env['GROUP_MASTER_MQTT_PASSWORD'] || '',
-      MQTT_PORT:Number(process.env['GROUP_MASTER_MQTT_PORT'] || '1883'),
-      HOST:process.env['GROUP_MASTER_ENDPOINT'] || '',
-    }
-    bot.use(GroupMaster(configGroupMaster))
   }
 
   // 启用ChatFlow插件

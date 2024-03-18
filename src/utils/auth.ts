@@ -21,17 +21,28 @@ class AuthClient {
   private tokenExpirationDate: Date | null = null
   private username: string = ''
   private password: string = ''
-  private endpoint: string = `${process.env.ENDPOINT || 'http://127.0.0.1:9503'}/api/v1`
+  endpoint: string = 'http://127.0.0.1:9503'
 
-  private constructor () { // 步骤2：私有构造函数
+  private constructor (ops?:{
+    username:string;
+    password:string,
+    endpoint:string
+  }) { // 步骤2：私有构造函数
+    this.username = ops?.username || this.username
+    this.password = ops?.password || this.password
+    this.endpoint = ops?.endpoint ? ops.endpoint : 'http://127.0.0.1:9503'
     this.axiosInstance = axios.create({
       baseURL: this.endpoint, // 你的 API 基础地址
     })
   }
 
-  public static getInstance (): AuthClient { // 步骤3：公共静态方法
+  public static getInstance (ops?:{
+    username:string;
+    password:string,
+    endpoint:string
+  }): AuthClient { // 步骤3：公共静态方法
     if (!AuthClient.instance) {
-      AuthClient.instance = new AuthClient()
+      AuthClient.instance = new AuthClient(ops)
     }
     return AuthClient.instance
   }
@@ -40,7 +51,7 @@ class AuthClient {
     this.username = username || this.username
     this.password = password || this.password
     try {
-      const response = await this.axiosInstance.post<TokenResponse>('/auth/login', {
+      const response = await this.axiosInstance.post<TokenResponse>('/api/v1/auth/login', {
         mobile: this.username,
         password: this.password,
       })
@@ -63,7 +74,7 @@ class AuthClient {
     this.username = username || this.username
     this.password = password || this.password
     try {
-      const response:{data:{message:string}} = await this.axiosInstance.post<TokenResponse>('/auth/init', {
+      const response:{data:{message:string}} = await this.axiosInstance.post<TokenResponse>('/api/v1/auth/init', {
         mobile: this.username,
         password: this.password,
       })

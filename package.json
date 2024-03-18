@@ -1,6 +1,6 @@
 {
   "name": "@atorber/chatflow",
-  "version": "3.0.0-Beta-10",
+  "version": "3.0.0-Beta-11",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
@@ -108,7 +108,8 @@
     "typescript": "^4.9.3",
     "wechaty": "^1.20.2",
     "wechaty-puppet-padlocal": "^1.20.1",
-    "wechaty-puppet-wechat4u": "^1.14.12"
+    "wechaty-puppet-wechat4u": "^1.14.12",
+    "wechaty-puppet-xp": "^1.13.8"
   },
   "files": [
     "bin/",

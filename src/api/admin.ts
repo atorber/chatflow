@@ -276,6 +276,48 @@ export const adminAction = async (message:Message) => {
             const tableName = ChatFlowConfig.db.dataBaseNames[tableCode as keyof typeof ChatFlowConfig.db.dataBaseNames]
             log.info('数据表名称：', tableName)
             await message.say(`检测到多维表格链接，表格名称：【${tableName}】，\n是否需要处理？\n配置信息:\n${JSON.stringify(config, null, 2)}`)
+
+            switch (tableCode) {
+              case 'mediaSheet':
+                await ChatFlowConfig.updateMediaList()
+                break
+              case 'envSheet':
+                await ChatFlowConfig.updateEnv()
+                break
+              case 'groupSheet':
+                await ChatFlowConfig.updateGroup()
+                break
+              case 'chatBotUserSheet':
+                await ChatFlowConfig.updateChatBotUser()
+                break
+              case 'chatBotSheet':
+                await ChatFlowConfig.updateChatBot()
+                break
+              case 'whiteListSheet':
+                await ChatFlowConfig.updateWhiteList()
+                break
+              case 'groupNoticeSheet':
+                await ChatFlowConfig.updateGroupNotifications()
+                break
+              case 'statisticSheet':
+                await ChatFlowConfig.updateStatistics()
+                break
+              case 'noticeSheet':
+                await ChatFlowConfig.updateReminder()
+                break
+              case 'qaSheet':
+                await ChatFlowConfig.updateQaList()
+                break
+              case 'keywordSheet':
+                await ChatFlowConfig.updateKeywords()
+                break
+              case 'welcomeSheet':
+                await ChatFlowConfig.updateWelcomes()
+                break
+              default:
+                log.info('多维表格配置信息不需要处理...')
+            }
+
           } else {
             log.info('多维表格配置信息不匹配，不处理...')
             await message.say(`检测到多维表格链接，但不是当前系统的多维表格链接，不处理~\n配置信息:\n${JSON.stringify(config, null, 2)}`)

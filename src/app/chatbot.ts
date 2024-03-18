@@ -47,7 +47,7 @@ async function chatbot (message: Message) {
 
   logger.info('智聊服务chatBotUser:' + JSON.stringify(chatBotUser))
   // log.info('当前用户或群:' + JSON.stringify(room) + JSON.stringify(talker))
-  log.info('智聊服务chatBotUser:' + JSON.stringify(chatBotUser))
+  // log.info('智聊服务chatBotUser:' + JSON.stringify(chatBotUser))
 
   try {
     if (message.type() === types.Message.Text && chatBotUser !== undefined) {

@@ -85,7 +85,7 @@ export interface MessageToCloud {
 }
 
 export const formatMessageToCloud = async (message: Message) => {
-  log.info('formatMessageToCloud 消息转换为存储到多维表格的格式...')
+  // log.info('formatMessageToCloud 消息转换为存储到多维表格的格式...')
   const room = message.room()
   const talker = message.talker()
   try {

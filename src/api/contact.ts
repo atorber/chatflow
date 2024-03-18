@@ -72,7 +72,7 @@ export const ServeSearchUser = (data: {} | undefined) => {
 }
 
 // 搜索用户信息服务接口
-export const ServeContactGroupList = (data: {} | undefined) => {
+export const ServeContactGroupList = (data?: any) => {
   return get('/api/v1/contact/group/list', data)
 }
 

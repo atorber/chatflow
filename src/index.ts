@@ -29,10 +29,10 @@ function ChatFlow (options?:{
   return function ChatFlowPlugin (bot: Wechaty): void {
 
     ChatFlowConfig.bot = bot
-    ChatFlowConfig.spaceId = options?.spaceId || process.env.VIKA_SPACE_ID || ''
-    ChatFlowConfig.token = options?.token || process.env.VIKA_TOKEN || ''
-    ChatFlowConfig.adminRoomTopic = options?.adminRoomTopic || process.env.ADMINROOM_ADMINROOMTOPIC || ''
-    ChatFlowConfig.endpoint = options?.endpoint || process.env.ENDPOINT || ''
+    ChatFlowConfig.spaceId = options?.spaceId || ''
+    ChatFlowConfig.token = options?.token || ''
+    ChatFlowConfig.adminRoomTopic = options?.adminRoomTopic || ''
+    ChatFlowConfig.endpoint = options?.endpoint || ''
 
     bot.on('scan', onScan)
     bot.on('login', onLogin)
@@ -51,10 +51,14 @@ const init = async (options:{
   token: string,
   endpoint?: string,
 }) => {
-
+  ChatFlowConfig.setOptions(options)
   // 远程加载配置信息，初始化api客户端
   try {
-    const authClient = getAuthClient()
+    const authClient = getAuthClient({
+      password: options.token,
+      username: options.spaceId,
+      endpoint: options.endpoint || '',
+    })
     try {
       // 初始化检查数据库表，如果不存在则创建
       const initRes = await authClient.init(options.spaceId, options.token)

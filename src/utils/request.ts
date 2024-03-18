@@ -12,7 +12,7 @@ const authClient = getAuthClient()
 // 创建 axios 实例
 const request = axios.create({
   // API 请求的默认前缀
-  baseURL: process.env.ENDPOINT || 'http://127.0.0.1:9503',
+  baseURL: authClient.endpoint || 'http://127.0.0.1:9503',
 
   // 请求超时时间
   timeout: 120000,
