@@ -17,6 +17,8 @@ ChatFlow是一个聊天机器人管理系统，可以帮助你实现一些原生
 
 [访问项目语雀文档查看完整使用说明](https://www.yuque.com/atorber/chatflow)
 
+![架构](./docs/image/index.png)
+
 ### 功能列表
 
 |功能|描述|
