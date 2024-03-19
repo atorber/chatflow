@@ -17,8 +17,9 @@ import { BiTable } from './db/lark-db.js'
 
 import getAuthClient from './utils/auth.js'
 import { GroupMaster, GroupMasterConfig } from './plugins/mod.js'
+import fs from 'fs'
 
-function ChatFlow (options?:{
+function ChatFlow (options?: {
   spaceId: string
   token: string
   adminRoomTopic?: string
@@ -46,11 +47,43 @@ function ChatFlow (options?:{
 
 }
 
-const init = async (options:{
+const init = async (options: {
   spaceId: string
   token: string,
   endpoint?: string,
 }) => {
+
+  // 检测./data文件夹，如果不存在则创建
+  // 在程序安装目录下创建/data目录，用于存放配置文件、日志文件、数据库文件、媒体文件等
+  if (!fs.existsSync('data')) {
+    fs.mkdirSync('data')
+  }
+
+  if (!fs.existsSync('data/table')) {
+    fs.mkdirSync('data/table')
+  }
+  if (!fs.existsSync('data/logs')) {
+    fs.mkdirSync('data/logs')
+  }
+  if (!fs.existsSync('data/db')) {
+    fs.mkdirSync('data/db')
+  }
+  if (!fs.existsSync('data/media')) {
+    fs.mkdirSync('data/media')
+  }
+  if (!fs.existsSync('data/media/image')) {
+    fs.mkdirSync('data/media/image')
+  }
+  if (!fs.existsSync('data/media/image/room')) {
+    fs.mkdirSync('data/media/image/room')
+  }
+  if (!fs.existsSync('data/media/image/contact')) {
+    fs.mkdirSync('data/media/image/contact')
+  }
+  if (!fs.existsSync('data/media/image/qrcode')) {
+    fs.mkdirSync('data/media/image/qrcode')
+  }
+
   ChatFlowConfig.setOptions(options)
   // 远程加载配置信息，初始化api客户端
   try {
@@ -97,11 +130,7 @@ const init = async (options:{
     const configAll = await ChatFlowConfig.init(options)
     // log.info('configAll', JSON.stringify(configAll))
 
-    const config: {
-        mqttConfig: IClientOptions,
-        wechatyConfig: WechatyConfig,
-        mqttIsOn: boolean,
-      } | undefined = configAll // 默认使用vika，使用lark时，需要传入'lark'参数await ChatFlowConfig.init('lark')
+    const config: CloudConfig | undefined = configAll // 默认使用vika，使用lark时，需要传入'lark'参数await ChatFlowConfig.init('lark')
     // log.info('config', JSON.stringify(config, undefined, 2))
 
     // 构建机器人
@@ -117,10 +146,18 @@ const init = async (options:{
         log.error('MQTT代理启动失败，检查mqtt配置信息是否正确...', e)
       }
     }
+    return config
   } catch (e) {
     log.error('初始化ChatFlowConfig失败...', e)
+    return undefined
   }
 
+}
+
+export interface CloudConfig {
+  mqttConfig: IClientOptions,
+  wechatyConfig: WechatyConfig,
+  mqttIsOn: boolean,
 }
 
 export {

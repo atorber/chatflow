@@ -211,32 +211,32 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
     }
   }
 
-  const wechatyConfig:{
-    id?:string;
-    name:string;
-    value:any;
-    key:string;
-    lastOperationTime:number;
-    syncStatus:string;
-  }[] = configGgroup['Wechaty']
+  // const wechatyConfig:{
+  //   id?:string;
+  //   name:string;
+  //   value:any;
+  //   key:string;
+  //   lastOperationTime:number;
+  //   syncStatus:string;
+  // }[] = configGgroup['Wechaty']
 
-  const WECHATY_PUPPET = wechatyConfig.find((item) => item.key === 'WECHATY_PUPPET')
-  if (WECHATY_PUPPET) {
-    WECHATY_PUPPET.name = `Wechaty-${WECHATY_PUPPET.name}`
-    WECHATY_PUPPET.value = bot.puppet.name()
-    WECHATY_PUPPET.lastOperationTime = curTime
-    WECHATY_PUPPET.syncStatus = '已同步'
-    baseInfo.push(WECHATY_PUPPET)
-  }
+  // const WECHATY_PUPPET = wechatyConfig.find((item) => item.key === 'WECHATY_PUPPET')
+  // if (WECHATY_PUPPET) {
+  //   WECHATY_PUPPET.name = `Wechaty-${WECHATY_PUPPET.name}`
+  //   WECHATY_PUPPET.value = bot.puppet.name()
+  //   WECHATY_PUPPET.lastOperationTime = curTime
+  //   WECHATY_PUPPET.syncStatus = '已同步'
+  //   baseInfo.push(WECHATY_PUPPET)
+  // }
 
-  const WECHATY_TOKEN = wechatyConfig.find((item) => item.key === 'WECHATY_TOKEN')
-  if (WECHATY_TOKEN) {
-    WECHATY_TOKEN.name = `Wechaty-${WECHATY_TOKEN.name}`
-    WECHATY_TOKEN.value = ''
-    WECHATY_TOKEN.lastOperationTime = curTime
-    WECHATY_TOKEN.syncStatus = '已同步'
-    baseInfo.push(WECHATY_TOKEN)
-  }
+  // const WECHATY_TOKEN = wechatyConfig.find((item) => item.key === 'WECHATY_TOKEN')
+  // if (WECHATY_TOKEN) {
+  //   WECHATY_TOKEN.name = `Wechaty-${WECHATY_TOKEN.name}`
+  //   WECHATY_TOKEN.value = ''
+  //   WECHATY_TOKEN.lastOperationTime = curTime
+  //   WECHATY_TOKEN.syncStatus = '已同步'
+  //   baseInfo.push(WECHATY_TOKEN)
+  // }
 
   if (baseInfo.length > 0) {
     baseInfo = baseInfo.map((item) => {
