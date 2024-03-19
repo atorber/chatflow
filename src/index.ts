@@ -18,6 +18,11 @@ import { BiTable } from './db/lark-db.js'
 import getAuthClient from './utils/auth.js'
 import { GroupMaster, GroupMasterConfig } from './plugins/mod.js'
 import fs from 'fs'
+import { join } from 'path'
+
+// 获取根目录
+const rootDir = process.cwd()
+log.info('rootDir', rootDir)
 
 function ChatFlow (options?: {
   spaceId: string
@@ -55,33 +60,33 @@ const init = async (options: {
 
   // 检测./data文件夹，如果不存在则创建
   // 在程序安装目录下创建/data目录，用于存放配置文件、日志文件、数据库文件、媒体文件等
-  if (!fs.existsSync('data')) {
-    fs.mkdirSync('data')
+  if (!fs.existsSync(join(rootDir, 'data'))) {
+    fs.mkdirSync(join(rootDir, 'data'))
   }
 
-  if (!fs.existsSync('data/table')) {
-    fs.mkdirSync('data/table')
+  if (!fs.existsSync(join(rootDir, 'data/table'))) {
+    fs.mkdirSync(join(rootDir, 'data/table'))
   }
-  if (!fs.existsSync('data/logs')) {
-    fs.mkdirSync('data/logs')
+  if (!fs.existsSync(join(rootDir, 'data/logs'))) {
+    fs.mkdirSync(join(rootDir, 'data/logs'))
   }
-  if (!fs.existsSync('data/db')) {
-    fs.mkdirSync('data/db')
+  if (!fs.existsSync(join(rootDir, 'data/db'))) {
+    fs.mkdirSync(join(rootDir, 'data/db'))
   }
-  if (!fs.existsSync('data/media')) {
-    fs.mkdirSync('data/media')
+  if (!fs.existsSync(join(rootDir, 'data/media'))) {
+    fs.mkdirSync(join(rootDir, 'data/media'))
   }
-  if (!fs.existsSync('data/media/image')) {
-    fs.mkdirSync('data/media/image')
+  if (!fs.existsSync(join(rootDir, 'data/media/image'))) {
+    fs.mkdirSync(join(rootDir, 'data/media/image'))
   }
-  if (!fs.existsSync('data/media/image/room')) {
-    fs.mkdirSync('data/media/image/room')
+  if (!fs.existsSync(join(rootDir, 'data/media/image/room'))) {
+    fs.mkdirSync(join(rootDir, 'data/media/image/room'))
   }
-  if (!fs.existsSync('data/media/image/contact')) {
-    fs.mkdirSync('data/media/image/contact')
+  if (!fs.existsSync(join(rootDir, 'data/media/image/contact'))) {
+    fs.mkdirSync(join(rootDir, 'data/media/image/contact'))
   }
-  if (!fs.existsSync('data/media/image/qrcode')) {
-    fs.mkdirSync('data/media/image/qrcode')
+  if (!fs.existsSync(join(rootDir, 'data/media/image/qrcode'))) {
+    fs.mkdirSync(join(rootDir, 'data/media/image/qrcode'))
   }
 
   ChatFlowConfig.setOptions(options)
