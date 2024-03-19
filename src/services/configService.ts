@@ -1,6 +1,6 @@
 /* eslint-disable sort-keys */
 import { Contact, Message, Room, Sayable, log } from 'wechaty'
-import fs from 'fs'
+// import fs from 'fs'
 import { MessageChat } from './messageService.js'
 
 // 配置机器人
@@ -45,10 +45,4 @@ export const sendMsg = async (publisher: Message | Room | Contact, sayable: Saya
   } catch (e) {
     log.error('消息发送失败:', publisher, sayable, e)
   }
-}
-
-// 保存配置文件到data/config.json
-export function updateConfig (config: any) {
-  fs.writeFileSync('data/config.json', JSON.stringify(config, null, '\t'))
-  // log.info('配置有变更, updateConfig:', JSON.stringify(config))
 }
