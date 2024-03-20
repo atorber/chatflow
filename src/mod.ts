@@ -8,7 +8,7 @@ import {
   MqttProxy,
   ChatFlow,
   GroupMaster,
-  GroupMasterConfig,
+  GroupMasterOptions,
 } from './index.js'
 
 export {
@@ -24,5 +24,5 @@ export {
 }
 
 export type {
-  GroupMasterConfig,
+  GroupMasterOptions,
 }
