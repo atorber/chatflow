@@ -262,7 +262,7 @@ function isOverRun (body: any) {
 /**
  * GroupMaster 配置接口
  */
-export interface GroupMasterConfig {
+export interface GroupMasterOptions {
   /**
    * 微信密钥
    */
@@ -295,7 +295,7 @@ export interface GroupMasterConfig {
 }
 
 function GroupMaster (
-  config: GroupMasterConfig,
+  config: GroupMasterOptions,
 ): WechatyPlugin {
   logForm('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...\n\n' + JSON.stringify(config))
 

@@ -261,6 +261,7 @@ atorber/chatflow:latest
 ### 3.0.0-Beta-14
 
 - 支持自定义数据目录
+- 优化配置信息命名
 
 ### 3.0.0-Beta-11
 

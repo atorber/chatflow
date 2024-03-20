@@ -5,7 +5,7 @@ import {
   WechatyBuilder,
 } from 'wechaty'
 
-import { getBotOps, log, logForm, GroupMaster, GroupMasterConfig } from '../src/index.js'
+import { getBotOps, log, logForm, GroupMaster, GroupMasterOptions } from '../src/index.js'
 
 const main = async () => {
 
@@ -18,7 +18,7 @@ const main = async () => {
   const MQTT_PORT = Number(process.env['GROUP_MASTER_MQTT_PORT'] || '1883')
   const HOST = process.env['GROUP_MASTER_ENDPOINT'] || ''
 
-  const config: GroupMasterConfig = {
+  const config: GroupMasterOptions = {
     WX_KEY,
     MQTT_ENDPOINT,
     MQTT_USERNAME,

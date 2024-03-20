@@ -12,7 +12,7 @@ import {
   logForm,
   init,
   CloudConfig,
-  ChatFlowConfig,
+  ChatFlowOptions,
 } from '../src/index.js'
 // import path from 'path'
 
@@ -23,7 +23,7 @@ const main = async () => {
   const ADMINROOM_ADMINROOMTOPIC = process.env['ADMINROOM_ADMINROOMTOPIC'] // 管理群的topic，可选
   const dataDir = process.cwd() // 数据目录
 
-  const chatFlowConfig:ChatFlowConfig = {
+  const chatFlowConfig:ChatFlowOptions = {
     spaceId: VIKA_SPACE_ID,
     token: VIKA_TOKEN,
     adminRoomTopic: ADMINROOM_ADMINROOMTOPIC,

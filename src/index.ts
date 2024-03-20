@@ -16,11 +16,11 @@ import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
 import { BiTable } from './db/lark-db.js'
 
 import getAuthClient from './utils/auth.js'
-import { GroupMaster, GroupMasterConfig } from './plugins/mod.js'
+import { GroupMaster, GroupMasterOptions } from './plugins/mod.js'
 import fs from 'fs'
 import { join } from 'path'
 
-interface ChatFlowConfig {
+interface ChatFlowOptions {
   spaceId: string
   token: string
   adminRoomTopic: string
@@ -28,7 +28,7 @@ interface ChatFlowConfig {
   dataDir?: string
 }
 
-function ChatFlow (options?: ChatFlowConfig): WechatyPlugin {
+function ChatFlow (options?: ChatFlowOptions): WechatyPlugin {
   logForm('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...')
 
   return function ChatFlowPlugin (bot: Wechaty): void {
@@ -52,7 +52,7 @@ function ChatFlow (options?: ChatFlowConfig): WechatyPlugin {
 
 }
 
-const init = async (options: ChatFlowConfig) => {
+const init = async (options: ChatFlowOptions) => {
 // 获取根目录
   const rootDir =  options.dataDir || process.cwd()
   log.info('rootDir', rootDir)
@@ -178,8 +178,8 @@ export {
 }
 
 export type {
-  GroupMasterConfig,
-  ChatFlowConfig,
+  GroupMasterOptions,
+  ChatFlowOptions,
 }
 
 export type { WechatyConfig }
