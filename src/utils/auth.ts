@@ -26,12 +26,12 @@ class AuthClient {
   private constructor (ops?:{
     username:string;
     password:string,
-    endpoint:string
+    endpoint?:string
   }) { // 步骤2：私有构造函数
     if (ops) {
       this.username = ops.username
       this.password = ops.password
-      this.endpoint = ops.endpoint
+      this.endpoint = ops.endpoint || this.endpoint
     }
     this.axiosInstance = axios.create({
       baseURL: this.endpoint, // 你的 API 基础地址
@@ -41,9 +41,11 @@ class AuthClient {
   public static getInstance (ops?:{
     username:string;
     password:string,
-    endpoint:string
-  }): AuthClient { // 步骤3：公共静态方法
-    if (!AuthClient.instance) {
+    endpoint?:string
+  }): AuthClient | undefined { // 步骤3：公共静态方法
+    // logForm('getInstance ops:' + JSON.stringify(ops))
+
+    if (!AuthClient.instance && ops) {
       AuthClient.instance = new AuthClient(ops)
     }
     return AuthClient.instance
