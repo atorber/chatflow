@@ -3,16 +3,13 @@ import { Room, Contact, Message, Wechaty, log } from 'wechaty'
 import { v4 } from 'uuid'
 import { formatTimestamp, getCurTime, logger } from '../utils/utils.js'
 import moment from 'moment'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import {
   ServeGetStatistics,
   // ServeCreateStatistics,
 } from '../api/statistic.js'
 import { ServeCreateOrders } from '../api/order.js'
-
-import { db } from '../db/tables.js'
-const activityData = db.activity
-const orderData = db.order
+import {  DataTables } from '../db/tables.js'
 
 // 活动接口
 export interface Activity {
@@ -82,7 +79,7 @@ export class ActivityChat {
   // 初始化
   static async init () {
     await this.getStatistics()
-    this.bot = ChatFlowConfig.bot
+    this.bot = ChatFlowCore.bot
     log.info('初始化 ActivityChat 成功...')
   }
 
@@ -203,6 +200,8 @@ export class ActivityChat {
   // 创建活动
   static async addActivity (activity: Activity): Promise<Activity | any> {
     try {
+      const tables = DataTables.getTables()
+      const activityData = tables?.activity
       await activityData.insert(activity)
       this.activities.push(activity)
       return activity
@@ -214,6 +213,8 @@ export class ActivityChat {
   // 删除活动
   static async removeAtivity (activityId: string): Promise<any> {
     try {
+      const tables = DataTables.getTables()
+      const activityData = tables?.activity
       await activityData.remove({ _id: activityId })
       const indexToRemove = this.activities.findIndex(activity => activity._id === activityId)
       if (indexToRemove !== -1) {
@@ -228,6 +229,8 @@ export class ActivityChat {
   // 更新活动
   static async updateAtivity (activityId: string, data: Activity): Promise<any> {
     try {
+      const tables = DataTables.getTables()
+      const activityData = tables?.activity
       await activityData.update({ _id: activityId }, data)
       const indexToUpdate = this.activities.findIndex(activity => activity._id === activityId)
       if (indexToUpdate !== -1) {
@@ -243,7 +246,8 @@ export class ActivityChat {
   static async assignSubstituteParticipants (activity: Activity, additionalParticipants: number) {
     const canceledParticipants = additionalParticipants
     const newlyAssignedParticipants:any[] = []
-
+    const tables = DataTables.getTables()
+    const orderData = tables?.order
     const substituteOrders = await orderData.find({
       isBench: true,
       act_id: activity._id,
@@ -277,6 +281,8 @@ export class ActivityChat {
   static async getActivityList (room?: Room) {
     let query: any = {}
     let activityList = []
+    const tables = DataTables.getTables()
+    const activityData = tables?.activity
     if (room) {
       query = [ {
         roomid: room.id,
@@ -288,6 +294,7 @@ export class ActivityChat {
         type: '活动报名',
         active: true,
       } ]
+
       activityList = await activityData.find({ $or: query })
     } else {
       query = {
@@ -333,7 +340,8 @@ export class ActivityChat {
     if (shortCode) {
       query.shortCode = shortCode
     }
-
+    const tables = DataTables.getTables()
+    const activityData = tables?.activity
     const latestActivity = await activityData.findOne({ $or:query })
 
     // logger.info('获取最新活动：======================\n' + JSON.stringify(latestActivity));
@@ -359,6 +367,8 @@ export class ActivityChat {
     const query = {
       act_id: activity._id,
     }
+    const tables = DataTables.getTables()
+    const orderData = tables?.order
     const orders = await orderData.find(query)
     return orders
   };
@@ -393,7 +403,8 @@ export class ActivityChat {
       isBench,
       member,
     }
-
+    const tables = DataTables.getTables()
+    const orderData = tables?.order
     if (isBench) {
       return await orderData.insert(data)
     } else {
@@ -473,7 +484,8 @@ export class ActivityChat {
     let newAddNumAll = addNum
     let cancelNum: number = 0
     const newAdder:any = []
-
+    const tables = DataTables.getTables()
+    const orderData = tables?.order
     if (curOrders.length) {
       for (const order of curOrders) {
         const curOrder = order
@@ -579,6 +591,8 @@ export class ActivityChat {
 
   // 更新报名信息
   static async updateSignInOrder (currentOrder: Order, additionalParticipants: any) {
+    const tables = DataTables.getTables()
+    const orderData = tables?.order
     return await orderData.update({ _id: currentOrder._id }, {
       $set: {
         totalNum: currentOrder.totalNum + additionalParticipants,
@@ -602,6 +616,8 @@ export class ActivityChat {
         alias,
       })
     }
+    const tables = DataTables.getTables()
+    const orderData = tables?.order
     const order = await orderData.findOne({ $or:query })
     return order || {}
   }
@@ -622,7 +638,8 @@ export class ActivityChat {
         alias,
       })
     }
-
+    const tables = DataTables.getTables()
+    const orderData = tables?.order
     const orders = await orderData.find({ $or: query })
 
     logger.info('用户的订单：' + JSON.stringify(orders))

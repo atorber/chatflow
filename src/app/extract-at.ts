@@ -9,12 +9,12 @@ import { handleSay } from '../handlers/onReadyOrLogin.js'
 import {
   gptbot,
 } from '../plugins/mod.js'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 
 export const extractAtContent = async (message: Message): Promise<string | null> => {
 
   const text = message.text()
-  const keyWord = ChatFlowConfig.bot.currentUser.name()
+  const keyWord = ChatFlowCore.bot.currentUser.name()
 
   // @机器人消息处理，当引用消息仅包含@机器人时，提取引用消息内容并回复
   if (text.indexOf(`@${keyWord}`) !== -1) {

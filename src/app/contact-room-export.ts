@@ -8,6 +8,8 @@ import {
 
 import { FileBox } from 'file-box'
 import { createWriteStream } from 'fs'
+import path from 'path'
+import { ChatFlowCore } from '../api/base-config.js'
 
 // 导出联系人和群列表到csv文件
 export async function exportContactsAndRoomsToCSV (bot:Wechaty) {
@@ -29,7 +31,7 @@ export async function exportContactsAndRoomsToCSV (bot:Wechaty) {
 
   log.info('通讯录原始数据：', csvData)
 
-  const fileName = './data/db/contacts_and_rooms.csv'
+  const fileName = path.join(ChatFlowCore.dataDir, 'data/db', 'contacts_and_rooms.csv')
   const writeStream = createWriteStream(fileName)
   const csvStream = csv.format({ headers: true })
   csvStream.pipe(writeStream).on('end', () => {
@@ -75,7 +77,7 @@ export async function exportContactsAndRoomsToXLSX (bot:Wechaty) {
   XLSX.utils.book_append_sheet(workbook, roomsSheet, 'Rooms')
 
   // 将工作簿写入文件
-  const fileName = './data/db/contacts_and_rooms.xlsx'
+  const fileName = path.join(ChatFlowCore.dataDir, 'data/db', 'contacts_and_rooms.xlsx')
   XLSX.writeFile(workbook, fileName)
 
   // 返回FileBox对象

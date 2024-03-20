@@ -1,20 +1,27 @@
 import Datastore from 'nedb'
+import path from 'path'
 
-class DB {
+export class DB {
 
   private db: any
   private offsetValue: number
   private limitValue: number
   private orderby: any
+  static dataDir: string = path.join(process.cwd(), 'data/db')
 
   constructor (database: any) {
     const options = {
       autoload: true,
-      filename: database,
+      filename: path.join(DB.dataDir, database),
     }
     this.db = new Datastore(options)
     this.offsetValue = 0
     this.limitValue = 15
+  }
+
+  static setDir (dataDir:string) {
+    const dbDir = path.join(dataDir, 'data/db')
+    DB.dataDir = dbDir
   }
 
   public limit (offset?: number, limit?: number): this {
@@ -107,8 +114,4 @@ class DB {
     })
   }
 
-}
-
-export default (database: any) => {
-  return new DB(database)
 }

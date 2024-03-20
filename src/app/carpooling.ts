@@ -1,6 +1,6 @@
 import { Message, log } from 'wechaty'
 import axios from 'axios'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 
 export interface CarpoolInfoChinese {
   /**
@@ -106,9 +106,9 @@ async function getFormattedRideInfo (message:Message) {
   const room = message.room()
   const talker = message.talker()
   const name:string = message.talker().name()
-  const apiUrl = `${ChatFlowConfig.configEnv.CHATGPT_ENDPOINT}/v1/chat/completions`
+  const apiUrl = `${ChatFlowCore.configEnv.CHATGPT_ENDPOINT}/v1/chat/completions`
   const headers = {
-    Authorization: `Bearer ${ChatFlowConfig.configEnv.CHATGPT_KEY}`, // <-- 把 fkxxxxx 替换成你自己的 Forward Key，注意前面的 Bearer 要保留，并且和 Key 中间有一个空格。
+    Authorization: `Bearer ${ChatFlowCore.configEnv.CHATGPT_KEY}`, // <-- 把 fkxxxxx 替换成你自己的 Forward Key，注意前面的 Bearer 要保留，并且和 Key 中间有一个空格。
     'Content-Type': 'application/json',
   }
   const content = `从"发布人：${name}\n信息：${text}"中提取出顺风车信息，提取不到的内容填写“暂无”:
@@ -125,7 +125,7 @@ async function getFormattedRideInfo (message:Message) {
 }`
   const payload = {
     messages: [ { content, role: 'user' } ],
-    model: ChatFlowConfig.configEnv.CHATGPT_MODEL, // 'gpt-3.5-turbo
+    model: ChatFlowCore.configEnv.CHATGPT_MODEL, // 'gpt-3.5-turbo
   }
 
   try {

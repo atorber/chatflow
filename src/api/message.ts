@@ -6,7 +6,6 @@ import {
   ScanStatus,
 } from 'wechaty'
 import moment from 'moment'
-import { db } from '../db/tables.js'
 import { formatTimestamp, getCurrentTime, delay, logger, getCurTime } from '../utils/utils.js'
 import type { ChatMessage } from '../types/interface.js'
 import {
@@ -14,8 +13,9 @@ import {
 } from '../services/mod.js'
 import fs from 'fs'
 import path from 'path'
-
-const MEDIA_PATH = 'data/media/image'
+import { ChatFlowCore } from '../api/base-config.js'
+import { DataTables } from '../db/tables.js'
+const MEDIA_PATH = path.join(ChatFlowCore.dataDir, 'data/media/image')
 const MEDIA_PATH_QRCODE = path.join(MEDIA_PATH, 'qrcode')
 const MEDIA_PATH_CONTACT = path.join(MEDIA_PATH, 'contact')
 const MEDIA_PATH_ROOM = path.join(MEDIA_PATH, 'room')
@@ -27,9 +27,6 @@ paths.forEach((p) => {
     fs.mkdirSync(p, { recursive: true })
   }
 })
-
-// 本地存储位置
-const messageData = db.message
 
 export interface MessageToDB {
   _id: string;
@@ -65,6 +62,9 @@ export const formatMessageToDB = async (message: Message) => {
 
 export const saveMessageToDB = async (message: MessageToDB) => {
   try {
+    // 本地存储位置
+    const tables = DataTables.getTables()
+    const messageData = tables?.message
     const res = await messageData.insert(message)
     log.info('消息写入数据库成功:', res._id)
     return res

@@ -7,7 +7,7 @@ import {
 } from 'wechaty'
 import { formatSentMessage, logger } from '../utils/utils.js'
 import axios from 'axios'
-import { ChatFlowConfig } from '../index.js'
+import { ChatFlowCore } from '../index.js'
 axios.defaults.timeout = 60000
 
 async function gpt (bot: Wechaty, message: Message) {
@@ -117,9 +117,9 @@ async function aibot (query: any) {
 
   try {
     const response = await axios.post(
-      `${ChatFlowConfig.configEnv.CHATGPT_ENDPOINT}/v1/chat/completions`,
+      `${ChatFlowCore.configEnv.CHATGPT_ENDPOINT}/v1/chat/completions`,
       {
-        model: ChatFlowConfig.configEnv.CHATGPT_MODEL || 'gpt-3.5-turbo',  // 使用的模型
+        model: ChatFlowCore.configEnv.CHATGPT_MODEL || 'gpt-3.5-turbo',  // 使用的模型
         messages: [
           // {role: 'system', content: 'You are a helpful assistant.'},
           { role: 'user', content: query },
@@ -129,7 +129,7 @@ async function aibot (query: any) {
       },
       {
         headers: {
-          Authorization: `Bearer ${ChatFlowConfig.configEnv.CHATGPT_KEY}`,
+          Authorization: `Bearer ${ChatFlowCore.configEnv.CHATGPT_KEY}`,
           'Content-Type': 'application/json',
         },
       },
@@ -155,7 +155,7 @@ async function aibot (query: any) {
 
 export function prepareChatGptBody (content: string) {
   return {
-    model: ChatFlowConfig.configEnv['CHATGPT_MODEL'] || 'gpt-3.5-turbo',
+    model: ChatFlowCore.configEnv['CHATGPT_MODEL'] || 'gpt-3.5-turbo',
     prompt: content,
     temperature: 0.7,
     // n: 1,

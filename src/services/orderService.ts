@@ -2,12 +2,11 @@
 import { delay, logger } from '../utils/utils.js'
 import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
 import type { BusinessRoom, BusinessUser } from '../api/contact-room-finder.js'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import { Wechaty, log } from 'wechaty'
 import { ServeGetOrders } from '../api/order.js'
 
-// import { db } from '../db/tables.js'
-// const whiteListData = db.whiteList
+// const whiteListData = ChatFlowCore.tables.whiteList
 
 export type WhiteList = { contactWhiteList: ContactWhiteList; roomWhiteList: RoomWhiteList }
 
@@ -37,7 +36,7 @@ export class OrderChat {
       gpt: [],
     }
     await this.getRecords()
-    this.bot = ChatFlowConfig.bot
+    this.bot = ChatFlowCore.bot
 
     log.info('初始化 WhiteListChat 成功...')
   }

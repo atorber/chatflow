@@ -1,10 +1,10 @@
 import {
   GroupMaster,
-  GroupMasterConfig,
+  GroupMasterOptions,
 }                     from './group-master.js'
 
 export type {
-  GroupMasterConfig,
+  GroupMasterOptions,
 }
 export {
   GroupMaster,

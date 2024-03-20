@@ -84,9 +84,6 @@ export const ServeContactGroupSave = (data: {} | undefined) => {
   return post('/api/v1/contact/group/save', data)
 }
 
-// import { db } from '../db/tables.js'
-// const contactData = db.contact
-
 // 获取好友列表
 export async function getContactList () {
   const res = await ServeGetContacts()

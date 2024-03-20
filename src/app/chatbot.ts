@@ -8,13 +8,13 @@ import {
 } from 'wechaty'
 import { formatSentMessage, logger } from '../utils/utils.js'
 import axios from 'axios'
-import { ChatFlowConfig } from '../index.js'
+import { ChatFlowCore } from '../index.js'
 import type { ChatBotUser } from '../api/base-config.js'
 
 axios.defaults.timeout = 60000
 
 async function chatbot (message: Message) {
-  const bot: Wechaty = ChatFlowConfig.bot
+  const bot: Wechaty = ChatFlowCore.bot
   const keyword = '@' + bot.currentUser.name()
   const text = extractKeyword(message, keyword)
   const talker = message.talker()
@@ -26,7 +26,7 @@ async function chatbot (message: Message) {
     if (room && message.text().indexOf(keyword) !== -1 && !message.self()) {
       log.info('当前群:' + JSON.stringify(room))
       const topic = await room.topic()
-      chatBotUser = ChatFlowConfig.chatBotUsers.find((user:ChatBotUser) => {
+      chatBotUser = ChatFlowCore.chatBotUsers.find((user:ChatBotUser) => {
         return user.room !== undefined && (user.room.id === room.id || user.room.topic === topic)
       })
       log.info('room智聊服务chatBotUser:' + JSON.stringify(chatBotUser))
@@ -35,8 +35,8 @@ async function chatbot (message: Message) {
     if (!room) {
       log.info('当前用户:' + JSON.stringify(talker))
       const alias = await talker.alias()
-      log.info('ChatFlowConfig.chatBotUsers:' + JSON.stringify(ChatFlowConfig.chatBotUsers, null, 2))
-      chatBotUser = ChatFlowConfig.chatBotUsers.find((user:ChatBotUser) => {
+      log.info('ChatFlowCore.chatBotUsers:' + JSON.stringify(ChatFlowCore.chatBotUsers, null, 2))
+      chatBotUser = ChatFlowCore.chatBotUsers.find((user:ChatBotUser) => {
         return user.contact !== undefined && (user.contact.id === talker.id || (user.contact.alias && user.contact.alias === alias) || user.contact.name === talker.name())
       })
       log.info('contact智聊服务chatBotUser:' + JSON.stringify(chatBotUser))

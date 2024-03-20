@@ -12,20 +12,28 @@ import {
   logForm,
   init,
   CloudConfig,
+  ChatFlowOptions,
 } from '../src/index.js'
+// import path from 'path'
 
 const main = async () => {
+  log.info('开始启动机器人...')
   const VIKA_SPACE_ID = process.env['VIKA_SPACE_ID']
   const VIKA_TOKEN = process.env['VIKA_TOKEN']
   const ADMINROOM_ADMINROOMTOPIC = process.env['ADMINROOM_ADMINROOMTOPIC'] // 管理群的topic，可选
+  const dataDir = process.cwd() // 数据目录
+
+  const chatFlowConfig:ChatFlowOptions = {
+    spaceId: VIKA_SPACE_ID,
+    token: VIKA_TOKEN,
+    adminRoomTopic: ADMINROOM_ADMINROOMTOPIC,
+    dataDir,
+  } // ChatFlow配置信息
 
   let config: CloudConfig | undefined
   // 初始化检查数据库表，如果不存在则创建
   try {
-    config = await init({
-      spaceId: VIKA_SPACE_ID,
-      token: VIKA_TOKEN,
-    })
+    config = await init(chatFlowConfig)
     log.info('初始化检查成功：', JSON.stringify(config))
   } catch (e) {
     logForm('初始化检查失败：' + JSON.stringify(e))
@@ -44,11 +52,7 @@ const main = async () => {
     const bot = WechatyBuilder.build(ops)
 
     // 启用ChatFlow插件
-    bot.use(ChatFlow({
-      spaceId: VIKA_SPACE_ID,
-      token: VIKA_TOKEN,
-      adminRoomTopic: ADMINROOM_ADMINROOMTOPIC,
-    }))
+    bot.use(ChatFlow(chatFlowConfig))
 
     // 启动机器人
     bot.start()

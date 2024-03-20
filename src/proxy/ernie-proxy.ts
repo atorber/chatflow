@@ -9,7 +9,7 @@ import {
 import { formatSentMessage, logger } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/mod.js'
 import axios from 'axios'
-import { ChatFlowConfig } from '../index.js'
+import { ChatFlowCore } from '../index.js'
 
 /**
  * 使用 AK，SK 生成鉴权签名（Access Token）
@@ -199,7 +199,7 @@ async function aibot (sysConfig: ProcessEnv, query: any) {
 
 export function prepareChatGptBody (content: string) {
   return {
-    model:ChatFlowConfig.configEnv['CHATGPT_MODEL'],
+    model:ChatFlowCore.configEnv['CHATGPT_MODEL'],
     messages: [ { role: 'user', content } ],
     temperature: 1,
     n: 1,

@@ -5,7 +5,7 @@ import { getCurTime, delay, logger } from '../utils/utils.js'
 import moment from 'moment'
 import { FileBox } from 'file-box'
 
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import type { ChatMessage } from '../types/mod.js'
 import {
   ServeCreateTalkRecords,
@@ -14,11 +14,9 @@ import {
 import fs from 'fs'
 import path from 'path'
 import FormData from 'form-data'
+import { DataTables } from '../db/tables.js'
 
-import { db } from '../db/tables.js'
-const messageData = db.message
-
-const MEDIA_PATH = 'data/media/image'
+const MEDIA_PATH = path.join(ChatFlowCore.dataDir, 'data/media/image')
 const MEDIA_PATH_QRCODE = path.join(MEDIA_PATH, 'qrcode')
 const MEDIA_PATH_CONTACT = path.join(MEDIA_PATH, 'contact')
 const MEDIA_PATH_ROOM = path.join(MEDIA_PATH, 'room')
@@ -42,13 +40,15 @@ export class MessageChat {
 
   // protected static override recordId: string = ''  // 定义记录ID，初始为空字符串
   constructor () {
-    MessageChat.batchCount = ChatFlowConfig.batchCount
-    MessageChat.delayTime = ChatFlowConfig.delayTime
+    MessageChat.batchCount = ChatFlowCore.batchCount
+    MessageChat.delayTime = ChatFlowCore.delayTime
   }
 
   // 初始化
   static async init () {
     const that = this
+    const tables = DataTables.getTables()
+    const messageData = tables?.message
     try {
       this.msgStore = []
       this.messageData = messageData
@@ -57,7 +57,7 @@ export class MessageChat {
       setInterval(() => {
         // logger.info('待处理消息池长度：', that.msgStore.length || '0')
 
-        if (that.msgStore.length && ChatFlowConfig.isReady) {
+        if (that.msgStore.length && ChatFlowCore.isReady) {
           const end = that.msgStore.length < this.batchCount ? that.msgStore.length : this.batchCount
           const records = that.msgStore.splice(0, end)
           // logger.info('写入vika的消息：', JSON.stringify(records))
@@ -74,7 +74,7 @@ export class MessageChat {
           } catch (err) {
             logger.error('调用datasheet.records.create失败：', err)
           }
-        } else if (!ChatFlowConfig.isReady) {
+        } else if (!ChatFlowCore.isReady) {
           log.info('机器人未初始化完成，待处理消息池等待中...')
         } else {
           // log.info('待处理消息池为空...', new Date().toLocaleString())
@@ -86,7 +86,7 @@ export class MessageChat {
     } catch (e) {
       log.error('初始化 MessageChat 失败：', e)
     }
-    this.bot = ChatFlowConfig.bot
+    this.bot = ChatFlowCore.bot
   }
 
   static addRecord (record: any) {

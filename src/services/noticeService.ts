@@ -9,13 +9,12 @@ import {
   getRoom,
 } from '../plugins/mod.js'
 import { sendMsg } from './configService.js'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import {
   ServeGetNoticesTask,
 } from '../api/notice.js'
 
-// import { db } from '../db/tables.js'
-// const noticeData = db.notice
+// const noticeData = ChatFlowCore.tables.notice
 
 function getRemainingTime (taskTime: number): string {
   const time = taskTime - new Date().getTime()
@@ -38,7 +37,7 @@ export class NoticeChat {
 
   // 初始化
   static async init () {
-    this.bot = ChatFlowConfig.bot
+    this.bot = ChatFlowCore.bot
     log.info('初始化 NoticeChat 成功...')
   }
 

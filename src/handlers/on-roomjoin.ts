@@ -1,12 +1,12 @@
 import { Contact, Room, log } from 'wechaty'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import { logger } from '../utils/utils.js'
 /**
  * 群中有新人进入
  */
 async function onRoomjoin (room: Room, inviteeList: Contact[], inviter: Contact) {
   log.info('有新人进入群聊...')
-  const welcomeList = ChatFlowConfig.welcomeList
+  const welcomeList = ChatFlowCore.welcomeList
   const welcomeRoom = welcomeList.find((item) => item.id === room.id)
 
   // Check if Vika is OK and if the room is in the welcome list
@@ -19,7 +19,7 @@ async function onRoomjoin (room: Room, inviteeList: Contact[], inviter: Contact)
     // Send a welcome message only if there are invitees
     if (inviteeList.length > 0) {
       const welcomeMessage = `欢迎加入${roomTopic}, ${welcomeRoom.text}~`
-      // await sendMsg(room, welcomeMessage, (chatflowConfig.services as Services).messageService, inviteeList)
+      // await sendMsg(room, welcomeMessage, (ChatFlowCore.services as Services).messageService, inviteeList)
       await room.say(welcomeMessage, ...inviteeList)
     }
   }

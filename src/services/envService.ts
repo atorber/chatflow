@@ -6,8 +6,8 @@ import {
   ServeGetUserConfigObj,
 } from '../api/user.js'
 
-// import { db } from '../db/tables.js'
-// const envData = db.env
+// import { ChatFlowCore } from '../api/base-config.js'
+// const envData = ChatFlowCore.tables.env
 // log.info(JSON.stringify(envData))
 
 // 服务类

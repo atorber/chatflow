@@ -1,21 +1,21 @@
 /* eslint-disable camelcase */
 import { log, Message, types } from 'wechaty'
 import { Client } from 'minio'
-import { ChatFlowConfig } from '../index.js'
+import { ChatFlowCore } from '../index.js'
 
 function upload (file_payload: { cloudPath?: any; fileContent?: any }) {
   // Instantiate the minio client with the endpoint
   // and access keys as shown below.
   const minioClient = new Client({
-    endPoint: ChatFlowConfig.configEnv.endpoint,
+    endPoint: ChatFlowCore.configEnv.endpoint,
     // port: 80,
     // useSSL: false,
-    accessKey: ChatFlowConfig.configEnv.accessKeyId,
-    secretKey: ChatFlowConfig.configEnv.secretAccessKey,
-    region: ChatFlowConfig.configEnv.region,
+    accessKey: ChatFlowCore.configEnv.accessKeyId,
+    secretKey: ChatFlowCore.configEnv.secretAccessKey,
+    region: ChatFlowCore.configEnv.region,
   })
   // Upload a Buffer without content-type (default: 'application/octet-stream')
-  minioClient.putObject(ChatFlowConfig.configEnv.bucketName, file_payload.cloudPath
+  minioClient.putObject(ChatFlowCore.configEnv.bucketName, file_payload.cloudPath
     , file_payload.fileContent, function (e) {
       if (e) {
         return log.info('上传结果：', e)
