@@ -1,6 +1,6 @@
 {
   "name": "@atorber/chatflow",
-  "version": "3.0.0-Beta-14-4",
+  "version": "3.0.18",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
