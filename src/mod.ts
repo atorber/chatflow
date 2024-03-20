@@ -1,6 +1,6 @@
 import {
   getBotOps,
-  ChatFlowConfig,
+  ChatFlowCore,
   log,
   logForm,
   BiTable,
@@ -13,7 +13,7 @@ import {
 
 export {
   getBotOps,
-  ChatFlowConfig,
+  ChatFlowCore,
   log,
   logForm,
   BiTable,

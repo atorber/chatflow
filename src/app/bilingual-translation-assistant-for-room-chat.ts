@@ -6,7 +6,7 @@
 // https://stackoverflow.com/a/42817956/1123955
 // https://github.com/motdotla/dotenv/issues/89#issuecomment-587753552
 import 'dotenv/config.js'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import {
   Contact,
   Message,
@@ -42,9 +42,9 @@ setInterval(() => {
  */
 async function getChatGPTReply (message: string) {
   const systemPrompt = '你是一个翻译器，用户将输入{"text":"你要翻译的内容..."}，你只需要翻译text对应的value内容。如果输入的是中文你翻译成英文，如果输入的是英文你翻译成中文。例如输入是：{"text":"你是谁"}，你的回到是：who are you（只返回翻译结果，而不是返回{"text":"who are you"}格式）'
-  const apiKey = ChatFlowConfig.configEnv.CHATGPT_KEY || 'your key'
+  const apiKey = ChatFlowCore.configEnv.CHATGPT_KEY || 'your key'
   // const apiEndpoint = 'https://api.openai.com'
-  const apiEndpoint = ChatFlowConfig.configEnv.CHATGPT_ENDPOINT || 'https://api.openai-proxy.com'
+  const apiEndpoint = ChatFlowCore.configEnv.CHATGPT_ENDPOINT || 'https://api.openai-proxy.com'
   try {
     const api = new Api2d(apiKey, apiEndpoint, 60 * 1000)
     const body = {

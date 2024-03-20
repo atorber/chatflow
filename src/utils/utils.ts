@@ -9,8 +9,9 @@ import type {
   // WechatyBuilder,
 } from 'wechaty'
 
-import type { TaskConfig } from '../api/base-config.js'
+import { TaskConfig, ChatFlowCore } from '../api/base-config.js'
 import * as winston from 'winston'
+import path from 'path'
 
 // 创建一个 Winston 日志记录器实例
 export const logger = winston.createLogger({
@@ -21,8 +22,8 @@ export const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'user-service' },
   transports: [
-    new winston.transports.File({ filename: 'data/logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'data/logs/info.log' }),
+    new winston.transports.File({ filename: path.join(ChatFlowCore.dataDir, 'data/logs/error.log'), level: 'error' }),
+    new winston.transports.File({ filename: path.join(ChatFlowCore.dataDir, 'data/logs/info.log') }),
   ],
 })
 

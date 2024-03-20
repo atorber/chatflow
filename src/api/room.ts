@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable camelcase */
-import { db } from '../db/tables.js'
 import { post, get } from '../utils/request.js'
+import { DataTables } from '../db/tables.js'
 
 // 查询用户群聊服务接口
 export const ServeGetGroups = () => {
@@ -142,7 +142,6 @@ export const ServeGroupAssignAdmin = (data: {} | undefined) => {
 export const ServeGroupNoSpeak = (data: {} | undefined) => {
   return post('/api/v1/group/no-speak', data)
 }
-const rdb = db.room
 
 /**
  * 记录群聊天记录 记录格式
@@ -152,6 +151,8 @@ const rdb = db.room
  */
 export async function addRoomRecord (info:any): Promise<boolean> {
   try {
+    const tables = DataTables.getTables()
+    const rdb = tables?.room
     await rdb.insert(info)
     return true
   } catch (error) {
@@ -167,6 +168,8 @@ export async function addRoomRecord (info:any): Promise<boolean> {
  */
 export async function getRoomRecord (roomName:any): Promise<any> {
   try {
+    const tables = DataTables.getTables()
+    const rdb = tables?.room
     const search = await rdb.find({ roomName })
     return search
   } catch (error) {
@@ -181,6 +184,8 @@ export async function getRoomRecord (roomName:any): Promise<any> {
  */
 export async function removeRecord (roomName:any): Promise<void> {
   try {
+    const tables = DataTables.getTables()
+    const rdb = tables?.room
     const search = await rdb.remove({ roomName }, { multi: true })
     return search
   } catch (e) {

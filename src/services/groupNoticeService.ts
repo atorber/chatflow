@@ -1,6 +1,6 @@
 /* eslint-disable sort-keys */
 import type { Notifications } from '../api/base-config.js'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import { Wechaty, log } from 'wechaty'
 import type { BusinessRoom, BusinessUser } from '../plugins/mod.js'
 import { generateRandomNumber, delay, logger } from '../utils/mod.js'
@@ -14,8 +14,7 @@ import {
   ServeUpdateGroupnotices,
 } from '../api/group-notice.js'
 
-// import { db } from '../db/tables.js'
-// const groupNoticeData = db.groupNotice
+// const groupNoticeData = ChatFlowCore.tables.groupNotice
 // logger.info(JSON.stringify(groupNoticeData))
 
 // 服务类
@@ -29,7 +28,7 @@ export class GroupNoticeChat {
 
   // 初始化
   static async init () {
-    this.bot = ChatFlowConfig.bot
+    this.bot = ChatFlowCore.bot
 
     log.info('初始化 GroupNoticeChat 成功...')
   }

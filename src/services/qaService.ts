@@ -1,12 +1,11 @@
 /* eslint-disable sort-keys */
 import type { SkillInfoArray } from './wxopenaiService.js'
 import { logger } from '../utils/mod.js'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import { Wechaty, log } from 'wechaty'
 import { ServeGetQas } from '../api/qa.js'
 
-// import { db } from '../db/tables.js'
-// const noticeData = db.notice
+// const noticeData = ChatFlowCore.tables.notice
 // logger.info(JSON.stringify(noticeData))
 
 // 服务类
@@ -27,7 +26,7 @@ export class QaChat {
       const res = await ServeGetQas()
       const records = res.data.items
       this.records = records
-      this.bot = ChatFlowConfig.bot
+      this.bot = ChatFlowCore.bot
       log.info('初始化 QaChat 成功...')
     } catch (e) {
       log.info('初始化 QaChat 失败...', e)

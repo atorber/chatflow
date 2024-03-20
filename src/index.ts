@@ -11,7 +11,7 @@ import onReady from './handlers/on-ready.js'
 import onMessage from './handlers/on-message.js'
 import { getBotOps } from './services/configService.js'
 import delay, { logForm, logger } from './utils/utils.js'
-import { ChatFlowConfig, WechatyConfig } from './api/base-config.js'
+import { ChatFlowCore, WechatyConfig } from './api/base-config.js'
 import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
 import { BiTable } from './db/lark-db.js'
 
@@ -20,25 +20,25 @@ import { GroupMaster, GroupMasterConfig } from './plugins/mod.js'
 import fs from 'fs'
 import { join } from 'path'
 
-// 获取根目录
-const rootDir = process.cwd()
-log.info('rootDir', rootDir)
-
-function ChatFlow (options?: {
+interface ChatFlowConfig {
   spaceId: string
   token: string
-  adminRoomTopic?: string
+  adminRoomTopic: string
   endpoint?: string
-}): WechatyPlugin {
+  dataDir?: string
+}
+
+function ChatFlow (options?: ChatFlowConfig): WechatyPlugin {
   logForm('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...')
 
   return function ChatFlowPlugin (bot: Wechaty): void {
 
-    ChatFlowConfig.bot = bot
-    ChatFlowConfig.spaceId = options?.spaceId || ''
-    ChatFlowConfig.token = options?.token || ''
-    ChatFlowConfig.adminRoomTopic = options?.adminRoomTopic || ''
-    ChatFlowConfig.endpoint = options?.endpoint || ''
+    ChatFlowCore.bot = bot
+    ChatFlowCore.spaceId = options?.spaceId || ''
+    ChatFlowCore.token = options?.token || ''
+    ChatFlowCore.adminRoomTopic = options?.adminRoomTopic || ''
+    ChatFlowCore.endpoint = options?.endpoint || ChatFlowCore.endpoint
+    ChatFlowCore.dataDir = options?.dataDir ||  ChatFlowCore.dataDir
 
     bot.on('scan', onScan)
     bot.on('login', onLogin)
@@ -52,11 +52,11 @@ function ChatFlow (options?: {
 
 }
 
-const init = async (options: {
-  spaceId: string
-  token: string,
-  endpoint?: string,
-}) => {
+const init = async (options: ChatFlowConfig) => {
+// 获取根目录
+  const rootDir =  options.dataDir || process.cwd()
+  log.info('rootDir', rootDir)
+  ChatFlowCore.setOptions(options)
 
   // 检测./data文件夹，如果不存在则创建
   // 在程序安装目录下创建/data目录，用于存放配置文件、日志文件、数据库文件、媒体文件等
@@ -89,7 +89,6 @@ const init = async (options: {
     fs.mkdirSync(join(rootDir, 'data/media/image/qrcode'))
   }
 
-  ChatFlowConfig.setOptions(options)
   // 远程加载配置信息，初始化api客户端
   try {
     const authClient = getAuthClient({
@@ -105,7 +104,7 @@ const init = async (options: {
 
       if (initRes.data && initRes.data.message === 'success') {
         logForm('初始化检查系统表成功...')
-        ChatFlowConfig.db = initRes.data.data
+        ChatFlowCore.db = initRes.data.data
       } else {
         logForm('初始化检查系统表失败...' + JSON.stringify(initRes.data))
         // 中止程序
@@ -121,7 +120,7 @@ const init = async (options: {
     try {
       const loginRes = await authClient.login(options.spaceId, options.token)
       logForm('登录客户端结果：' + JSON.stringify(loginRes))
-      ChatFlowConfig.isLogin = true
+      ChatFlowCore.isLogin = true
     } catch (e) {
       log.error('登录客户端失败...', e)
       throw e
@@ -132,10 +131,10 @@ const init = async (options: {
 
   // 从配置文件中读取配置信息，包括wechaty配置、mqtt配置以及是否启用mqtt推送或控制
   try {
-    const configAll = await ChatFlowConfig.init(options)
+    const configAll = await ChatFlowCore.init(options)
     // log.info('configAll', JSON.stringify(configAll))
 
-    const config: CloudConfig | undefined = configAll // 默认使用vika，使用lark时，需要传入'lark'参数await ChatFlowConfig.init('lark')
+    const config: CloudConfig | undefined = configAll // 默认使用vika，使用lark时，需要传入'lark'参数await ChatFlowCore.init('lark')
     // log.info('config', JSON.stringify(config, undefined, 2))
 
     // 构建机器人
@@ -145,7 +144,7 @@ const init = async (options: {
       try {
         const mqttProxy = MqttProxy.getInstance(config.mqttConfig)
         if (mqttProxy) {
-          mqttProxy.setWechaty(ChatFlowConfig.bot)
+          mqttProxy.setWechaty(ChatFlowCore.bot)
         }
       } catch (e) {
         log.error('MQTT代理启动失败，检查mqtt配置信息是否正确...', e)
@@ -153,7 +152,7 @@ const init = async (options: {
     }
     return config
   } catch (e) {
-    log.error('初始化ChatFlowConfig失败...', e)
+    log.error('初始化ChatFlowCore失败...', e)
     return undefined
   }
 
@@ -168,7 +167,7 @@ export interface CloudConfig {
 export {
   init,
   getBotOps,
-  ChatFlowConfig,
+  ChatFlowCore,
   log,
   logForm,
   BiTable,
@@ -180,6 +179,7 @@ export {
 
 export type {
   GroupMasterConfig,
+  ChatFlowConfig,
 }
 
 export type { WechatyConfig }

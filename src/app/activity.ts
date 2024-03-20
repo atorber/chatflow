@@ -1,6 +1,6 @@
 import { Message, log, Room } from 'wechaty'
 import { containsRoom } from '../services/userService.js'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import { ActivityChat } from '../services/activityService.js'
 
 // 控制器
@@ -75,7 +75,7 @@ const activityController = async (message: Message, room: Room) => {
 export const handleActivityManagement = async (message: Message, room:Room) => {
   try {
     const topic = await room.topic()
-    const isActInRoomWhiteList = await containsRoom(ChatFlowConfig.whiteList.roomWhiteList.act, room)
+    const isActInRoomWhiteList = await containsRoom(ChatFlowCore.whiteList.roomWhiteList.act, room)
     if (isActInRoomWhiteList) {
       log.info('当前群在act白名单内，开始请求活动管理...')
       try {

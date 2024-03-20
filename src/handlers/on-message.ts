@@ -7,7 +7,7 @@ import {
   formatMessageToCloud,
   saveMessageToCloud,
 } from '../api/message.js'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import {
   // logger,
   logForm, logger,
@@ -48,7 +48,7 @@ export async function onMessage (message: Message) {
     log.error('消息格式化失败:\n', e)
   }
 
-  if (ChatFlowConfig.isReady && !isSelf) {
+  if (ChatFlowCore.isReady && !isSelf) {
   // 请求管理员群操作
     try {
       await adminAction(message)
@@ -73,9 +73,9 @@ export async function onMessage (message: Message) {
 
     // 关键字回复
     try {
-      if (text && ChatFlowConfig.keywordList.length > 0) {
+      if (text && ChatFlowCore.keywordList.length > 0) {
         log.info('检测关键字回复...')
-        const keywordItem = ChatFlowConfig.keywordList.find((item) => item.name === text && item.type === '等于关键字')
+        const keywordItem = ChatFlowCore.keywordList.find((item) => item.name === text && item.type === '等于关键字')
         if (keywordItem) {
           log.info('触发关键字回复，关键字是:', keywordItem.name)
           await message.say(keywordItem.desc)
@@ -94,7 +94,7 @@ export async function onMessage (message: Message) {
         const media = text.replace('搜资源', '').trim()
         // 如果
         if (media) {
-          const mediaItem = ChatFlowConfig.mediaList.find((item) => item.name === media)
+          const mediaItem = ChatFlowCore.mediaList.find((item) => item.name === media)
           if (mediaItem) {
             await message.say(`「${mediaItem.name}」 ${mediaItem.link}`)
           } else {
@@ -106,7 +106,7 @@ export async function onMessage (message: Message) {
               const mediaItem = mediaList.find((item:any) => item.state === '开启')
               if (mediaItem) {
                 await message.say(`「${mediaItem.name}」${mediaItem.link}`)
-                ChatFlowConfig.mediaList.push(mediaItem)
+                ChatFlowCore.mediaList.push(mediaItem)
               } else {
                 await message.say(`没有找到资源「${media}」,在群内@管理员可提供人工搜索`)
               }
@@ -158,7 +158,7 @@ export async function onMessage (message: Message) {
 
           // 如果wxid不是weixin或者gh_开头的公众号ID，则提取出回复内容并回复
           if (wxid) {
-            const contact = await ChatFlowConfig.bot.Contact.find({ id: wxid })
+            const contact = await ChatFlowCore.bot.Contact.find({ id: wxid })
             const content = text.split('- - -\n')[1]
             if (contact && content) {
               await contact.say(content)
@@ -174,14 +174,14 @@ export async function onMessage (message: Message) {
     } else {
       // 转发到adminRoom
       const wxid = talker.id
-      if (ChatFlowConfig.adminRoom  && ![ 'weixin' ].includes(wxid) && wxid.includes('gh_') === false) {
-        const adminRoom = ChatFlowConfig.adminRoom
+      if (ChatFlowCore.adminRoom  && ![ 'weixin' ].includes(wxid) && wxid.includes('gh_') === false) {
+        const adminRoom = ChatFlowCore.adminRoom
         await adminRoom.say(`[${talker.name()}@${talker.id}]\n ${message.text()}`)
       }
     }
 
     // 消息存储到云表格，维格表或者飞书多维表格
-    if (ChatFlowConfig.configEnv.VIKA_UPLOADMESSAGETOVIKA) {
+    if (ChatFlowCore.configEnv.VIKA_UPLOADMESSAGETOVIKA) {
       try {
         const messageToCloud = await formatMessageToCloud(message)
         if (messageToCloud) await saveMessageToCloud(messageToCloud)
@@ -193,7 +193,7 @@ export async function onMessage (message: Message) {
     // 消息通过MQTT上报
     try {
       const mqttProxy = MqttProxy.getInstance()
-      if (mqttProxy && mqttProxy.isOk && ChatFlowConfig.configEnv.MQTT_MQTTMESSAGEPUSH) {
+      if (mqttProxy && mqttProxy.isOk && ChatFlowCore.configEnv.MQTT_MQTTMESSAGEPUSH) {
         const messageToMQTT = await formatMessageToMQTT(message)
         const eventMessagePayload = eventMessage('onMessage', messageToMQTT)
         mqttProxy.pubEvent(eventMessagePayload)
@@ -203,7 +203,7 @@ export async function onMessage (message: Message) {
     }
 
     // 保存文件到S3
-    if (ChatFlowConfig.configEnv.secretAccessKey) {
+    if (ChatFlowCore.configEnv.secretAccessKey) {
       try {
         await uploadMessage(message)
       } catch (e) {

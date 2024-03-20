@@ -44,6 +44,8 @@ import {
 } from '../api/chatbot.js'
 import { ServeGetWelcomes } from '../api/welcome.js'
 import { ServeGetQas } from '../api/qa.js'
+// import { DB } from '../db/nedb.js'
+import { DataTables } from '../db/tables.js'
 
 export interface ChatBotUser {
   id: string;
@@ -149,7 +151,21 @@ export class BiDirectionalMap {
 
 }
 
-export class ChatFlowConfig {
+export interface Database {
+  activity:any;
+  bot: any;
+  config:any;
+  contact: any;
+  env:any;
+  groupNotice:any;
+  message: any;
+  notice:any;
+  order:any;
+  room: any;
+  whiteList:any;
+}
+
+export class ChatFlowCore {
 
   static isLogin: boolean = false
   static isReady: boolean = false
@@ -161,10 +177,14 @@ export class ChatFlowConfig {
   static configEnv: ProcessEnv
   static spaceId: string
   static token: string = ''
-  static adminRoomTopic?: string
-  static endpoint?: string
+  static adminRoomTopic: string
+  static endpoint: string = 'http://127.0.0.1:9503'
+  static dataDir: string = process.cwd()
   static bot: Wechaty
   static adminRoom: Room | undefined
+
+  static tables: Database
+
   static db: {
     dataBaseIds: DateBase,
     dataBaseNames: DateBase,
@@ -217,12 +237,15 @@ export class ChatFlowConfig {
     spaceId: string,
     token: string,
     endpoint?: string,
+    dataDir?: string,
   }) {
-    ChatFlowConfig.spaceId = options.spaceId || ChatFlowConfig.spaceId
-    ChatFlowConfig.token = options.token || ChatFlowConfig.token
-    ChatFlowConfig.endpoint = options.endpoint || ChatFlowConfig.token || 'http://127.0.0.1:9503'
-    ChatFlowConfig.batchCount = options.token.indexOf('/') === -1 ? 10 : 100
-    ChatFlowConfig.delayTime = options.token.indexOf('/') === -1 ? 1000 : 500
+    ChatFlowCore.dataDir = options.dataDir || ChatFlowCore.dataDir
+    ChatFlowCore.tables = DataTables.createTables(ChatFlowCore.dataDir)
+    ChatFlowCore.spaceId = options.spaceId || ChatFlowCore.spaceId
+    ChatFlowCore.token = options.token || ChatFlowCore.token
+    ChatFlowCore.endpoint = options.endpoint || ChatFlowCore.token || 'http://127.0.0.1:9503'
+    ChatFlowCore.batchCount = options.token.indexOf('/') === -1 ? 10 : 100
+    ChatFlowCore.delayTime = options.token.indexOf('/') === -1 ? 1000 : 500
   }
 
   static async init (options: {
@@ -230,9 +253,10 @@ export class ChatFlowConfig {
     token?: string,
     endpoint?: string,
   }) {
-    ChatFlowConfig.spaceId = options.spaceId || ChatFlowConfig.spaceId
-    ChatFlowConfig.token = options.token || ChatFlowConfig.token
-    ChatFlowConfig.endpoint = options.endpoint || ChatFlowConfig.token || 'http://127.0.0.1:9503'
+    ChatFlowCore.spaceId = options.spaceId || ChatFlowCore.spaceId
+    ChatFlowCore.token = options.token || ChatFlowCore.token
+    ChatFlowCore.endpoint = options.endpoint || ChatFlowCore.token || 'http://127.0.0.1:9503'
+
     // log.info('初始化维格配置信息...,init()')
     const userConfig = await ServeGetUserConfigObj()
     // log.info('userConfig', JSON.stringify(userConfig))
@@ -243,7 +267,7 @@ export class ChatFlowConfig {
     }
 
     // 计算clientid原始字符串
-    const clientString = ChatFlowConfig.token + ChatFlowConfig.spaceId
+    const clientString = ChatFlowCore.token + ChatFlowCore.spaceId
     // clientid加密
     const client = CryptoJS.SHA256(clientString).toString()
 
@@ -304,8 +328,8 @@ export class ChatFlowConfig {
       log.info('当前bot使用的puppet:', puppet)
 
       // 根据多维表格类型设置批量操作的数量和延迟时间
-      const batchCount = ChatFlowConfig.batchCount
-      const delayTime = ChatFlowConfig.delayTime
+      const batchCount = ChatFlowCore.batchCount
+      const delayTime = ChatFlowCore.delayTime
 
       // 如果是wechaty-puppet-wechat或wechaty-puppet-wechat4u，每次登录好友ID会变化，需要分批删除好友
       if (puppet === 'wechaty-puppet-wechat' || puppet === 'wechaty-puppet-wechat4u') {
@@ -377,8 +401,8 @@ export class ChatFlowConfig {
   static async updateRooms (puppet: string) {
     let updateCount = 0
     // 根据多维表格类型设置批量操作的数量和延迟时间
-    const batchCount = ChatFlowConfig.batchCount
-    const delayTime = ChatFlowConfig.delayTime
+    const batchCount = ChatFlowCore.batchCount
+    const delayTime = ChatFlowCore.delayTime
     try {
       // 获取最新的群列表
       const rooms: Room[] = await this.bot.Room.findAll()
@@ -478,7 +502,7 @@ export class ChatFlowConfig {
     // const records = await this.getKeywords()
     const res = await ServeGetKeywords()
     const records = res.data.items
-    ChatFlowConfig.keywordList = records
+    ChatFlowCore.keywordList = records
     let text: string = '【操作说明】\n'
     for (const fields of records) {
       if (fields['type'] === '系统指令') text += `${fields['name']} : ${fields['desc']}\n`

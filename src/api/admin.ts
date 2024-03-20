@@ -1,6 +1,6 @@
 import { Message, log, Wechaty, Room } from 'wechaty'
 import { FileBox } from 'file-box'
-import { ChatFlowConfig } from '../api/base-config.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import {
   sendNotice,
   exportContactsAndRoomsToCSV,
@@ -40,8 +40,8 @@ const adminCommands: AdminCommands = {
   更新智聊用户: async () => {
     try {
       const chatBotUsers = await ServeGetChatbotUsersDetail()
-      ChatFlowConfig.chatBotUsers = chatBotUsers.data.items
-      logger.info('获取到智聊用户信息:' + JSON.stringify(ChatFlowConfig.chatBotUsers))
+      ChatFlowCore.chatBotUsers = chatBotUsers.data.items
+      logger.info('获取到智聊用户信息:' + JSON.stringify(ChatFlowCore.chatBotUsers))
       return [ true, '智聊用户列表更新成功~' ]
     } catch (e) {
       return [ false, '智聊用户列表配置更新失败~' ]
@@ -56,8 +56,8 @@ const adminCommands: AdminCommands = {
       // logger.info('获取的维格表中的环境变量配置信息vikaConfig：' + JSON.stringify(vikaConfig))
 
       // 合并配置信息，如果维格表中有对应配置则覆盖环境变量中的配置
-      ChatFlowConfig.configEnv = { ...vikaConfig, ...(ChatFlowConfig.configEnv) }
-      logger.info('合并后的环境变量信息：' + JSON.stringify(ChatFlowConfig.configEnv))
+      ChatFlowCore.configEnv = { ...vikaConfig, ...(ChatFlowCore.configEnv) }
+      logger.info('合并后的环境变量信息：' + JSON.stringify(ChatFlowCore.configEnv))
       return [ true, '配置更新成功~' ]
     } catch (e) {
       return [ false, '配置更新失败~' ]
@@ -73,8 +73,8 @@ const adminCommands: AdminCommands = {
   },
   更新通讯录: async () => {
     try {
-      await ChatFlowConfig.updateContacts(ChatFlowConfig.configEnv.WECHATY_PUPPET)
-      await ChatFlowConfig.updateRooms(ChatFlowConfig.configEnv.WECHATY_PUPPET)
+      await ChatFlowCore.updateContacts(ChatFlowCore.configEnv.WECHATY_PUPPET)
+      await ChatFlowCore.updateRooms(ChatFlowCore.configEnv.WECHATY_PUPPET)
       return [ true, '通讯录更新成功~' ]
     } catch (e) {
       return [ false, '通讯录更新失败~' ]
@@ -83,8 +83,8 @@ const adminCommands: AdminCommands = {
   更新白名单: async () => {
     try {
       const res = await ServeGetWhitelistWhiteObject()
-      ChatFlowConfig.whiteList = res.data
-      logger.info('获取到白名单信息:' + JSON.stringify(ChatFlowConfig.whiteList))
+      ChatFlowCore.whiteList = res.data
+      logger.info('获取到白名单信息:' + JSON.stringify(ChatFlowCore.whiteList))
       return [ true, '热更新白名单~' ]
     } catch (e) {
       return [ false, '白名单更新失败~' ]
@@ -108,16 +108,16 @@ const adminCommands: AdminCommands = {
   },
   更新问答: async () => {
     let replyText = ''
-    if (ChatFlowConfig.configEnv.WXOPENAI_APPID && ChatFlowConfig.configEnv.WXOPENAI_MANAGERID) {
+    if (ChatFlowCore.configEnv.WXOPENAI_APPID && ChatFlowCore.configEnv.WXOPENAI_MANAGERID) {
       try {
         const skills: SkillInfoArray = await QaChat.getQa()
         if (skills.length) {
           const config: WxOpenaiBotConfig = {
-            encodingAESKey: ChatFlowConfig.configEnv.WXOPENAI_ENCODINGAESKEY || '',
-            token: ChatFlowConfig.configEnv.WXOPENAI_TOKEN || '',
+            encodingAESKey: ChatFlowCore.configEnv.WXOPENAI_ENCODINGAESKEY || '',
+            token: ChatFlowCore.configEnv.WXOPENAI_TOKEN || '',
             nonce: 'ABSBSDSD',
-            appid: ChatFlowConfig.configEnv.WXOPENAI_APPID || '',
-            managerid: ChatFlowConfig.configEnv.WXOPENAI_MANAGERID || '',
+            appid: ChatFlowCore.configEnv.WXOPENAI_APPID || '',
+            managerid: ChatFlowCore.configEnv.WXOPENAI_MANAGERID || '',
           }
 
           const aiBotInstance = new WxOpenaiBot(config)
@@ -154,7 +154,7 @@ const adminCommands: AdminCommands = {
   },
   上传配置: async () => {
     try {
-      await EnvChat.updateConfigToVika(ChatFlowConfig.configEnv)
+      await EnvChat.updateConfigToVika(ChatFlowCore.configEnv)
       return [ true, '上传配置信息成功~' ]
     } catch (e) {
       return [ false, '上传配置信息失败~' ]
@@ -172,9 +172,9 @@ async function handleAdminRoomSetting (message: Message) {
   const text = message.text()
   const room = message.room() as Room
   if (message.self() && text === '设置为管理群') {
-    ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMID = room.id
-    ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMTOPIC = await room.topic()
-    // await updateConfig(ChatFlowConfig.configEnv)
+    ChatFlowCore.configEnv.ADMINROOM_ADMINROOMID = room.id
+    ChatFlowCore.configEnv.ADMINROOM_ADMINROOMTOPIC = await room.topic()
+    // await updateConfig(ChatFlowCore.configEnv)
     await sendMsg(message, '设置管理群成功')
   }
 }
@@ -187,20 +187,20 @@ export const adminAction = async (message:Message) => {
   const topic = await room?.topic()
   const isSelf = message.self()
 
-  const isAdminRoom: boolean = (roomId && (roomId === ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMID || topic === ChatFlowConfig.configEnv.ADMINROOM_ADMINROOMTOPIC)) || isSelf
+  const isAdminRoom: boolean = (roomId && (roomId === ChatFlowCore.configEnv.ADMINROOM_ADMINROOMID || topic === ChatFlowCore.configEnv.ADMINROOM_ADMINROOMTOPIC)) || isSelf
   // 管理员群接收到管理指令时执行相关操作
   if (isAdminRoom) {
-    if (message.type() === ChatFlowConfig.bot.Message.Type.Attachment) {
-      await sendNotice(ChatFlowConfig.bot, message)
+    if (message.type() === ChatFlowCore.bot.Message.Type.Attachment) {
+      await sendNotice(ChatFlowCore.bot, message)
     }
 
     if (text === '帮助') {
-      const replyText = await ChatFlowConfig.getSystemKeywordsText()
+      const replyText = await ChatFlowCore.getSystemKeywordsText()
       await sendMsg(message, replyText)
     } else if (Object.prototype.hasOwnProperty.call(adminCommands, text)) {
       const command = adminCommands[text as keyof typeof adminCommands]
       if (typeof command === 'function') {
-        const [ success, replyText ] = await command(ChatFlowConfig.bot, message)
+        const [ success, replyText ] = await command(ChatFlowCore.bot, message)
         await sendReplyMessage(message, success, replyText, replyText)
       }
     }
@@ -215,7 +215,7 @@ export const adminAction = async (message:Message) => {
       const command = commandActions[text]
       if (typeof command === 'function') {
         try {
-          const fileBox = await command(ChatFlowConfig.bot, message)
+          const fileBox = await command(ChatFlowCore.bot, message)
           await sendMsg(message, fileBox)
         } catch (err) {
           logger.error(`${command} failed`, err)
@@ -268,51 +268,51 @@ export const adminAction = async (message:Message) => {
         if (config.table && config.view) {
           log.info('多维表格配置信息匹配，开始处理...')
           // 处理多维表格配置信息
-          // 检查config.talbe是否是ChatFlowConfig.db.dataBaseIds中某个key的value，如果存在则查询ChatFlowConfig.db.dataBaseNames找出对应的表名称
+          // 检查config.talbe是否是ChatFlowCore.db.dataBaseIds中某个key的value，如果存在则查询ChatFlowCore.db.dataBaseNames找出对应的表名称
           const tableId = config.table
-          const tableCode = ChatFlowConfig.db.dataBaseIdsMap[tableId]
+          const tableCode = ChatFlowCore.db.dataBaseIdsMap[tableId]
           log.info('数据表标识：', tableCode)
           if (tableCode) {
-            const tableName = ChatFlowConfig.db.dataBaseNames[tableCode as keyof typeof ChatFlowConfig.db.dataBaseNames]
+            const tableName = ChatFlowCore.db.dataBaseNames[tableCode as keyof typeof ChatFlowCore.db.dataBaseNames]
             log.info('数据表名称：', tableName)
             await message.say(`检测到多维表格链接，表格名称：【${tableName}】，\n是否需要处理？\n配置信息:\n${JSON.stringify(config, null, 2)}`)
 
             switch (tableCode) {
               case 'mediaSheet':
-                await ChatFlowConfig.updateMediaList()
+                await ChatFlowCore.updateMediaList()
                 break
               case 'envSheet':
-                await ChatFlowConfig.updateEnv()
+                await ChatFlowCore.updateEnv()
                 break
               case 'groupSheet':
-                await ChatFlowConfig.updateGroup()
+                await ChatFlowCore.updateGroup()
                 break
               case 'chatBotUserSheet':
-                await ChatFlowConfig.updateChatBotUser()
+                await ChatFlowCore.updateChatBotUser()
                 break
               case 'chatBotSheet':
-                await ChatFlowConfig.updateChatBot()
+                await ChatFlowCore.updateChatBot()
                 break
               case 'whiteListSheet':
-                await ChatFlowConfig.updateWhiteList()
+                await ChatFlowCore.updateWhiteList()
                 break
               case 'groupNoticeSheet':
-                await ChatFlowConfig.updateGroupNotifications()
+                await ChatFlowCore.updateGroupNotifications()
                 break
               case 'statisticSheet':
-                await ChatFlowConfig.updateStatistics()
+                await ChatFlowCore.updateStatistics()
                 break
               case 'noticeSheet':
-                await ChatFlowConfig.updateReminder()
+                await ChatFlowCore.updateReminder()
                 break
               case 'qaSheet':
-                await ChatFlowConfig.updateQaList()
+                await ChatFlowCore.updateQaList()
                 break
               case 'keywordSheet':
-                await ChatFlowConfig.updateKeywords()
+                await ChatFlowCore.updateKeywords()
                 break
               case 'welcomeSheet':
-                await ChatFlowConfig.updateWelcomes()
+                await ChatFlowCore.updateWelcomes()
                 break
               default:
                 log.info('多维表格配置信息不需要处理...')

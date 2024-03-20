@@ -1,5 +1,5 @@
-import nedb from '../db/nedb.js'
-const cdb:any = nedb('./config.db')
+import { DB } from '../db/nedb.js'
+const cdb:any = new DB('config.db')
 /**
  * 添加配置文件
  * @param {*} config
