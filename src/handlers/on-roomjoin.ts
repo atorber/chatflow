@@ -1,6 +1,5 @@
 import { Contact, Room, log } from 'wechaty'
 import { ChatFlowCore } from '../api/base-config.js'
-import { logger } from '../utils/utils.js'
 /**
  * 群中有新人进入
  */
@@ -15,7 +14,7 @@ async function onRoomjoin (room: Room, inviteeList: Contact[], inviter: Contact)
     const nameList = inviteeList.map(c => c.name()).join(',')
     const inviterName = inviter.name()
     log.info(`新人进群: Room "${roomTopic}" got new members "${nameList}", invited by "${inviterName}"`)
-    logger.info(`新人进群: Room "${roomTopic}" got new members "${nameList}", invited by "${inviterName}"`)
+    ChatFlowCore.logger.info(`新人进群: Room "${roomTopic}" got new members "${nameList}", invited by "${inviterName}"`)
     // Send a welcome message only if there are invitees
     if (inviteeList.length > 0) {
       const welcomeMessage = `欢迎加入${roomTopic}, ${welcomeRoom.text}~`

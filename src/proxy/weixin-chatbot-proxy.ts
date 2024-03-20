@@ -7,9 +7,10 @@ import {
   types,
   Wechaty,
 } from 'wechaty'
-import { formatSentMessage, logger } from '../utils/utils.js'
+import { formatSentMessage } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/mod.js'
 import * as openai from '../utils/openai-sdk/index.js'
+import { ChatFlowCore } from '../api/base-config.js'
 
 async function wxai (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
   const text = extractKeyword(message, bot.currentUser.name())
@@ -115,7 +116,7 @@ async function aibot (sysConfig: ProcessEnv, talker: any, room: any, query: any)
   const wxid = talker.id
   const nickName = talker.name()
   const topic = await room?.topic()
-  logger.info(`查询内容，query: ${query}`)
+  ChatFlowCore.logger.info(`查询内容，query: ${query}`)
 
   const ops = {
     EncodingAESKey: sysConfig.WXOPENAI_ENCODINGAESKEY,
@@ -135,18 +136,18 @@ async function aibot (sysConfig: ProcessEnv, talker: any, room: any, query: any)
   //     console.log('error', e)
   // })
 
-  logger.info('开始请求微信对话平台...')
+  ChatFlowCore.logger.info('开始请求微信对话平台...')
   try {
     const queryData = prepareWxOpenAiParams(room, topic, nickName, wxid, roomid, query)
 
     const resMsg:any = await openai.chat(queryData)
 
-    logger.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
+    ChatFlowCore.logger.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
     log.info(`对话平台返回内容： ${JSON.stringify(resMsg)}`)
     log.info(`回答内容： ${resMsg.msgtype}, ${resMsg.title || 'NO_MATCH'}, ${resMsg.msg[0].content || 'NO_MATCH'}`)
     answer = handleWxOpenAiResponse(resMsg)
   } catch (err) {
-    logger.error(`请求微信对话平台错误： ${err}`)
+    ChatFlowCore.logger.error(`请求微信对话平台错误： ${err}`)
     answer = {}
   }
 
@@ -205,7 +206,7 @@ function handleWxOpenAiResponse (resMsg: any) {
       }
       // Add other cases here as needed
       default:
-        logger.info(JSON.stringify({ msg: '没有命中关键字' }))
+        ChatFlowCore.logger.info(JSON.stringify({ msg: '没有命中关键字' }))
     }
   }
   log.info('回答内容：', JSON.stringify(answer))

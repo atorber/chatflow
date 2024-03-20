@@ -9,23 +9,7 @@ import type {
   // WechatyBuilder,
 } from 'wechaty'
 
-import { TaskConfig, ChatFlowCore } from '../api/base-config.js'
-import * as winston from 'winston'
-import path from 'path'
-
-// 创建一个 Winston 日志记录器实例
-export const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`),
-  ),
-  defaultMeta: { service: 'user-service' },
-  transports: [
-    new winston.transports.File({ filename: path.join(ChatFlowCore.dataDir, 'data/logs/error.log'), level: 'error' }),
-    new winston.transports.File({ filename: path.join(ChatFlowCore.dataDir, 'data/logs/info.log') }),
-  ],
-})
+import type { TaskConfig } from '../api/base-config.js'
 
 async function formatSentMessage (userSelf: Contact, text: string, talker: Contact|undefined, room: Room|undefined) {
   // console.debug('发送的消息：', text)

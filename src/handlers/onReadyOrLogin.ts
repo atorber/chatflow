@@ -1,7 +1,7 @@
 // 不同的puppet对onReady和onLogin的实现可能不一致，需要分别处理
 
 import { Contact, Wechaty, log, Message, Room, Sayable } from 'wechaty'
-import { delay, logger } from '../utils/utils.js'
+import { delay } from '../utils/utils.js'
 import { ChatFlowCore } from '../api/base-config.js'
 import {
   MessageChat,
@@ -56,20 +56,20 @@ const postVikaInitialization = async (bot: Wechaty) => {
   try {
     log.info('开始请求维格表中的环境变量配置信息...')
     const res = await EnvChat.getConfigFromVika()
-    logger.info('ServeGetUserConfig res:' + JSON.stringify(res))
+    ChatFlowCore.logger.info('ServeGetUserConfig res:' + JSON.stringify(res))
 
     const vikaConfig:any = res.data
-    // logger.info('获取的维格表中的环境变量配置信息vikaConfig：' + JSON.stringify(vikaConfig))
+    // ChatFlowCore.logger.info('获取的维格表中的环境变量配置信息vikaConfig：' + JSON.stringify(vikaConfig))
 
     // 合并配置信息，如果维格表中有对应配置则覆盖环境变量中的配置
     ChatFlowCore.configEnv = { ...vikaConfig, ...(ChatFlowCore.configEnv) }
-    logger.info('合并后的环境变量信息：' + JSON.stringify(ChatFlowCore.configEnv))
+    ChatFlowCore.logger.info('合并后的环境变量信息：' + JSON.stringify(ChatFlowCore.configEnv))
 
     // 下载进群欢迎语
     try {
       const welcomes = await ServeGetWelcomes()
       ChatFlowCore.welcomeList = welcomes.data.items
-      logger.info('获取的进群欢迎语：' + JSON.stringify(ChatFlowCore.welcomeList))
+      ChatFlowCore.logger.info('获取的进群欢迎语：' + JSON.stringify(ChatFlowCore.welcomeList))
     } catch (err) {
       log.error('获取进群欢迎语失败', err)
     }
@@ -79,7 +79,7 @@ const postVikaInitialization = async (bot: Wechaty) => {
       // 获取白名单列表
       const listRes = await ServeGetWhitelistWhiteObject()
       ChatFlowCore.whiteList = listRes.data
-      logger.info('获取白名单成功...' + JSON.stringify(ChatFlowCore.whiteList))
+      ChatFlowCore.logger.info('获取白名单成功...' + JSON.stringify(ChatFlowCore.whiteList))
 
       try {
         // 更新定时任务
@@ -107,7 +107,7 @@ const postVikaInitialization = async (bot: Wechaty) => {
       whiteList: ChatFlowCore.whiteList,
       chatBotUsers: ChatFlowCore.chatBotUsers,
     }
-    logger.info('ChatFlowCoreInfo配置信息：' + JSON.stringify(ChatFlowCoreInfo))
+    ChatFlowCore.logger.info('ChatFlowCoreInfo配置信息：' + JSON.stringify(ChatFlowCoreInfo))
   } catch (err) {
     log.error('向管理群推送消息失败...', err)
   }
@@ -122,7 +122,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
   // 初始化服务
   try {
     log.info('onReadyOrLogin,初始化services服务...')
-    logger.info('初始化服务开始...')
+    ChatFlowCore.logger.info('初始化服务开始...')
 
     // 消息上传服务初始化
     await MessageChat.init()
@@ -146,7 +146,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
 
     // 智能问答服务初始化
     await QaChat.init()
-    // logger.info('services:' + JSON.stringify(services))
+    // ChatFlowCore.logger.info('services:' + JSON.stringify(services))
     ChatFlowCore.isReady = true
     log.info('初始化服务完成...')
     await delay(500)
@@ -167,7 +167,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
     syncStatus:string;
   }[] = configGgroup['基础配置']
 
-  logger.info('获取的基础配置信息:' + JSON.stringify(baseConfig))
+  ChatFlowCore.logger.info('获取的基础配置信息:' + JSON.stringify(baseConfig))
 
   // 从baseConfig中找出key为BASE_BOT_ID的配置项，更新value为当前登录的bot的id
   const BASE_BOT_ID = baseConfig.find((item) => item.key === 'BASE_BOT_ID')
@@ -249,7 +249,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
       raw.fields = item
       return raw
     })
-    logger.info('更新基础配置信息:' + JSON.stringify(baseInfo))
+    ChatFlowCore.logger.info('更新基础配置信息:' + JSON.stringify(baseInfo))
     await ServeUpdateConfig(baseInfo)
     await delay(500)
   }
@@ -257,7 +257,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
   try {
     const chatBotUsers = await ServeGetChatbotUsersDetail()
     ChatFlowCore.chatBotUsers = chatBotUsers.data.items
-    logger.info('获取chatBotUsers:' + JSON.stringify(ChatFlowCore.chatBotUsers))
+    ChatFlowCore.logger.info('获取chatBotUsers:' + JSON.stringify(ChatFlowCore.chatBotUsers))
   } catch (err) {
     log.error('获取chatBotUsers失败', err)
   }

@@ -49,7 +49,7 @@ export class WhiteListChat {
     for (let i = 0; i < whiteListRecords.length; i++) {
       const fields = whiteListRecords[i]
       const app: 'qa' | 'msg' | 'act' | 'gpt' = fields['app']?.split('|')[1]
-      // logger.info('当前app:' + app)
+      // ChatFlowCore.logger.info('当前app:' + app)
       if (fields['name'] || fields['id'] || fields['alias']) {
         if (fields['type'] === '群') {
           const room: BusinessRoom = {

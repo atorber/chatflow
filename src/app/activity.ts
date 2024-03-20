@@ -64,10 +64,10 @@ const activityController = async (message: Message, room: Room) => {
   }
 
   // req = generateResponseMessage('Text', msg, roomid, wxid)
-  // logger.info('req===========================' + JSON.stringify(req))
+  // ChatFlowCore.logger.info('req===========================' + JSON.stringify(req))
 
   if (msg) {
-    // logger.info('活动操作结果：\n' + msg)
+    // ChatFlowCore.logger.info('活动操作结果：\n' + msg)
     await message.say(msg)
   }
 }

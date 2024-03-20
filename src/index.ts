@@ -10,7 +10,7 @@ import onLogin from './handlers/on-login.js'
 import onReady from './handlers/on-ready.js'
 import onMessage from './handlers/on-message.js'
 import { getBotOps } from './services/configService.js'
-import delay, { logForm, logger } from './utils/utils.js'
+import delay, { logForm } from './utils/utils.js'
 import { ChatFlowCore, WechatyConfig } from './api/base-config.js'
 import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
 import { BiTable } from './db/lark-db.js'
@@ -100,7 +100,6 @@ const init = async (options: ChatFlowOptions) => {
       // 初始化检查数据库表，如果不存在则创建
       const initRes = await authClient?.init(options.spaceId, options.token)
       logForm('初始化检查系统表结果：' + JSON.stringify(initRes.data))
-      logger.info('初始化检查系统表结果：' + JSON.stringify(initRes.data))
 
       if (initRes.data && initRes.data.message === 'success') {
         logForm('初始化检查系统表成功...')

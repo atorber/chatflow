@@ -8,7 +8,7 @@ import { onReadyOrLogin } from './onReadyOrLogin.js'
  */
 async function onLogin (this:Wechaty) {
 
-  // logger.info('onLogin,当前登录的账号信息:\n' + user.name())
+  // ChatFlowCore.logger.info('onLogin,当前登录的账号信息:\n' + user.name())
 
   await delay(3000)
 

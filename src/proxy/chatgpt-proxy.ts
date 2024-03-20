@@ -5,7 +5,7 @@ import {
   types,
   Wechaty,
 } from 'wechaty'
-import { formatSentMessage, logger } from '../utils/utils.js'
+import { formatSentMessage } from '../utils/utils.js'
 import axios from 'axios'
 import { ChatFlowCore } from '../index.js'
 axios.defaults.timeout = 60000
@@ -21,14 +21,14 @@ async function gpt (bot: Wechaty, message: Message) {
       answer = await aibot(text)
     }
 
-    logger.info('回复消息：', JSON.stringify(answer))
+    ChatFlowCore.logger.info('回复消息：', JSON.stringify(answer))
 
     if (isValidAnswer(answer)) {
       await handleAnswer(answer, bot, message)
     }
   } catch (error) {
-    logger.error('请求gpt Error:', error)
-    logger.error(`查询内容，query: ${text}`)
+    ChatFlowCore.logger.error('请求gpt Error:', error)
+    ChatFlowCore.logger.error(`查询内容，query: ${text}`)
 
   }
 }
@@ -135,7 +135,7 @@ async function aibot (query: any) {
       },
     )
 
-    logger.info('gpt Response:' + JSON.stringify(response.data))
+    ChatFlowCore.logger.info('gpt Response:' + JSON.stringify(response.data))
 
     if (response.data.choices) {
       return {
@@ -146,8 +146,8 @@ async function aibot (query: any) {
       return answer
     }
   } catch (error) {
-    logger.error('请求gpt Error:', error)
-    logger.error(`查询内容，query: ${query}`)
+    ChatFlowCore.logger.error('请求gpt Error:', error)
+    ChatFlowCore.logger.error(`查询内容，query: ${query}`)
     return answer
 
   }

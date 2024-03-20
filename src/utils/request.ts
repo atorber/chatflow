@@ -2,10 +2,7 @@
 import axios from 'axios'
 import getAuthClient from './auth.js'
 import 'dotenv/config.js'
-import {
-  // logForm,
-  logger,
-} from './utils.js'
+import { ChatFlowCore } from '../api/base-config.js'
 
 /**
  * GET 请求
@@ -31,7 +28,7 @@ export const get = (url: string, data = {}, options = {}) => {
  * @param {*} error
  */
   const errorHandler = (error: { response?: { status: number, config:any } }) => {
-    logger.error('请求异常' + JSON.stringify(error) + '\n')
+    ChatFlowCore.logger.error('请求异常' + JSON.stringify(error) + '\n')
     // 判断是否是响应错误信息
     if (error.response) {
       if (error.response.status === 401) {
@@ -56,7 +53,7 @@ export const get = (url: string, data = {}, options = {}) => {
 
   // 响应拦截器
   request.interceptors.response.use((response) => {
-    logger.info(`${response.config.method} ${response.config.url}\n${JSON.stringify(response.data)}\n`)
+    ChatFlowCore.logger.info(`${response.config.method} ${response.config.url}\n${JSON.stringify(response.data)}\n`)
     if (response.data && response.data.message === 'Unauthorized' && response.data.statusCode === 401) {
       getAuthClient()?.delAccessToken()
       return request(response.config)
@@ -98,7 +95,7 @@ export const post = (url: string, data = {}, options = {}) => {
  * @param {*} error
  */
   const errorHandler = (error: { response?: { status: number, config:any } }) => {
-    logger.error('请求异常' + JSON.stringify(error) + '\n')
+    ChatFlowCore.logger.error('请求异常' + JSON.stringify(error) + '\n')
     // 判断是否是响应错误信息
     if (error.response) {
       if (error.response.status === 401) {
@@ -123,7 +120,7 @@ export const post = (url: string, data = {}, options = {}) => {
 
   // 响应拦截器
   request.interceptors.response.use((response) => {
-    logger.info(`${response.config.method} ${response.config.url}\n${JSON.stringify(response.data)}\n`)
+    ChatFlowCore.logger.info(`${response.config.method} ${response.config.url}\n${JSON.stringify(response.data)}\n`)
     if (response.data && response.data.message === 'Unauthorized' && response.data.statusCode === 401) {
       getAuthClient()?.delAccessToken()
       return request(response.config)
@@ -165,7 +162,7 @@ export const upload = (url: string, data = {}, options = {}) => {
  * @param {*} error
  */
   const errorHandler = (error: { response?: { status: number, config:any } }) => {
-    logger.error('请求异常' + JSON.stringify(error) + '\n')
+    ChatFlowCore.logger.error('请求异常' + JSON.stringify(error) + '\n')
     // 判断是否是响应错误信息
     if (error.response) {
       if (error.response.status === 401) {
@@ -190,7 +187,7 @@ export const upload = (url: string, data = {}, options = {}) => {
 
   // 响应拦截器
   request.interceptors.response.use((response) => {
-    logger.info(`${response.config.method} ${response.config.url}\n${JSON.stringify(response.data)}\n`)
+    ChatFlowCore.logger.info(`${response.config.method} ${response.config.url}\n${JSON.stringify(response.data)}\n`)
     if (response.data && response.data.message === 'Unauthorized' && response.data.statusCode === 401) {
       getAuthClient()?.delAccessToken()
       return request(response.config)

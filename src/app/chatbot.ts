@@ -6,7 +6,7 @@ import {
   Wechaty,
   log,
 } from 'wechaty'
-import { formatSentMessage, logger } from '../utils/utils.js'
+import { formatSentMessage } from '../utils/utils.js'
 import axios from 'axios'
 import { ChatFlowCore } from '../index.js'
 import type { ChatBotUser } from '../api/base-config.js'
@@ -42,10 +42,10 @@ async function chatbot (message: Message) {
       log.info('contact智聊服务chatBotUser:' + JSON.stringify(chatBotUser))
     }
   } catch (e) {
-    logger.error('chatbot error:', e)
+    ChatFlowCore.logger.error('chatbot error:', e)
   }
 
-  logger.info('智聊服务chatBotUser:' + JSON.stringify(chatBotUser))
+  ChatFlowCore.logger.info('智聊服务chatBotUser:' + JSON.stringify(chatBotUser))
   // log.info('当前用户或群:' + JSON.stringify(room) + JSON.stringify(talker))
   // log.info('智聊服务chatBotUser:' + JSON.stringify(chatBotUser))
 
@@ -73,8 +73,8 @@ async function chatbot (message: Message) {
       }
     }
   } catch (error) {
-    logger.error('请求智聊服务 Error:', error)
-    logger.error(`智聊查询内容，query: ${text}`)
+    ChatFlowCore.logger.error('请求智聊服务 Error:', error)
+    ChatFlowCore.logger.error(`智聊查询内容，query: ${text}`)
   }
 }
 
@@ -171,7 +171,7 @@ async function callGptbot (query: any, chatBotUser:ChatBotUser) {
     }
   } catch (error) {
     log.error('请求智聊服务gptbot Error:', error)
-    logger.error(`查询内容，query: ${query}`)
+    ChatFlowCore.logger.error(`查询内容，query: ${query}`)
     return answer
 
   }

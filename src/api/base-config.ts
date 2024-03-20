@@ -18,7 +18,7 @@ import {
   // ServeGetUserConfig,
 } from '../api/user.js'
 
-import { delay, logger } from '../utils/utils.js'
+import { delay } from '../utils/utils.js'
 import {
   ServeGetContactsRaw,
   ServeDeleteBatchContact,
@@ -46,6 +46,9 @@ import { ServeGetWelcomes } from '../api/welcome.js'
 import { ServeGetQas } from '../api/qa.js'
 // import { DB } from '../db/nedb.js'
 import { DataTables } from '../db/tables.js'
+
+import * as winston from 'winston'
+import path from 'path'
 
 export interface ChatBotUser {
   id: string;
@@ -182,6 +185,7 @@ export class ChatFlowCore {
   static dataDir: string = process.cwd()
   static bot: Wechaty
   static adminRoom: Room | undefined
+  static logger: winston.Logger
 
   static tables: Database
 
@@ -246,6 +250,19 @@ export class ChatFlowCore {
     ChatFlowCore.endpoint = options.endpoint || ChatFlowCore.endpoint
     ChatFlowCore.batchCount = options.token.indexOf('/') === -1 ? 10 : 100
     ChatFlowCore.delayTime = options.token.indexOf('/') === -1 ? 1000 : 500
+    // 创建一个 Winston 日志记录器实例
+    ChatFlowCore.logger = winston.createLogger({
+      level: 'info',
+      format: winston.format.combine(
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`),
+      ),
+      defaultMeta: { service: 'user-service' },
+      transports: [
+        new winston.transports.File({ filename: path.join(ChatFlowCore.dataDir, 'data/logs/error.log'), level: 'error' }),
+        new winston.transports.File({ filename: path.join(ChatFlowCore.dataDir, 'data/logs/info.log') }),
+      ],
+    })
   }
 
   static async init (options: {
@@ -312,14 +329,14 @@ export class ChatFlowCore {
     try {
       const contacts: Contact[] = await this.bot.Contact.findAll()
       log.info('最新联系人数量(包含公众号)：', contacts.length)
-      logger.info('最新联系人数量(包含公众号)：' + contacts.length)
+      ChatFlowCore.logger.info('最新联系人数量(包含公众号)：' + contacts.length)
 
       const recordsAll: any = []
       const recordRes = await ServeGetContactsRaw()
       const recordExisting = recordRes.data.items
 
       log.info('云端好友数量（不包含公众号）：', recordExisting.length || '0')
-      logger.info('云端好友数量（不包含公众号）：' + recordExisting.length || '0')
+      ChatFlowCore.logger.info('云端好友数量（不包含公众号）：' + recordExisting.length || '0')
 
       let wxids: string[] = []
       const recordIds: string[] = []
@@ -329,7 +346,7 @@ export class ChatFlowCore {
           recordIds.push(fields.recordId)
         })
       }
-      logger.info('当前bot使用的puppet:' + puppet)
+      ChatFlowCore.logger.info('当前bot使用的puppet:' + puppet)
       log.info('当前bot使用的puppet:', puppet)
 
       // 根据多维表格类型设置批量操作的数量和延迟时间
@@ -352,24 +369,24 @@ export class ChatFlowCore {
         const item = contacts[i]
         const isFriend = item?.friend() || false
         // const isIndividual = item?.type() === types.Contact.Individual
-        // logger.info('好友详情：' + item?.name())
+        // ChatFlowCore.logger.info('好友详情：' + item?.name())
         // log.info('是否好友：' + isFriend)
-        // logger.info('是否公众号：' + isIndividual)
+        // ChatFlowCore.logger.info('是否公众号：' + isIndividual)
         // if(item) log.info('头像信息：', (JSON.stringify((await item?.avatar()).toJSON())))
         if (item && isFriend && !wxids.includes(item.id)) {
-          // logger.info('云端不存在：' + item.name())
+          // ChatFlowCore.logger.info('云端不存在：' + item.name())
           let avatar: any = ''
           let alias = ''
           try {
             avatar = (await item.avatar()).toJSON()
             avatar = avatar.url
           } catch (err) {
-            // logger.error('获取好友头像失败：'+ err)
+            // ChatFlowCore.logger.error('获取好友头像失败：'+ err)
           }
           try {
             alias = await item.alias() || ''
           } catch (err) {
-            logger.error('获取好友备注失败：' + err)
+            ChatFlowCore.logger.error('获取好友备注失败：' + err)
           }
           const fields = {
             alias,
@@ -386,7 +403,7 @@ export class ChatFlowCore {
           recordsAll.push(record)
         }
       }
-      logger.info('待更新的好友数量：' + recordsAll.length || '0')
+      ChatFlowCore.logger.info('待更新的好友数量：' + recordsAll.length || '0')
 
       for (let i = 0; i < recordsAll.length; i = i + batchCount) {
         const records = recordsAll.slice(i, i + batchCount)
@@ -417,7 +434,7 @@ export class ChatFlowCore {
       // 从云端获取已有的群列表
       const roomsRes = await ServeGetGroupsRaw()
       const recordExisting = roomsRes.data.items
-      logger.info('云端群数量：' + recordExisting.length || '0')
+      ChatFlowCore.logger.info('云端群数量：' + recordExisting.length || '0')
 
       let wxids: string[] = []
       const recordIds: string[] = []
@@ -434,7 +451,7 @@ export class ChatFlowCore {
         const count = Math.ceil(recordIds.length / batchCount)
         for (let i = 0; i < count; i++) {
           const records = recordIds.splice(0, batchCount)
-          logger.info('删除：', records.length)
+          ChatFlowCore.logger.info('删除：', records.length)
           await ServeDeleteBatchGroups({ recordIds: records })
           await delay(delayTime)
         }
@@ -452,10 +469,10 @@ export class ChatFlowCore {
             avatar = (await item.avatar()).toJSON()
             avatar = avatar.url
           } catch (err) {
-            // logger.error('获取群头像失败：' + err)
+            // ChatFlowCore.logger.error('获取群头像失败：' + err)
           }
           const ownerId = await item.owner()?.id
-          //   logger.info('第一个群成员：' + ownerId)
+          //   ChatFlowCore.logger.info('第一个群成员：' + ownerId)
           const fields = {
             avatar,
             id: item.id,
@@ -472,18 +489,18 @@ export class ChatFlowCore {
         const records = recordsAll.slice(i, i + batchCount)
         try {
           await ServeCreateGroupBatch(records)
-          logger.info('群列表同步完成...' + i + records.length)
+          ChatFlowCore.logger.info('群列表同步完成...' + i + records.length)
           updateCount = updateCount + records.length
           void await delay(delayTime)
         } catch (err) {
-          logger.error('群列表同步失败,待系统就绪后再管理群发送【更新通讯录】可手动更新...' + i + batchCount)
+          ChatFlowCore.logger.error('群列表同步失败,待系统就绪后再管理群发送【更新通讯录】可手动更新...' + i + batchCount)
           void await delay(delayTime)
         }
       }
 
-      logger.info('同步群列表完成，更新到云端群数量：' + updateCount || '0')
+      ChatFlowCore.logger.info('同步群列表完成，更新到云端群数量：' + updateCount || '0')
     } catch (err) {
-      logger.error('更新群列表失败：' + err)
+      ChatFlowCore.logger.error('更新群列表失败：' + err)
 
     }
 

@@ -1,12 +1,11 @@
 /* eslint-disable sort-keys */
 import type { SkillInfoArray } from './wxopenaiService.js'
-import { logger } from '../utils/mod.js'
 import { ChatFlowCore } from '../api/base-config.js'
 import { Wechaty, log } from 'wechaty'
 import { ServeGetStatistics } from '../api/statistic.js'
 
 // const noticeData = ChatFlowCore.tables.notice
-// logger.info(JSON.stringify(noticeData))
+// ChatFlowCore.logger.info(JSON.stringify(noticeData))
 
 // 服务类
 export class StatisticChat {
@@ -55,7 +54,7 @@ export class StatisticChat {
           answer: [ record.fields['机器人回答|answer'] ],
         }
       })
-    logger.info('skills:', JSON.stringify(skills))
+    ChatFlowCore.logger.info('skills:', JSON.stringify(skills))
     return skills
   }
 
