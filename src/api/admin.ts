@@ -22,7 +22,6 @@ import {
 
 import {
   getNow,
-  logger,
 } from '../utils/mod.js'
 
 import { WxOpenaiBot, type WxOpenaiBotConfig, type SkillInfoArray } from '../services/wxopenaiService.js'
@@ -41,7 +40,7 @@ const adminCommands: AdminCommands = {
     try {
       const chatBotUsers = await ServeGetChatbotUsersDetail()
       ChatFlowCore.chatBotUsers = chatBotUsers.data.items
-      logger.info('获取到智聊用户信息:' + JSON.stringify(ChatFlowCore.chatBotUsers))
+      ChatFlowCore.logger.info('获取到智聊用户信息:' + JSON.stringify(ChatFlowCore.chatBotUsers))
       return [ true, '智聊用户列表更新成功~' ]
     } catch (e) {
       return [ false, '智聊用户列表配置更新失败~' ]
@@ -50,14 +49,14 @@ const adminCommands: AdminCommands = {
   更新配置: async () => {
     try {
       const res = await EnvChat.getConfigFromVika()
-      logger.info('ServeGetUserConfig res:' + JSON.stringify(res))
+      ChatFlowCore.logger.info('ServeGetUserConfig res:' + JSON.stringify(res))
 
       const vikaConfig:any = res.data
-      // logger.info('获取的维格表中的环境变量配置信息vikaConfig：' + JSON.stringify(vikaConfig))
+      // ChatFlowCore.logger.info('获取的维格表中的环境变量配置信息vikaConfig：' + JSON.stringify(vikaConfig))
 
       // 合并配置信息，如果维格表中有对应配置则覆盖环境变量中的配置
       ChatFlowCore.configEnv = { ...vikaConfig, ...(ChatFlowCore.configEnv) }
-      logger.info('合并后的环境变量信息：' + JSON.stringify(ChatFlowCore.configEnv))
+      ChatFlowCore.logger.info('合并后的环境变量信息：' + JSON.stringify(ChatFlowCore.configEnv))
       return [ true, '配置更新成功~' ]
     } catch (e) {
       return [ false, '配置更新失败~' ]
@@ -84,7 +83,7 @@ const adminCommands: AdminCommands = {
     try {
       const res = await ServeGetWhitelistWhiteObject()
       ChatFlowCore.whiteList = res.data
-      logger.info('获取到白名单信息:' + JSON.stringify(ChatFlowCore.whiteList))
+      ChatFlowCore.logger.info('获取到白名单信息:' + JSON.stringify(ChatFlowCore.whiteList))
       return [ true, '热更新白名单~' ]
     } catch (e) {
       return [ false, '白名单更新失败~' ]
@@ -218,7 +217,7 @@ export const adminAction = async (message:Message) => {
           const fileBox = await command(ChatFlowCore.bot, message)
           await sendMsg(message, fileBox)
         } catch (err) {
-          logger.error(`${command} failed`, err)
+          ChatFlowCore.logger.error(`${command} failed`, err)
           await sendMsg(message, '下载失败，请重试~')
         }
       }
@@ -263,7 +262,7 @@ export const adminAction = async (message:Message) => {
           config.view = larkConfig[3]
         }
 
-        logger.info('多维表格配置信息：' + JSON.stringify(config))
+        ChatFlowCore.logger.info('多维表格配置信息：' + JSON.stringify(config))
         log.info('多维表格配置信息：', JSON.stringify(config))
         if (config.table && config.view) {
           log.info('多维表格配置信息匹配，开始处理...')

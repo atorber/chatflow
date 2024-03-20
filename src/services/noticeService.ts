@@ -2,7 +2,7 @@
 import { Wechaty, log } from 'wechaty'
 import type { TaskConfig } from '../api/base-config.js'
 import schedule from 'node-schedule'
-import { delay, logger } from '../utils/mod.js'
+import { delay } from '../utils/mod.js'
 import type { BusinessRoom, BusinessUser } from '../plugins/mod.js'
 import {
   getContact,
@@ -47,7 +47,7 @@ export class NoticeChat {
     try {
       // 结束所有任务
       await schedule.gracefulShutdown()
-      // logger.info('结束所有任务成功...')
+      // ChatFlowCore.logger.info('结束所有任务成功...')
     } catch (e) {
       log.error('结束所有任务失败：' + e)
     }
@@ -55,14 +55,14 @@ export class NoticeChat {
       const res = await ServeGetNoticesTask()
       const tasks: TaskConfig[] = res.data.items
       log.info('获取到的定时提醒任务：' + tasks.length || '0')
-      logger.info('获取到的定时提醒任务：\n' + JSON.stringify(tasks))
+      ChatFlowCore.logger.info('获取到的定时提醒任务：\n' + JSON.stringify(tasks))
 
       this.jobs = {}
       for (let i = 0; i < tasks.length; i++) {
         const task: TaskConfig = tasks[i] as TaskConfig
         if (task.active) {
-          // logger.info(`任务${i}原始信息:` + JSON.stringify(task))
-          // logger.info('转换信息：' + curRule)
+          // ChatFlowCore.logger.info(`任务${i}原始信息:` + JSON.stringify(task))
+          // ChatFlowCore.logger.info('转换信息：' + curRule)
 
           try {
             await schedule.scheduleJob(task.id, task.rule, async () => {
@@ -80,10 +80,10 @@ export class NoticeChat {
                       await sendMsg(contact, text)
                       await delay(200)
                     } else {
-                      logger.info('当前好友不存在:' + JSON.stringify(task.target))
+                      ChatFlowCore.logger.info('当前好友不存在:' + JSON.stringify(task.target))
                     }
                   } catch (e) {
-                    logger.error('发送好友定时任务失败:' + e)
+                    ChatFlowCore.logger.error('发送好友定时任务失败:' + e)
                   }
                 }
 
@@ -94,19 +94,19 @@ export class NoticeChat {
                       await sendMsg(room, text)
                       await delay(200)
                     } else {
-                      logger.info('当前群不存在:' + JSON.stringify(task.target))
+                      ChatFlowCore.logger.info('当前群不存在:' + JSON.stringify(task.target))
                     }
                   } catch (e) {
-                    logger.error('发送群定时任务失败:' + e)
+                    ChatFlowCore.logger.error('发送群定时任务失败:' + e)
                   }
                 }
               } catch (err) {
-                logger.error('定时任务执行失败:' + err)
+                ChatFlowCore.logger.error('定时任务执行失败:' + err)
               }
             })
             that.jobs[task.id] = task
           } catch (e) {
-            logger.error('创建定时任务失败:' + e)
+            ChatFlowCore.logger.error('创建定时任务失败:' + e)
           }
         }
       }

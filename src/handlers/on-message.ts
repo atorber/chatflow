@@ -9,8 +9,7 @@ import {
 } from '../api/message.js'
 import { ChatFlowCore } from '../api/base-config.js'
 import {
-  // logger,
-  logForm, logger,
+  logForm,
 } from '../utils/mod.js'
 
 import { MqttProxy, eventMessage } from '../proxy/mqtt-proxy.js'
@@ -139,7 +138,7 @@ export async function onMessage (message: Message) {
         try {
           const rideInfo = await getFormattedRideInfo(message)
           // log.info('rideInfo信息:', JSON.stringify(rideInfo, null, 2))
-          logger.info('rideInfo信息:' + JSON.stringify(rideInfo, null, 2))
+          ChatFlowCore.logger.info('rideInfo信息:' + JSON.stringify(rideInfo, null, 2))
           const res = await ServeCreateCarpoolings(rideInfo)
           log.info('保存顺风车信息:', JSON.stringify(res.data, null, 2))
         } catch (e) {

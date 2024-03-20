@@ -6,27 +6,13 @@ import {
   ScanStatus,
 } from 'wechaty'
 import moment from 'moment'
-import { formatTimestamp, getCurrentTime, delay, logger, getCurTime } from '../utils/utils.js'
+import { formatTimestamp, getCurrentTime, delay, getCurTime } from '../utils/utils.js'
 import type { ChatMessage } from '../types/interface.js'
 import {
   MessageChat,
 } from '../services/mod.js'
-import fs from 'fs'
-import path from 'path'
-import { ChatFlowCore } from '../api/base-config.js'
 import { DataTables } from '../db/tables.js'
-const MEDIA_PATH = path.join(ChatFlowCore.dataDir, 'data/media/image')
-const MEDIA_PATH_QRCODE = path.join(MEDIA_PATH, 'qrcode')
-const MEDIA_PATH_CONTACT = path.join(MEDIA_PATH, 'contact')
-const MEDIA_PATH_ROOM = path.join(MEDIA_PATH, 'room')
-
-const paths = [ MEDIA_PATH, MEDIA_PATH_QRCODE, MEDIA_PATH_CONTACT, MEDIA_PATH_ROOM ]
-
-paths.forEach((p) => {
-  if (!fs.existsSync(p)) {
-    fs.mkdirSync(p, { recursive: true })
-  }
-})
+import { ChatFlowCore } from '../api/base-config.js'
 
 export interface MessageToDB {
   _id: string;
@@ -115,11 +101,11 @@ export const formatMessageToCloud = async (message: Message) => {
           // file = await message.toFileBox()
 
         } catch (e) {
-          logger.error('Image解析img.hd()失败：', e)
+          ChatFlowCore.logger.error('Image解析img.hd()失败：', e)
           try {
             file = await img.thumbnail()
           } catch (e) {
-            logger.error('Image解析img.thumbnail()失败：', e)
+            ChatFlowCore.logger.error('Image解析img.thumbnail()失败：', e)
           }
         }
 
@@ -140,7 +126,7 @@ export const formatMessageToCloud = async (message: Message) => {
 
         text = JSON.stringify(JSON.parse(JSON.stringify(miniProgram)).payload)
 
-        // logger.info(miniProgram)
+        // ChatFlowCore.logger.info(miniProgram)
         /*
           miniProgram: 小程序卡片数据
           {
@@ -163,7 +149,7 @@ export const formatMessageToCloud = async (message: Message) => {
         try {
           file = await message.toFileBox()
         } catch (e) {
-          logger.error('Audio解析失败：', e)
+          ChatFlowCore.logger.error('Audio解析失败：', e)
           file = ''
         }
 
@@ -176,7 +162,7 @@ export const formatMessageToCloud = async (message: Message) => {
           file = await message.toFileBox()
 
         } catch (e) {
-          logger.error('Video解析失败：', e)
+          ChatFlowCore.logger.error('Video解析失败：', e)
           file = ''
         }
         break
@@ -188,7 +174,7 @@ export const formatMessageToCloud = async (message: Message) => {
           file = await message.toFileBox()
 
         } catch (e) {
-          logger.error('Emoticon解析失败：', e)
+          ChatFlowCore.logger.error('Emoticon解析失败：', e)
           file = ''
         }
 
@@ -201,7 +187,7 @@ export const formatMessageToCloud = async (message: Message) => {
           file = await message.toFileBox()
 
         } catch (e) {
-          logger.error('Attachment解析失败：', e)
+          ChatFlowCore.logger.error('Attachment解析失败：', e)
           file = ''
         }
 
@@ -255,7 +241,7 @@ export const formatMessageToCloud = async (message: Message) => {
       wxAvatar = (await talker.avatar()).toJSON()
       wxAvatar = wxAvatar.url
     } catch (e) {
-      logger.error('获取发言人头像失败：', e)
+      ChatFlowCore.logger.error('获取发言人头像失败：', e)
     }
 
     if (listener) {
@@ -263,7 +249,7 @@ export const formatMessageToCloud = async (message: Message) => {
         listenerAvatar = (await listener.avatar()).toJSON()
         listenerAvatar = listenerAvatar.url
       } catch (e) {
-        logger.error('获取发言人头像失败：', e)
+        ChatFlowCore.logger.error('获取发言人头像失败：', e)
       }
     }
 
@@ -272,7 +258,7 @@ export const formatMessageToCloud = async (message: Message) => {
         roomAvatar = (await room.avatar()).toJSON()
         roomAvatar = roomAvatar.url
       } catch (e) {
-        logger.error('获取发言人头像失败：', e)
+        ChatFlowCore.logger.error('获取发言人头像失败：', e)
       }
     }
 
@@ -296,7 +282,7 @@ export const formatMessageToCloud = async (message: Message) => {
           listenerAvatar,
         }
         if (files.length) record['file'] = files
-        // logger.info('addChatRecord:', JSON.stringify(record))
+        // ChatFlowCore.logger.info('addChatRecord:', JSON.stringify(record))
         return record
       } else {
         return undefined

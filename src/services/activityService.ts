@@ -1,7 +1,7 @@
 /* eslint-disable sort-keys */
 import { Room, Contact, Message, Wechaty, log } from 'wechaty'
 import { v4 } from 'uuid'
-import { formatTimestamp, getCurTime, logger } from '../utils/utils.js'
+import { formatTimestamp, getCurTime } from '../utils/utils.js'
 import moment from 'moment'
 import { ChatFlowCore } from '../api/base-config.js'
 import {
@@ -101,20 +101,20 @@ export class ActivityChat {
       }
     }
 
-    logger.info('维格表中的有效活动：' + JSON.stringify(activitiesVika))
+    ChatFlowCore.logger.info('维格表中的有效活动：' + JSON.stringify(activitiesVika))
 
     const activitiesDb = await this.getActivityList()
-    logger.info('DB中的活动：' + JSON.stringify(activitiesDb))
+    ChatFlowCore.logger.info('DB中的活动：' + JSON.stringify(activitiesDb))
 
     const { addArray, removeArray } = findArrayDifferences(activitiesVika, activitiesDb)
-    logger.info('新增：' + JSON.stringify(addArray))
-    logger.info('移除：' + JSON.stringify(removeArray))
+    ChatFlowCore.logger.info('新增：' + JSON.stringify(addArray))
+    ChatFlowCore.logger.info('移除：' + JSON.stringify(removeArray))
 
     for (const statistics of addArray) {
       try {
         await ActivityChat.addActivity(statistics)
       } catch (e) {
-        logger.error('写入活动失败：', e)
+        ChatFlowCore.logger.error('写入活动失败：', e)
       }
     }
 
@@ -164,13 +164,13 @@ export class ActivityChat {
       },
     ]
 
-    logger.info('订单消息:' + records)
+    ChatFlowCore.logger.info('订单消息:' + records)
 
     try {
       const res = await ServeCreateOrders(records)
       return res
     } catch (err) {
-      logger.error('创建订单，vika写入接口失败：', err)
+      ChatFlowCore.logger.error('创建订单，vika写入接口失败：', err)
       return err
     }
   }
@@ -304,7 +304,7 @@ export class ActivityChat {
       activityList = await activityData.find(query)
     }
 
-    // logger.info('获取活动列表：======================\n' + JSON.stringify(activityList));
+    // ChatFlowCore.logger.info('获取活动列表：======================\n' + JSON.stringify(activityList));
     return activityList
   };
 
@@ -344,7 +344,7 @@ export class ActivityChat {
     const activityData = tables?.activity
     const latestActivity = await activityData.findOne({ $or:query })
 
-    // logger.info('获取最新活动：======================\n' + JSON.stringify(latestActivity));
+    // ChatFlowCore.logger.info('获取最新活动：======================\n' + JSON.stringify(latestActivity));
 
     return latestActivity || {}
   };
@@ -642,7 +642,7 @@ export class ActivityChat {
     const orderData = tables?.order
     const orders = await orderData.find({ $or: query })
 
-    logger.info('用户的订单：' + JSON.stringify(orders))
+    ChatFlowCore.logger.info('用户的订单：' + JSON.stringify(orders))
 
     return orders
   };

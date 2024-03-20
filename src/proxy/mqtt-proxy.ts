@@ -14,10 +14,10 @@ import {
 import CryptoJS from 'crypto-js'
 import {
   formatSentMessage,
-  logger,
 } from '../utils/utils.js'
 import { formatMessageToMQTT } from '../api/message.js'
 import { getKeyByBasicString, encrypt, decrypt } from '../utils/crypto-use-crypto-js.js'
+import { ChatFlowCore } from '../api/base-config.js'
 
 // import { MQTTAgent } from './mqtt-agent.js'
 
@@ -82,7 +82,7 @@ async function getAllRoom (mqttProxy: MqttProxy, bot: Wechaty) {
 }
 
 async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:string} > {
-  logger.info('params:' + JSON.stringify(params))
+  ChatFlowCore.logger.info('params:' + JSON.stringify(params))
 
   let msg: any = ''
   let message:Message | void = {} as Message
@@ -123,7 +123,7 @@ async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:st
       } */
     const contactCard = await bot.Contact.find({ id: params.messagePayload })
     if (!contactCard) {
-      logger.info('not found')
+      ChatFlowCore.logger.info('not found')
       return {
         msg: '无此联系人',
       }
@@ -171,10 +171,10 @@ async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:st
     } */
     // msg = FileBox.fromUrl(params.messagePayload)
     if (params.messagePayload.indexOf('http') !== -1 || params.messagePayload.indexOf('https') !== -1) {
-      logger.info('图片http地址：', params.messagePayload)
+      ChatFlowCore.logger.info('图片http地址：', params.messagePayload)
       msg = FileBox.fromUrl(params.messagePayload)
     } else {
-      logger.info('图片本地地址：', params.messagePayload)
+      ChatFlowCore.logger.info('图片本地地址：', params.messagePayload)
       msg = FileBox.fromFile(params.messagePayload)
     }
 
@@ -233,13 +233,13 @@ async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:st
     }
   }
 
-  logger.info('远程发送消息 msg:' + msg)
+  ChatFlowCore.logger.info('远程发送消息 msg:' + msg)
 
   const toContacts = params.toContacts
 
   for (let i = 0; i < toContacts.length; i++) {
     if (toContacts[i].split('@').length === 2 || toContacts[i].split(':').length === 2) {
-      logger.info(`向群${toContacts[i]}发消息`)
+      ChatFlowCore.logger.info(`向群${toContacts[i]}发消息`)
       try {
         const room: Room | undefined = await bot.Room.find({ id: toContacts[i] })
         if (room) {
@@ -250,17 +250,17 @@ async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:st
             // 发送成功后向前端发送消息
 
           } catch (err) {
-            logger.error('发送群消息失败：' + err)
+            ChatFlowCore.logger.error('发送群消息失败：' + err)
           }
         }
       } catch (err) {
         log.error('获取群失败：', err)
-        logger.error('获取群失败：' + err)
+        ChatFlowCore.logger.error('获取群失败：' + err)
       }
 
     } else {
-      logger.info(`好友${toContacts[i]}发消息`)
-      // logger.info(bot)
+      ChatFlowCore.logger.info(`好友${toContacts[i]}发消息`)
+      // ChatFlowCore.logger.info(bot)
       try {
         const contact: Contact | undefined = await bot.Contact.find({ id: toContacts[i] })
         if (contact) {
@@ -268,12 +268,12 @@ async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:st
             message = await contact.say(msg)
             await formatSentMessage(bot.currentUser, msg, contact, undefined)
           } catch (err) {
-            logger.error('发送好友消息失败：' + err)
+            ChatFlowCore.logger.error('发送好友消息失败：' + err)
           }
         }
       } catch (err) {
         log.error('获取好友失败：', err)
-        logger.error('获取好友失败：' + err)
+        ChatFlowCore.logger.error('获取好友失败：' + err)
       }
     }
   }
@@ -304,7 +304,7 @@ async function createRoom (params: any, bot: Wechaty) {
   }
 
   const room = await bot.Room.create(contactList, params.topic)
-  // logger.info('Bot', 'createDingRoom() new ding room created: %s', room)
+  // ChatFlowCore.logger.info('Bot', 'createDingRoom() new ding room created: %s', room)
   // await room.topic(params.topic)
 
   await room.say('你的专属群创建完成')
@@ -649,7 +649,7 @@ class MqttProxy {
   subCommand () {
     this.mqttClient.subscribe(this.commandApi, function (err: any) {
       if (err) {
-        logger.info(err)
+        ChatFlowCore.logger.info(err)
       }
     })
   }
@@ -660,7 +660,7 @@ class MqttProxy {
 
     try {
       this.mqttClient.publish(this.propertyApi, msg)
-      logger.info('mqtt消息发布:' + this.eventApi, msg)
+      ChatFlowCore.logger.info('mqtt消息发布:' + this.eventApi, msg)
     } catch (err) {
       console.error('pubProperty err:', err)
     }
@@ -672,7 +672,7 @@ class MqttProxy {
 
     try {
       this.mqttClient.publish(this.eventApi, msg)
-      logger.info('mqtt消息发布:' + this.eventApi, msg)
+      ChatFlowCore.logger.info('mqtt消息发布:' + this.eventApi, msg)
     } catch (err) {
       console.error('pubEvent err:', err)
     }
@@ -686,7 +686,7 @@ class MqttProxy {
       payload = encrypt(payload, MqttProxy.key)
 
       this.mqttClient.publish(this.eventApi, payload)
-      logger.info('mqtt消息发布:' + this.eventApi, payload)
+      ChatFlowCore.logger.info('mqtt消息发布:' + this.eventApi, payload)
     } catch (err) {
       console.error(err)
     }
@@ -698,8 +698,8 @@ class MqttProxy {
   }
 
   private static onMessage = async (topic: string, message: any) => {
-    logger.info('mqtt onMessage:' + topic)
-    logger.info('mqtt onMessage:' + message.toString())
+    ChatFlowCore.logger.info('mqtt onMessage:' + topic)
+    ChatFlowCore.logger.info('mqtt onMessage:' + message.toString())
     log.info('MqttProxy.chatbot', MqttProxy.chatbot)
     try {
       // 解密
@@ -714,45 +714,45 @@ class MqttProxy {
 
       if (MqttProxy.instance) {
         if (name === 'start') { // 启动
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
           try {
             await this.chatbot.start()
           } catch (err) {
-            logger.error('启动失败：', err)
+            ChatFlowCore.logger.error('启动失败：', err)
           }
         }
         if (name === 'stop') { // 停止
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
           try {
             await this.chatbot.stop()
           } catch (err) {
-            logger.error('停止失败：', err)
+            ChatFlowCore.logger.error('停止失败：', err)
           }
         }
         if (name === 'logout') { // 登出
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
           try {
             await this.chatbot.logout()
           } catch (err) {
-            logger.error('登出失败：', err)
+            ChatFlowCore.logger.error('登出失败：', err)
           }
 
         }
         if (name === 'logonoff') { // 获取登录状态
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'getUserSelf') { // 获取当前登录用户信息
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
           try {
             const userSelf = await this.chatbot.currentUser
-            logger.info('userSelf:', userSelf)
+            ChatFlowCore.logger.info('userSelf:', userSelf)
           } catch (err) {
-            logger.error('获取用户失败：', err)
+            ChatFlowCore.logger.error('获取用户失败：', err)
           }
         }
         if (name === 'say') { // 发送消息
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'send') { // 发送消息
@@ -777,11 +777,11 @@ class MqttProxy {
             })
         }
         if (name === 'aliasGet') { // 获取好友备注
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'aliasSet') { // 设置好友备注
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'roomCreate') { // 创建群
@@ -794,31 +794,31 @@ class MqttProxy {
             })
         }
         if (name === 'roomAdd') { // 添加群成员
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'roomDel') { // 删除群成员
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'roomAnnounceGet') { // 获取群公告
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'roomAnnounceSet') { // 设置群公告
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'roomQuit') { // 退出群
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'roomTopicGet') { // 获取群名称
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'roomTopicSet') { // 设置群名称
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'roomQrcodeGet') { // 获取群二维码
@@ -895,11 +895,11 @@ class MqttProxy {
           }
         }
         if (name === 'contactAdd') { // 添加好友
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'contactAliasSet') { // 设置好友备注
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'contactFindAll') { // 获取好友列表
@@ -912,7 +912,7 @@ class MqttProxy {
           })
         }
         if (name === 'contactFind') { // 获取好友信息
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'roomFindAll') { // 获取群列表
@@ -927,17 +927,17 @@ class MqttProxy {
 
         }
         if (name === 'roomFind') { // 获取群信息
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
         if (name === 'config') { // 获取配置信息
-          logger.info('cmd name:' + name)
+          ChatFlowCore.logger.info('cmd name:' + name)
 
         }
       }
       return null
     } catch (err) {
-      logger.error('MQTT接收到消息错误：' + err)
+      ChatFlowCore.logger.error('MQTT接收到消息错误：' + err)
       return null
     }
   }
@@ -945,7 +945,7 @@ class MqttProxy {
   static onMessage2 = (topic: string, message: any) => {
     // 解密
     message = decrypt(message.toString(), MqttProxy.key)
-    const logCommand = (name: string) => logger.info(`cmd name: ${name}`)
+    const logCommand = (name: string) => ChatFlowCore.logger.info(`cmd name: ${name}`)
     const processCommand = (name: string, action: any) => {
       logCommand(name)
       if (action) {
@@ -958,8 +958,8 @@ class MqttProxy {
       }
     }
 
-    logger.info(`mqtt onMessage: ${topic}`)
-    logger.info(`mqtt onMessage: ${message.toString()}`)
+    ChatFlowCore.logger.info(`mqtt onMessage: ${topic}`)
+    ChatFlowCore.logger.info(`mqtt onMessage: ${message.toString()}`)
     log.info('MqttProxy.chatbot', MqttProxy.chatbot)
 
     const mqttProxy = MqttProxy.instance
@@ -1026,7 +1026,7 @@ class MqttProxy {
         }
 
       } catch (err) {
-        logger.error(`MQTT接收到消息错误: ${err}`)
+        ChatFlowCore.logger.error(`MQTT接收到消息错误: ${err}`)
       }
     }
   }

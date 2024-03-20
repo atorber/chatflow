@@ -10,10 +10,10 @@ import { propertyMessage, eventMessage } from '../proxy/mqtt-proxy.js'
 
 import {
   formatSentMessage,
-  logger,
 } from '../utils/utils.js'
 
 import type { MqttProxy } from './mqtt-proxy.js'
+import { ChatFlowCore } from '../api/base-config.js'
 
 // 接口文档参考 https://app.swaggerhub.com/apis/zixia/WechatyPuppet/0.20.16#/Puppet/Puppet_MessageImageStream
 class WchatyAPI {
@@ -81,7 +81,7 @@ class WchatyAPI {
   }
 
   async send (params: any): Promise<any> {
-    logger.info('params:' + JSON.stringify(params))
+    ChatFlowCore.logger.info('params:' + JSON.stringify(params))
 
     let msg: any = ''
     if (params.messageType === 'Text') {
@@ -120,7 +120,7 @@ class WchatyAPI {
         } */
       const contactCard = await WchatyAPI.bot.Contact.find({ id: params.messagePayload })
       if (!contactCard) {
-        logger.info('not found')
+        ChatFlowCore.logger.info('not found')
         return {
           msg: '无此联系人',
         }
@@ -168,10 +168,10 @@ class WchatyAPI {
       } */
       // msg = FileBox.fromUrl(params.messagePayload)
       if (params.messagePayload.indexOf('http') !== -1 || params.messagePayload.indexOf('https') !== -1) {
-        logger.info('图片http地址：', params.messagePayload)
+        ChatFlowCore.logger.info('图片http地址：', params.messagePayload)
         msg = FileBox.fromUrl(params.messagePayload)
       } else {
-        logger.info('图片本地地址：', params.messagePayload)
+        ChatFlowCore.logger.info('图片本地地址：', params.messagePayload)
         msg = FileBox.fromFile(params.messagePayload)
       }
 
@@ -230,13 +230,13 @@ class WchatyAPI {
       }
     }
 
-    logger.info('远程发送消息 msg:' + msg)
+    ChatFlowCore.logger.info('远程发送消息 msg:' + msg)
 
     const toContacts = params.toContacts
 
     for (let i = 0; i < toContacts.length; i++) {
       if (toContacts[i].split('@').length === 2 || toContacts[i].split(':').length === 2) {
-        logger.info(`向群${toContacts[i]}发消息`)
+        ChatFlowCore.logger.info(`向群${toContacts[i]}发消息`)
         try {
           const room: Room | undefined = await WchatyAPI.bot.Room.find({ id: toContacts[i] })
           if (room) {
@@ -247,17 +247,17 @@ class WchatyAPI {
               // 发送成功后向前端发送消息
 
             } catch (err) {
-              logger.error('发送群消息失败：' + err)
+              ChatFlowCore.logger.error('发送群消息失败：' + err)
             }
           }
         } catch (err) {
           log.error('获取群失败：', err)
-          logger.error('获取群失败：' + err)
+          ChatFlowCore.logger.error('获取群失败：' + err)
         }
 
       } else {
-        logger.info(`好友${toContacts[i]}发消息`)
-        // logger.info(bot)
+        ChatFlowCore.logger.info(`好友${toContacts[i]}发消息`)
+        // ChatFlowCore.logger.info(bot)
         try {
           const contact: Contact | undefined = await WchatyAPI.bot.Contact.find({ id: toContacts[i] })
           if (contact) {
@@ -265,12 +265,12 @@ class WchatyAPI {
               await contact.say(msg)
               await formatSentMessage(WchatyAPI.bot.currentUser, msg, contact, undefined)
             } catch (err) {
-              logger.error('发送好友消息失败：' + err)
+              ChatFlowCore.logger.error('发送好友消息失败：' + err)
             }
           }
         } catch (err) {
           log.error('获取好友失败：', err)
-          logger.error('获取好友失败：' + err)
+          ChatFlowCore.logger.error('获取好友失败：' + err)
         }
       }
     }
@@ -299,7 +299,7 @@ class WchatyAPI {
     }
 
     const room = await WchatyAPI.bot.Room.create(contactList, params.topic)
-    // logger.info('Bot', 'createDingRoom() new ding room created: %s', room)
+    // ChatFlowCore.logger.info('Bot', 'createDingRoom() new ding room created: %s', room)
     // await room.topic(params.topic)
 
     await room.say('你的专属群创建完成')

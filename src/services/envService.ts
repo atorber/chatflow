@@ -1,7 +1,7 @@
 /* eslint-disable sort-keys */
 // import type { IRecord } from '../db/vika.js'
 import { log } from 'wechaty'
-import { logger } from '../utils/utils.js'
+import { ChatFlowCore } from '../api/base-config.js'
 import {
   ServeGetUserConfigObj,
 } from '../api/user.js'
@@ -23,10 +23,10 @@ export class EnvChat {
   static async getConfigFromVika () {
     log.info('从维格表中获取环境变量配置,getConfigFromVika ()')
     const res: any = await ServeGetUserConfigObj()
-    logger.info('从维格表中获取环境变量配置,ServeGetUserConfigObj res:' + JSON.stringify(res))
+    ChatFlowCore.logger.info('从维格表中获取环境变量配置,ServeGetUserConfigObj res:' + JSON.stringify(res))
 
     const vikaData = res.data
-    logger.info('vikaData:' + JSON.stringify(vikaData))
+    ChatFlowCore.logger.info('vikaData:' + JSON.stringify(vikaData))
     // log.info('sysConfig:', JSON.stringify(sysConfig, null, '\t'))
 
     return vikaData

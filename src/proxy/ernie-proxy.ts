@@ -6,7 +6,7 @@ import {
   types,
   Wechaty,
 } from 'wechaty'
-import { formatSentMessage, logger } from '../utils/utils.js'
+import { formatSentMessage } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/mod.js'
 import axios from 'axios'
 import { ChatFlowCore } from '../index.js'
@@ -27,7 +27,7 @@ async function getAccessToken (sysConfig:ProcessEnv) {
 
   try {
     const response = await axios.post(apiUrl, payload)
-    logger.info('access_token:', JSON.stringify(response.data))
+    ChatFlowCore.logger.info('access_token:', JSON.stringify(response.data))
     return response.data.access_token
   } catch (error) {
     console.error(error)
@@ -51,7 +51,7 @@ export async function getFormattedRideInfo (message:Message) {
 
   try {
     const response = await axios.post(apiUrl, payload, { headers })
-    logger.info('顺风车信息检测结果：', JSON.stringify(response.data))
+    ChatFlowCore.logger.info('顺风车信息检测结果：', JSON.stringify(response.data))
     return response.data
   } catch (error) {
     console.error(error)
@@ -171,7 +171,7 @@ async function chatGptRoutine (sysConfig:ProcessEnv, query: string) {
     }
     const responseMessage = await axios.post(options.url, options.body, { headers:options.headers })
     console.log(responseMessage.data)
-    logger.info('gptbot responseMessage:\n', JSON.stringify(responseMessage))
+    ChatFlowCore.logger.info('gptbot responseMessage:\n', JSON.stringify(responseMessage))
 
     if (responseMessage.data.result) {
       return {
@@ -190,7 +190,7 @@ async function chatGptRoutine (sysConfig:ProcessEnv, query: string) {
 
 // aibot 函数基本保持不变
 async function aibot (sysConfig: ProcessEnv, query: any) {
-  logger.info(`查询内容，query: ${query}`)
+  ChatFlowCore.logger.info(`查询内容，query: ${query}`)
 
   const answer = await chatGptRoutine(sysConfig, query)
 

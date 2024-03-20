@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys */
-import { delay, logger } from '../utils/utils.js'
+import { delay } from '../utils/utils.js'
 import type { RoomWhiteList, ContactWhiteList } from '../types/mod.js'
 import type { BusinessRoom, BusinessUser } from '../api/contact-room-finder.js'
 import { ChatFlowCore } from '../api/base-config.js'
@@ -44,7 +44,7 @@ export class OrderChat {
   static async getRecords () {
     const res = await ServeGetOrders()
     const records = res.data.items
-    logger.info('维格表中的记录：' + JSON.stringify(records))
+    ChatFlowCore.logger.info('维格表中的记录：' + JSON.stringify(records))
     return records
   }
 
@@ -57,7 +57,7 @@ export class OrderChat {
       const record = whiteListRecords[i]
       const fields = record.fields
       const app: 'qa' | 'msg' | 'act' | 'gpt' = fields['所属应用|app']?.split('|')[1]
-      // logger.info('当前app:' + app)
+      // ChatFlowCore.logger.info('当前app:' + app)
       if (fields['昵称/群名称|name'] || fields['好友ID/群ID(选填)|id'] || fields['好友备注(选填)|alias']) {
         if (record.fields['类型|type'] === '群') {
           const room: BusinessRoom = {

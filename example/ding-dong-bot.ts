@@ -14,14 +14,14 @@ import {
   CloudConfig,
   ChatFlowOptions,
 } from '../src/index.js'
-// import path from 'path'
+import path from 'path'
 
 const main = async () => {
   log.info('开始启动机器人...')
   const VIKA_SPACE_ID = process.env['VIKA_SPACE_ID']
   const VIKA_TOKEN = process.env['VIKA_TOKEN']
   const ADMINROOM_ADMINROOMTOPIC = process.env['ADMINROOM_ADMINROOMTOPIC'] // 管理群的topic，可选
-  const dataDir = process.cwd() // 数据目录
+  const dataDir = path.join(process.cwd(), '') // 数据目录
   const endpoint = process.env['ENDPOINT'] // ChatFlow服务端地址，可选
 
   const chatFlowConfig:ChatFlowOptions = {
