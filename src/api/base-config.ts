@@ -243,7 +243,7 @@ export class ChatFlowCore {
     ChatFlowCore.tables = DataTables.createTables(ChatFlowCore.dataDir)
     ChatFlowCore.spaceId = options.spaceId || ChatFlowCore.spaceId
     ChatFlowCore.token = options.token || ChatFlowCore.token
-    ChatFlowCore.endpoint = options.endpoint || ChatFlowCore.token || 'http://127.0.0.1:9503'
+    ChatFlowCore.endpoint = options.endpoint || ChatFlowCore.endpoint
     ChatFlowCore.batchCount = options.token.indexOf('/') === -1 ? 10 : 100
     ChatFlowCore.delayTime = options.token.indexOf('/') === -1 ? 1000 : 500
   }
@@ -255,7 +255,7 @@ export class ChatFlowCore {
   }) {
     ChatFlowCore.spaceId = options.spaceId || ChatFlowCore.spaceId
     ChatFlowCore.token = options.token || ChatFlowCore.token
-    ChatFlowCore.endpoint = options.endpoint || ChatFlowCore.token || 'http://127.0.0.1:9503'
+    ChatFlowCore.endpoint = options.endpoint || ChatFlowCore.endpoint
 
     // log.info('初始化维格配置信息...,init()')
     const userConfig = await ServeGetUserConfigObj()

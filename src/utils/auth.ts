@@ -30,7 +30,7 @@ class AuthClient {
   }) { // 步骤2：私有构造函数
     this.username = ops?.username || this.username
     this.password = ops?.password || this.password
-    this.endpoint = ops?.endpoint ? ops.endpoint : 'http://127.0.0.1:9503'
+    this.endpoint = ops?.endpoint || this.endpoint
     this.axiosInstance = axios.create({
       baseURL: this.endpoint, // 你的 API 基础地址
     })

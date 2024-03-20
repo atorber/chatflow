@@ -42,7 +42,7 @@ export class DataTables {
 
   static getTables = () => {
     // eslint-disable-next-line no-console
-    console.info('获取数据库表实例', DB.dataDir)
+    console.info('获取数据库表实例，数据目录：', DB.dataDir)
     return DataTables.tables
   }
 
