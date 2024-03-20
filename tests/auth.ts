@@ -33,9 +33,9 @@ import 'dotenv/config.js'  // 导入环境变量配置
 
 const main = async () => {
   const authClient = getAuthClient()
-  const res = await authClient.init(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
+  const res = await authClient?.init(process.env.VIKA_SPACE_ID, process.env.VIKA_TOKEN)
   console.log('res:', JSON.stringify(res.data, null, 2))
-  await authClient.login()
+  await authClient?.login()
   // const task = await ServeGetNoticesTask()
   // console.log('task:', JSON.stringify(task, null, 2))
 

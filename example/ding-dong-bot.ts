@@ -22,12 +22,14 @@ const main = async () => {
   const VIKA_TOKEN = process.env['VIKA_TOKEN']
   const ADMINROOM_ADMINROOMTOPIC = process.env['ADMINROOM_ADMINROOMTOPIC'] // 管理群的topic，可选
   const dataDir = process.cwd() // 数据目录
+  const endpoint = process.env['ENDPOINT'] // ChatFlow服务端地址，可选
 
   const chatFlowConfig:ChatFlowOptions = {
     spaceId: VIKA_SPACE_ID,
     token: VIKA_TOKEN,
     adminRoomTopic: ADMINROOM_ADMINROOMTOPIC,
     dataDir,
+    endpoint,
   } // ChatFlow配置信息
 
   let config: CloudConfig | undefined

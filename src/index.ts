@@ -53,11 +53,16 @@ function ChatFlow (options?: ChatFlowOptions): WechatyPlugin {
 }
 
 const init = async (options: ChatFlowOptions) => {
-// 获取根目录
+  // log.info('初始化ChatFlowCore...', JSON.stringify(options))
+  // 获取根目录
   const rootDir =  options.dataDir || process.cwd()
   log.info('rootDir', rootDir)
   ChatFlowCore.setOptions(options)
-
+  const authClient = getAuthClient({
+    password: options.token,
+    username: options.spaceId,
+    endpoint: options.endpoint || '',
+  })
   // 检测./data文件夹，如果不存在则创建
   // 在程序安装目录下创建/data目录，用于存放配置文件、日志文件、数据库文件、媒体文件等
   if (!fs.existsSync(join(rootDir, 'data'))) {
@@ -91,14 +96,9 @@ const init = async (options: ChatFlowOptions) => {
 
   // 远程加载配置信息，初始化api客户端
   try {
-    const authClient = getAuthClient({
-      password: options.token,
-      username: options.spaceId,
-      endpoint: options.endpoint || '',
-    })
     try {
       // 初始化检查数据库表，如果不存在则创建
-      const initRes = await authClient.init(options.spaceId, options.token)
+      const initRes = await authClient?.init(options.spaceId, options.token)
       logForm('初始化检查系统表结果：' + JSON.stringify(initRes.data))
       logger.info('初始化检查系统表结果：' + JSON.stringify(initRes.data))
 
@@ -118,7 +118,7 @@ const init = async (options: ChatFlowOptions) => {
     }
     await delay(1000)
     try {
-      const loginRes = await authClient.login(options.spaceId, options.token)
+      const loginRes = await authClient?.login(options.spaceId, options.token)
       logForm('登录客户端结果：' + JSON.stringify(loginRes))
       ChatFlowCore.isLogin = true
     } catch (e) {

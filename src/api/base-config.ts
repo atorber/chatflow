@@ -258,9 +258,14 @@ export class ChatFlowCore {
     ChatFlowCore.endpoint = options.endpoint || ChatFlowCore.endpoint
 
     // log.info('初始化维格配置信息...,init()')
-    const userConfig = await ServeGetUserConfigObj()
-    // log.info('userConfig', JSON.stringify(userConfig))
-    this.configEnv = userConfig.data
+    try {
+      const userConfig = await ServeGetUserConfigObj()
+      // log.info('userConfig', JSON.stringify(userConfig))
+      this.configEnv = userConfig.data
+    } catch (err) {
+      log.error('初始化配置信息失败：', err)
+    }
+
     const wechatyConfig: WechatyConfig = {
       puppet: this.configEnv.WECHATY_PUPPET,
       token: this.configEnv.WECHATY_TOKEN,
