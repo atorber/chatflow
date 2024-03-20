@@ -28,9 +28,11 @@ class AuthClient {
     password:string,
     endpoint:string
   }) { // 步骤2：私有构造函数
-    this.username = ops?.username || this.username
-    this.password = ops?.password || this.password
-    this.endpoint = ops?.endpoint || this.endpoint
+    if (ops) {
+      this.username = ops.username
+      this.password = ops.password
+      this.endpoint = ops.endpoint
+    }
     this.axiosInstance = axios.create({
       baseURL: this.endpoint, // 你的 API 基础地址
     })
