@@ -108,12 +108,10 @@ const init = async (options: ChatFlowOptions) => {
         logForm('初始化检查系统表失败...' + JSON.stringify(initRes.data))
         // 中止程序
         throw new Error('初始化检查系统表失败...', initRes)
-        // process.exit(1)
       }
     } catch (e) {
       log.error('请求初始化检查系统表失败...', e)
       throw e
-      // process.exit(1)
     }
     await delay(1000)
     try {

@@ -33,10 +33,6 @@ export class MessageChat {
   constructor () {
     MessageChat.batchCount = ChatFlowCore.batchCount
     MessageChat.delayTime = ChatFlowCore.delayTime
-    MessageChat.MEDIA_PATH = path.join(ChatFlowCore.dataDir, 'data/media/image')
-    MessageChat.MEDIA_PATH_QRCODE = path.join(MessageChat.MEDIA_PATH, 'qrcode')
-    MessageChat.MEDIA_PATH_CONTACT = path.join(MessageChat.MEDIA_PATH, 'contact')
-    MessageChat.MEDIA_PATH_ROOM = path.join(MessageChat.MEDIA_PATH, 'room')
   }
 
   // 初始化
@@ -44,6 +40,10 @@ export class MessageChat {
     const that = this
     const tables = DataTables.getTables()
     const messageData = tables?.message
+    MessageChat.MEDIA_PATH = path.join(ChatFlowCore.dataDir, 'data/media/image')
+    MessageChat.MEDIA_PATH_QRCODE = path.join(MessageChat.MEDIA_PATH, 'qrcode')
+    MessageChat.MEDIA_PATH_CONTACT = path.join(MessageChat.MEDIA_PATH, 'contact')
+    MessageChat.MEDIA_PATH_ROOM = path.join(MessageChat.MEDIA_PATH, 'room')
     try {
       this.msgStore = []
       this.messageData = messageData
