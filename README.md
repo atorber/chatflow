@@ -258,6 +258,10 @@ atorber/chatflow:latest
 
 ## 更新日志
 
+### 3.0.21
+
+- 修复https://github.com/wechaty/puppet-supports/issues/364描述的wechaty-puppet-service问题
+
 ### 3.0.20
 
 - 修复图片无法保存到数据表的问题
