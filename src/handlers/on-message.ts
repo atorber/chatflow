@@ -171,9 +171,9 @@ export async function onMessage (message: Message) {
       }
 
     } else {
-      // 转发到adminRoom
+      // 转发私信消息到adminRoom
       const wxid = talker.id
-      if (ChatFlowCore.adminRoom  && ![ 'weixin' ].includes(wxid) && wxid.includes('gh_') === false) {
+      if (ChatFlowCore.adminRoom  && ![ 'weixin' ].includes(wxid) && wxid.includes('gh_') === false && process.env['ADMINROOM_ADMINROOMID']) {
         const adminRoom = ChatFlowCore.adminRoom
         await adminRoom.say(`[${talker.name()}@${talker.id}]\n ${message.text()}`)
       }
