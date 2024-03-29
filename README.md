@@ -258,9 +258,9 @@ atorber/chatflow:latest
 
 ## 更新日志
 
-### 3.0.21
+### 3.0.22
 
-- 修复https://github.com/wechaty/puppet-supports/issues/364描述的wechaty-puppet-service问题
+- 修复[https://github.com/wechaty/puppet-supports/issues/364](https://github.com/wechaty/puppet-supports/issues/364) 描述的wechaty-puppet-service问题,
 
 ### 3.0.20
 
