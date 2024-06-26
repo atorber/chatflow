@@ -1,0 +1,28 @@
+version: '3.0.22'
+
+services:
+  chatflow-admin:
+    image: atorber/chatflow-admin:latest
+    network_mode: "host"
+    # extra_hosts:
+    #  - "host.docker.internal:192.168.1.100"
+    environment: # 可选配置，对接chatflow不需要配置
+      - accessKeyId=''
+      - secretAccessKey=''
+      - region='cn-north-3'
+      - endpoint='oss.cn-north-3.inspurcloudoss.com'
+      - bucketName='poem-poster'
+    ports:
+      - "9503:9503"
+  chatflow:
+    image: atorber/chatflow:amd64-latest
+    network_mode: "host"
+    # extra_hosts:
+    #   - "host.docker.internal:192.168.1.100"
+    environment:
+      - WECHATY_PUPPET="wechaty-puppet-wechat4u" # 可选值：wechaty-puppet-wechat4u、wechaty-puppet-wechat、wechaty-puppet-xp、wechaty-puppet-engine、wechaty-puppet-padlocal、wechaty-puppet-service
+      - WECHATY_TOKEN="" # 使用wechaty-puppet-padlocal、wechaty-puppet-service时需配置此token
+      - ADMINROOM_ADMINROOMTOPIC="替换为你的管理员群名称" # 管理群名称，需尽量保持名称复杂，避免重名群干扰
+      - VIKA_SPACE_ID="替换为你的维格表空间ID" # 维格表空间ID或飞书多维表格的appToken
+      - VIKA_TOKEN="替换为你的维格表token" # 维格表token或飞书多维表格信息拼接（使用'/'拼接三个参数：appId/appSecret/appToken）
+      - ENDPOINT="http://127.0.0.1:9503" # 后端管理服务API地址，默认http://127.0.0.1:9503

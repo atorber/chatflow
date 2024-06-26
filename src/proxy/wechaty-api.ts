@@ -14,6 +14,7 @@ import {
 
 import type { MqttProxy } from './mqtt-proxy.js'
 import { ChatFlowCore } from '../api/base-config.js'
+import { sendMsg } from '../services/configService.js'
 
 // 接口文档参考 https://app.swaggerhub.com/apis/zixia/WechatyPuppet/0.20.16#/Puppet/Puppet_MessageImageStream
 class WchatyAPI {
@@ -241,7 +242,7 @@ class WchatyAPI {
           const room: Room | undefined = await WchatyAPI.bot.Room.find({ id: toContacts[i] })
           if (room) {
             try {
-              await room.say(msg)
+              await sendMsg(room, msg)
               await formatSentMessage(WchatyAPI.bot.currentUser, msg, undefined, room)
 
               // 发送成功后向前端发送消息
@@ -262,7 +263,7 @@ class WchatyAPI {
           const contact: Contact | undefined = await WchatyAPI.bot.Contact.find({ id: toContacts[i] })
           if (contact) {
             try {
-              await contact.say(msg)
+              await sendMsg(contact, msg)
               await formatSentMessage(WchatyAPI.bot.currentUser, msg, contact, undefined)
             } catch (err) {
               ChatFlowCore.logger.error('发送好友消息失败：' + err)
@@ -285,7 +286,7 @@ class WchatyAPI {
       const curContact = await WchatyAPI.bot.Contact.find({ id: userId })
       atUserList.push(curContact)
     }
-    await room?.say(params.messagePayload, ...atUserList)
+    if (room) await sendMsg(room, params.messagePayload, atUserList as Contact[])
     await formatSentMessage(WchatyAPI.bot.currentUser, params.messagePayload, undefined, room)
   }
 
@@ -302,7 +303,7 @@ class WchatyAPI {
     // ChatFlowCore.logger.info('Bot', 'createDingRoom() new ding room created: %s', room)
     // await room.topic(params.topic)
 
-    await room.say('你的专属群创建完成')
+    await sendMsg(room, '你的专属群创建完成')
     await formatSentMessage(WchatyAPI.bot.currentUser, '你的专属群创建完成', undefined, room)
   }
 

@@ -259,6 +259,7 @@ export class MessageChat {
   }
 
   static async onMessage (message: Message) {
+    log.info('onMessage:', message)
     const room = message.room()
     const talker = message.talker()
     const files: any = []

@@ -10,7 +10,7 @@ import {
   log,
   Wechaty,
 } from 'wechaty'
-
+import { sendMsg } from '../../services/configService.js'
 import { FileBox } from 'file-box'
 import mqtt from 'mqtt'
 import axios from 'axios'
@@ -43,7 +43,7 @@ async function sendAt (bot: Wechaty, params: any) {
         atUserList.push(curContact)
       }
     }
-    await room.say(params.messagePayload, ...atUserList)
+    await sendMsg(room, params.messagePayload, atUserList)
   }
 }
 
@@ -204,7 +204,7 @@ async function send (bot: Wechaty, params: any) {
       const room = await bot.Room.find({ id: toContacts[i] })
       if (room) {
         try {
-          await room.say(msg)
+          await sendMsg(room, msg)
         } catch (err) {
           console.error(err)
         }
@@ -612,7 +612,7 @@ function GroupMaster (
       await pubMsg(getEventsMsg('room-join', { room, inviteeList, inviter }))
 
       // let msg = `热烈欢迎@${nameList} 加入群~`
-      // room.say(msg)
+      // sendMsg(room, msg)
     })
     bot.on('room-leave', async (room, leaverList, remover) => {
       const nameList = leaverList.map(c => c.name()).join(',')
@@ -620,7 +620,7 @@ function GroupMaster (
       await pubMsg(getEventsMsg('room-leave', { room, leaverList, remover }))
 
       // let msg:any = `很遗憾，${nameList}离开了群~`
-      // room.say(msg)
+      // sendMsg(room, msg)
 
     })
     bot.on('room-topic', async (room, topic, oldTopic, changer) => {

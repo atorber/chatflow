@@ -14,6 +14,7 @@ import {
 import { ChatFlowCore } from '../api/base-config.js'
 
 import type { MqttProxy } from './mqtt-proxy.js'
+import { sendMsg } from '../services/configService.js'
 
 class MQTTAgent {
 
@@ -420,7 +421,7 @@ class MQTTAgent {
           const room: Room | undefined = await MQTTAgent.bot.Room.find({ id: toContacts[i] })
           if (room) {
             try {
-              await room.say(msg)
+              await sendMsg(room, msg)
               await formatSentMessage(MQTTAgent.bot.currentUser, msg, undefined, room)
 
               // 发送成功后向前端发送消息
@@ -441,7 +442,7 @@ class MQTTAgent {
           const contact: Contact | undefined = await MQTTAgent.bot.Contact.find({ id: toContacts[i] })
           if (contact) {
             try {
-              await contact.say(msg)
+              await sendMsg(contact, msg)
               await formatSentMessage(MQTTAgent.bot.currentUser, msg, contact, undefined)
             } catch (err) {
               ChatFlowCore.logger.error('发送好友消息失败：' + err)
@@ -464,7 +465,7 @@ class MQTTAgent {
       const curContact = await MQTTAgent.bot.Contact.find({ id: userId })
       atUserList.push(curContact)
     }
-    await room?.say(params.messagePayload, ...atUserList)
+    if (room) await sendMsg(room, params.messagePayload, atUserList as Contact[])
     await formatSentMessage(MQTTAgent.bot.currentUser, params.messagePayload, undefined, room)
   }
 
@@ -481,7 +482,7 @@ class MQTTAgent {
     // ChatFlowCore.logger.info('Bot', 'createDingRoom() new ding room created: %s', room)
     // await room.topic(params.topic)
 
-    await room.say('你的专属群创建完成')
+    await sendMsg(room, '你的专属群创建完成')
     await formatSentMessage(MQTTAgent.bot.currentUser, '你的专属群创建完成', undefined, room)
   }
 

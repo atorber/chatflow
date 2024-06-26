@@ -13,6 +13,7 @@ import {
 } from '../services/mod.js'
 import { DataTables } from '../db/tables.js'
 import { ChatFlowCore } from '../api/base-config.js'
+import { sendMsg } from '../services/configService.js'
 
 export interface MessageToDB {
   _id: string;
@@ -408,24 +409,13 @@ export const formatMessageToLog = async (message: Message) => {
   return chatMessage
 }
 
-// 发送消息
-export const sendMsg = async (message: Message, text: string) => {
-  const talker = message.talker()
-  const room = message.room()
-  if (room) {
-    await room.say(text)
-  } else {
-    await talker.say(text)
-  }
-}
-
 // 上传图片
 export const uploadImage = async (message: Message, path: string) => {
   const talker = message.talker()
   const room = message.room()
   if (room) {
-    await room.say(path)
+    await sendMsg(room, path)
   } else {
-    await talker.say(path)
+    await sendMsg(talker, path)
   }
 }

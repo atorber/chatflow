@@ -2,6 +2,7 @@ import { Message, log, Room } from 'wechaty'
 import { containsRoom } from '../services/userService.js'
 import { ChatFlowCore } from '../api/base-config.js'
 import { ActivityChat } from '../services/activityService.js'
+import { sendMsg } from '../services/configService.js'
 
 // 控制器
 const activityController = async (message: Message, room: Room) => {
@@ -68,7 +69,7 @@ const activityController = async (message: Message, room: Room) => {
 
   if (msg) {
     // ChatFlowCore.logger.info('活动操作结果：\n' + msg)
-    await message.say(msg)
+    await sendMsg(message, msg)
   }
 }
 
