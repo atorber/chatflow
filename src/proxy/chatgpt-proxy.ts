@@ -8,6 +8,7 @@ import {
 import { formatSentMessage } from '../utils/utils.js'
 import axios from 'axios'
 import { ChatFlowCore } from '../index.js'
+import { sendMsg } from '../services/configService.js'
 axios.defaults.timeout = 60000
 
 async function gpt (bot: Wechaty, message: Message) {
@@ -67,10 +68,10 @@ async function sendMessage (text: string, bot: Wechaty, message: Message) {
   const talker = message.talker()
   const room = message.room()
   if (room) {
-    await room.say(formattedText, talker)
+    await sendMsg(room, formattedText, [ talker ])
     await formatSentMessage(bot.currentUser, formattedText, undefined, room)
   } else {
-    await message.say(formattedText)
+    await sendMsg(message, formattedText)
     await formatSentMessage(bot.currentUser, formattedText, message.talker(), undefined)
   }
 }
@@ -79,10 +80,10 @@ async function sendImage (answer: any, bot: Wechaty, message: Message) {
   const fileBox = FileBox.fromUrl(answer.text.url)
   const room = message.room()
   if (room) {
-    await room.say(fileBox)
+    await sendMsg(room, fileBox)
     await formatSentMessage(bot.currentUser, fileBox.toString(), undefined, room)
   } else {
-    await message.say(fileBox)
+    await sendMsg(message, fileBox)
     await formatSentMessage(bot.currentUser, fileBox.toString(), message.talker(), undefined)
   }
 }
@@ -100,11 +101,11 @@ async function sendMiniProgram (answer: any, bot: Wechaty, message: Message) {
   })
 
   if (room) {
-    await room.say(miniProgram)
+    await sendMsg(room, miniProgram)
     await formatSentMessage(bot.currentUser, miniProgram.toString(), undefined, message.room())
 
   } else {
-    await message.say(miniProgram)
+    await sendMsg(message, miniProgram)
     await formatSentMessage(bot.currentUser, miniProgram.toString(), message.talker(), undefined)
   }
 }

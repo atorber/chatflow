@@ -1,6 +1,6 @@
 // 不同的puppet对onReady和onLogin的实现可能不一致，需要分别处理
 
-import { Contact, Wechaty, log, Message, Room, Sayable } from 'wechaty'
+import { Contact, Wechaty, log } from 'wechaty'
 import { delay } from '../utils/utils.js'
 import { ChatFlowCore } from '../api/base-config.js'
 import {
@@ -16,7 +16,6 @@ import { logForm } from '../utils/mod.js'
 import {
   getRoom,
 } from '../plugins/mod.js'
-import { onMessage } from './on-message.js'
 
 import {
   ServeGetUserConfigGroup,
@@ -27,11 +26,7 @@ import {
 } from '../api/white-list.js'
 import { ServeGetChatbotUsersDetail } from '../api/chatbot.js'
 import { ServeGetWelcomes } from '../api/welcome.js'
-
-export const handleSay = async (talker: Room | Contact | Message, sayable: Sayable) => {
-  const message: Message | void = await talker.say(sayable)
-  if (message) await onMessage(message)
-}
+import { sendMsg } from '../services/configService.js'
 
 // 处理管理员群消息
 const notifyAdminRoom = async (bot: Wechaty) => {
@@ -43,9 +38,8 @@ const notifyAdminRoom = async (bot: Wechaty) => {
     const text = `${new Date().toLocaleString()}\nchatflow启动成功!\n当前登录用户${bot.currentUser.name()}\n可在管理员群回复对应指令进行操作\n${helpText}\n`
     if (adminRoom) {
       ChatFlowCore.adminRoom = adminRoom
-      await handleSay(adminRoom, text)
+      await sendMsg(adminRoom, text)
     }
-    // await adminRoom?.say(text)
   }
 }
 

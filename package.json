@@ -24,6 +24,7 @@
     "init-db": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/init-db.ts",
     "test-vika-orm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./tests/vika-orm-test.ts",
     "start": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/ding-dong-bot.ts",
+    "start:bridge": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/ding-dong-bot-puppet-bridge.ts",
     "start:verbose": "cross-env WECHATY_LOG=verbose NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/ding-dong-bot.ts",
     "start:gm": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./example/group-master-worker.ts",
     "start:index": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" node ./src/index.ts",
@@ -108,6 +109,7 @@
     "ts-node": "^10.9.1",
     "typescript": "^4.9.3",
     "wechaty": "^1.20.2",
+    "wechaty-puppet-bridge": "^0.10.1",
     "wechaty-puppet-padlocal": "^1.20.1",
     "wechaty-puppet-wechat4u": "^1.14.12"
   },

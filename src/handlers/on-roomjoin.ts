@@ -1,5 +1,6 @@
 import { Contact, Room, log } from 'wechaty'
 import { ChatFlowCore } from '../api/base-config.js'
+import { sendMsg } from '../services/configService.js'
 /**
  * 群中有新人进入
  */
@@ -19,7 +20,7 @@ async function onRoomjoin (room: Room, inviteeList: Contact[], inviter: Contact)
     if (inviteeList.length > 0) {
       const welcomeMessage = `欢迎加入${roomTopic}, ${welcomeRoom.text}~`
       // await sendMsg(room, welcomeMessage, (ChatFlowCore.services as Services).messageService, inviteeList)
-      await room.say(welcomeMessage, ...inviteeList)
+      await sendMsg(room, welcomeMessage, inviteeList)
     }
   }
 }

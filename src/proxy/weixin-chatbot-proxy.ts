@@ -11,6 +11,7 @@ import { formatSentMessage } from '../utils/utils.js'
 import type { ProcessEnv } from '../types/mod.js'
 import * as openai from '../utils/openai-sdk/index.js'
 import { ChatFlowCore } from '../api/base-config.js'
+import { sendMsg } from '../services/configService.js'
 
 async function wxai (sysConfig: ProcessEnv, bot: Wechaty, message: Message) {
   const text = extractKeyword(message, bot.currentUser.name())
@@ -62,10 +63,10 @@ async function sendMessage (text: string, bot: Wechaty, message: Message) {
   const room = message.room()
   const formattedText = `${text}\n`
   if (room) {
-    await room.say(formattedText, talker)
+    await sendMsg(room, formattedText, [ talker ])
     await formatSentMessage(bot.currentUser, formattedText, undefined, room)
   } else {
-    await message.say(formattedText)
+    await sendMsg(message, formattedText)
     await formatSentMessage(bot.currentUser, formattedText, message.talker(), undefined)
   }
 }
@@ -74,10 +75,10 @@ async function sendImage (answer: any, bot: Wechaty, message: Message) {
   const room = message.room()
   const fileBox = FileBox.fromUrl(answer.text.url)
   if (room) {
-    await room.say(fileBox)
+    await sendMsg(room, fileBox)
     await formatSentMessage(bot.currentUser, fileBox.toString(), undefined, room)
   } else {
-    await message.say(fileBox)
+    await sendMsg(message, fileBox)
     await formatSentMessage(bot.currentUser, fileBox.toString(), message.talker(), undefined)
   }
 }
@@ -95,11 +96,11 @@ async function sendMiniProgram (answer: any, bot: Wechaty, message: Message) {
   })
 
   if (room) {
-    await room.say(miniProgram)
+    await sendMsg(room, miniProgram)
     await formatSentMessage(bot.currentUser, miniProgram.toString(), undefined, message.room())
 
   } else {
-    await message.say(miniProgram)
+    await sendMsg(message, miniProgram)
     await formatSentMessage(bot.currentUser, miniProgram.toString(), message.talker(), undefined)
   }
 }

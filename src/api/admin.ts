@@ -274,7 +274,7 @@ export const adminAction = async (message:Message) => {
           if (tableCode) {
             const tableName = ChatFlowCore.db.dataBaseNames[tableCode as keyof typeof ChatFlowCore.db.dataBaseNames]
             log.info('数据表名称：', tableName)
-            await message.say(`检测到多维表格链接，表格名称：【${tableName}】，\n是否需要处理？\n配置信息:\n${JSON.stringify(config, null, 2)}`)
+            await sendMsg(message, `检测到多维表格链接，表格名称：【${tableName}】，\n是否需要处理？\n配置信息:\n${JSON.stringify(config, null, 2)}`)
 
             switch (tableCode) {
               case 'mediaSheet':
@@ -319,12 +319,12 @@ export const adminAction = async (message:Message) => {
 
           } else {
             log.info('多维表格配置信息不匹配，不处理...')
-            await message.say(`检测到多维表格链接，但不是当前系统的多维表格链接，不处理~\n配置信息:\n${JSON.stringify(config, null, 2)}`)
+            await sendMsg(message, `检测到多维表格链接，但不是当前系统的多维表格链接，不处理~\n配置信息:\n${JSON.stringify(config, null, 2)}`)
           }
 
         } else {
           log.info('多维表格配置信息不全，不处理...')
-          await message.say('检测到多维表格链接，但配置信息不全，不处理~')
+          await sendMsg(message, '检测到多维表格链接，但配置信息不全，不处理~')
         }
       }
     } catch (e) {

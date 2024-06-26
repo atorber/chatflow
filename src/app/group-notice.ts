@@ -4,12 +4,13 @@ import 'dotenv/config.js'
 import { Contact, Message, log, Wechaty } from 'wechaty'
 import { FileBox } from 'file-box'
 import XLSX from 'xlsx'
+import { sendMsg } from '../services/configService.js'
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 async function sendTextMessage (contact: Contact, text: string): Promise<boolean> {
   try {
-    await contact.say(`${contact.name()}，${text}`)
+    await sendMsg(contact, `${contact.name()}，${text}`)
     return true
   } catch (error) {
     log.error('StarterBot', 'Error sending message: %s', error)
@@ -17,11 +18,11 @@ async function sendTextMessage (contact: Contact, text: string): Promise<boolean
   }
 }
 
-async function sendNotice (bot:Wechaty, msg: Message) {
-  log.info('发送通知任务:', msg.talker().id)
+async function sendNotice (bot:Wechaty, message: Message) {
+  log.info('发送通知任务:', message.talker().id)
   await delay(3000)
   // 检测群消息
-  const file = await msg.toFileBox()
+  const file = await message.toFileBox()
   const fileType = file.name.split('.').pop()
 
   if (fileType === 'xlsx' || fileType === 'xls') {
@@ -74,11 +75,8 @@ async function sendNotice (bot:Wechaty, msg: Message) {
 
         const updatedFile = FileBox.fromBuffer(updatedBuffer, 'res_' + file.name)
         log.info('updatedFile:', updatedFile)
-        await msg.say(`通知发送完成，成功${successCount}人，失败${failureCount}人，详情查看excel文件`)
-        await msg.say(updatedFile)
-        // if (failedWxids.length > 0) {
-        //   await msg.say(`发送失败的wxid：\n${failedWxids.join('\n')}`)
-        // }
+        await sendMsg(message, `通知发送完成，成功${successCount}人，失败${failureCount}人，详情查看excel文件`)
+        await sendMsg(message, updatedFile)
       }
     }
 

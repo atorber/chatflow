@@ -5,7 +5,9 @@ import {
 import {
   MessageChat,
 } from '../services/mod.js'
-import { handleSay } from '../handlers/onReadyOrLogin.js'
+import {
+  sendMsg,
+} from '../services/configService.js'
 import {
   gptbot,
 } from '../plugins/mod.js'
@@ -65,11 +67,11 @@ export const extractAtContent = async (message: Message): Promise<string | null>
       const answer = await gptbot(p)
 
       if (answer.text && answer.text.length > 0) {
-        await handleSay(message, answer.text)
-        // await message.say(answer.text)
+        await sendMsg(message, answer.text)
+        // await sendMsg(message, answer.text)
       } else {
-        await handleSay(message, `${keyWord}走神了，再问一次吧~`)
-        // await message.say(`${keyWord}走神了，再问一次吧~`)
+        await sendMsg(message, `${keyWord}走神了，再问一次吧~`)
+        // await sendMsg(message, `${keyWord}走神了，再问一次吧~`)
       }
     } else {
       log.info('未提取到内容：', text)

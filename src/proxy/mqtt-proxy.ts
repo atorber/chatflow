@@ -18,6 +18,7 @@ import {
 import { formatMessageToMQTT } from '../api/message.js'
 import { getKeyByBasicString, encrypt, decrypt } from '../utils/crypto-use-crypto-js.js'
 import { ChatFlowCore } from '../api/base-config.js'
+import { sendMsg } from '../services/configService.js'
 
 // import { MQTTAgent } from './mqtt-agent.js'
 
@@ -244,7 +245,7 @@ async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:st
         const room: Room | undefined = await bot.Room.find({ id: toContacts[i] })
         if (room) {
           try {
-            message = await room.say(msg)
+            message = await sendMsg(room, msg)
             await formatSentMessage(bot.currentUser, msg, undefined, room)
 
             // 发送成功后向前端发送消息
@@ -265,7 +266,7 @@ async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:st
         const contact: Contact | undefined = await bot.Contact.find({ id: toContacts[i] })
         if (contact) {
           try {
-            message = await contact.say(msg)
+            message = await sendMsg(contact, msg)
             await formatSentMessage(bot.currentUser, msg, contact, undefined)
           } catch (err) {
             ChatFlowCore.logger.error('发送好友消息失败：' + err)
@@ -281,7 +282,6 @@ async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:st
 }
 
 async function sendAt (params: any, bot: Wechaty): Promise<Message |void | {msg:string} > {
-  let message:Message | void = {} as Message
   const atUserIdList = params.toContacts
   const room = await bot.Room.find({ id: params.room })
   const atUserList = []
@@ -289,9 +289,7 @@ async function sendAt (params: any, bot: Wechaty): Promise<Message |void | {msg:
     const curContact = await bot.Contact.find({ id: userId })
     atUserList.push(curContact)
   }
-  message = await room?.say(params.messagePayload, ...atUserList)
-  await formatSentMessage(bot.currentUser, params.messagePayload, undefined, room)
-  return message
+  if (room) await sendMsg(room, params.messagePayload, atUserList as Contact[])
 }
 
 async function createRoom (params: any, bot: Wechaty) {
@@ -307,7 +305,7 @@ async function createRoom (params: any, bot: Wechaty) {
   // ChatFlowCore.logger.info('Bot', 'createDingRoom() new ding room created: %s', room)
   // await room.topic(params.topic)
 
-  await room.say('你的专属群创建完成')
+  await sendMsg(room, '你的专属群创建完成')
   await formatSentMessage(bot.currentUser, '你的专属群创建完成', undefined, room)
 }
 
