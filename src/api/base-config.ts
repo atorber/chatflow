@@ -293,11 +293,12 @@ export class ChatFlowCore {
     // clientid加密
     const client = CryptoJS.SHA256(clientString).toString()
 
+    const protocol = this.configEnv.MQTT_ENDPOINT === '127.0.0.1' ? 'mqtt' : 'mqtts'
     const mqttConfig: IClientOptions = {
       username: this.configEnv.MQTT_USERNAME,
       password: this.configEnv.MQTT_PASSWORD,
       host: this.configEnv.MQTT_ENDPOINT,
-      protocol: 'mqtts',
+      protocol,
       port: Number(this.configEnv.MQTT_PORT),
       clientId: client,
       clean: false,
