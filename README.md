@@ -120,9 +120,6 @@ npm i @atorber/chatflow
 import 'dotenv/config.js'
 import {
   WechatyBuilder,
-} from 'wechaty'
-
-import {
   ChatFlow,
   getBotOps,
   logForm,

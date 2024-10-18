@@ -1,11 +1,8 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 /* eslint-disable sort-keys */
 import 'dotenv/config.js'
-import {
-  WechatyBuilder,
-} from 'wechaty'
 
-import { getBotOps, log, logForm, GroupMaster, GroupMasterOptions } from '../src/index.js'
+import { getBotOps, log, logForm, GroupMaster, GroupMasterOptions, WechatyBuilder, } from '../src/index.js'
 
 const main = async () => {
 

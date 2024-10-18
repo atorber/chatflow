@@ -1,7 +1,7 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 /* eslint-disable sort-keys */
 import 'dotenv/config.js'
-import { WechatyPlugin, Wechaty, log } from 'wechaty'
+import { WechatyPlugin, Wechaty, log, WechatyBuilder } from 'wechaty'
 import onScan from './handlers/on-scan.js'
 import onError from './handlers/on-error.js'
 import onRoomjoin from './handlers/on-roomjoin.js'
@@ -162,6 +162,7 @@ export interface CloudConfig {
 }
 
 export {
+  WechatyBuilder,
   init,
   getBotOps,
   ChatFlowCore,
@@ -177,6 +178,7 @@ export {
 export type {
   GroupMasterOptions,
   ChatFlowOptions,
+  Wechaty,
 }
 
 export type { WechatyConfig }

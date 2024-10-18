@@ -1,10 +1,6 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 /* eslint-disable sort-keys */
 import 'dotenv/config.js'
-import {
-  WechatyBuilder,
-  log,
-} from 'wechaty'
 
 import {
   ChatFlow,
@@ -13,6 +9,8 @@ import {
   init,
   CloudConfig,
   ChatFlowOptions,
+  WechatyBuilder,
+  log,
 } from '../src/index.js'
 import * as path from 'path'
 
