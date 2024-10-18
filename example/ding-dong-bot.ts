@@ -16,9 +16,9 @@ import * as path from 'path'
 
 const main = async () => {
   log.info('开始启动机器人...')
-  const VIKA_SPACE_ID = process.env['VIKA_SPACE_ID']
-  const VIKA_TOKEN = process.env['VIKA_TOKEN']
-  const ADMINROOM_ADMINROOMTOPIC = process.env['ADMINROOM_ADMINROOMTOPIC'] // 管理群的topic，可选
+  const VIKA_SPACE_ID = process.env['VIKA_SPACE_ID']||''
+  const VIKA_TOKEN = process.env['VIKA_TOKEN']||''
+  const ADMINROOM_ADMINROOMTOPIC = process.env['ADMINROOM_ADMINROOMTOPIC']||'' // 管理群的topic，可选
   const dataDir = path.join(process.cwd(), '') // 数据目录
   const endpoint = process.env['ENDPOINT'] // ChatFlow服务端地址，可选
 
@@ -45,7 +45,7 @@ const main = async () => {
   } else {
     // 从环境变量中获取配置信息, 在环境变量中已经配置了以下信息或者直接赋值
     const WECHATY_PUPPET = process.env['WECHATY_PUPPET'] ? process.env['WECHATY_PUPPET'] : (config.wechatyConfig.puppet || 'wechaty-puppet-wechat4u')
-    const WECHATY_TOKEN = process.env['WECHATY_PUPPET'] ? process.env['WECHATY_TOKEN'] : (config.wechatyConfig.token || '')
+    const WECHATY_TOKEN = process.env['WECHATY_TOKEN'] ? process.env['WECHATY_TOKEN'] : (config.wechatyConfig.token || '')
 
     // 构建wechaty机器人
     const ops = getBotOps(WECHATY_PUPPET, WECHATY_TOKEN) // 获取wechaty配置信息
