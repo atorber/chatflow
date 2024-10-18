@@ -50,7 +50,7 @@ import { DataTables } from '../db/tables.js'
 import * as winston from 'winston'
 import * as path from 'path'
 
-import { ChatFlowOptions } from '../types/interface.js'
+import type { ChatFlowOptions } from '../types/interface.js'
 
 export interface ChatBotUser {
   id: string;

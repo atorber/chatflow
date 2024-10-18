@@ -31,7 +31,7 @@ import { sendMsg } from '../services/configService.js'
 import getAuthClient from '../utils/auth.js'
 import * as fs from 'fs'
 import { join } from 'path'
-import { ChatFlowOptions, CloudConfig } from '../types/interface.js'
+import type { ChatFlowOptions, CloudConfig } from '../types/interface.js'
 import { MqttProxy } from '../proxy/mqtt-proxy.js'
 
 const initServer = async (options: ChatFlowOptions) => {

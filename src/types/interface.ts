@@ -2,8 +2,8 @@
 import type { Message, Wechaty } from 'wechaty'
 import type { ProcessEnv } from './env'
 
-import { IClientOptions } from '../proxy/mqtt-proxy.js'
-import { WechatyConfig } from '../api/base-config.js'
+import type { IClientOptions } from '../proxy/mqtt-proxy.js'
+import type { WechatyConfig } from '../api/base-config.js'
 
 export interface Plugin {
     init(app: any): void;

@@ -15,7 +15,7 @@ import { ChatFlowCore, WechatyConfig } from './api/base-config.js'
 import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
 import { BiTable } from './db/lark-db.js'
 import { GroupMaster, GroupMasterOptions } from './plugins/mod.js'
-import { ChatFlowOptions } from './types/interface.js'
+import type { ChatFlowOptions } from './types/interface.js'
 
 function ChatFlow (options: ChatFlowOptions): WechatyPlugin {
   logForm('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...')
