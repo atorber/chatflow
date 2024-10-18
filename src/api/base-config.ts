@@ -12,7 +12,7 @@ import type { BusinessRoom, BusinessUser } from './contact-room-finder.js'
 import type {
   IClientOptions,
 } from '../proxy/mqtt-proxy.js'
-import CryptoJS from 'crypto-js'
+import * as CryptoJS from 'crypto-js'
 import {
   ServeGetUserConfigObj,
   // ServeGetUserConfig,
@@ -48,7 +48,9 @@ import { ServeGetQas } from '../api/qa.js'
 import { DataTables } from '../db/tables.js'
 
 import * as winston from 'winston'
-import path from 'path'
+import * as path from 'path'
+
+import { ChatFlowOptions } from '../types/interface.js'
 
 export interface ChatBotUser {
   id: string;
@@ -170,6 +172,7 @@ export interface Database {
 
 export class ChatFlowCore {
 
+  static chatFlowConfig: ChatFlowOptions
   static isLogin: boolean = false
   static isReady: boolean = false
   static delayTime: number = 1000

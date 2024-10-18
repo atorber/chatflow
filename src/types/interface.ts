@@ -2,6 +2,9 @@
 import type { Message, Wechaty } from 'wechaty'
 import type { ProcessEnv } from './env'
 
+import { IClientOptions } from '../proxy/mqtt-proxy.js'
+import { WechatyConfig } from '../api/base-config.js'
+
 export interface Plugin {
     init(app: any): void;
     enable(app: any): void;
@@ -55,4 +58,18 @@ export interface ChatMessage {
   talker: ChatTalker;
   room: ChatRoom;
   listener: ChatListener;
+}
+
+export interface ChatFlowOptions {
+  spaceId: string
+  token: string
+  adminRoomTopic: string
+  endpoint?: string
+  dataDir?: string
+}
+
+export interface CloudConfig {
+  mqttConfig: IClientOptions,
+  wechatyConfig: WechatyConfig,
+  mqttIsOn: boolean,
 }

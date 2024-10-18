@@ -14,11 +14,11 @@ import {
   types,
   WechatyBuilder,
   log,
-}                  from 'wechaty'
+} from 'wechaty'
 
 import qrcodeTerminal from 'qrcode-terminal'
 import Api2d from 'api2d'
-import fs from 'fs'
+import * as fs from 'fs'
 
 // 设置白名单
 let whitelist = new Set<string>()
@@ -32,7 +32,7 @@ if (fs.existsSync(whitelistPath)) {
 
 // 定时保存白名单到文件
 setInterval(() => {
-  const data = JSON.stringify([ ...whitelist ])
+  const data = JSON.stringify([...whitelist])
   fs.writeFileSync(whitelistPath, data, { encoding: 'utf-8' })
 }, 5000)
 
@@ -40,7 +40,7 @@ setInterval(() => {
  * @param {string} messages
  * @returns {string}
  */
-async function getChatGPTReply (message: string) {
+async function getChatGPTReply(message: string) {
   const systemPrompt = '你是一个翻译器，用户将输入{"text":"你要翻译的内容..."}，你只需要翻译text对应的value内容。如果输入的是中文你翻译成英文，如果输入的是英文你翻译成中文。例如输入是：{"text":"你是谁"}，你的回到是：who are you（只返回翻译结果，而不是返回{"text":"who are you"}格式）'
   const apiKey = ChatFlowCore.configEnv.CHATGPT_KEY || 'your key'
   // const apiEndpoint = 'https://api.openai.com'
@@ -48,10 +48,10 @@ async function getChatGPTReply (message: string) {
   try {
     const api = new Api2d(apiKey, apiEndpoint, 60 * 1000)
     const body = {
-      max_tokens:2048,
-      messages:[
-        { content:systemPrompt, role:'system' },
-        { content:`{"text":"${message}"}`, role:'user' },
+      max_tokens: 2048,
+      messages: [
+        { content: systemPrompt, role: 'system' },
+        { content: `{"text":"${message}"}`, role: 'user' },
       ],
       model: 'gpt-3.5-turbo',
       n: 1,
@@ -68,7 +68,7 @@ async function getChatGPTReply (message: string) {
   }
 }
 
-function onScan (qrcode: string, status: ScanStatus) {
+function onScan(qrcode: string, status: ScanStatus) {
   if (status === ScanStatus.Waiting || status === ScanStatus.Timeout) {
     const qrcodeImageUrl = [
       'https://wechaty.js.org/qrcode/',
@@ -83,15 +83,15 @@ function onScan (qrcode: string, status: ScanStatus) {
   }
 }
 
-function onLogin (user: Contact) {
+function onLogin(user: Contact) {
   log.info('StarterBot', '%s login', user)
 }
 
-function onLogout (user: Contact) {
+function onLogout(user: Contact) {
   log.info('StarterBot', '%s logout', user)
 }
 
-async function onMessage (message: Message) {
+async function onMessage(message: Message) {
   log.info('onMessage', JSON.stringify(message))
   const type = message.type()
   const text = message.text()
@@ -145,9 +145,9 @@ const bot = WechatyBuilder.build({
   puppet: 'wechaty-puppet-xp',
 })
 
-bot.on('scan',    onScan)
-bot.on('login',   onLogin)
-bot.on('logout',  onLogout)
+bot.on('scan', onScan)
+bot.on('login', onLogin)
+bot.on('logout', onLogout)
 bot.on('message', onMessage)
 
 bot.start()

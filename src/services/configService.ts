@@ -2,6 +2,7 @@
 import { Contact, Message, Room, Sayable, log } from 'wechaty'
 // import fs from 'fs'
 import { MessageChat } from './messageService.js'
+import { PuppetBridge } from 'wechaty-puppet-bridge'
 
 // 配置机器人
 export function getBotOps (puppet: string, token: string) {
@@ -18,13 +19,17 @@ export function getBotOps (puppet: string, token: string) {
     process.env['WECHATY_PUPPET_SERVICE_AUTHORITY'] = 'token-service-discovery-test.juzibot.com'
   }
 
-  if ([ 'wechaty-puppet-wechat4u', 'wechaty-puppet-xp', 'wechaty-puppet-engine' ].includes(puppet)) {
+  if ([ 'wechaty-puppet-wechat4u', 'wechaty-puppet-xp', 'wechaty-puppet-engine', 'wechaty-puppet-bridge' ].includes(puppet)) {
     delete ops.puppetOptions.token
   }
 
   if (puppet === 'wechaty-puppet-wechat') {
     delete ops.puppetOptions.token
     ops.puppetOptions.uos = true
+  }
+
+  if (puppet === 'wechaty-puppet-bridge') {
+    ops.puppet = new PuppetBridge()
   }
   return ops
 }
