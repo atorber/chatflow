@@ -1,6 +1,6 @@
 /* eslint-disable sort-keys */
-import moment from 'moment'
-import boxen from 'boxen'
+import * as moment from 'moment'
+// import boxen from 'boxen'
 
 import type {
   Contact,
@@ -173,19 +173,7 @@ function generateRandomNumber (base:number): number {
   return Math.floor(Math.random() * 100) + base
 }
 
-const logForm = (msg:string) => {
-  const time = new Date().toTimeString()
-  console.info(boxen(msg, {
-    title: ` ChatFlow ${time}`,
-    padding: 1,
-    margin: 1,
-    borderStyle: 'classic',
-  // borderStyle: 'double',
-  }))
-}
-
 export {
-  logForm,
   generateRandomNumber,
   toDBC,
   getNow,

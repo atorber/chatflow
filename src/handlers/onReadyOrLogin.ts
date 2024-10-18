@@ -12,7 +12,6 @@ import {
   NoticeChat,
   QaChat,
 } from '../services/mod.js'
-import { logForm } from '../utils/mod.js'
 import {
   getRoom,
 } from '../plugins/mod.js'
@@ -81,13 +80,13 @@ const initServer = async (options: ChatFlowOptions) => {
     try {
       // 初始化检查数据库表，如果不存在则创建
       const initRes = await authClient?.init(options.spaceId, options.token)
-      logForm('初始化检查系统表结果：' + JSON.stringify(initRes.data))
+      log.info('初始化检查系统表结果：' + JSON.stringify(initRes.data))
 
       if (initRes.data && initRes.data.message === 'success') {
-        logForm('初始化检查系统表成功...')
+        log.info('初始化检查系统表成功...')
         ChatFlowCore.db = initRes.data.data
       } else {
-        logForm('初始化检查系统表失败...' + JSON.stringify(initRes.data))
+        log.info('初始化检查系统表失败...' + JSON.stringify(initRes.data))
         // 中止程序
         throw new Error(initRes)
       }
@@ -98,7 +97,7 @@ const initServer = async (options: ChatFlowOptions) => {
     await delay(1000)
     try {
       const loginRes = await authClient?.login(options.spaceId, options.token)
-      logForm('登录客户端结果：' + JSON.stringify(loginRes))
+      log.info('登录客户端结果：' + JSON.stringify(loginRes))
       ChatFlowCore.isLogin = true
     } catch (e) {
       log.error('登录客户端失败...', e)
@@ -189,7 +188,7 @@ const postVikaInitialization = async (bot: Wechaty) => {
         await NoticeChat.updateJobs()
         // 获取关键字列表
         const helpText = await ChatFlowCore.getSystemKeywordsText()
-        logForm(`启动成功，系统准备就绪\n\n当前登录用户：${bot.currentUser.name()}\nID:${bot.currentUser.id}\n\n在当前群（管理员群）回复对应指令进行操作\n${helpText}`)
+        log.info(`启动成功，系统准备就绪\n\n当前登录用户：${bot.currentUser.name()}\nID:${bot.currentUser.id}\n\n在当前群（管理员群）回复对应指令进行操作\n${helpText}`)
       } catch (err) {
         log.error('获取帮助文案失败', err)
       }
@@ -231,7 +230,7 @@ export const onReadyOrLogin = async (bot: Wechaty) => {
       config = await initServer(ChatFlowCore.chatFlowConfig)
       log.info('初始化检查成功：', JSON.stringify(config))
     } catch (e) {
-      logForm('初始化检查失败：' + JSON.stringify(e))
+      log.info('初始化检查失败：' + JSON.stringify(e))
       throw e
     }
 

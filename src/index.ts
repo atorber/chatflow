@@ -10,7 +10,6 @@ import onLogin from './handlers/on-login.js'
 import onReady from './handlers/on-ready.js'
 import onMessage from './handlers/on-message.js'
 import { getBotOps } from './services/configService.js'
-import { logForm } from './utils/utils.js'
 import { ChatFlowCore, WechatyConfig } from './api/base-config.js'
 import { MqttProxy, IClientOptions } from './proxy/mqtt-proxy.js'
 import { BiTable } from './db/lark-db.js'
@@ -18,7 +17,7 @@ import { GroupMaster, GroupMasterOptions } from './plugins/mod.js'
 import type { ChatFlowOptions } from './types/interface.js'
 
 function ChatFlow (options: ChatFlowOptions): WechatyPlugin {
-  logForm('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...')
+  log.info('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...')
 
   return function ChatFlowPlugin (bot: Wechaty): void {
 
@@ -47,7 +46,6 @@ export {
   getBotOps,
   ChatFlowCore,
   log,
-  logForm,
   BiTable,
   type IClientOptions,
   MqttProxy,

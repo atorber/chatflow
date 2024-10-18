@@ -8,9 +8,6 @@ import {
   saveMessageToCloud,
 } from '../api/message.js'
 import { ChatFlowCore } from '../api/base-config.js'
-// import {
-//   logForm,
-// } from '../utils/mod.js'
 
 import { MqttProxy, eventMessage } from '../proxy/mqtt-proxy.js'
 import { uploadMessage } from '../proxy/s3-proxy.js'

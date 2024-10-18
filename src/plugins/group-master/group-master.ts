@@ -1,7 +1,6 @@
 #!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 /* eslint-disable sort-keys */
 import 'dotenv/config.js'
-import { logForm } from '../../utils/utils.js'
 import { v4 } from 'uuid'
 
 import {
@@ -12,7 +11,7 @@ import {
 } from 'wechaty'
 import { sendMsg } from '../../services/configService.js'
 import { FileBox } from 'file-box'
-import mqtt from 'mqtt'
+import * as mqtt from 'mqtt'
 import axios from 'axios'
 import { GroupMasterStore } from './store.js'
 import { onMessage } from './on-message.js'
@@ -297,7 +296,7 @@ export interface GroupMasterOptions {
 function GroupMaster (
   config: GroupMasterOptions,
 ): WechatyPlugin {
-  logForm('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...\n\n' + JSON.stringify(config))
+  log.info('ChatFlow插件开始启动...\n\n启动过程需要30秒到1分钟\n\n请等待系统初始化...\n\n' + JSON.stringify(config))
 
   return function GroupMasterPlugin (bot: Wechaty): void {
     const wxKey = config.WX_KEY
