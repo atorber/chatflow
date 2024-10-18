@@ -1,12 +1,12 @@
 {
   "name": "@atorber/chatflow",
-  "version": "3.1.0",
+  "version": "3.2.1",
   "description": "ChatFlow-聊天机器人管理平台",
   "type": "module",
   "exports": {
     ".": {
       "import": "./dist/esm/src/index.js",
-      "require": "./dist/cjs/src/.js"
+      "require": "./dist/cjs/src/index.js"
     }
   },
   "typings": "./dist/esm/src/index.d.ts",

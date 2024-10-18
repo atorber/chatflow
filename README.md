@@ -227,7 +227,7 @@ void main()
 
 ### 3.0.22
 
-- 修复[https://github.com/wechaty/puppet-supports/issues/364](https://github.com/wechaty/puppet-supports/issues/364) 描述的wechaty-puppet-service问题,
+- 修复[https://github.com/wechaty/puppet-supports/issues/364](https://github.com/wechaty/puppet-supports/issues/364) 描述的wechaty-puppet-service问题
 
 ### 3.0.20
 
