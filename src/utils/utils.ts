@@ -13,8 +13,8 @@ import type { TaskConfig } from '../api/base-config.js'
 
 async function formatSentMessage (userSelf: Contact, text: string, talker: Contact|undefined, room: Room|undefined) {
   // console.debug('发送的消息：', text)
-  const curTime = new Date().getTime()
-  const timeHms = moment(curTime).format('YYYY-MM-DD HH:mm:ss')
+  // const curTime = new Date().getTime()
+  const timeHms = moment().format('YYYY-MM-DD HH:mm:ss')
   const record = {
     fields: {
       timeHms,
