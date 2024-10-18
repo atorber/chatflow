@@ -140,7 +140,7 @@ const init = async (options: ChatFlowOptions) => {
       log.info('启动MQTT代理...', JSON.stringify(config.mqttConfig))
       try {
         const mqttProxy = MqttProxy.getInstance(config.mqttConfig)
-        if (mqttProxy) {
+        if (mqttProxy && ChatFlowCore.bot) {
           mqttProxy.setWechaty(ChatFlowCore.bot)
         }
       } catch (e) {

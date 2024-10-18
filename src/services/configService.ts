@@ -38,8 +38,9 @@ export const sendMsg = async (publisher: Message | Room | Contact, sayable: Saya
       replyMessage = await (publisher as Room).say(text, ...inviteeList)
     } else {
       replyMessage = await publisher.say(sayable)
-      log.info('消息发送成功,replyMessage:', JSON.stringify(replyMessage, null, 2))
     }
+    console.info('消息发送成功,replyMessage:', JSON.stringify(replyMessage, null, 2))
+
     if (replyMessage) await MessageChat.onMessage(replyMessage)
   } catch (e) {
     log.error('消息发送失败:', e)

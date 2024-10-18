@@ -30,7 +30,8 @@ async function getAvatarUrl (params:Contact|Room) {
   }
 }
 
-async function getAllContact (mqttProxy: MqttProxy, bot: Wechaty) {
+async function getAllContact (mqttProxy: MqttProxy) {
+  const bot = ChatFlowCore.bot
   const contactList: Contact[] = await bot.Contact.findAll()
   let friends = []
   for (const i in contactList) {
@@ -60,7 +61,9 @@ async function getAllContact (mqttProxy: MqttProxy, bot: Wechaty) {
   mqttProxy.pubProperty(msg)
 }
 
-async function getAllRoom (mqttProxy: MqttProxy, bot: Wechaty) {
+async function getAllRoom (mqttProxy: MqttProxy) {
+  const bot = ChatFlowCore.bot
+
   const roomList = await bot.Room.findAll()
   for (const i in roomList) {
     const room = roomList[i]
@@ -82,7 +85,9 @@ async function getAllRoom (mqttProxy: MqttProxy, bot: Wechaty) {
   mqttProxy.pubProperty(msg)
 }
 
-async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:string} > {
+async function send (params: any): Promise<Message |void | {msg:string} > {
+  const bot = ChatFlowCore.bot
+
   ChatFlowCore.logger.info('params:' + JSON.stringify(params))
 
   let msg: any = ''
@@ -241,6 +246,7 @@ async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:st
   for (let i = 0; i < toContacts.length; i++) {
     if (toContacts[i].split('@').length === 2 || toContacts[i].split(':').length === 2) {
       ChatFlowCore.logger.info(`向群${toContacts[i]}发消息`)
+      console.info('向群发消息', toContacts[i])
       try {
         const room: Room | undefined = await bot.Room.find({ id: toContacts[i] })
         if (room) {
@@ -261,6 +267,9 @@ async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:st
 
     } else {
       ChatFlowCore.logger.info(`好友${toContacts[i]}发消息`)
+      console.info('向好友发消息', toContacts[i])
+      console.info('当前bot是：', bot.currentUser)
+
       // ChatFlowCore.logger.info(bot)
       try {
         const contact: Contact | undefined = await bot.Contact.find({ id: toContacts[i] })
@@ -281,7 +290,9 @@ async function send (params: any, bot: Wechaty): Promise<Message |void | {msg:st
   return message
 }
 
-async function sendAt (params: any, bot: Wechaty): Promise<Message |void | {msg:string} > {
+async function sendAt (params: any): Promise<Message |void | {msg:string} > {
+  const bot = ChatFlowCore.bot
+
   const atUserIdList = params.toContacts
   const room = await bot.Room.find({ id: params.room })
   const atUserList = []
@@ -292,7 +303,9 @@ async function sendAt (params: any, bot: Wechaty): Promise<Message |void | {msg:
   if (room) await sendMsg(room, params.messagePayload, atUserList as Contact[])
 }
 
-async function createRoom (params: any, bot: Wechaty) {
+async function createRoom (params: any) {
+  const bot = ChatFlowCore.bot
+
   const contactList: Contact[] = []
   for (const i in params.contactList) {
     const c = await bot.Contact.find({ name: params.contactList[i] })
@@ -309,7 +322,9 @@ async function createRoom (params: any, bot: Wechaty) {
   await formatSentMessage(bot.currentUser, '你的专属群创建完成', undefined, room)
 }
 
-async function getQrcod (params: any, bot: Wechaty, mqttProxy: MqttProxy) {
+async function getQrcod (params: any, mqttProxy: MqttProxy) {
+  const bot = ChatFlowCore.bot
+
   const roomId = params.roomId
   const room = await bot.Room.find({ id: roomId })
   const qr = await room?.qrCode()
@@ -645,9 +660,14 @@ class MqttProxy {
   }
 
   subCommand () {
+    const that = this
     this.mqttClient.subscribe(this.commandApi, function (err: any) {
       if (err) {
-        ChatFlowCore.logger.info(err)
+        ChatFlowCore.logger.info(`订阅失败:${that.commandApi}`)
+        console.error('订阅失败:', err)
+      } else {
+        ChatFlowCore.logger.info(`订阅成功:${that.commandApi}`)
+        console.info('订阅成功:', that.commandApi)
       }
     })
   }
@@ -698,10 +718,16 @@ class MqttProxy {
   private static onMessage = async (topic: string, message: any) => {
     ChatFlowCore.logger.info('mqtt onMessage:' + topic)
     ChatFlowCore.logger.info('mqtt onMessage:' + message.toString())
-    log.info('MqttProxy.chatbot', MqttProxy.chatbot)
+    console.info('MqttProxy.chatbot', MqttProxy.chatbot)
+    console.info('mqtt onMessage:', topic)
+    console.info('mqtt onMessage:', message.toString())
+  
+
     try {
       // 解密
       message = decrypt(message.toString(), MqttProxy.key)
+
+      console.info('解密后的消息:', message)
 
       message = JSON.parse(message)
       const name = message.name
@@ -754,7 +780,7 @@ class MqttProxy {
 
         }
         if (name === 'send') { // 发送消息
-          send(params, MqttProxy.chatbot)
+          send(params)
             .then(async res => {
               log.info('send res:', res)
               this.instance?.pubEvent(eventMessage('onMessage', await formatMessageToMQTT(res as Message)))
@@ -764,7 +790,7 @@ class MqttProxy {
             })
         }
         if (name === 'sendAt') { // 发送@消息
-          sendAt(params, MqttProxy.chatbot)
+          sendAt(params)
             .then(async res => {
               log.info('sendAt res:', res)
               this.instance?.pubEvent(eventMessage('onMessage', await formatMessageToMQTT(res as Message)))
@@ -783,7 +809,7 @@ class MqttProxy {
 
         }
         if (name === 'roomCreate') { // 创建群
-          createRoom(params, MqttProxy.chatbot)
+          createRoom(params)
             .then(res => {
               log.info('roomCreate res:', res)
               return res
@@ -820,7 +846,7 @@ class MqttProxy {
 
         }
         if (name === 'roomQrcodeGet') { // 获取群二维码
-          getQrcod(params, MqttProxy.chatbot, MqttProxy.instance).then(res => {
+          getQrcod(params, MqttProxy.instance).then(res => {
             log.info('roomQrcodeGet res:', res)
             return res
 
@@ -901,7 +927,7 @@ class MqttProxy {
 
         }
         if (name === 'contactFindAll') { // 获取好友列表
-          getAllContact(MqttProxy.instance, MqttProxy.chatbot).then(res => {
+          getAllContact(MqttProxy.instance).then(res => {
             log.info('contactFindAll res:', res)
             return res
 
@@ -915,7 +941,7 @@ class MqttProxy {
         }
         if (name === 'roomFindAll') { // 获取群列表
 
-          getAllRoom(MqttProxy.instance, MqttProxy.chatbot).then(res => {
+          getAllRoom(MqttProxy.instance).then(res => {
             log.info('roomFindAll res:', res)
             return res
 
@@ -936,6 +962,7 @@ class MqttProxy {
       return null
     } catch (err) {
       ChatFlowCore.logger.error('MQTT接收到消息错误：' + err)
+      console.error('MQTT接收到消息错误:', err)
       return null
     }
   }
@@ -1002,22 +1029,22 @@ class MqttProxy {
             logCommand(name)
             break
           case 'send':
-            processCommand(name, () => send(params, MqttProxy.chatbot))
+            processCommand(name, () => send(params))
             break
           case 'sendAt':
-            processCommand(name, () => sendAt(params, MqttProxy.chatbot))
+            processCommand(name, () => sendAt(params))
             break
           case 'roomCreate':
-            processCommand(name, () => createRoom(params, MqttProxy.chatbot))
+            processCommand(name, () => createRoom(params))
             break
           case 'roomQrcodeGet':
-            processCommand(name, () => getQrcod(params, MqttProxy.chatbot, mqttProxy))
+            processCommand(name, () => getQrcod(params, mqttProxy))
             break
           case 'contactFindAll':
-            processCommand(name, () => getAllContact(mqttProxy, MqttProxy.chatbot))
+            processCommand(name, () => getAllContact(mqttProxy))
             break
           case 'roomFindAll':
-            processCommand(name, () => getAllRoom(mqttProxy, MqttProxy.chatbot))
+            processCommand(name, () => getAllRoom(mqttProxy))
             break
           default:
             log.error('Unknown command:', name)

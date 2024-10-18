@@ -14,7 +14,7 @@ import {
   CloudConfig,
   ChatFlowOptions,
 } from '../src/index.js'
-import path from 'path'
+import * as path from 'path'
 
 import { PuppetBridgeAtorberFusedV3090825 as PuppetBridge } from 'wechaty-puppet-bridge'
 

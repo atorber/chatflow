@@ -14,7 +14,7 @@ import {
   CloudConfig,
   ChatFlowOptions,
 } from '../src/index.js'
-import path from 'path'
+import * as path from 'path'
 
 const main = async () => {
   log.info('开始启动机器人...')

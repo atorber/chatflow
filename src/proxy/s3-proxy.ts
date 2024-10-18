@@ -16,12 +16,7 @@ function upload (file_payload: { cloudPath?: any; fileContent?: any }) {
   })
   // Upload a Buffer without content-type (default: 'application/octet-stream')
   minioClient.putObject(ChatFlowCore.configEnv.bucketName, file_payload.cloudPath
-    , file_payload.fileContent, function (e) {
-      if (e) {
-        return log.info('上传结果：', e)
-      }
-      log.info('Successfully uploaded the Buffer')
-    })
+    , file_payload.fileContent)
 }
 
 async function uploadMessage (message: Message) {
