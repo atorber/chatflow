@@ -721,7 +721,6 @@ class MqttProxy {
     console.info('MqttProxy.chatbot', MqttProxy.chatbot)
     console.info('mqtt onMessage:', topic)
     console.info('mqtt onMessage:', message.toString())
-  
 
     try {
       // 解密

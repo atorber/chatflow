@@ -121,7 +121,7 @@ const initServer = async (options: ChatFlowOptions) => {
       log.info('启动MQTT代理...', JSON.stringify(config.mqttConfig))
       try {
         const mqttProxy = MqttProxy.getInstance(config.mqttConfig)
-        if (mqttProxy && ChatFlowCore.bot) {
+        if (mqttProxy && ChatFlowCore.bot.currentUser.id === '1') {
           mqttProxy.setWechaty(ChatFlowCore.bot)
         }
       } catch (e) {
@@ -131,7 +131,8 @@ const initServer = async (options: ChatFlowOptions) => {
     return config
   } catch (e) {
     log.error('初始化ChatFlowCore失败...', e)
-    return undefined
+    throw e
+    // return undefined
   }
 
 }

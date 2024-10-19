@@ -12,7 +12,7 @@ import type { BusinessRoom, BusinessUser } from './contact-room-finder.js'
 import type {
   IClientOptions,
 } from '../proxy/mqtt-proxy.js'
-import * as CryptoJS from 'crypto-js'
+import CryptoJS from 'crypto-js'
 import {
   ServeGetUserConfigObj,
   // ServeGetUserConfig,

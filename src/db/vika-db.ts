@@ -4,7 +4,7 @@ import { ICreateRecordsReqParams, Vika } from '@vikadata/vika'
 import type { Sheets } from './vikaModel/Model.js'
 import { sheets } from './vikaModel/index.js'
 import { delay } from '../utils/utils.js'
-import * as CryptoJS from 'crypto-js'
+import CryptoJS from 'crypto-js'
 // import { Messages } from './vikaModel/Message/db.js';
 // import { Env } from './vikaModel/Env/db.js';
 // import { Chatbots } from './vikaModel/ChatBot/db.js';
