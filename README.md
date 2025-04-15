@@ -44,11 +44,17 @@ ChatFlow是一个聊天机器人管理系统，可以帮助你实现一些原生
 
 1.下载代码及安装启动
 
-1.1 下载并运行chatflow-admin
+1.1 下载项目代码，进入项目根目录
+
+```
+git clone https://github.com/atorber/chatflow.git
+cd chatflow
+```
+
+1.2 启动后端服务
 
 ```Shell
-git clone https://github.com/atorber/chatflow-admin.git
-cd chatflow-admin
+cd backend
 
 # 安装依赖
 npm i
@@ -57,16 +63,11 @@ npm i
 npm run start:dev
 ```
 
-1.2 下载并运行chatflow
+1.3 启动客户端
 
-```Shell
-git clone https://github.com/atorber/chatflow.git
-cd chatflow
-```
+(1) 分别登陆[微信对话开放平台](https://openai.weixin.qq.com/)和[vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973)官网注册账号并获取token
 
-2.分别登陆[微信对话开放平台](https://openai.weixin.qq.com/)和[vika维格表](https://spcp52tvpjhxm.com.vika.cn/?inviteCode=55152973)官网注册账号并获取token
-
-3.重命名.env.example文件为.env并修改配置文件
+(2) 重命名.env.example文件为.env并修改配置文件
 
 > 快速开始仅需要修改VIKA_TOKEN、VIKA_SPACE_NAME、ADMINROOM_ADMINROOMTOPIC配置项,其他配置项暂时无需修改，使用微信对话开放平台时配置WXOPENAI_TOKEN、WXOPENAI_ENCODINGAESKEY
 
@@ -84,25 +85,29 @@ VIKA_TOKEN="替换为你的维格表token" # 维格表token或飞书多维表格
 ENDPOINT="http://127.0.0.1:9503" # 后端管理服务API地址，默认http://127.0.0.1:9503
 ```
 
-4.启动程序
+(3) 启动程序
 
 ```Shell
+cd client
+
+npm i
+
 npm run start
 ```
 
 出现二维码之后，扫码二维码登陆微信
 
-5.开启智能问答功能
+2.开启智能问答功能
 
-5.1 设置微信对话平台token，填写【环境变量|Env】表中的 【微信对话开放平台-Token】、【微信对话开放平台-EncodingAESKey】、【微信对话开放平台-APPID】、【微信对话开放平台-管理员ID】并将【智能问答-启用自动问答】修改为 true
+2.1 设置微信对话平台token，填写【环境变量|Env】表中的 【微信对话开放平台-Token】、【微信对话开放平台-EncodingAESKey】、【微信对话开放平台-APPID】、【微信对话开放平台-管理员ID】并将【智能问答-启用自动问答】修改为 true
 
-5.2 添加问题到【问答列表|Qa】，添加之后在管理员群内发送【更新问答】
+2.2 添加问题到【问答列表|Qa】，添加之后在管理员群内发送【更新问答】
 
-5.3 将群加入到【白名单|WhiteList】，在【白名单|WhiteList】表中，所属应用选择【智能问答|qa】
+2.3 将群加入到【白名单|WhiteList】，在【白名单|WhiteList】表中，所属应用选择【智能问答|qa】
 
 > 群ID在消息中查看(在群里发一条消息，然后控制台查看或在维格表中查找)
 
-5.4 在管理群发送【更新白名单】或者重启程序
+2.4 在管理群发送【更新白名单】或者重启程序
 
 详细操作参考 [手把手教程](https://www.yuque.com/atorber/oegota/zm4ulnwnqp9whmd6)
 
@@ -225,38 +230,9 @@ void main()
 
 ## 更新日志
 
-### 3.0.22
+### 4.0.0
 
-- 修复[https://github.com/wechaty/puppet-supports/issues/364](https://github.com/wechaty/puppet-supports/issues/364) 描述的wechaty-puppet-service问题
-
-### 3.0.20
-
-- 修复图片无法保存到数据表的问题
-
-### 3.0.0-Beta-14
-
-- 支持自定义数据目录
-- 优化配置信息命名
-
-### 3.0.0-Beta-11
-
-- 移除环境变量依赖
-
-### 3.0.0-Beta-10
-
-- 新增媒体资源接口
-- 新增进群欢迎语接口
-- 新增顺风车接口
-
-### 3.0.0-6
-
-- 全部接口切换到chatfow-admin，更加稳定可靠
-- 修复微信对话开放平台bug
-- 增加ChatGPT支持
-
-### 3.0.0-5
-
-- 适配飞书多维表格，初步测试通过
+- 合并前后端代码
 
 ## Star History
 
