@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+  <title>ChatFlow Admin Launcher</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    button {
+      background-color: #4CAF50;
+      /* Green */
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>一键启动API服务</h1>
+  ChatFlow Admin API服务管理器
+  <br><br>
+  <button id="startBtn">启动API服务</button>
+  <button id="stopBtn">停止API服务</button>
+  <!-- 操作结果提示栏 -->
+  <div id="messageBox" style="margin-top: 20px; color: #333;"></div>
+</body>
+
+</html>
+<script>
+  const { ipcRenderer } = require('electron');
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    console.log('startBtn clicked');
+    ipcRenderer.send('start-chatflow-admin');
+    // 更新操作结果提示栏
+    document.getElementById('messageBox').textContent = '正在启动API服务...';
+  });
+
+  document.getElementById('stopBtn').addEventListener('click', () => {
+    console.log('stopBtn clicked');
+    ipcRenderer.send('stop-chatflow-admin');
+    // 更新操作结果提示栏
+    document.getElementById('messageBox').textContent = '正在停止API服务...';
+  });
+
+  // 监听操作结果并更新提示栏
+  ipcRenderer.on('chatflow-admin-started', (_event, ...args) => {
+    console.log('chatflow-admin-started', args);
+    document.getElementById('messageBox').textContent = args[0];
+  });
+
+  ipcRenderer.on('chatflow-admin-stopped', (_event, ...args) => {
+    console.log('chatflow-admin-stopped', args);
+    document.getElementById('messageBox').textContent = args[0];
+  });
+
+</script>

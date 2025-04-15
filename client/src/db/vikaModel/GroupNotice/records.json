@@ -1,0 +1,1 @@
+{"code":200,"success":true,"data":{"total":1,"records":[{"recordId":"rec5rHxqNeWNw","createdAt":1693750559000,"updatedAt":1694055083000,"fields":{"状态|state":"待发送|waiting","类型|type":"好友|contact","发送时间|pubTime":1693750559067}}],"pageNum":1,"pageSize":1},"message":"SUCCESS"}
