@@ -54,7 +54,7 @@ cd chatflow
 1.2 启动后端服务
 
 ```Shell
-cd backend
+cd server
 
 # 安装依赖
 npm i
