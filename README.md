@@ -32,7 +32,7 @@ ChatFlow是一个聊天机器人管理系统，可以帮助你实现一些原生
 |白名单|支持配置群白名单，白名单内群开启机器人问答/活动报名/ChatGPT问答，未配置问题答案的群不会受到机器人干扰|
 |MQTT消息推送|支持配置一个MQTTQ消息队列，将消息推送到队列当中|
 |远程控制发消息|支持通过MQTT控制机器人向指定好友或群发消息|
-|Web控制台|Web端控制台预览版已上线，抢险体验可以访问 chat.vlist.cc|
+|Web控制台|Web端控制台预览版已上线，抢先体验可以访问 chat.vlist.cc|
 
 > 移步语雀文档查看 [详细功能查看](https://www.yuque.com/atorber/oegota/aialc7sbyb4ldmg4/edit)
 
