@@ -80,18 +80,17 @@ const initServer = async (options: ChatFlowOptions) => {
     try {
       // 初始化检查数据库表，如果不存在则创建
       const initRes = await authClient?.init(options.spaceId, options.token)
-      log.info('初始化检查系统表结果：' + JSON.stringify(initRes.data))
 
       if (initRes.data && initRes.data.message === 'success') {
         log.info('初始化检查系统表成功...')
         ChatFlowCore.db = initRes.data.data
       } else {
-        log.info('初始化检查系统表失败...' + JSON.stringify(initRes.data))
+        log.info('初始化检查系统表失败')
         // 中止程序
-        throw new Error(initRes)
+        throw new Error('Initialization response did not indicate success')
       }
     } catch (e) {
-      log.error('请求初始化检查系统表失败...', e)
+      log.error('请求初始化检查系统表失败...')
       throw e
     }
     await delay(1000)
@@ -100,11 +99,11 @@ const initServer = async (options: ChatFlowOptions) => {
       log.info('登录客户端成功')
       ChatFlowCore.isLogin = true
     } catch (e) {
-      log.error('登录客户端失败...', e)
+      log.error('登录客户端失败...')
       throw e
     }
   } catch (e) {
-    log.error('登录客户端失败...', e)
+    log.error('登录客户端失败...')
   }
 
   // 从配置文件中读取配置信息，包括wechaty配置、mqtt配置以及是否启用mqtt推送或控制
