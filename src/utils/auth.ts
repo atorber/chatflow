@@ -59,16 +59,16 @@ class AuthClient {
         password: this.password,
       })
       if (response.data.data.access_token) {
-        console.info('登录成功' + JSON.stringify(response.data))
+        console.info('登录成功')
         this.token = response.data.data.access_token
         this.tokenExpirationDate = new Date(new Date().getTime() + response.data.data.expires_in * 1000)
         return response.data
       } else {
-        console.info('登录失败' + JSON.stringify(response.data))
-        throw new Error(JSON.stringify(response.data))
+        console.info('登录失败：响应未包含访问令牌')
+        throw new Error('Login response did not include an access token')
       }
     } catch (error) {
-      console.info('登录失败' + JSON.stringify(error))
+      console.info('登录请求失败')
       throw error
     }
   }
@@ -84,7 +84,7 @@ class AuthClient {
       // console.info('系统初始化完成' + JSON.stringify(response.data))
       return response
     } catch (error) {
-      console.info('系统初始化失败' + JSON.stringify(error))
+      console.info('系统初始化请求失败')
       return error
     }
   }
@@ -115,7 +115,7 @@ class AuthClient {
       await this.refreshTokenIfNeeded()
       return this.token as string
     } catch (error) {
-      console.error('获取token失败', error)
+      console.error('获取token失败')
       return undefined
     }
   }

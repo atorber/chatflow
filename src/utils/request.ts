@@ -4,6 +4,14 @@ import getAuthClient from './auth.js'
 import 'dotenv/config.js'
 import { ChatFlowCore } from '../api/base-config.js'
 
+function markAuthRetry (config: unknown): boolean {
+  if (!config || typeof config !== 'object') return false
+  const retryConfig = config as { __chatFlowAuthRetried?: boolean }
+  if (retryConfig.__chatFlowAuthRetried) return false
+  retryConfig.__chatFlowAuthRetried = true
+  return true
+}
+
 /**
  * GET 请求
  *
@@ -27,16 +35,13 @@ export const get = (url: string, data = {}, options = {}) => {
  *
  * @param {*} error
  */
-  const errorHandler = (error: { response?: { status: number, config:any } }) => {
-    ChatFlowCore.logger.error('请求异常' + JSON.stringify(error) + '\n')
-    // 判断是否是响应错误信息
-    if (error.response) {
-      if (error.response.status === 401) {
-        getAuthClient()?.delAccessToken()
-        return request(error.response.config)
-      }
+  const errorHandler = (error: { response?: { status: number, config:any }; message?: string }) => {
+    const status = error.response?.status
+    ChatFlowCore.logger.error(`请求异常${status ? ` status=${status}` : ''}: ${error.message || 'request failed'}`)
+    if (status === 401 && markAuthRetry(error.response?.config)) {
+      getAuthClient()?.delAccessToken()
+      return request(error.response!.config)
     }
-
     return Promise.reject(error)
   }
 
@@ -53,13 +58,15 @@ export const get = (url: string, data = {}, options = {}) => {
 
   // 响应拦截器
   request.interceptors.response.use((response) => {
-    ChatFlowCore.logger.info(`${response.config.method} ${response.config.url}\n${JSON.stringify(response.data)}\n`)
+    ChatFlowCore.logger.info(`${response.config.method} response (status ${response.status})`)
     if (response.data && response.data.message === 'Unauthorized' && response.data.statusCode === 401) {
+      if (!markAuthRetry(response.config)) {
+        return Promise.reject(new Error('Unauthorized after authentication retry'))
+      }
       getAuthClient()?.delAccessToken()
       return request(response.config)
-    } else {
-      return response.data
     }
+    return response.data
   }, errorHandler)
 
   // request.interceptors.response.use((response) => response.data, errorHandler)
@@ -94,16 +101,13 @@ export const post = (url: string, data = {}, options = {}) => {
  *
  * @param {*} error
  */
-  const errorHandler = (error: { response?: { status: number, config:any } }) => {
-    ChatFlowCore.logger.error('请求异常' + JSON.stringify(error) + '\n')
-    // 判断是否是响应错误信息
-    if (error.response) {
-      if (error.response.status === 401) {
-        getAuthClient()?.delAccessToken()
-        return request(error.response.config)
-      }
+  const errorHandler = (error: { response?: { status: number, config:any }; message?: string }) => {
+    const status = error.response?.status
+    ChatFlowCore.logger.error(`请求异常${status ? ` status=${status}` : ''}: ${error.message || 'request failed'}`)
+    if (status === 401 && markAuthRetry(error.response?.config)) {
+      getAuthClient()?.delAccessToken()
+      return request(error.response!.config)
     }
-
     return Promise.reject(error)
   }
 
@@ -120,13 +124,15 @@ export const post = (url: string, data = {}, options = {}) => {
 
   // 响应拦截器
   request.interceptors.response.use((response) => {
-    ChatFlowCore.logger.info(`${response.config.method} ${response.config.url}\n${JSON.stringify(response.data)}\n`)
+    ChatFlowCore.logger.info(`${response.config.method} response (status ${response.status})`)
     if (response.data && response.data.message === 'Unauthorized' && response.data.statusCode === 401) {
+      if (!markAuthRetry(response.config)) {
+        return Promise.reject(new Error('Unauthorized after authentication retry'))
+      }
       getAuthClient()?.delAccessToken()
       return request(response.config)
-    } else {
-      return response.data
     }
+    return response.data
   }, errorHandler)
 
   // request.interceptors.response.use((response) => response.data, errorHandler)
@@ -161,16 +167,13 @@ export const upload = (url: string, data = {}, options = {}) => {
  *
  * @param {*} error
  */
-  const errorHandler = (error: { response?: { status: number, config:any } }) => {
-    ChatFlowCore.logger.error('请求异常' + JSON.stringify(error) + '\n')
-    // 判断是否是响应错误信息
-    if (error.response) {
-      if (error.response.status === 401) {
-        getAuthClient()?.delAccessToken()
-        return request(error.response.config)
-      }
+  const errorHandler = (error: { response?: { status: number, config:any }; message?: string }) => {
+    const status = error.response?.status
+    ChatFlowCore.logger.error(`请求异常${status ? ` status=${status}` : ''}: ${error.message || 'request failed'}`)
+    if (status === 401 && markAuthRetry(error.response?.config)) {
+      getAuthClient()?.delAccessToken()
+      return request(error.response!.config)
     }
-
     return Promise.reject(error)
   }
 
@@ -187,13 +190,15 @@ export const upload = (url: string, data = {}, options = {}) => {
 
   // 响应拦截器
   request.interceptors.response.use((response) => {
-    ChatFlowCore.logger.info(`${response.config.method} ${response.config.url}\n${JSON.stringify(response.data)}\n`)
+    ChatFlowCore.logger.info(`${response.config.method} response (status ${response.status})`)
     if (response.data && response.data.message === 'Unauthorized' && response.data.statusCode === 401) {
+      if (!markAuthRetry(response.config)) {
+        return Promise.reject(new Error('Unauthorized after authentication retry'))
+      }
       getAuthClient()?.delAccessToken()
       return request(response.config)
-    } else {
-      return response.data
     }
+    return response.data
   }, errorHandler)
 
   // request.interceptors.response.use((response) => response.data, errorHandler)
