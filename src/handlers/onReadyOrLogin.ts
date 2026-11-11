@@ -96,8 +96,8 @@ const initServer = async (options: ChatFlowOptions) => {
     }
     await delay(1000)
     try {
-      const loginRes = await authClient?.login(options.spaceId, options.token)
-      log.info('登录客户端结果：' + JSON.stringify(loginRes))
+      await authClient?.login(options.spaceId, options.token)
+      log.info('登录客户端成功')
       ChatFlowCore.isLogin = true
     } catch (e) {
       log.error('登录客户端失败...', e)

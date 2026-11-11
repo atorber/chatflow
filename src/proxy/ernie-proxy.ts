@@ -28,10 +28,10 @@ async function getAccessToken (sysConfig:ProcessEnv) {
 
   try {
     const response = await axios.post(apiUrl, payload)
-    ChatFlowCore.logger.info('access_token:', JSON.stringify(response.data))
+    ChatFlowCore.logger.info('Access token response received')
     return response.data.access_token
   } catch (error) {
-    console.error(error)
+    console.error('Baidu access token request failed')
     return  undefined
   }
 }
